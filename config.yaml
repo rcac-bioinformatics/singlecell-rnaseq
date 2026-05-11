@@ -10,36 +10,38 @@
 # incubator: The Carpentries Incubator
 # Note that you can also use a custom carpentry type. For more info,
 # see the documentation: https://carpentries.github.io/sandpaper-docs/editing.html
-carpentry: 'incubator'
+carpentry: 'rcac'
+varnish: aseetharam/varnish
+#carpentry_description: "Custom Carpentry"
 
 # Custom carpentry description
 # This will be used as the alt text for the logo
 # carpentry_description: "Custom Carpentry"
 
 # Overall title for pages.
-title: 'Lesson Title'
+title: 'Single-Cell RNA-Seq Analysis: Hands-on Training'
 
 # Date the lesson was created (YYYY-MM-DD, this is empty by default)
-created: '2026-05-11'
+created: '2026-02-24'
 
 # Comma-separated list of keywords for the lesson
-keywords: 'software, data, lesson, The Carpentries'
+keywords: 'scRNA-seq, single-cell, seurat, cellranger, starsolo, 10x-genomics, PBMC'
 
 # Life cycle stage of the lesson
 # possible values: pre-alpha, alpha, beta, stable
-life_cycle: 'pre-alpha'
+life_cycle: 'stable'
 
 # License of the lesson materials (recommended CC-BY 4.0)
 license: 'CC-BY 4.0'
 
 # Link to the source repository for this lesson
-source: 'https://github.com/aseetharam/singlecell-rnaseq'
+source: 'https://rcac-bioinformatics.github.io/singlecell-rnaseq'
 
 # Default branch of your lesson
 branch: 'main'
 
 # Who to contact if there are any issues
-contact: 'team@carpentries.org'
+contact: 'rcac-help@purdue.edu'
 
 # Navigation ------------------------------------------------
 #
@@ -66,6 +68,13 @@ contact: 'team@carpentries.org'
 # Order of episodes in your lesson
 episodes: 
 - introduction.Rmd
+- raw-data-processing.Rmd
+- quality-control.Rmd
+- normalization-and-features.Rmd
+- dimensionality-reduction-clustering.Rmd
+- cell-type-annotation.Rmd
+- multi-sample-integration.Rmd
+- differential-expression.Rmd
 
 # Information for Learners
 learners: 
@@ -80,5 +89,8 @@ profiles:
 #
 # This space below is where custom yaml items (e.g. pinning
 # sandpaper and varnish versions) should live
+
+disable_sidebar_numbering: false
+
 
 

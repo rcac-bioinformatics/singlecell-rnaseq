@@ -1,0 +1,638 @@
+---
+source: Rmd
+title: 'Differential Expression Analysis'
+teaching: 40
+exercises: 20
+---
+
+:::::::::::::::::::::::::::::::::::::: questions
+
+- What are the main approaches for differential expression testing in scRNA-seq?
+- Why is pseudobulk analysis preferred over per-cell testing for multi-sample experiments?
+- How do we create volcano plots and other visualizations to interpret DE results?
+- How do we connect lists of DE genes to biological pathways using GO enrichment?
+- How should we export our results for sharing and reproducibility?
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::: objectives
+
+- Compare Wilcoxon, MAST, and pseudobulk DE testing approaches and choose the right one for your design
+- Run pseudobulk differential expression using AggregateExpression
+- Create volcano plots, feature plots, and violin plots to visualize DE results
+- Perform gene ontology enrichment analysis with clusterProfiler and interpret the results
+- Export Seurat objects, count matrices, and metadata for reproducibility and sharing
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+## Setup
+
+```{r setup, message=FALSE, warning=FALSE}
+library(Seurat)
+library(ggplot2)
+library(patchwork)
+library(dplyr)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+```
+
+## Loading the Integrated Data
+
+We continue from the integrated and annotated IFNB dataset produced in the
+previous episode. Make sure the cell type annotation is set as the active
+identity.
+
+```{r load-data, eval=FALSE}
+ifnb <- readRDS("ifnb_annotated.rds")
+Idents(ifnb) <- "celltype"
+DimPlot(ifnb, reduction = "umap", label = TRUE, repel = TRUE, split.by = "stim") +
+    NoLegend()
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+You should see two UMAP panels (CTRL and STIM) with the same cell type
+structure in both. Cell types are labeled and colored consistently across
+panels.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+## DE Testing Methods
+
+Seurat supports several statistical tests for differential expression. The
+choice of method depends on your experimental design and whether you have
+biological replicates.
+
+| Method | Seurat parameter | Statistical model | Best for |
+|--------|:----------------|:-----------------|:---------|
+| **Wilcoxon rank-sum** | `test.use = "wilcox"` | Non-parametric rank test | Fast exploration, comparing clusters within a single sample |
+| **MAST** | `test.use = "MAST"` | Hurdle model (logistic + Gaussian) | Accounts for dropout and cellular detection rate; per-cell testing with better modeling |
+| **DESeq2 (pseudobulk)** | `test.use = "DESeq2"` | Negative binomial GLM on aggregated counts | Publication-quality results when biological replicates are available |
+
+Let's start with the **Wilcoxon test** to quickly identify DE genes between
+stimulated and control CD14+ monocytes:
+
+```{r wilcox-de, eval=FALSE}
+# Subset to CD14+ monocytes
+mono <- subset(ifnb, idents = "CD14 Mono")
+
+# Set condition as active identity
+Idents(mono) <- "stim"
+
+# Run Wilcoxon DE test
+mono.wilcox <- FindMarkers(mono,
+                           ident.1 = "STIM",
+                           ident.2 = "CTRL",
+                           test.use = "wilcox",
+                           min.pct = 0.25,
+                           logfc.threshold = 0.25)
+head(mono.wilcox, 10)
+```
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `ident.1` | `"STIM"` | The first group (numerator). Positive `avg_log2FC` means higher in STIM. |
+| `ident.2` | `"CTRL"` | The second group (denominator). |
+| `test.use` | `"wilcox"` | Wilcoxon rank-sum test. Fast, non-parametric, works well for exploration. |
+| `min.pct` | `0.25` | Only test genes detected in at least 25% of cells in either group. |
+| `logfc.threshold` | `0.25` | Only test genes with at least 0.25 log2FC between groups. |
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+```output
+              p_val avg_log2FC pct.1 pct.2    p_val_adj
+IFIT1  0.000e+00      4.528 0.992 0.056 0.000e+00
+ISG15  0.000e+00      4.345 0.995 0.186 0.000e+00
+IFI6   0.000e+00      4.123 0.968 0.042 0.000e+00
+IFIT3  0.000e+00      3.752 0.959 0.048 0.000e+00
+IFI44L 0.000e+00      3.697 0.888 0.022 0.000e+00
+IFIT2  0.000e+00      3.583 0.919 0.027 0.000e+00
+RSAD2  0.000e+00      3.443 0.828 0.013 0.000e+00
+ISG20  0.000e+00      3.159 0.940 0.124 0.000e+00
+LY6E   0.000e+00      3.243 0.919 0.077 0.000e+00
+MX1    0.000e+00      3.023 0.893 0.029 0.000e+00
+```
+
+The top genes are all interferon-stimulated genes (ISGs), as expected. But
+notice that the p-values are extremely small (effectively zero). This is a
+symptom of per-cell testing with thousands of cells.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+```{r wilcox-count, eval=FALSE}
+cat("Significant genes (padj < 0.05):", sum(mono.wilcox$p_val_adj < 0.05), "\n")
+```
+
+:::::::::::::::::::::::::::::::::::::::::: callout
+
+## The pseudobulk revolution
+
+The Wilcoxon and MAST tests treat **each cell as an independent observation**.
+But cells from the same donor or the same sample are **not** independent --
+they share the same genetic background, the same library preparation, and the
+same sequencing run. This is called **pseudoreplication**, and it severely
+inflates p-values.
+
+For example, if you have 2,000 monocytes from one control sample and 2,000
+from one stimulated sample, per-cell testing treats this as n = 4,000. But the
+true sample size is n = 2 (one sample per condition). Every gene with even a
+tiny difference will appear significant simply because of the enormous
+"sample size."
+
+**Pseudobulk analysis** solves this by aggregating all cells of the same type
+from the same sample into a single expression profile. If you have 3 control
+donors and 3 stimulated donors, you get 3 pseudobulk replicates per condition
+-- the same as a bulk RNA-seq experiment with n = 3 per group. This gives
+proper type I error control and realistic p-values.
+
+**Always use pseudobulk** when you have biological replicates. Use per-cell
+tests only for exploratory analysis or when you have a single sample per
+condition and have no other option.
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+## Pseudobulk Analysis
+
+Pseudobulk aggregation sums the raw UMI counts for each gene across all cells
+of the same cell type from the same sample, producing a bulk-like count matrix
+with one column per sample-celltype combination.
+
+```{r aggregate, eval=FALSE}
+# Create pseudobulk counts
+# Group by cell type, condition, and sample (orig.ident)
+bulk <- AggregateExpression(ifnb,
+                            group.by = c("celltype", "stim", "orig.ident"),
+                            return.seurat = TRUE)
+bulk
+```
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `group.by` | `c("celltype", "stim", "orig.ident")` | Metadata columns to group cells by. Each unique combination of cell type, condition, and sample becomes one pseudobulk column. |
+| `return.seurat` | `TRUE` | Return a Seurat object (instead of a raw matrix) so we can use `FindMarkers` on it. |
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+```output
+An object of class Seurat
+14053 features across N samples within 1 assay
+Active assay: RNA (14053 features, 0 variable features)
+ 1 layer present: counts
+```
+
+The number of samples (N) depends on the number of unique cell type + condition
++ donor combinations in the dataset.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Now we can run DESeq2-based DE testing on the pseudobulk object. We subset to
+CD14+ monocytes and compare conditions:
+
+```{r pseudobulk-de, eval=FALSE}
+# Subset pseudobulk to CD14 Mono samples
+bulk.mono <- subset(bulk, celltype == "CD14 Mono")
+
+# Set condition as active identity
+Idents(bulk.mono) <- "stim"
+
+# Run DESeq2 on pseudobulk counts
+mono.pseudo <- FindMarkers(bulk.mono,
+                           ident.1 = "STIM",
+                           ident.2 = "CTRL",
+                           test.use = "DESeq2")
+head(mono.pseudo, 10)
+```
+
+```{r pseudo-count, eval=FALSE}
+cat("Significant genes (padj < 0.05):", sum(mono.pseudo$p_val_adj < 0.05, na.rm = TRUE), "\n")
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+The pseudobulk analysis typically identifies **fewer significant genes** than
+the per-cell Wilcoxon test (often hundreds instead of thousands). The top genes
+are still ISGs (IFIT1, ISG15, IFI6), but the p-values are larger and more
+realistic because the effective sample size is the number of donors, not the
+number of cells.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+## Visualization and Interpretation
+
+### Volcano plot
+
+A volcano plot shows the relationship between statistical significance
+(-log10 p-value, y-axis) and biological effect size (log2 fold change,
+x-axis). Each point is a gene. Genes in the upper corners are both
+statistically significant and biologically meaningful.
+
+```{r volcano, eval=FALSE, fig.alt="Volcano plot showing differential expression results for stimulated versus control CD14 monocytes. Significant upregulated genes appear in the upper right (including ISG15, IFIT1, IFI6), significant downregulated genes in the upper left, and non-significant genes cluster near the bottom center."}
+# Use Wilcoxon results for visualization (more genes to plot)
+mono.wilcox$gene <- rownames(mono.wilcox)
+mono.wilcox$significance <- case_when(
+    mono.wilcox$p_val_adj < 0.05 & mono.wilcox$avg_log2FC > 0.5  ~ "Up",
+    mono.wilcox$p_val_adj < 0.05 & mono.wilcox$avg_log2FC < -0.5 ~ "Down",
+    TRUE ~ "NS"
+)
+
+ggplot(mono.wilcox, aes(x = avg_log2FC, y = -log10(p_val_adj), color = significance)) +
+    geom_point(size = 0.5, alpha = 0.6) +
+    scale_color_manual(values = c("Up" = "firebrick", "Down" = "steelblue", "NS" = "grey70")) +
+    geom_vline(xintercept = c(-0.5, 0.5), linetype = "dashed", color = "grey40") +
+    geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "grey40") +
+    labs(x = "Log2 fold change (STIM vs CTRL)",
+         y = "-log10(adjusted p-value)",
+         title = "CD14+ Monocytes: STIM vs CTRL",
+         color = "Direction") +
+    theme_minimal()
+```
+
+How to read the volcano plot:
+
+- **Upper right**: genes significantly upregulated in stimulated cells (ISGs)
+- **Upper left**: genes significantly downregulated in stimulated cells
+- **Bottom center**: non-significant genes (low fold change or high p-value)
+- **Dashed lines**: significance cutoffs (|log2FC| > 0.5 and padj < 0.05)
+
+### Feature and violin plots
+
+Visualize specific DE genes on the UMAP and across conditions:
+
+```{r de-viz, eval=FALSE, fig.alt="FeaturePlot showing ISG15 expression split by control and stimulated conditions. ISG15 is nearly absent in control cells but strongly expressed across multiple cell types in stimulated cells, especially monocytes."}
+FeaturePlot(ifnb,
+            features = "ISG15",
+            split.by = "stim",
+            cols = c("grey85", "firebrick"))
+```
+
+```{r de-violin, eval=FALSE, fig.alt="Violin plots showing ISG15, IFIT1, and MX1 expression across cell types, split by control and stimulated conditions. All three genes are dramatically upregulated in the stimulated condition across multiple cell types."}
+VlnPlot(ifnb,
+        features = c("ISG15", "IFIT1", "MX1"),
+        split.by = "stim",
+        pt.size = 0,
+        ncol = 3)
+```
+
+### Dot plot across cell types
+
+A dot plot can show the top DE genes across all cell types simultaneously,
+revealing which responses are shared and which are cell-type-specific:
+
+```{r de-dotplot, eval=FALSE, fig.alt="Dot plot showing expression of the top 10 DE genes across all cell types, split by condition. Interferon-stimulated genes are consistently upregulated across all cell types in the stimulated condition."}
+top_de_genes <- head(rownames(mono.wilcox), 10)
+DotPlot(ifnb,
+        features = top_de_genes,
+        split.by = "stim",
+        cols = c("steelblue", "firebrick")) +
+    coord_flip() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+## Functional Enrichment
+
+A list of hundreds of DE genes is difficult to interpret gene by gene.
+**Gene Ontology (GO) enrichment analysis** asks: are the DE genes enriched
+for specific biological processes? This connects individual gene changes to
+broader biological themes.
+
+### Converting gene symbols to Entrez IDs
+
+clusterProfiler requires Entrez gene IDs. We convert from gene symbols using
+`bitr()`:
+
+```{r convert-ids, eval=FALSE}
+# Get significant upregulated genes
+sig_genes <- mono.wilcox %>%
+    filter(p_val_adj < 0.05, avg_log2FC > 0.5) %>%
+    rownames()
+
+cat("Number of significant upregulated genes:", length(sig_genes), "\n")
+
+# Convert gene symbols to Entrez IDs
+gene_ids <- bitr(sig_genes,
+                 fromType = "SYMBOL",
+                 toType = "ENTREZID",
+                 OrgDb = org.Hs.eg.db)
+head(gene_ids)
+```
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `fromType` | `"SYMBOL"` | Input ID type (gene symbols like ISG15, IFIT1). |
+| `toType` | `"ENTREZID"` | Output ID type (Entrez gene IDs like 9636, 3434). |
+| `OrgDb` | `org.Hs.eg.db` | Organism annotation database (human). |
+
+### Running GO enrichment
+
+```{r enrichgo, eval=FALSE}
+go_results <- enrichGO(gene = gene_ids$ENTREZID,
+                       OrgDb = org.Hs.eg.db,
+                       ont = "BP",
+                       pAdjustMethod = "BH",
+                       qvalueCutoff = 0.05,
+                       readable = TRUE)
+```
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `gene` | `gene_ids$ENTREZID` | Vector of Entrez gene IDs to test. |
+| `OrgDb` | `org.Hs.eg.db` | Organism annotation database. |
+| `ont` | `"BP"` | GO ontology category: "BP" (Biological Process), "MF" (Molecular Function), or "CC" (Cellular Component). |
+| `pAdjustMethod` | `"BH"` | Benjamini-Hochberg method for multiple testing correction. |
+| `qvalueCutoff` | `0.05` | Only return terms with q-value below this threshold. |
+| `readable` | `TRUE` | Convert Entrez IDs in the output back to gene symbols for readability. |
+
+Visualize the top enriched GO terms with a dot plot:
+
+```{r go-dotplot, eval=FALSE, fig.alt="Dot plot showing the top 15 enriched GO biological process terms for upregulated genes in stimulated monocytes. The top terms include defense response to virus, type I interferon signaling pathway, response to virus, and innate immune response."}
+dotplot(go_results, showCategory = 15) +
+    ggtitle("GO Biological Process: STIM vs CTRL CD14+ Monocytes")
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+The top enriched GO terms should include:
+
+- **defense response to virus**
+- **type I interferon signaling pathway**
+- **response to virus**
+- **innate immune response**
+- **negative regulation of viral genome replication**
+- **cytokine-mediated signaling pathway**
+- **response to interferon-beta**
+
+These terms are entirely consistent with IFN-beta stimulation. IFN-beta is a
+type I interferon that activates antiviral defense programs, and the GO
+enrichment confirms that the DE genes are concentrated in exactly these
+pathways.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+### KEGG pathway enrichment
+
+For a complementary view, we can also test KEGG pathways:
+
+```{r kegg, eval=FALSE}
+kegg_results <- enrichKEGG(gene = gene_ids$ENTREZID,
+                           organism = "hsa",
+                           pAdjustMethod = "BH",
+                           qvalueCutoff = 0.05)
+head(kegg_results, 5)
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+Top KEGG pathways should include entries like "Influenza A", "Hepatitis C",
+"RIG-I-like receptor signaling pathway", and "NOD-like receptor signaling
+pathway" -- all pathways involving the interferon/antiviral response.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+## Exporting Results
+
+At the end of an analysis, you should export your results in formats that
+support reproducibility, sharing, and downstream use.
+
+### Save the annotated Seurat object
+
+```{r save-rds, eval=FALSE}
+saveRDS(ifnb, file = "ifnb_annotated.rds")
+```
+
+### Export the count matrix and metadata
+
+For the PBMC 10k dataset from earlier episodes, you can export the raw counts
+and metadata as CSV files:
+
+```{r export-csv, eval=FALSE}
+# Export raw count matrix (warning: can be large for big datasets)
+counts_matrix <- GetAssayData(pbmc, layer = "counts")
+writeMM(counts_matrix, file = "counts.mtx")
+
+# Export metadata
+write.csv(pbmc@meta.data, file = "metadata.csv", quote = FALSE)
+
+# Export gene names
+write.csv(data.frame(gene = rownames(pbmc)), file = "features.csv",
+          row.names = FALSE, quote = FALSE)
+```
+
+For smaller datasets, you can export as a dense CSV:
+
+```{r export-dense, eval=FALSE}
+write.csv(as.matrix(GetAssayData(pbmc, layer = "counts")),
+          file = "counts_dense.csv")
+```
+
+### Format conversion for Python users
+
+If collaborators use the Python/Scanpy ecosystem, you can convert your Seurat
+object to AnnData format using the `sceasy` package:
+
+```{r convert-anndata, eval=FALSE}
+# Install sceasy if needed: remotes::install_github("cellgeni/sceasy")
+library(sceasy)
+sceasy::convertFormat(pbmc,
+                      from = "seurat",
+                      to = "anndata",
+                      outFile = "pbmc_annotated.h5ad")
+```
+
+### GEO submission
+
+For submitting data to NCBI GEO, you typically need:
+
+- **Raw count matrix** (genes x cells) in MTX or CSV format
+- **Cell metadata** (barcodes, cell types, conditions) as a TSV/CSV
+- **Processing description** (software versions, parameters, filtering criteria)
+
+:::::::::::::::::::::::::::::::::::::::::: callout
+
+## Reproducibility checklist
+
+Before sharing or publishing your analysis, ensure you have:
+
+- **Saved your R session info** so others know exactly which package versions
+  you used:
+
+  ```r
+  writeLines(capture.output(sessionInfo()), "session_info.txt")
+  ```
+
+- **Pinned package versions** in your analysis scripts or used `renv` to create
+  a reproducible environment.
+
+- **Saved intermediate RDS files** at each major step (`pbmc_filtered.rds`,
+  `pbmc_normalized.rds`, `pbmc_clustered.rds`, `pbmc_annotated.rds`) so others
+  can enter the pipeline at any point.
+
+- **Documented all parameter choices**: QC thresholds, number of PCs,
+  clustering resolution, normalization method, integration method, and DE test
+  used.
+
+- **Recorded the random seed** if you used one (e.g., `set.seed(42)` before
+  UMAP or clustering).
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+::::::::::::::::::::::::::::::::::::: challenge
+
+## Challenge 1: Wilcoxon vs. Pseudobulk
+
+Run both Wilcoxon (per-cell) and pseudobulk (DESeq2) DE testing for stimulated
+vs. control CD14+ monocytes. Compare the number of significant genes and the
+p-value distributions.
+
+```{r challenge1, eval=FALSE}
+# Wilcoxon (already computed above)
+n_wilcox <- sum(mono.wilcox$p_val_adj < 0.05)
+cat("Wilcoxon significant genes:", n_wilcox, "\n")
+
+# Pseudobulk (already computed above)
+n_pseudo <- sum(mono.pseudo$p_val_adj < 0.05, na.rm = TRUE)
+cat("Pseudobulk significant genes:", n_pseudo, "\n")
+
+# Compare p-value distributions for shared genes
+shared_genes <- intersect(rownames(mono.wilcox), rownames(mono.pseudo))
+comparison <- data.frame(
+    gene = shared_genes,
+    wilcox_pval = mono.wilcox[shared_genes, "p_val_adj"],
+    pseudo_pval = mono.pseudo[shared_genes, "p_val_adj"]
+)
+comparison <- comparison[complete.cases(comparison), ]
+
+ggplot(comparison, aes(x = -log10(wilcox_pval), y = -log10(pseudo_pval))) +
+    geom_point(size = 0.5, alpha = 0.5) +
+    geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+    labs(x = "-log10(p-value) Wilcoxon",
+         y = "-log10(p-value) Pseudobulk",
+         title = "P-value comparison: Wilcoxon vs Pseudobulk") +
+    theme_minimal()
+```
+
+Which method gives more conservative results? Why?
+
+:::::::::::::::::::::::: solution
+
+You should find that:
+
+- **Wilcoxon** identifies thousands of significant genes (often 2,000--4,000+)
+- **Pseudobulk** identifies far fewer (often 200--800)
+
+The scatter plot shows that most points fall **below** the diagonal (the red
+dashed line), meaning pseudobulk p-values are consistently **larger** (less
+significant) than Wilcoxon p-values for the same genes.
+
+This is expected and correct. The Wilcoxon test has inflated significance
+because it treats each cell as an independent observation. With ~2,000
+monocytes per condition, even tiny expression differences become
+"significant." The pseudobulk test treats each **donor** as one observation,
+giving a realistic sample size and honest p-values.
+
+The genes that are significant in **both** methods are the most trustworthy --
+these are genes with large, robust effects that survive the more stringent
+pseudobulk test. The genes significant only in Wilcoxon but not in pseudobulk
+are likely false positives driven by pseudoreplication.
+
+**Rule of thumb:** Use Wilcoxon for quick exploration and hypothesis
+generation. Use pseudobulk for any result you plan to report or publish.
+
+:::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::: challenge
+
+## Challenge 2: GO Enrichment of IFN-beta Response Genes
+
+Run GO enrichment on the top 200 upregulated genes (by fold change) in
+stimulated vs. control CD14+ monocytes. What are the top 5 biological
+processes? Do they make sense for IFN-beta stimulation?
+
+```{r challenge2, eval=FALSE}
+# Get top 200 upregulated genes by fold change
+top200 <- mono.wilcox %>%
+    filter(p_val_adj < 0.05, avg_log2FC > 0) %>%
+    arrange(desc(avg_log2FC)) %>%
+    head(200)
+top200_genes <- rownames(top200)
+
+# Convert to Entrez IDs
+top200_ids <- bitr(top200_genes,
+                   fromType = "SYMBOL",
+                   toType = "ENTREZID",
+                   OrgDb = org.Hs.eg.db)
+
+# Run GO enrichment
+go_top200 <- enrichGO(gene = top200_ids$ENTREZID,
+                      OrgDb = org.Hs.eg.db,
+                      ont = "BP",
+                      pAdjustMethod = "BH",
+                      qvalueCutoff = 0.05,
+                      readable = TRUE)
+
+# Show top 5 terms
+head(go_top200, 5)
+
+# Visualize
+dotplot(go_top200, showCategory = 10) +
+    ggtitle("GO BP: Top 200 upregulated genes in STIM CD14+ Monocytes")
+```
+
+:::::::::::::::::::::::: solution
+
+The top 5 biological processes should include terms like:
+
+| Rank | GO Term | Interpretation |
+|:----:|:--------|:--------------|
+| 1 | defense response to virus | Direct antiviral effector programs activated by IFN-beta |
+| 2 | type I interferon signaling pathway | The canonical pathway triggered by IFN-beta binding to IFNAR |
+| 3 | response to virus | Broad viral response including both detection and effector mechanisms |
+| 4 | negative regulation of viral genome replication | Specific antiviral effectors (MX1, IFIT proteins) that block viral replication |
+| 5 | innate immune response | General innate immunity activation, of which IFN signaling is a central component |
+
+These results make complete biological sense. IFN-beta (interferon beta) is a
+**type I interferon** that signals through the IFNAR receptor complex,
+activating the JAK-STAT pathway, which turns on hundreds of
+interferon-stimulated genes (ISGs). These ISGs encode proteins that directly
+inhibit viral replication (MX1, IFIT1), degrade viral RNA (ISG20, OAS
+proteins), and alert neighboring cells to the viral threat (chemokines,
+cytokines).
+
+The GO enrichment confirms that our DE analysis is capturing the expected
+biology: the top upregulated genes in stimulated monocytes are overwhelmingly
+involved in antiviral and interferon signaling pathways. This serves as
+important biological validation that the computational pipeline (integration,
+DE testing, enrichment) is working correctly.
+
+:::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::: keypoints
+
+- Per-cell DE tests (Wilcoxon, MAST) treat each cell as independent, inflating p-values through pseudoreplication
+- Pseudobulk analysis aggregates cells by sample and cell type, providing statistically valid results with proper type I error control
+- Volcano plots visualize the relationship between effect size (log2FC) and significance (-log10 p-value) for all tested genes
+- Gene ontology enrichment connects lists of DE genes to biological pathways, providing functional interpretation of differential expression results
+- Always export session info, save intermediate objects, and document parameter choices for reproducibility
+
+::::::::::::::::::::::::::::::::::::::::::::::::
