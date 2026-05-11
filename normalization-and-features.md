@@ -1,0 +1,530 @@
+---
+source: Rmd
+title: 'Normalization and Feature Selection'
+teaching: 40
+exercises: 15
+---
+
+:::::::::::::::::::::::::::::::::::::: questions
+
+- Why do we need to normalize scRNA-seq data before comparing cells?
+- How does log normalization work and where are the results stored?
+- What are highly variable features and why do we select them?
+- What does scaling do and when should we regress out confounders?
+- How does SCTransform differ from the LogNormalize workflow?
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::: objectives
+
+- Apply log normalization to correct for differences in sequencing depth between cells
+- Identify highly variable features using variance-stabilizing transformation
+- Scale the data to prepare for PCA
+- Describe SCTransform as an alternative to the three-step LogNormalize workflow
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+## Setup
+
+
+``` r
+library(Seurat)
+```
+
+``` error
+Error in `library()`:
+! there is no package called 'Seurat'
+```
+
+``` r
+library(ggplot2)
+```
+
+``` error
+Error in `library()`:
+! there is no package called 'ggplot2'
+```
+
+``` r
+library(patchwork)
+```
+
+``` error
+Error in `library()`:
+! there is no package called 'patchwork'
+```
+
+## Loading the Filtered Data
+
+We start from the filtered Seurat object saved at the end of the previous
+episode. This object contains only cells that passed our QC thresholds.
+
+
+``` r
+pbmc <- readRDS("pbmc_filtered.rds")
+pbmc
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+```output
+An object of class Seurat
+23694 features across 10000 samples within 1 assay
+Active assay: RNA (23694 features, 0 variable features)
+ 1 layer present: counts
+```
+
+The object has approximately 23,700 genes and 10,000 cells. Only the `counts`
+layer is populated at this stage. By the end of this episode we will fill in
+the `data` and `scale.data` layers as well.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Right now, the only expression data we have is raw UMI counts. Before we can
+compare gene expression between cells, we need to address a fundamental
+problem: **cells are sequenced to different depths**.
+
+Consider two cells that are biologically identical -- they express the same
+genes at the same levels. If Cell A was sequenced to 5,000 total UMIs and Cell
+B to 10,000 total UMIs, every gene in Cell B will appear to have roughly twice
+the counts of Cell A. This is purely a technical artifact of sequencing depth,
+not a biological difference. Normalization corrects for this so that expression
+values are comparable across cells.
+
+
+## Log Normalization
+
+The standard normalization in Seurat is **LogNormalize**. It applies a simple
+three-step transformation to each cell independently:
+
+1. **Divide** each gene's count by the cell's total UMI count
+2. **Multiply** by a scale factor (default 10,000) so the values are not
+   tiny fractions
+3. **Log-transform** with `log1p` (natural log of 1 + x) to compress the
+   dynamic range
+
+The formula for a single gene *g* in cell *c* is:
+
+**normalized(g, c) = log(1 + count(g, c) / total_counts(c) x 10000)**
+
+
+``` r
+pbmc <- NormalizeData(pbmc,
+                      normalization.method = "LogNormalize",
+                      scale.factor = 10000)
+```
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `normalization.method` | `"LogNormalize"` | Divide by total counts, multiply by scale factor, log1p transform. |
+| `scale.factor` | `10000` | Multiplicative factor applied after dividing by total counts. The default 10,000 means normalized values are in "counts per 10,000" before log transformation. |
+
+After normalization, the results are stored in the `data` layer of the RNA
+assay:
+
+
+``` r
+pbmc
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+```output
+An object of class Seurat
+23694 features across 10000 samples within 1 assay
+Active assay: RNA (23694 features, 0 variable features)
+ 2 layers present: counts, data
+```
+
+Notice that we now have **2 layers**: `counts` (raw) and `data` (normalized).
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+You can access each layer directly:
+
+
+``` r
+# Raw counts for the first 5 genes in the first 3 cells
+pbmc[["RNA"]]$counts[1:5, 1:3]
+
+# Normalized values for the same genes and cells
+pbmc[["RNA"]]$data[1:5, 1:3]
+```
+
+### Visualizing the effect of normalization
+
+To see what normalization does, let's compare the distribution of a gene before
+and after normalization. We'll look at **LYZ**, a marker for CD14+ monocytes
+that has high and variable expression across cells.
+
+
+``` r
+# Extract raw and normalized values for LYZ
+lyz_raw <- pbmc[["RNA"]]$counts["LYZ", ]
+lyz_norm <- pbmc[["RNA"]]$data["LYZ", ]
+
+p1 <- ggplot(data.frame(x = as.numeric(lyz_raw)), aes(x = x)) +
+    geom_histogram(bins = 50, fill = "steelblue", color = "white") +
+    labs(title = "LYZ - Raw counts", x = "UMI counts", y = "Number of cells") +
+    theme_minimal()
+
+p2 <- ggplot(data.frame(x = as.numeric(lyz_norm)), aes(x = x)) +
+    geom_histogram(bins = 50, fill = "darkred", color = "white") +
+    labs(title = "LYZ - Log-normalized", x = "Normalized expression", y = "Number of cells") +
+    theme_minimal()
+
+p1 + p2
+```
+
+The raw count distribution is heavily right-skewed with a large spike at zero
+(cells that don't express LYZ -- mostly non-monocytes). After log
+normalization, the non-zero values are spread more evenly and the influence
+of sequencing depth differences is reduced.
+
+
+## Identifying Variable Features
+
+The human genome contains roughly 20,000 protein-coding genes, but not all of
+them are informative for distinguishing cell types. Many genes are:
+
+- **Housekeeping genes** expressed at similar levels in every cell (e.g., ACTB,
+  GAPDH). These carry no information about cell identity.
+- **Low-expression genes** detected in only a handful of cells. These are too
+  noisy to contribute meaningfully.
+- **Constant genes** that show little variation across cells.
+
+**Highly variable features (HVGs)** are genes that vary substantially from cell
+to cell. These are the genes most likely to capture biological differences
+between cell types. By selecting the top 2,000 variable features, we focus
+downstream analysis (PCA, clustering) on the genes that matter most, while
+reducing noise and computation time.
+
+
+``` r
+pbmc <- FindVariableFeatures(pbmc,
+                             selection.method = "vst",
+                             nfeatures = 2000)
+```
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `selection.method` | `"vst"` | Variance-stabilizing transformation. Fits a mean-variance relationship across genes using local regression, then selects genes with the highest standardized variance (i.e., genes that vary more than expected given their expression level). |
+| `nfeatures` | `2000` | Number of variable features to select. 2,000 is the standard default for most scRNA-seq analyses. |
+
+Let's see which genes were selected:
+
+
+``` r
+head(VariableFeatures(pbmc), 10)
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+```output
+ [1] "S100A9" "LYZ"    "S100A8" "GNLY"   "FTL"    "NKG7"   "IGKC"   "FTH1"
+ [9] "CST3"   "TYROBP"
+```
+
+The top variable features include known immune cell markers: S100A9 and LYZ
+(monocytes), GNLY and NKG7 (NK cells), IGKC (B cells), and CST3 (dendritic
+cells). This makes sense -- these genes are highly expressed in specific cell
+types but absent in others, producing high cell-to-cell variance.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Visualize the variable feature selection with a mean-variance plot:
+
+
+``` r
+vf_plot <- VariableFeaturePlot(pbmc)
+top10 <- head(VariableFeatures(pbmc), 10)
+LabelPoints(plot = vf_plot, points = top10, repel = TRUE)
+```
+
+In this plot, each point is a gene. The x-axis shows mean expression across
+cells and the y-axis shows standardized variance. The red points are the 2,000
+selected variable features. Genes in the upper right are both highly expressed
+and highly variable -- these are strong cell-type markers. Genes along the
+bottom have low variance relative to their expression level and are excluded.
+
+
+## Scaling
+
+The final step before PCA is **scaling**. `ScaleData()` applies a z-score
+transformation to each gene across all cells: it subtracts the mean expression
+and divides by the standard deviation. After scaling, each gene has mean 0 and
+standard deviation 1.
+
+Why is this necessary? Without scaling, PCA would be dominated by highly
+expressed genes simply because they have larger absolute values, not because
+they carry more biological information. Scaling puts all genes on equal footing
+so that PCA identifies the axes of true biological variation rather than
+expression magnitude.
+
+
+``` r
+pbmc <- ScaleData(pbmc)
+```
+
+By default, `ScaleData()` only scales the variable features (the 2,000 genes
+selected above), not all ~23,000 genes. This is faster and sufficient for PCA,
+which only uses variable features. If you later need scaled values for all
+genes (e.g., for a heatmap of a non-variable gene), you can re-run
+`ScaleData()` with `features = rownames(pbmc)`.
+
+After scaling, a third layer appears in the object:
+
+
+``` r
+pbmc
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+```output
+An object of class Seurat
+23694 features across 10000 samples within 1 assay
+Active assay: RNA (23694 features, 2000 variable features)
+ 3 layers present: counts, data, scale.data
+```
+
+All three layers are now populated: `counts` (raw), `data` (log-normalized),
+and `scale.data` (z-scored variable features).
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+### Regressing out confounders
+
+`ScaleData()` can optionally **regress out** unwanted sources of variation
+using the `vars.to.regress` parameter. A common use case is regressing out
+mitochondrial percentage so that cell damage does not influence clustering:
+
+
+``` r
+# Optional: regress out mitochondrial percentage
+pbmc_regressed <- ScaleData(pbmc, vars.to.regress = "percent.mt")
+```
+
+This fits a linear model for each gene with `percent.mt` as a covariate and
+uses the residuals as the scaled expression values. The effect is that
+variation driven by mitochondrial content is removed before PCA.
+
+**When to regress:**
+
+- Mitochondrial percentage is driving a major axis of variation in PCA (i.e.,
+  one of the top PCs strongly correlates with percent.mt)
+- You see cells grouping by mitochondrial content rather than cell type
+
+**When NOT to regress:**
+
+- Mitochondrial content correlates with real biology. Some cell types
+  (e.g., cardiomyocytes, metabolically active immune cells) naturally have
+  higher mitochondrial gene expression. Regressing it out would remove
+  legitimate biological signal.
+- The QC filtering in the previous episode already removed high-mt cells, and
+  the remaining variation is modest.
+
+For this workshop, we proceed **without** regression because our QC filtering
+already removed cells with `percent.mt > 15`, and the remaining variation does
+not dominate the PCA.
+
+Save the normalized object for the next episode:
+
+
+``` r
+saveRDS(pbmc, file = "pbmc_normalized.rds")
+```
+
+
+## SCTransform as an Alternative
+
+:::::::::::::::::::::::::::::::::::::::::: callout
+
+## SCTransform: a one-step alternative
+
+The three-step LogNormalize workflow (`NormalizeData` + `FindVariableFeatures` +
+`ScaleData`) works well for most datasets, but it has limitations. The log
+transformation can over-stabilize variance for lowly expressed genes and
+under-stabilize it for highly expressed genes. This matters most when there
+is high technical noise in the data.
+
+**SCTransform** addresses this by using **regularized negative binomial
+regression**. It models each gene's expression as a function of total UMI
+counts per cell, estimates the expected variance at each expression level, and
+returns Pearson residuals that serve as normalized, variance-stabilized values.
+A single function call replaces all three steps:
+
+```r
+pbmc_sct <- SCTransform(pbmc, vst.flavor = "v2")
+```
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `vst.flavor` | `"v2"` | Use the improved v2 algorithm (Choudhary & Satija, 2022) with better variance estimation for sparse data. |
+
+Key differences from LogNormalize:
+
+- **Replaces three steps** with one: normalization, feature selection, and
+  scaling are all handled internally.
+- **Selects 3,000 variable features** by default (vs. 2,000 for
+  `FindVariableFeatures`), which can improve resolution for complex tissues.
+- **Better variance stabilization** across the full range of expression levels.
+- **Stored in a separate assay**: results go into an assay called `SCT` rather
+  than modifying the `RNA` assay. The `RNA` assay retains the raw counts for
+  reference.
+
+**When to use SCTransform:**
+
+- For publication-quality analyses, especially with complex tissues or datasets
+  with high technical variance.
+- When you observe that LogNormalize produces clusters driven by sequencing
+  depth rather than biology.
+
+**When LogNormalize is sufficient:**
+
+- For exploratory analysis and quick overviews.
+- When the dataset is well-behaved and you want a simpler, faster workflow.
+- For direct comparability with older analyses and tutorials.
+
+In this workshop, we use **LogNormalize** throughout for simplicity and because
+it produces excellent results with this well-characterized PBMC dataset.
+However, SCTransform is the preferred method for most production analyses.
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+::::::::::::::::::::::::::::::::::::: challenge
+
+## Challenge 1: LogNormalize vs. SCTransform Variable Features
+
+Run both normalization approaches on the same filtered dataset and compare the
+top 20 variable features from each method. How many genes appear in both lists?
+
+
+``` r
+# LogNormalize pathway (already done above)
+lognorm_top20 <- head(VariableFeatures(pbmc), 20)
+
+# SCTransform pathway
+pbmc_sct <- SCTransform(pbmc, vst.flavor = "v2")
+sct_top20 <- head(VariableFeatures(pbmc_sct), 20)
+
+# Compare
+cat("LogNormalize top 20:\n")
+print(lognorm_top20)
+cat("\nSCTransform top 20:\n")
+print(sct_top20)
+cat("\nGenes in both lists:\n")
+shared <- intersect(lognorm_top20, sct_top20)
+print(shared)
+cat("\nOverlap:", length(shared), "out of 20\n")
+```
+
+:::::::::::::::::::::::: solution
+
+You should find that approximately **12--14 of the top 20 genes overlap**
+(~60--70%), which means both methods broadly agree on which genes are most
+variable. The shared genes typically include strong cell-type markers like
+S100A9, LYZ, GNLY, NKG7, and IGKC.
+
+The differences arise because the two methods define "variable" differently:
+
+- **vst** (LogNormalize) fits a mean-variance curve and selects genes with the
+  highest residual variance. It can be influenced by a few outlier cells with
+  extreme counts.
+- **SCTransform** uses a negative binomial model that is more robust to
+  outliers and better handles the mean-variance relationship at low expression
+  levels.
+
+Despite these differences in the top-ranked features, the downstream results
+(PCA, clustering, cell type identification) are usually very similar because
+both methods capture the major axes of biological variation. The differences
+tend to matter more for subtle distinctions between closely related cell states.
+
+:::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::: challenge
+
+## Challenge 2: Housekeeping vs. Variable Gene Behavior
+
+Plot the expression of **ACTB** (a housekeeping gene) and **LYZ** (a variable
+monocyte marker) before and after normalization. What changes for each gene,
+and why?
+
+
+``` r
+# Extract raw and normalized values
+actb_raw  <- as.numeric(pbmc[["RNA"]]$counts["ACTB", ])
+actb_norm <- as.numeric(pbmc[["RNA"]]$data["ACTB", ])
+lyz_raw   <- as.numeric(pbmc[["RNA"]]$counts["LYZ", ])
+lyz_norm  <- as.numeric(pbmc[["RNA"]]$data["LYZ", ])
+
+p1 <- ggplot(data.frame(x = actb_raw), aes(x)) +
+    geom_histogram(bins = 50, fill = "steelblue") +
+    labs(title = "ACTB - Raw counts") + theme_minimal()
+p2 <- ggplot(data.frame(x = actb_norm), aes(x)) +
+    geom_histogram(bins = 50, fill = "darkred") +
+    labs(title = "ACTB - Normalized") + theme_minimal()
+p3 <- ggplot(data.frame(x = lyz_raw), aes(x)) +
+    geom_histogram(bins = 50, fill = "steelblue") +
+    labs(title = "LYZ - Raw counts") + theme_minimal()
+p4 <- ggplot(data.frame(x = lyz_norm), aes(x)) +
+    geom_histogram(bins = 50, fill = "darkred") +
+    labs(title = "LYZ - Normalized") + theme_minimal()
+
+(p1 + p2) / (p3 + p4)
+```
+
+:::::::::::::::::::::::: solution
+
+**ACTB (housekeeping gene):**
+
+- **Before normalization:** the raw count distribution is right-skewed because
+  cells with higher sequencing depth have proportionally more ACTB counts. The
+  apparent variation is mostly technical (sequencing depth), not biological.
+- **After normalization:** the distribution becomes tighter and more uniform.
+  Because ACTB is expressed at similar levels in all cell types, once you
+  correct for sequencing depth the remaining variation is small. This is exactly
+  why ACTB is **not** selected as a variable feature -- it doesn't help
+  distinguish cell types.
+
+**LYZ (variable gene):**
+
+- **Before normalization:** there is a large spike at zero (non-monocyte cells
+  that don't express LYZ) and a spread of non-zero values. Part of the
+  variation in non-zero values is technical (depth) and part is biological
+  (different amounts of LYZ in monocytes).
+- **After normalization:** the zero spike remains (you can't normalize away
+  true absence of expression), but the non-zero values are corrected for depth.
+  The biological variation between monocytes and non-monocytes is preserved and
+  stands out more clearly. This is why LYZ **is** selected as a highly variable
+  feature.
+
+The key takeaway: normalization makes expression comparable across cells by
+removing sequencing depth effects. Housekeeping genes become more uniform
+(confirming they don't vary biologically), while cell-type marker genes retain
+their meaningful variation.
+
+:::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::: keypoints
+
+- Log normalization corrects for sequencing depth by dividing by total counts, scaling, and log-transforming each cell independently
+- Highly variable features are the ~2,000 genes with the most cell-to-cell variation, capturing biological differences while excluding housekeeping genes and noise
+- Scaling (z-score transformation) centers and standardizes gene expression so that PCA is not dominated by highly expressed genes
+- Regressing out confounders like percent.mt during scaling is optional and should only be done when technical variation is obscuring biology
+- SCTransform is a one-step alternative that uses regularized negative binomial regression and is recommended for publication-quality analyses
+
+::::::::::::::::::::::::::::::::::::::::::::::::

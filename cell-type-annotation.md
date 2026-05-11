@@ -1,0 +1,587 @@
+---
+source: Rmd
+title: 'Cell Type Annotation'
+teaching: 40
+exercises: 20
+---
+
+:::::::::::::::::::::::::::::::::::::: questions
+
+- How do we systematically find the genes that define each cluster?
+- How do we assign cell type labels using known marker genes?
+- How does automated annotation with SingleR work?
+- When do manual and automated annotations disagree and what should we do?
+- What are best practices for confident, reproducible annotation?
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::: objectives
+
+- Run FindAllMarkers to identify differentially expressed genes for every cluster
+- Interpret marker gene statistics: avg_log2FC, pct.1, pct.2, and p_val_adj
+- Manually annotate clusters using known PBMC marker genes
+- Use SingleR with the Monaco Immune reference for automated cell type annotation
+- Compare manual and automated annotations and resolve discrepancies
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+## Setup
+
+
+``` r
+library(Seurat)
+```
+
+``` error
+Error in `library()`:
+! there is no package called 'Seurat'
+```
+
+``` r
+library(ggplot2)
+```
+
+``` error
+Error in `library()`:
+! there is no package called 'ggplot2'
+```
+
+``` r
+library(patchwork)
+```
+
+``` error
+Error in `library()`:
+! there is no package called 'patchwork'
+```
+
+``` r
+library(SingleR)
+```
+
+``` error
+Error in `library()`:
+! there is no package called 'SingleR'
+```
+
+``` r
+library(celldex)
+```
+
+``` error
+Error in `library()`:
+! there is no package called 'celldex'
+```
+
+## Loading the Clustered Data
+
+We start from the clustered Seurat object saved at the end of the previous
+episode. Make sure the active identity is set to the resolution 0.5 clusters.
+
+
+``` r
+pbmc <- readRDS("pbmc_clustered.rds")
+Idents(pbmc) <- "RNA_snn_res.0.5"
+DimPlot(pbmc, reduction = "umap", label = TRUE, label.size = 5) + NoLegend()
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+You should see the UMAP with approximately 9--11 clusters labeled by number,
+matching the clustering results from the previous episode.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+## Finding Marker Genes
+
+Up to now, our clusters are just numbers. To give them biological meaning, we
+need to find the genes that distinguish each cluster from all other clusters.
+These are called **marker genes** -- genes that are significantly upregulated
+in one cluster compared to the rest.
+
+`FindAllMarkers()` runs a differential expression test for every cluster,
+comparing cells in that cluster against all other cells:
+
+
+``` r
+pbmc.markers <- FindAllMarkers(pbmc,
+                               only.pos = TRUE,
+                               min.pct = 0.25,
+                               logfc.threshold = 0.25)
+```
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `only.pos` | `TRUE` | Only return genes that are **upregulated** in the cluster (positive log fold change). We are interested in markers that define a cluster, not genes that are absent from it. |
+| `min.pct` | `0.25` | Only test genes detected in at least 25% of cells in either the cluster or the rest. This speeds up the computation by skipping very rare genes that cannot be reliable markers. |
+| `logfc.threshold` | `0.25` | Only test genes with at least a 0.25 log2 fold change between the cluster and the rest. This pre-filters out genes with trivially small differences. |
+
+This step may take 1--2 minutes. The result is a data frame with one row per
+gene per cluster. Let's look at the key columns:
+
+
+``` r
+head(pbmc.markers)
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+```output
+               p_val avg_log2FC pct.1 pct.2 p_val_adj cluster gene
+S100A9  0.000e+00      3.862 0.975 0.108 0.000e+00       1 S100A9
+S100A8  0.000e+00      3.796 0.960 0.094 0.000e+00       1 S100A8
+LYZ     0.000e+00      3.210 0.988 0.255 0.000e+00       1 LYZ
+FCN1    0.000e+00      2.543 0.791 0.045 0.000e+00       1 FCN1
+TYROBP  0.000e+00      2.372 0.995 0.320 0.000e+00       1 TYROBP
+CD14    0.000e+00      2.123 0.683 0.034 0.000e+00       1 CD14
+```
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+The columns mean:
+
+| Column | Meaning |
+|--------|:--------|
+| `p_val` | Raw p-value from the Wilcoxon rank-sum test (default test). |
+| `avg_log2FC` | Average log2 fold change between the cluster and all other cells. A value of 1.0 means the gene is on average 2x higher in this cluster. |
+| `pct.1` | Fraction of cells **in the cluster** where the gene is detected. |
+| `pct.2` | Fraction of cells **outside the cluster** where the gene is detected. |
+| `p_val_adj` | Bonferroni-adjusted p-value. Use this for significance filtering (typically < 0.05). |
+| `cluster` | Which cluster this gene is a marker for. |
+| `gene` | The gene symbol. |
+
+A good marker gene has a high `avg_log2FC`, high `pct.1` (expressed in most
+cells of the cluster), low `pct.2` (not expressed in other clusters), and a
+significant `p_val_adj`.
+
+### Top markers per cluster
+
+Let's extract the top 5 markers per cluster ranked by fold change:
+
+
+``` r
+top5 <- pbmc.markers %>%
+    group_by(cluster) %>%
+    slice_max(n = 5, order_by = avg_log2FC)
+top5
+```
+
+### Visualizing markers with a heatmap
+
+A heatmap of top marker genes across all clusters shows the expression patterns
+at a glance. Each column is a cell (grouped by cluster), each row is a gene,
+and color intensity represents scaled expression:
+
+
+``` r
+top3 <- pbmc.markers %>%
+    group_by(cluster) %>%
+    slice_max(n = 3, order_by = avg_log2FC)
+
+DoHeatmap(pbmc, features = top3$gene) + NoLegend()
+```
+
+Each cluster should show a distinct block of highly expressed genes (bright
+yellow/white) that are low in other clusters (dark purple). Clusters with very
+similar heatmap profiles may represent subtypes of the same cell type.
+
+### Dot plot summary
+
+A dot plot provides a compact summary of marker expression across clusters.
+The dot size encodes the percentage of cells expressing the gene, and the
+color intensity encodes the average expression level:
+
+
+``` r
+DotPlot(pbmc, features = unique(top3$gene)) + coord_flip() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+## Manual Annotation with Known Markers
+
+Now we match the marker gene patterns to known PBMC cell types. The table below
+lists the canonical markers for each expected cell type:
+
+| Cell type | Key markers | Expected % |
+|-----------|:-----------|:-----------|
+| CD4+ T cells | CD3D, IL7R, CCR7 | ~35% |
+| CD8+ T cells | CD3D, CD8A, CD8B | ~10% |
+| B cells | MS4A1, CD79A | ~10% |
+| CD14+ Monocytes | LYZ, CD14, S100A9 | ~20% |
+| FCGR3A+ Monocytes | FCGR3A, MS4A7 | ~5% |
+| NK cells | GNLY, NKG7, KLRD1 | ~10% |
+| Dendritic cells | FCER1A, CST3 | ~3% |
+| Platelets | PPBP, PF4 | ~2% |
+
+Let's visualize these markers on the UMAP to see which clusters they map to:
+
+
+``` r
+FeaturePlot(pbmc,
+            features = c("CD3D", "IL7R", "CD8A", "MS4A1",
+                         "LYZ", "FCGR3A", "GNLY", "FCER1A"),
+            ncol = 4)
+```
+
+And as violin plots to see expression across clusters:
+
+
+``` r
+VlnPlot(pbmc,
+        features = c("CD3D", "IL7R", "CD8A", "MS4A1",
+                     "LYZ", "FCGR3A", "GNLY", "PPBP"),
+        ncol = 4,
+        pt.size = 0)
+```
+
+Based on these plots and the `FindAllMarkers` results, we can build a mapping
+from cluster numbers to cell type names. Your exact cluster numbers will depend
+on the random seed, but the logic is the same: find which clusters express each
+set of markers.
+
+
+``` r
+# Build the cluster-to-cell-type mapping
+# Adjust cluster IDs to match YOUR results
+new.cluster.ids <- c(
+    "CD4 T",           # 0: CD3D+, IL7R+
+    "CD14 Mono",       # 1: LYZ+, CD14+, S100A9+
+    "CD4 T",           # 2: CD3D+, IL7R+ (memory subset)
+    "B",               # 3: MS4A1+, CD79A+
+    "CD8 T",           # 4: CD3D+, CD8A+
+    "NK",              # 5: GNLY+, NKG7+
+    "FCGR3A Mono",     # 6: FCGR3A+, MS4A7+
+    "DC",              # 7: FCER1A+, CST3+
+    "Platelet",        # 8: PPBP+, PF4+
+    "CD4 T"            # 9: CD3D+, IL7R+ (if present)
+)
+names(new.cluster.ids) <- levels(pbmc)
+pbmc <- RenameIdents(pbmc, new.cluster.ids)
+```
+
+:::::::::::::::::::::::::::::::::::::::::: callout
+
+## Annotation is iterative
+
+Your first-pass annotation will not always be correct. This is normal. After
+assigning labels, go back and check:
+
+- Do the labels make biological sense? Is the proportion of each cell type
+  reasonable for PBMCs?
+- Are there clusters where multiple marker sets overlap? This may indicate
+  a mixed cluster that should be sub-clustered at higher resolution.
+- Are there clusters with no clear markers? These may be low-quality cells
+  that slipped through QC, or a rare cell type you didn't expect.
+
+Annotation is an iterative process: assign labels, verify with markers,
+revise, and repeat until you are confident in the assignments.
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Visualize the final annotated UMAP:
+
+
+``` r
+DimPlot(pbmc, reduction = "umap", label = TRUE, repel = TRUE) + NoLegend()
+```
+
+Store the annotation in the metadata so it persists after saving:
+
+
+``` r
+pbmc$manual_annotation <- Idents(pbmc)
+```
+
+
+## Automated Annotation with SingleR
+
+Manual annotation requires expert knowledge of marker genes for every expected
+cell type. **SingleR** offers an automated alternative: it compares the
+expression profile of each cell to a labeled reference dataset and assigns the
+label of the most similar reference sample.
+
+### Download the reference
+
+We use the **Monaco Immune Data** reference from the `celldex` package. This
+reference contains bulk RNA-seq profiles of sorted human immune cell
+populations, making it well-suited for PBMC annotation.
+
+
+``` r
+ref <- celldex::MonacoImmuneData()
+ref
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+```output
+class: SummarizedExperiment
+dim: 46077 114
+metadata(0):
+assays(1): logcounts
+rownames(46077): A1BG A1BG-AS1 ... ZZEF1 ZZZ3
+rowData names(0):
+colnames(114): DZQV_CD14+_monocytes DZQV_Exhausted_B_cells ...
+  DZQV_T_regulatory_cells DZQV_Terminal_effector_CD8_T_cells
+colData names(3): label.main label.fine label.ont
+```
+
+The reference has 114 samples across multiple immune cell types. The
+`label.main` column has broad cell type labels (e.g., "Monocytes", "CD4+ T
+cells") that match well with our expected PBMC types.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+### Run SingleR
+
+SingleR works on a `SingleCellExperiment` object. We convert our Seurat object
+and then run the annotation:
+
+
+``` r
+# Convert to SingleCellExperiment
+sce <- as.SingleCellExperiment(DietSeurat(pbmc))
+
+# Run SingleR with Monaco Immune reference
+results <- SingleR(test = sce,
+                   ref = ref,
+                   labels = ref$label.main)
+```
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `test` | `sce` | The query dataset as a SingleCellExperiment. SingleR uses the log-normalized expression values. |
+| `ref` | `ref` | The reference dataset with known labels. |
+| `labels` | `ref$label.main` | Which column of the reference metadata to use as cell type labels. `label.main` gives broad categories; `label.fine` gives more specific subtypes. |
+
+This runs for 1--2 minutes. SingleR assigns a label to **every individual
+cell**, not to clusters. Let's transfer the labels to our Seurat object:
+
+
+``` r
+pbmc$singler_labels <- results$labels
+```
+
+Visualize the SingleR annotations on the UMAP:
+
+
+``` r
+DimPlot(pbmc, group.by = "singler_labels", reduction = "umap",
+        label = TRUE, repel = TRUE) + NoLegend()
+```
+
+### Comparing manual and automated annotations
+
+The real power of annotation comes from comparing multiple approaches. Let's
+create a cross-tabulation of our manual labels versus SingleR labels:
+
+
+``` r
+table(Manual = pbmc$manual_annotation, SingleR = pbmc$singler_labels)
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+You should see a table where most cells along the diagonal agree. For example,
+cells you labeled "CD14 Mono" should predominantly be called "Monocytes" by
+SingleR. Typical areas of agreement and disagreement:
+
+- **Strong agreement**: CD14+ Monocytes, B cells, NK cells -- these have
+  distinctive expression profiles and are called consistently by both methods.
+- **Partial agreement**: CD4+ T cells may be split by SingleR into "CD4+ T
+  cells" and "T regulatory cells"; CD8+ T cells may be split into subtypes.
+  These finer distinctions from SingleR are often correct.
+- **Possible disagreement**: FCGR3A+ Monocytes may be labeled as "Non-classical
+  monocytes" by SingleR (which is the correct immunological term) or
+  occasionally as "NK cells" if FCGR3A expression is high. Dendritic cells may
+  also show disagreement if the cluster is small.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Visualize both annotations side by side:
+
+
+``` r
+p1 <- DimPlot(pbmc, group.by = "manual_annotation", label = TRUE, repel = TRUE) +
+    NoLegend() + ggtitle("Manual annotation")
+p2 <- DimPlot(pbmc, group.by = "singler_labels", label = TRUE, repel = TRUE) +
+    NoLegend() + ggtitle("SingleR annotation")
+p1 + p2
+```
+
+When the two methods **agree**, you can be very confident in the label. When
+they **disagree**, check the marker gene expression for the disputed cluster
+and decide which label fits better. In general:
+
+- Trust **manual annotation** when the markers are clear and well-established
+  for the tissue type you are studying
+- Trust **SingleR** when you are unfamiliar with the tissue or when the
+  reference provides finer subtypes than you would identify manually
+
+Save the final annotated object:
+
+
+``` r
+saveRDS(pbmc, file = "pbmc_annotated.rds")
+```
+
+
+## Annotation Best Practices
+
+:::::::::::::::::::::::::::::::::::::::::: callout
+
+## Guidelines for confident annotation
+
+1. **Use multiple references.** No single reference is perfect. The `celldex`
+   package provides several options for human immune cells:
+   - `MonacoImmuneData()` -- sorted immune populations, best for PBMCs
+   - `HumanPrimaryCellAtlasData()` (HPCA) -- broader coverage including
+     non-immune cell types, but less specific for immune subtypes
+   - `DatabaseImmuneCellExpressionData()` (DICE) -- another immune-focused
+     reference with different experimental conditions
+
+   Running SingleR with multiple references and checking for agreement
+   increases confidence.
+
+2. **Cross-validate automated labels with marker genes.** Never accept
+   automated labels blindly. Always check that the assigned label is consistent
+   with the expression of established markers for that cell type.
+
+3. **Document your decisions.** Record which markers you used, which reference
+   datasets, and any ambiguous cases you resolved manually. This makes your
+   analysis reproducible and allows others to evaluate your annotation choices.
+
+4. **Sub-cluster when needed.** If a cluster shows mixed marker expression
+   (e.g., both CD4 and CD8 markers), it may contain two cell types that were
+   merged at the current resolution. Re-run `FindClusters()` at higher
+   resolution on just that subset of cells to resolve the mixture:
+
+   ```r
+   subset_cells <- subset(pbmc, idents = "mixed_cluster")
+   subset_cells <- FindNeighbors(subset_cells, dims = 1:15)
+   subset_cells <- FindClusters(subset_cells, resolution = 0.5)
+   ```
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+::::::::::::::::::::::::::::::::::::: challenge
+
+## Challenge 1: Identifying a T Cell Subtype
+
+One of the T cell clusters expresses **CD3D** and **SELL** (CD62L) at high
+levels, but **CD69** expression is low. Use what you know about T cell biology
+to determine what T cell subtype this is.
+
+Check the expression of these additional markers in the cluster:
+
+
+``` r
+VlnPlot(pbmc, features = c("CD3D", "SELL", "CCR7", "CD69", "IL7R"), ncol = 5, pt.size = 0)
+```
+
+:::::::::::::::::::::::: solution
+
+This cluster represents **naive T cells**. The key evidence:
+
+| Marker | Expression | Interpretation |
+|--------|:----------|:---------------|
+| CD3D | High | Confirms T cell identity |
+| SELL (CD62L) | High | Expressed on naive and central memory T cells; required for lymph node homing |
+| CCR7 | High | Another lymph node homing receptor; high in naive T cells |
+| CD69 | Low | An early activation marker; low expression confirms these are NOT recently activated |
+| IL7R (CD127) | High | IL-7 receptor, expressed on naive and memory T cells for homeostatic survival |
+
+The combination of **SELL-high, CCR7-high, CD69-low** is the hallmark of
+**naive T cells** that have not yet encountered their antigen. They recirculate
+between blood and lymph nodes (hence the homing receptors) but have not been
+activated (hence low CD69).
+
+By contrast, **effector memory T cells** would be SELL-low, CCR7-low (they
+patrol peripheral tissues rather than homing to lymph nodes) and may have
+higher CD69 if recently activated.
+
+This illustrates why multiple markers are needed: CD3D alone tells you it is
+a T cell, but the combination of homing and activation markers tells you the
+functional subtype.
+
+:::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::: challenge
+
+## Challenge 2: Comparing Two SingleR References
+
+Run SingleR with both `MonacoImmuneData` and `HumanPrimaryCellAtlasData`.
+For which clusters do the two references disagree? Why might they disagree?
+
+
+``` r
+# Monaco Immune reference (already computed above)
+ref_monaco <- celldex::MonacoImmuneData()
+results_monaco <- SingleR(test = sce, ref = ref_monaco, labels = ref_monaco$label.main)
+
+# Human Primary Cell Atlas reference
+ref_hpca <- celldex::HumanPrimaryCellAtlasData()
+results_hpca <- SingleR(test = sce, ref = ref_hpca, labels = ref_hpca$label.main)
+
+# Transfer labels
+pbmc$singler_monaco <- results_monaco$labels
+pbmc$singler_hpca <- results_hpca$labels
+
+# Compare
+table(Monaco = pbmc$singler_monaco, HPCA = pbmc$singler_hpca)
+```
+
+:::::::::::::::::::::::: solution
+
+You should find that the two references **agree** on the major cell types
+(T cells, B cells, monocytes, NK cells) but **disagree** on some clusters.
+Common disagreements include:
+
+**1. HPCA labels some immune cells with non-immune terms.** The HPCA reference
+includes tissue types like "Tissue_stem_cells", "Epithelial_cells", and
+"Smooth_muscle_cells" that are not present in a PBMC sample. When a cell does
+not closely match any immune profile in the HPCA reference, it may be
+incorrectly assigned to one of these non-immune categories. The Monaco
+reference, which contains only immune cell types, avoids this problem.
+
+**2. T cell subtype resolution differs.** Monaco distinguishes "CD4+ T cells"
+from "CD8+ T cells" and further subtypes. HPCA may label all T cells
+generically as "T_cells" without subtype distinction, because its T cell
+reference profiles are less granular.
+
+**3. Monocyte and dendritic cell boundaries differ.** The boundary between
+monocytes and dendritic cells is biologically continuous, and different
+references draw the line in slightly different places. Monocyte-derived DCs
+may be called "Monocytes" by one reference and "DC" by the other.
+
+**Lesson:** Use a reference that matches your tissue type. For PBMCs, the
+Monaco Immune reference is more appropriate because it was built from sorted
+immune populations. HPCA is better when you have a mixed tissue sample that
+may contain both immune and non-immune cells.
+
+:::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::: keypoints
+
+- FindAllMarkers identifies genes upregulated in each cluster versus all others; key output columns are avg_log2FC, pct.1, pct.2, and p_val_adj
+- Manual annotation maps cluster marker genes to known cell-type-specific markers and requires domain expertise
+- SingleR automates annotation by comparing each cell's expression profile to a labeled reference dataset
+- Combining manual and automated approaches increases confidence; agreement between methods strongly supports the assigned label
+- Annotation is iterative and should be cross-validated with multiple references and marker gene visualization
+
+::::::::::::::::::::::::::::::::::::::::::::::::
