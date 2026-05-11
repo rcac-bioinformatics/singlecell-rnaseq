@@ -33,7 +33,7 @@ This workshop assumes:
 
 - **Basic Linux/command-line skills**: navigating directories, running commands, editing files
 - **Basic R skills**: installing packages, reading/writing data, creating plots
-- **A Purdue HPC account**: access to the Negishi cluster via [ACCESS](https://www.rcac.purdue.edu/access) or your research allocation
+- **A Purdue HPC account**: access to the Negishi cluster or Scholar (provided)
 - **An SSH client**: terminal (macOS/Linux) or PuTTY/MobaXterm (Windows)
 
 No prior experience with single-cell RNA-seq is required.
