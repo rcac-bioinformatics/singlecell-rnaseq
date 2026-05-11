@@ -335,13 +335,170 @@
         </div>
 
         
-<section><h2 class="section-heading" id="glossary">Glossary<a class="anchor" aria-label="anchor" href="#glossary"></a></h2>
-<hr class="half-width"><p>This is a placeholder file. Please add content here.</p>
-<!--
+
+<section><h2 class="section-heading" id="additional-reading">Additional Reading<a class="anchor" aria-label="anchor" href="#additional-reading"></a></h2>
+<hr class="half-width"><ul><li><p><strong>Hao, Y. et al. (2024).</strong> Dictionary learning for
+integrative, multimodal and scalable single-cell analysis. <em>Nature
+Biotechnology</em>, 42, 293-304. <a href="https://doi.org/10.1038/s41587-023-01767-y" class="external-link">doi:10.1038/s41587-023-01767-y</a>
+- The Seurat v5 paper describing the dictionary learning framework and
+layer-based architecture used in this workshop.</p></li>
+<li><p><strong>Luecken, M.D. &amp; Theis, F.J. (2019).</strong> Current
+best practices in single-cell RNA-seq analysis: a tutorial.
+<em>Molecular Systems Biology</em>, 15(6), e8746. <a href="https://doi.org/10.15252/msb.20188746" class="external-link">doi:10.15252/msb.20188746</a>
+- A comprehensive overview of best practices for scRNA-seq analysis,
+covering QC, normalization, dimensionality reduction, clustering, and
+more.</p></li>
+<li><p><strong>Kaminow, B., Yunusov, D., &amp; Dobin, A.
+(2021).</strong> STARsolo: accurate, fast and versatile
+mapping/quantification of single-cell and single-nucleus RNA-seq data.
+<em>bioRxiv</em>. <a href="https://doi.org/10.1101/2021.05.05.442755" class="external-link">doi:10.1101/2021.05.05.442755</a>
+- The STARsolo paper describing the open-source alternative to Cell
+Ranger used in Episode 2.</p></li>
+<li><p><strong>Aran, D. et al. (2019).</strong> Reference-based analysis
+of lung single-cell sequencing reveals a transitional profibrotic
+macrophage. <em>Nature Immunology</em>, 20, 163-172. <a href="https://doi.org/10.1038/s41590-018-0276-y" class="external-link">doi:10.1038/s41590-018-0276-y</a>
+- The SingleR paper describing the reference-based automated annotation
+method used in Episode 6.</p></li>
+</ul></section><section><h2 class="section-heading" id="glossary">Glossary<a class="anchor" aria-label="anchor" href="#glossary"></a></h2>
+<hr class="half-width"><dl><dt><strong>Barcode</strong></dt>
+<dd>
+A short DNA sequence (typically 16 nucleotides in 10x Genomics) that
+uniquely identifies a cell in a droplet-based scRNA-seq experiment.
+</dd>
+<dt><strong>Batch effect</strong></dt>
+<dd>
+Systematic technical differences between samples processed at different
+times, on different lanes, or with different reagents that are unrelated
+to the biology of interest.
+</dd>
+<dt><strong>CCA (Canonical Correlation Analysis)</strong></dt>
+<dd>
+A statistical method used by Seurat for data integration that identifies
+shared sources of variation between two datasets.
+</dd>
+<dt><strong>Cell Ranger</strong></dt>
+<dd>
+A set of analysis pipelines from 10x Genomics for processing Chromium
+single-cell data, including alignment, barcode counting, and gene
+expression quantification.
+</dd>
+<dt><strong>Cluster</strong></dt>
+<dd>
+A group of cells that share similar gene expression profiles, typically
+identified through graph-based community detection algorithms.
+</dd>
+<dt><strong>Count matrix</strong></dt>
+<dd>
+A genes-by-cells matrix where each entry represents the number of UMI
+counts detected for a given gene in a given cell.
+</dd>
+<dt><strong>Differential expression (DE)</strong></dt>
+<dd>
+Statistical testing to identify genes whose expression levels differ
+significantly between two or more groups of cells.
+</dd>
+<dt><strong>Dimensionality reduction</strong></dt>
+<dd>
+Mathematical techniques (PCA, UMAP, t-SNE) that reduce high-dimensional
+gene expression data to a lower-dimensional representation for
+visualization and analysis.
+</dd>
+<dt><strong>Doublet</strong></dt>
+<dd>
+An artifact where two cells are captured in the same droplet and
+assigned the same barcode, producing a hybrid expression profile.
+</dd>
+<dt><strong>Feature</strong></dt>
+<dd>
+In scRNA-seq, typically refers to a gene. Feature selection identifies
+genes with the most variation across cells.
+</dd>
+<dt><strong>GEM (Gel Bead-in-Emulsion)</strong></dt>
+<dd>
+A droplet in the 10x Chromium system containing a single gel bead (with
+barcode oligonucleotides) and ideally a single cell.
+</dd>
+<dt><strong>Highly variable genes (HVGs)</strong></dt>
+<dd>
+Genes that show the most variation in expression across cells, selected
+as informative features for dimensionality reduction and clustering.
+</dd>
+<dt><strong>Leiden algorithm</strong></dt>
+<dd>
+A community detection algorithm used for clustering cells in a shared
+nearest neighbor graph. An improvement over the Louvain algorithm.
+</dd>
+<dt><strong>LogNormalize</strong></dt>
+<dd>
+A normalization method that divides gene counts by total counts per
+cell, multiplies by a scale factor (10,000), and log-transforms the
+result.
+</dd>
+<dt><strong>Marker gene</strong></dt>
+<dd>
+A gene whose expression is specific to or enriched in a particular cell
+type, used for cell type annotation.
+</dd>
+<dt><strong>PCA (Principal Component Analysis)</strong></dt>
+<dd>
+A linear dimensionality reduction technique that identifies the axes of
+greatest variance in the data.
+</dd>
+<dt><strong>Pseudobulk</strong></dt>
+<dd>
+An approach that aggregates single-cell expression profiles by sample
+and cell type, creating pseudo-bulk samples for statistically valid
+differential expression analysis.
+</dd>
+<dt><strong>QC (Quality Control)</strong></dt>
+<dd>
+The process of identifying and removing low-quality cells based on
+metrics such as total counts, number of genes detected, and
+mitochondrial gene percentage.
+</dd>
+<dt><strong>SCTransform</strong></dt>
+<dd>
+A normalization method that uses regularized negative binomial
+regression to stabilize variance across genes with different expression
+levels.
+</dd>
+<dt><strong>Seurat object</strong></dt>
+<dd>
+The primary data structure in Seurat that stores expression data, cell
+metadata, dimensionality reductions, and analysis results.
+</dd>
+<dt><strong>SingleR</strong></dt>
+<dd>
+An R package for automated cell type annotation that assigns labels by
+comparing expression profiles to labeled reference datasets.
+</dd>
+<dt><strong>SNN (Shared Nearest Neighbor) graph</strong></dt>
+<dd>
+A graph where cells are nodes and edges connect cells that share nearest
+neighbors in PCA space, used as input for clustering algorithms.
+</dd>
+<dt><strong>STARsolo</strong></dt>
+<dd>
+An open-source tool integrated into the STAR aligner for processing
+droplet-based scRNA-seq data, serving as a fast alternative to Cell
+Ranger.
+</dd>
+<dt><strong>UMAP (Uniform Manifold Approximation and
+Projection)</strong></dt>
+<dd>
+A nonlinear dimensionality reduction technique used primarily for 2D
+visualization of single-cell data.
+</dd>
+<dt><strong>UMI (Unique Molecular Identifier)</strong></dt>
+<dd>
+A short random DNA sequence (typically 12 nucleotides in 10x Genomics)
+attached to each mRNA molecule before amplification, used to count
+unique transcripts and remove PCR duplicates.
+</dd>
+</dl><!--
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.
- -->
-</section></div> <!-- / div.lesson-content -->
+ --><!-- Links used across the lesson --></section></div> <!-- / div.lesson-content -->
     </main><!-- / main#main-content.main-content --><nav class="bottom-pagination mx-md-4" aria-label="Previous and Next Chapter"><div class="d-block d-sm-block d-md-none">
         <a class="chapter-link" href="index.html"><i aria-hidden="true" class="small-arrow" data-feather="arrow-left"></i>Previous</a>
         <a class="chapter-link float-end" href="index.html">Next<i aria-hidden="true" class="small-arrow" data-feather="arrow-right"></i></a>

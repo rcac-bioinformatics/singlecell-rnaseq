@@ -320,14 +320,38 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><h1 class="schedule-heading">Summary and Schedule</h1>
       
-
-<p>This is a new lesson built with <a href="https://carpentries.github.io/sandpaper-docs" class="external-link">The Carpentries
-Workbench</a>.</p>
+<div class="section level1">
+<h1 id="welcome">Welcome<a class="anchor" aria-label="anchor" href="#welcome"></a></h1>
+<p>This hands-on workshop teaches you how to analyze single-cell RNA
+sequencing (scRNA-seq) data from start to finish. You will work with a
+real 10x Genomics PBMC dataset on Purdue’s HPC clusters, progressing
+from raw FASTQ files through alignment, quality control, clustering,
+cell type annotation, multi-sample integration, and differential
+expression analysis.</p>
+<div class="section level2">
+<h2 id="learning-outcomes">Learning Outcomes<a class="anchor" aria-label="anchor" href="#learning-outcomes"></a></h2>
+<p>After completing this workshop, you will be able to:</p>
+<ul><li>Process raw scRNA-seq data using Cell Ranger and STARsolo on an HPC
+cluster</li>
+<li>Perform quality control, normalization, and dimensionality reduction
+with Seurat v5 in R</li>
+<li>Identify cell types through marker gene analysis and automated
+annotation</li>
+<li>Integrate multiple samples, run differential expression analysis,
+and interpret pathway enrichment results</li>
+</ul></div>
+<div class="section level2">
+<h2 id="getting-started">Getting Started<a class="anchor" aria-label="anchor" href="#getting-started"></a></h2>
+<p>Please visit the <a href="index.html#setup">Setup</a> page for
+prerequisites, software installation, data access instructions, and the
+workshop schedule.</p>
 <!--
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.
  -->
-
+<!-- Links used across the lesson -->
+</div>
+</div>
 
       <section id="schedule"><table class="table table schedule table-striped" role="presentation"><tbody><tr><td></td><td><a href="#setup">Setup Instructions</a></td><td> Download files required for the lesson</td>
           </tr><tr><td>
@@ -452,32 +476,123 @@ Finish
 </tr><!--
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.
- --></tbody></table><p>
+ --><!-- Links used across the lesson --></tbody></table><p>
       The actual schedule may vary slightly depending on the topics and exercises chosen by the instructor.
       </p>
-      </section><section id="setup"><p>FIXME: Setup instructions live in this document. Please specify the
-tools and the data sets the Learner needs to have installed.</p>
-<section><h2 class="section-heading" id="data-sets">Data Sets<a class="anchor" aria-label="anchor" href="#data-sets"></a></h2>
-<hr class="half-width"><!--
-FIXME: place any data you want learners to use in `episodes/data` and then use
-       a relative link ( [data zip file](data/lesson-data.zip) ) to provide a
-       link to it, replacing the example.com link.
---><p>Download the <a href="https://example.com/FIXME" class="external-link">data zip file</a>
-and unzip it to your Desktop</p>
-</section><section><h2 class="section-heading" id="software-setup">Software Setup<a class="anchor" aria-label="anchor" href="#software-setup"></a></h2>
-<hr class="half-width"><div id="details" class="callout discussion">
+      </section><section id="setup"><section><h2 class="section-heading" id="instructors">Instructors<a class="anchor" aria-label="anchor" href="#instructors"></a></h2>
+<hr class="half-width"><ol style="list-style-type: decimal"><li><p><strong>Arun Seetharam</strong>: Arun is a Bioinformatics
+Scientist at Purdue’s Rosen Center for Advanced Computing (RCAC). He
+develops and delivers bioinformatics training workshops and provides
+research computing support for the Purdue community.</p></li>
+<li><p><strong>Michael Carlson</strong>, Ph.D.: Michael is a Senior
+Computational Scientist at Purdue University’s Rosen Center for Advanced
+Computing (RCAC). Michael has a background in computational physics,
+specifically hypersonic materials. He also leads many introductory
+workshops in the High-Performance Computing domain.</p></li>
+</ol></section><section><h2 class="section-heading" id="workshop-schedule">Workshop Schedule<a class="anchor" aria-label="anchor" href="#workshop-schedule"></a></h2>
+<hr class="half-width"><p>TBA</p>
+</section><section><h2 class="section-heading" id="prerequisites">Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites"></a></h2>
+<hr class="half-width"><p>This workshop assumes:</p>
+<ul><li>
+<strong>Basic Linux/command-line skills</strong>: navigating
+directories, running commands, editing files</li>
+<li>
+<strong>Basic R skills</strong>: installing packages,
+reading/writing data, creating plots</li>
+<li>
+<strong>A Purdue HPC account</strong>: access to the Negishi cluster
+via <a href="https://www.rcac.purdue.edu/access" class="external-link">ACCESS</a> or your
+research allocation</li>
+<li>
+<strong>An SSH client</strong>: terminal (macOS/Linux) or
+PuTTY/MobaXterm (Windows)</li>
+</ul><p>No prior experience with single-cell RNA-seq is required.</p>
+</section><section><h2 class="section-heading" id="what-is-not-covered">What is not covered<a class="anchor" aria-label="anchor" href="#what-is-not-covered"></a></h2>
+<hr class="half-width"><p>This workshop focuses on the core scRNA-seq analysis workflow. The
+following topics are <strong>not</strong> covered:</p>
+<ul><li>Experimental design and sample preparation</li>
+<li>Other single-cell modalities (ATAC-seq, CITE-seq, spatial
+transcriptomics)</li>
+<li>Trajectory/pseudotime analysis (Monocle3, RNA velocity)</li>
+<li>Advanced doublet detection methods (DoubletFinder, scDblFinder)</li>
+<li>Generating your own Cell Ranger reference genomes</li>
+<li>Multi-modal data integration</li>
+</ul></section><section><h2 class="section-heading" id="data-setup">Data Setup<a class="anchor" aria-label="anchor" href="#data-setup"></a></h2>
+<hr class="half-width"><div class="section level3">
+<h3 id="copying-workshop-data">Copying Workshop Data<a class="anchor" aria-label="anchor" href="#copying-workshop-data"></a></h3>
+<p>The workshop data is pre-staged on the cluster. Copy it to your
+scratch directory:</p>
+<div class="codewrapper sourceCode" id="cb1">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="fu">rsync</span> <span class="at">-avP</span> /depot/workshop/data/scrna_workshop/ <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/</span></code></pre>
+</div>
+<p>This will copy:</p>
+<ul><li>
+<strong>FASTQ files</strong>:
+<code>fastq/pbmc_10k_v3_S1_L00{1,2}_R{1,2}_001.fastq.gz</code>
+</li>
+<li>
+<strong>10x Reference</strong>:
+<code>reference/refdata-gex-GRCh38-2024-A/</code>
+</li>
+<li>
+<strong>Pre-computed count matrix</strong>:
+<code>filtered_feature_bc_matrix/</code> (for episodes 3+)</li>
+<li>
+<strong>Pre-computed R objects</strong>: <code>rds/</code>
+(optional, for jumping into later episodes)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="verifying-the-data">Verifying the Data<a class="anchor" aria-label="anchor" href="#verifying-the-data"></a></h3>
+<div class="codewrapper sourceCode" id="cb2">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1" aria-label="code-block-2-2"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/fastq/</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/filtered_feature_bc_matrix/</span></code></pre>
+</div>
+</div>
+</section><section><h2 class="section-heading" id="r-package-installation">R Package Installation<a class="anchor" aria-label="anchor" href="#r-package-installation"></a></h2>
+<hr class="half-width"><p>The R packages are pre-installed on the cluster. If you need to
+install them locally:</p>
+<div class="codewrapper sourceCode" id="cb3">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Install BiocManager if not already installed</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu">requireNamespace</span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu">install.packages</span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Core packages</span></span>
+<span><span class="fu">install.packages</span><span class="op">(</span><span class="st">"Seurat"</span><span class="op">)</span></span>
+<span><span class="fu">install.packages</span><span class="op">(</span><span class="st">"tidyverse"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Bioconductor packages</span></span>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu">install</span><span class="op">(</span><span class="fu">c</span><span class="op">(</span></span>
+<span>    <span class="st">"SingleR"</span>,</span>
+<span>    <span class="st">"celldex"</span>,</span>
+<span>    <span class="st">"clusterProfiler"</span>,</span>
+<span>    <span class="st">"org.Hs.eg.db"</span>,</span>
+<span>    <span class="st">"enrichplot"</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># SeuratData for integration dataset</span></span>
+<span><span class="fu">install.packages</span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"satijalab/seurat-data"</span><span class="op">)</span></span></code></pre>
+</div>
+</section><section><h2 class="section-heading" id="ssh-key-setup">SSH Key Setup<a class="anchor" aria-label="anchor" href="#ssh-key-setup"></a></h2>
+<hr class="half-width"><div id="connecting-to-the-cluster" class="callout discussion">
 <div class="callout-square">
 <i class="callout-icon" data-feather="message-circle"></i>
 </div>
 <span class="callout-header">Discussion</span>
-<div id="details" class="callout-inner">
-<h3 class="callout-title">Details</h3>
+<div id="connecting-to-the-cluster" class="callout-inner">
+<h3 class="callout-title">Connecting to the Cluster</h3>
 <div class="callout-content">
-<p>Setup for different systems can be presented in dropdown menus via a
-<code>solution</code> tag. They will join to this discussion block, so
-you can give a general overview of the software used in this lesson here
-and fill out the individual operating systems (and potentially add more,
-e.g. online setup) in the solutions blocks.</p>
+<p>You will need SSH access to the Negishi cluster at Purdue. Choose the
+instructions for your operating system below.</p>
 </div>
 </div>
 </div>
@@ -490,7 +605,21 @@ e.g. online setup) in the solutions blocks.</p>
 </button>
 <div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
-<p>Use PuTTY</p>
+<ol style="list-style-type: decimal"><li>Download and install <a href="https://mobaxterm.mobatek.net/" class="external-link">MobaXterm</a> (recommended) or <a href="https://www.putty.org/" class="external-link">PuTTY</a>
+</li>
+<li>Open MobaXterm and click <strong>Session &gt; SSH</strong>
+</li>
+<li>Set <strong>Remote host</strong> to
+<code>negishi.rcac.purdue.edu</code>
+</li>
+<li>Check <strong>Specify username</strong> and enter your Purdue career
+account username</li>
+<li>Click <strong>OK</strong> and enter your password when prompted</li>
+<li>Complete Duo two-factor authentication</li>
+</ol><p>To set up SSH keys (optional, avoids repeated password entry):</p>
+<pre><code># In MobaXterm local terminal
+ssh-keygen -t ed25519
+ssh-copy-id your_username@negishi.rcac.purdue.edu</code></pre>
 </div>
 </div>
 </div>
@@ -499,13 +628,33 @@ e.g. online setup) in the solutions blocks.</p>
 <div class="accordion-item">
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2">
-  MacOS
+  macOS
   </h4>
 </button>
 <div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
-<p>Use Terminal.app</p>
+<ol style="list-style-type: decimal"><li>Open <strong>Terminal</strong> (Applications &gt; Utilities &gt;
+Terminal)</li>
+<li>Generate an SSH key pair (if you don’t already have one):</li>
+</ol><div class="codewrapper sourceCode" id="cb5">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-C</span> <span class="st">"your_email@purdue.edu"</span></span></code></pre>
 </div>
+<ol style="list-style-type: decimal"><li>Copy the public key to the cluster:</li>
+</ol><div class="codewrapper sourceCode" id="cb6">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="ex">ssh-copy-id</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
+</div>
+<ol style="list-style-type: decimal"><li>Connect to the cluster:</li>
+</ol><div class="codewrapper sourceCode" id="cb7">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1" aria-label="code-block-7-1"></a><span class="fu">ssh</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
+</div>
+<ol style="list-style-type: decimal"><li>Complete Duo two-factor authentication</li>
+</ol></div>
 </div>
 </div>
 </div>
@@ -518,8 +667,27 @@ e.g. online setup) in the solutions blocks.</p>
 </button>
 <div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
-<p>Use Terminal</p>
+<ol style="list-style-type: decimal"><li>Open your terminal emulator</li>
+<li>Generate an SSH key pair (if you don’t already have one):</li>
+</ol><div class="codewrapper sourceCode" id="cb8">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1" aria-label="code-block-8-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-C</span> <span class="st">"your_email@purdue.edu"</span></span></code></pre>
 </div>
+<ol style="list-style-type: decimal"><li>Copy the public key to the cluster:</li>
+</ol><div class="codewrapper sourceCode" id="cb9">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1" aria-label="code-block-9-1"></a><span class="ex">ssh-copy-id</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
+</div>
+<ol style="list-style-type: decimal"><li>Connect to the cluster:</li>
+</ol><div class="codewrapper sourceCode" id="cb10">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1" aria-label="code-block-10-1"></a><span class="fu">ssh</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
+</div>
+<ol style="list-style-type: decimal"><li>Complete Microsoft two-factor authentication</li>
+</ol></div>
 </div>
 </div>
 </div>
@@ -527,6 +695,7 @@ e.g. online setup) in the solutions blocks.</p>
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.
  -->
+<!-- Links used across the lesson -->
 </section></section></main><nav class="bottom-pagination mx-md-4" aria-label="Next Chapter"><!-- content for small screens --><div class="d-block d-sm-block d-md-none">
         <a class="chapter-link float-end" href="../instructor/introduction.html">Next<i aria-hidden="true" class="small-arrow" data-feather="arrow-right"></i></a>
       </div>

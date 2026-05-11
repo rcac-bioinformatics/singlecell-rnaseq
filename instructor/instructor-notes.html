@@ -385,14 +385,367 @@
         <h1>Instructor Notes</h1>
         
 
-<p>This is a placeholder file. Please add content here.</p>
+<section><h2 class="section-heading" id="workshop-timing">Workshop Timing<a class="anchor" aria-label="anchor" href="#workshop-timing"></a>
+</h2>
+<hr class="half-width">
+<table class="table">
+<colgroup>
+<col width="20%">
+<col width="15%">
+<col width="22%">
+<col width="25%">
+<col width="15%">
+</colgroup>
+<thead><tr>
+<th align="center">Episode</th>
+<th align="left">Title</th>
+<th align="center">Teaching</th>
+<th align="center">Exercises</th>
+<th align="center">Total</th>
+</tr></thead>
+<tbody>
+<tr>
+<td align="center">1</td>
+<td align="left">Introduction to Single-Cell RNA-Seq</td>
+<td align="center">30 min</td>
+<td align="center">0 min</td>
+<td align="center">30 min</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="left">Raw Data Processing</td>
+<td align="center">45 min</td>
+<td align="center">15 min</td>
+<td align="center">60 min</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="left">Quality Control</td>
+<td align="center">40 min</td>
+<td align="center">20 min</td>
+<td align="center">60 min</td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td align="left">Normalization and Feature Selection</td>
+<td align="center">40 min</td>
+<td align="center">15 min</td>
+<td align="center">55 min</td>
+</tr>
+<tr>
+<td align="center">5</td>
+<td align="left">Dimensionality Reduction and Clustering</td>
+<td align="center">45 min</td>
+<td align="center">15 min</td>
+<td align="center">60 min</td>
+</tr>
+<tr>
+<td align="center">6</td>
+<td align="left">Cell Type Annotation</td>
+<td align="center">40 min</td>
+<td align="center">20 min</td>
+<td align="center">60 min</td>
+</tr>
+<tr>
+<td align="center">7</td>
+<td align="left">Multi-Sample Integration</td>
+<td align="center">45 min</td>
+<td align="center">15 min</td>
+<td align="center">60 min</td>
+</tr>
+<tr>
+<td align="center">8</td>
+<td align="left">Differential Expression Analysis</td>
+<td align="center">40 min</td>
+<td align="center">20 min</td>
+<td align="center">60 min</td>
+</tr>
+<tr>
+<td align="center"></td>
+<td align="left"><strong>Total</strong></td>
+<td align="center"><strong>325 min</strong></td>
+<td align="center"><strong>120 min</strong></td>
+<td align="center"><strong>445 min</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The workshop is designed for a two-day schedule with approximately
+3.5–4 hours of instruction per day (excluding breaks).</p>
+<p><strong>Suggested day 1:</strong> Episodes 1–4 (205 min instruction +
+breaks) <strong>Suggested day 2:</strong> Episodes 5–8 (240 min
+instruction + breaks)</p>
+<p>Build in 10-minute breaks between episodes and a 45-minute lunch
+break. Expect the actual pace to vary: Episode 2 may run long if SLURM
+queue times are slow, and Episodes 6 and 8 often generate
+discussion.</p>
+</section><section><h2 class="section-heading" id="common-issues">Common Issues<a class="anchor" aria-label="anchor" href="#common-issues"></a>
+</h2>
+<hr class="half-width">
+<div class="section level3">
+<h3 id="r-package-installation-failures">R package installation failures<a class="anchor" aria-label="anchor" href="#r-package-installation-failures"></a>
+</h3>
+<p>BiocManager version mismatches are the most common source of
+installation errors. If learners see messages like
+<code>version '3.19' is required but '3.18' is installed</code>, have
+them run:</p>
+<div class="codewrapper sourceCode" id="cb1">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">install.packages</span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu">install</span><span class="op">(</span>version <span class="op">=</span> <span class="st">"3.20"</span><span class="op">)</span>  <span class="co"># match the R version on the cluster</span></span></code></pre>
+</div>
+<p>On RCAC clusters, R packages should be installed from a compute node
+or RStudio Server session, not the login node. The login node may have
+an older R version or restricted network access.</p>
+</div>
+<div class="section level3">
+<h3 id="memory-errors-on-login-nodes">Memory errors on login nodes<a class="anchor" aria-label="anchor" href="#memory-errors-on-login-nodes"></a>
+</h3>
+<p>Seurat operations (especially <code>ScaleData</code>,
+<code>RunPCA</code>, <code>FindAllMarkers</code>, and
+<code>SCTransform</code>) require substantial memory. Running these on a
+login node will either fail with an out-of-memory error or get killed by
+the resource monitor.</p>
+<p><strong>Solution:</strong> Always use a compute node allocation or
+RStudio Server through Open OnDemand. Request at least 16 GB of memory
+for R sessions.</p>
+</div>
+<div class="section level3">
+<h3 id="star-index-building-oom">STAR index building OOM<a class="anchor" aria-label="anchor" href="#star-index-building-oom"></a>
+</h3>
+<p>Building a STAR genome index for the human genome requires
+approximately 32 GB of RAM. If the SLURM job requests less memory, STAR
+will crash with a segmentation fault or <code>std::bad_alloc</code>
+error.</p>
+<p><strong>Solution:</strong> Ensure the
+<code>build_star_index.sh</code> script requests <code>--mem=40G</code>
+or higher. The pre-built index in the workshop data directory avoids
+this step entirely.</p>
+</div>
+<div class="section level3">
+<h3 id="cell-ranger-license-not-found">Cell Ranger license not found<a class="anchor" aria-label="anchor" href="#cell-ranger-license-not-found"></a>
+</h3>
+<p>Cell Ranger occasionally fails with a licensing error if the
+<code>--jobmode=local</code> flag conflicts with SLURM environment
+variables, or if the binary path is misconfigured in the module
+file.</p>
+<p><strong>Solution:</strong> Verify <code>which cellranger</code>
+resolves correctly after module load. If licensing errors persist,
+STARsolo produces equivalent results and can be used as a drop-in
+alternative.</p>
+</div>
+<div class="section level3">
+<h3 id="seurat-v4-vs-v5-syntax-confusion">Seurat v4 vs v5 syntax confusion<a class="anchor" aria-label="anchor" href="#seurat-v4-vs-v5-syntax-confusion"></a>
+</h3>
+<p>Learners who have prior experience with Seurat v4 may try to use
+slot-based syntax (<code>pbmc@assays$RNA@counts</code>) instead of the
+v5 layer syntax (<code>pbmc[["RNA"]]$counts</code>). The old syntax will
+silently return incorrect results or throw errors.</p>
+<p><strong>Solution:</strong> Emphasize the v5 layer syntax in Episode 3
+(the callout box explicitly shows both). If a learner has Seurat v4
+installed locally, they must upgrade or use the cluster
+installation.</p>
+</div>
+</section><section><h2 class="section-heading" id="pre-workshop-checklist">Pre-Workshop Checklist<a class="anchor" aria-label="anchor" href="#pre-workshop-checklist"></a>
+</h2>
+<hr class="half-width">
+<ul class="task-list">
+<li><label><input type="checkbox"><strong>Data staging:</strong>
+Verify workshop data is accessible at
+<code>/depot/workshop/data/scrna_workshop/</code> and contains
+<code>fastq/</code>, <code>reference/</code>, and
+<code>filtered_feature_bc_matrix/</code> directories</label></li>
+<li><label><input type="checkbox"><strong>Module
+availability:</strong> Confirm that
+<code>ml biocontainers; ml cellranger</code> and
+<code>ml biocontainers; ml star</code> load without errors on
+Negishi</label></li>
+<li>
+<label><input type="checkbox"><strong>R packages:</strong> Install
+all required R packages on training accounts and verify they
+load:</label>
+<ul>
+<li>
+<code>Seurat</code>, <code>ggplot2</code>, <code>patchwork</code>,
+<code>dplyr</code>
+</li>
+<li>
+<code>clustree</code>, <code>SingleR</code>,
+<code>celldex</code>
+</li>
+<li>
+<code>SeuratData</code> (and run
+<code>InstallData("ifnb")</code>)</li>
+<li>
+<code>clusterProfiler</code>, <code>org.Hs.eg.db</code>
+</li>
+<li>
+<code>sceasy</code> (optional, for Episode 8 export)</li>
+</ul>
+</li>
+<li>
+<label><input type="checkbox"><strong>Pre-computed
+objects:</strong> Generate and stage all intermediate <code>.rds</code>
+files so learners who fall behind can catch up:</label>
+<ul>
+<li>
+<code>pbmc_filtered.rds</code> (end of Episode 3)</li>
+<li>
+<code>pbmc_normalized.rds</code> (end of Episode 4)</li>
+<li>
+<code>pbmc_clustered.rds</code> (end of Episode 5)</li>
+<li>
+<code>pbmc_annotated.rds</code> (end of Episode 6)</li>
+<li>
+<code>ifnb_annotated.rds</code> (end of Episode 7, used in Episode
+8)</li>
+</ul>
+</li>
+<li><label><input type="checkbox"><strong>Build test:</strong> Run
+<code>sandpaper::build_lesson()</code> and confirm it renders without
+errors</label></li>
+<li><label><input type="checkbox"><strong>RStudio Server:</strong>
+Verify Open OnDemand RStudio Server app is available and launches R with
+the correct version and package library</label></li>
+<li><label><input type="checkbox"><strong>SLURM queue:</strong>
+Confirm the <code>workshop</code> account/queue is active and accepting
+jobs. Submit a test job to check wait times.</label></li>
+<li><label><input type="checkbox"><strong>Network access:</strong>
+Confirm compute nodes can reach Bioconductor and CRAN mirrors (needed
+for <code>celldex</code> reference downloads in Episode 6)</label></li>
+</ul></section><section><h2 class="section-heading" id="challenge-exercise-discussion-points">Challenge Exercise Discussion Points<a class="anchor" aria-label="anchor" href="#challenge-exercise-discussion-points"></a>
+</h2>
+<hr class="half-width">
+<div class="section level3">
+<h3 id="episode-2-raw-data-processing">Episode 2: Raw Data Processing<a class="anchor" aria-label="anchor" href="#episode-2-raw-data-processing"></a>
+</h3>
+<p><strong>Challenge 1 – Modify STARsolo for v2 Chemistry:</strong> The
+key point is that v2 and v3 chemistry differ in UMI length (10 vs 12 bp)
+and whitelist file (737K vs 3M barcodes). The cell barcode length (16
+bp) stays the same. Ask learners: “What would happen if you ran v3
+parameters on v2 data?” Answer: very few valid barcodes would match
+because the wrong whitelist is being searched, and the extra 2 bases of
+the “UMI” would actually be cDNA sequence, producing incorrect UMI
+deduplication.</p>
+<p><strong>Challenge 2 – QC from Cell Ranger Summary:</strong> This
+exercises interpretation skills. The two concerning metrics are Fraction
+Reads in Cells (55.2%, should be &gt;70%) and Sequencing Saturation
+(28.3%, suggesting under-sequencing). Discuss how ambient RNA
+contamination could be addressed with tools like SoupX or CellBender.
+Note that low saturation does not mean the experiment failed – it means
+additional sequencing would be beneficial.</p>
+</div>
+<div class="section level3">
+<h3 id="episode-3-quality-control">Episode 3: Quality Control<a class="anchor" aria-label="anchor" href="#episode-3-quality-control"></a>
+</h3>
+<p><strong>Challenge 1 – Propose Your Own Thresholds:</strong> There is
+no single correct answer. Encourage learners to justify their choices
+based on the distributions they observed. Common proposals include
+nFeature_RNA 300–4000 and percent.mt 10–12. Discuss the trade-off:
+aggressive filtering removes more noise but may also remove real cells
+(especially small cell types like platelets). Ask: “Which cell types are
+most at risk from a low nFeature_RNA threshold?”</p>
+<p><strong>Challenge 2 – Aggressive Mitochondrial Filtering:</strong>
+With percent.mt &lt; 5, roughly 35–40% of cells are removed because the
+median mitochondrial percentage is ~5.5%. This disproportionately
+removes metabolically active immune cells (monocytes, activated T
+cells). Use this to reinforce that thresholds must be tuned to the
+specific tissue and dataset.</p>
+</div>
+<div class="section level3">
+<h3 id="episode-4-normalization-and-feature-selection">Episode 4: Normalization and Feature Selection<a class="anchor" aria-label="anchor" href="#episode-4-normalization-and-feature-selection"></a>
+</h3>
+<p><strong>Challenge 1 – LogNormalize vs. SCTransform Variable
+Features:</strong> Expect ~60–70% overlap in the top 20 variable
+features. The shared genes (S100A9, LYZ, GNLY, NKG7, IGKC) are strong
+cell-type markers that any reasonable method will identify. The
+differences are in moderately variable genes where the two variance
+estimation approaches disagree. Emphasize that downstream clustering is
+typically robust to these differences.</p>
+<p><strong>Challenge 2 – Housekeeping vs. Variable Gene
+Behavior:</strong> ACTB’s distribution tightens after normalization
+(variation was mostly technical), while LYZ retains its bimodal pattern
+(real biological variation between monocytes and non-monocytes). This
+illustrates the purpose of both normalization (remove technical
+variation) and variable feature selection (keep biological
+variation).</p>
+</div>
+<div class="section level3">
+<h3 id="episode-5-dimensionality-reduction-and-clustering">Episode 5: Dimensionality Reduction and Clustering<a class="anchor" aria-label="anchor" href="#episode-5-dimensionality-reduction-and-clustering"></a>
+</h3>
+<p><strong>Challenge 1 – Choosing a Resolution with Clustree:</strong>
+Guide learners through reading the clustree plot. Stable splits (clean
+branching) suggest real biology; unstable splits (cells scattering
+across multiple clusters) suggest over-splitting. Resolution 0.5
+typically gives 9–11 clusters matching the ~8 major PBMC types.
+Resolution 0.2 under-clusters (merges T cell subtypes), while 1.2
+over-splits.</p>
+<p><strong>Challenge 2 – Mapping Markers to Clusters:</strong> This is a
+preview of Episode 6. Learners should identify that CD3D marks multiple
+clusters (T cell subtypes), MS4A1 is specific to one cluster (B cells),
+and LYZ marks one or two clusters (monocytes). Ask: “Why does CD3D mark
+multiple clusters?” Answer: because CD3D is a pan-T cell marker
+expressed in all T cell subtypes, which are resolved into separate
+clusters.</p>
+</div>
+<div class="section level3">
+<h3 id="episode-6-cell-type-annotation">Episode 6: Cell Type Annotation<a class="anchor" aria-label="anchor" href="#episode-6-cell-type-annotation"></a>
+</h3>
+<p><strong>Challenge 1 – Identifying a T Cell Subtype:</strong> The
+pattern SELL-high, CCR7-high, CD69-low identifies naive T cells. Use
+this to discuss the concept of marker combinations: no single gene is
+sufficient for subtype identification. Ask learners what markers would
+distinguish effector memory T cells (SELL-low, CCR7-low, possibly
+CD69-high).</p>
+<p><strong>Challenge 2 – Comparing Two SingleR References:</strong>
+Monaco Immune works better for PBMCs because it was built from sorted
+immune populations. HPCA may assign non-immune labels (e.g.,
+“Tissue_stem_cells”) because its reference includes non-immune cell
+types. Discuss the importance of choosing a reference appropriate for
+your tissue type.</p>
+</div>
+<div class="section level3">
+<h3 id="episode-7-multi-sample-integration">Episode 7: Multi-Sample Integration<a class="anchor" aria-label="anchor" href="#episode-7-multi-sample-integration"></a>
+</h3>
+<p><strong>Challenge 1 – Quantifying Integration Quality:</strong> The
+proportion table should show ~45–55% per condition within each cell
+type. If a cell type is heavily skewed (e.g., 90% from one condition),
+it could be a condition-specific population or a sign of incomplete
+integration. Ask: “What would it mean if a cluster was 95% STIM cells?”
+It could represent a stimulation-induced cell state that does not exist
+in control.</p>
+<p><strong>Challenge 2 – Interferon Response Genes:</strong> All top 10
+DE genes should be ISGs (IFIT1, ISG15, IFI6, MX1, etc.). Use this to
+validate the integration: if the biological signal was lost during
+integration, these genes would not be differentially expressed. This
+challenge connects back to the biology – IFN-beta activates the JAK-STAT
+pathway, which induces ISG transcription.</p>
+</div>
+<div class="section level3">
+<h3 id="episode-8-differential-expression-analysis">Episode 8: Differential Expression Analysis<a class="anchor" aria-label="anchor" href="#episode-8-differential-expression-analysis"></a>
+</h3>
+<p><strong>Challenge 1 – Wilcoxon vs. Pseudobulk:</strong> Wilcoxon
+identifies thousands of significant genes; pseudobulk identifies
+hundreds. The key teaching point is pseudoreplication: per-cell tests
+treat each cell as independent (n = 4,000) when the true sample size is
+n = 2. Discuss when per-cell tests are acceptable (single-sample,
+exploratory) vs. when pseudobulk is required (multi-sample,
+publication).</p>
+<p><strong>Challenge 2 – GO Enrichment:</strong> Top GO terms should all
+relate to interferon/antiviral response: “defense response to virus”,
+“type I interferon signaling pathway”, “response to virus”. Use this as
+the capstone: the full pipeline (from raw data through integration and
+DE) correctly identifies the expected biology. Ask learners to think
+about what GO terms they would expect for their own research
+questions.</p>
 <!--
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.
  -->
-
-
-      <section id="aggregate-instructor-notes"><section id="introduction"><h2 class="section-heading"><a href="introduction.html">Introduction to Single-Cell RNA-Seq</a></h2>
+<!-- Links used across the lesson -->
+</div>
+</section><section id="aggregate-instructor-notes"><section id="introduction"><h2 class="section-heading"><a href="introduction.html">Introduction to Single-Cell RNA-Seq</a></h2>
 <hr class="half-width"></section><section id="raw-data-processing"><h2 class="section-heading"><a href="raw-data-processing.html">Raw Data Processing</a></h2>
 <hr class="half-width"></section><section id="quality-control"><h2 class="section-heading"><a href="quality-control.html">Quality Control</a></h2>
 <hr class="half-width"></section><section id="normalization-and-features"><h2 class="section-heading"><a href="normalization-and-features.html">Normalization and Feature Selection</a></h2>
