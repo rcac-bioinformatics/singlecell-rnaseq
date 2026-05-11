@@ -52,3 +52,6 @@ po/*~
 # renv sandbox needed for renv version 0.16.0
 renv/sandbox # OPTIONAL
 .positai
+
+CLAUDE.md
+schedule.md

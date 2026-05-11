@@ -8,9 +8,24 @@ title: Setup
 
 2. **Michael Carlson**, Ph.D.: Michael is a Senior Computational Scientist at Purdue University's Rosen Center for Advanced Computing (RCAC). Michael has a background in computational physics, specifically hypersonic materials. He also leads many introductory workshops in the High-Performance Computing domain.
 
-## Workshop Schedule
+## Workshop Schedule (4/21/2026)
 
-TBA
+| Time | Topic |
+|:-----|:------|
+| 8:30 -- 9:00 | Arrival & Setup |
+| 9:00 -- 9:20 | Episode 1: Introduction to Single-Cell RNA-Seq |
+| 9:20 -- 10:05 | Episode 2: Raw Data Processing |
+| 10:05 -- 10:20 | Break |
+| 10:20 -- 11:05 | Episode 3: Quality Control |
+| 11:05 -- 11:55 | Episode 4: Normalization and Feature Selection |
+| 11:55 -- 12:00 | Morning Recap |
+| 12:00 -- 1:00 | Lunch |
+| 1:00 -- 1:45 | Episode 5: Dimensionality Reduction and Clustering |
+| 1:45 -- 2:30 | Episode 6: Cell Type Annotation |
+| 2:30 -- 2:45 | Break |
+| 2:45 -- 3:25 | Episode 7: Multi-Sample Integration |
+| 3:25 -- 4:00 | Episode 8: Differential Expression & Wrap-up |
+| 4:00 -- 4:30 | Q&A / Feedback |
 
 ## Prerequisites
 
