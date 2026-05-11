@@ -1,45 +1,111 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/404.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/404.html</loc>
   </url>
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/CODE_OF_CONDUCT.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/CODE_OF_CONDUCT.html</loc>
   </url>
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/LICENSE.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/index.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/aio.html</loc>
   </url>
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/instructor/404.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/cell-type-annotation.html</loc>
   </url>
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/instructor/CODE_OF_CONDUCT.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/differential-expression.html</loc>
   </url>
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/instructor/LICENSE.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/dimensionality-reduction-clustering.html</loc>
   </url>
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/instructor/index.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/images.html</loc>
   </url>
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/instructor/introduction.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/index.html</loc>
   </url>
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/instructor/profiles.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/404.html</loc>
   </url>
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/instructor/reference.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/CODE_OF_CONDUCT.html</loc>
   </url>
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/introduction.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/profiles.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/aio.html</loc>
   </url>
   <url>
-    <loc>https://aseetharam.github.io/singlecell-rnaseq/reference.html</loc>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/cell-type-annotation.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/differential-expression.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/dimensionality-reduction-clustering.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/images.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/index.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/instructor-notes.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/introduction.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/key-points.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/multi-sample-integration.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/normalization-and-features.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/profiles.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/quality-control.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/raw-data-processing.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/reference.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor-notes.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/introduction.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/key-points.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/multi-sample-integration.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/normalization-and-features.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/profiles.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/quality-control.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/raw-data-processing.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/reference.html</loc>
   </url>
 </urlset>
