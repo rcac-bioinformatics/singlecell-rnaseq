@@ -2,28 +2,98 @@
 title: Setup
 ---
 
-FIXME: Setup instructions live in this document. Please specify the tools and
-the data sets the Learner needs to have installed.
+## Instructors
 
-## Data Sets
+1. **Arun Seetharam**: Arun is a Bioinformatics Scientist at Purdue's Rosen Center for Advanced Computing (RCAC). He develops and delivers bioinformatics training workshops and provides research computing support for the Purdue community.
 
-<!--
-FIXME: place any data you want learners to use in `episodes/data` and then use
-       a relative link ( [data zip file](data/lesson-data.zip) ) to provide a
-       link to it, replacing the example.com link.
--->
-Download the [data zip file](https://example.com/FIXME) and unzip it to your Desktop
+2. **Michael Carlson**, Ph.D.: Michael is a Senior Computational Scientist at Purdue University's Rosen Center for Advanced Computing (RCAC). Michael has a background in computational physics, specifically hypersonic materials. He also leads many introductory workshops in the High-Performance Computing domain.
 
-## Software Setup
+## Workshop Schedule
+
+TBA
+
+## Prerequisites
+
+This workshop assumes:
+
+- **Basic Linux/command-line skills**: navigating directories, running commands, editing files
+- **Basic R skills**: installing packages, reading/writing data, creating plots
+- **A Purdue HPC account**: access to the Negishi cluster via [ACCESS](https://www.rcac.purdue.edu/access) or your research allocation
+- **An SSH client**: terminal (macOS/Linux) or PuTTY/MobaXterm (Windows)
+
+No prior experience with single-cell RNA-seq is required.
+
+## What is not covered
+
+This workshop focuses on the core scRNA-seq analysis workflow. The following topics are **not** covered:
+
+- Experimental design and sample preparation
+- Other single-cell modalities (ATAC-seq, CITE-seq, spatial transcriptomics)
+- Trajectory/pseudotime analysis (Monocle3, RNA velocity)
+- Advanced doublet detection methods (DoubletFinder, scDblFinder)
+- Generating your own Cell Ranger reference genomes
+- Multi-modal data integration
+
+## Data Setup
+
+### Copying Workshop Data
+
+The workshop data is pre-staged on the cluster. Copy it to your scratch directory:
+
+```bash
+mkdir -p ${RCAC_SCRATCH}/scrna_workshop
+rsync -avP /depot/workshop/data/scrna_workshop/ ${RCAC_SCRATCH}/scrna_workshop/
+```
+
+This will copy:
+
+- **FASTQ files**: `fastq/pbmc_10k_v3_S1_L00{1,2}_R{1,2}_001.fastq.gz`
+- **10x Reference**: `reference/refdata-gex-GRCh38-2024-A/`
+- **Pre-computed count matrix**: `filtered_feature_bc_matrix/` (for episodes 3+)
+- **Pre-computed R objects**: `rds/` (optional, for jumping into later episodes)
+
+### Verifying the Data
+
+```bash
+ls ${RCAC_SCRATCH}/scrna_workshop/
+ls ${RCAC_SCRATCH}/scrna_workshop/fastq/
+ls ${RCAC_SCRATCH}/scrna_workshop/filtered_feature_bc_matrix/
+```
+
+## R Package Installation
+
+The R packages are pre-installed on the cluster. If you need to install them locally:
+
+```r
+# Install BiocManager if not already installed
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+# Core packages
+install.packages("Seurat")
+install.packages("tidyverse")
+
+# Bioconductor packages
+BiocManager::install(c(
+    "SingleR",
+    "celldex",
+    "clusterProfiler",
+    "org.Hs.eg.db",
+    "enrichplot"
+))
+
+# SeuratData for integration dataset
+install.packages("remotes")
+remotes::install_github("satijalab/seurat-data")
+```
+
+## SSH Key Setup
 
 ::::::::::::::::::::::::::::::::::::::: discussion
 
-### Details
+## Connecting to the Cluster
 
-Setup for different systems can be presented in dropdown menus via a `solution`
-tag. They will join to this discussion block, so you can give a general overview
-of the software used in this lesson here and fill out the individual operating
-systems (and potentially add more, e.g. online setup) in the solutions blocks.
+You will need SSH access to the Negishi cluster at Purdue. Choose the instructions for your operating system below.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -31,24 +101,73 @@ systems (and potentially add more, e.g. online setup) in the solutions blocks.
 
 ### Windows
 
-Use PuTTY
+1. Download and install [MobaXterm](https://mobaxterm.mobatek.net/) (recommended) or [PuTTY](https://www.putty.org/)
+2. Open MobaXterm and click **Session > SSH**
+3. Set **Remote host** to `negishi.rcac.purdue.edu`
+4. Check **Specify username** and enter your Purdue career account username
+5. Click **OK** and enter your password when prompted
+6. Complete Duo two-factor authentication
+
+To set up SSH keys (optional, avoids repeated password entry):
+
+```
+# In MobaXterm local terminal
+ssh-keygen -t ed25519
+ssh-copy-id your_username@negishi.rcac.purdue.edu
+```
 
 :::::::::::::::::::::::::
 
 :::::::::::::::: solution
 
-### MacOS
+### macOS
 
-Use Terminal.app
+1. Open **Terminal** (Applications > Utilities > Terminal)
+2. Generate an SSH key pair (if you don't already have one):
+
+```bash
+ssh-keygen -t ed25519 -C "your_email@purdue.edu"
+```
+
+1. Copy the public key to the cluster:
+
+```bash
+ssh-copy-id your_username@negishi.rcac.purdue.edu
+```
+
+1. Connect to the cluster:
+
+```bash
+ssh your_username@negishi.rcac.purdue.edu
+```
+
+1. Complete Duo two-factor authentication
 
 :::::::::::::::::::::::::
-
 
 :::::::::::::::: solution
 
 ### Linux
 
-Use Terminal
+1. Open your terminal emulator
+2. Generate an SSH key pair (if you don't already have one):
+
+```bash
+ssh-keygen -t ed25519 -C "your_email@purdue.edu"
+```
+
+1. Copy the public key to the cluster:
+
+```bash
+ssh-copy-id your_username@negishi.rcac.purdue.edu
+```
+
+1. Connect to the cluster:
+
+```bash
+ssh your_username@negishi.rcac.purdue.edu
+```
+
+1. Complete Microsoft two-factor authentication
 
 :::::::::::::::::::::::::
-
