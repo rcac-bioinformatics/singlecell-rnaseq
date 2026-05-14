@@ -26,7 +26,7 @@ exercises: 15
 
 ## Setup
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r setup, message=FALSE, warning=FALSE,  eval=FALSE}
 library(Seurat)
 library(ggplot2)
 library(patchwork)
@@ -37,8 +37,17 @@ library(patchwork)
 We start from the filtered Seurat object saved at the end of the previous
 episode. This object contains only cells that passed our QC thresholds.
 
+Set up the working directory to match the previous episode:
+
+```{r set-paths, eval=FALSE}
+work_dir <- paste0(
+    "/scratch/negishi/", Sys.getenv("USER"),
+    "/scrna_workshop/"
+)
+```
+
 ```{r load-data, eval=FALSE}
-pbmc <- readRDS("pbmc_filtered.rds")
+pbmc <- readRDS(paste0(work_dir, "pbmc_filtered.rds"))
 pbmc
 ```
 

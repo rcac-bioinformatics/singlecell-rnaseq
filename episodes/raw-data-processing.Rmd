@@ -74,6 +74,15 @@ Now copy the pre-staged workshop data from the shared depot:
 rsync -avP /depot/workshop/data/scrna_workshop/ ${RCAC_SCRATCH}/scrna_workshop/
 ```
 
+Extract the 10x barcode whitelist from the Cell Ranger container (needed for
+STARsolo):
+
+```bash
+singularity exec ${BIOC_IMAGE_DIR}/cumulusprod_cellranger:10.0.0.sif \
+    zcat /software/cellranger-10.0.0/lib/python/cellranger/barcodes/3M-february-2018_TRU.txt.gz \
+    > ${RCAC_SCRATCH}/scrna_workshop/reference/3M-february-2018.txt
+```
+
 Verify that the FASTQ files are present:
 
 ```bash
@@ -85,8 +94,10 @@ ls ${RCAC_SCRATCH}/scrna_workshop/fastq/
 ## Expected output
 
 ```output
+pbmc_10k_v3_S1_L001_I1_001.fastq.gz
 pbmc_10k_v3_S1_L001_R1_001.fastq.gz
 pbmc_10k_v3_S1_L001_R2_001.fastq.gz
+pbmc_10k_v3_S1_L002_I1_001.fastq.gz
 pbmc_10k_v3_S1_L002_R1_001.fastq.gz
 pbmc_10k_v3_S1_L002_R2_001.fastq.gz
 ```
@@ -153,12 +164,12 @@ that every R1 sequence is exactly 28 bp -- that is the 16 bp cell barcode
 followed by the 12 bp UMI.
 
 ```output
-@A00228:279:HFWFVDMXX:1:1101:1000:1000 1:N:0:NAGATTCC
-NCGATCGTGTTTCCCGATCGTAAGACCT
+@A00228:279:HFWFVDMXX:1:1101:3260:1000 1:N:0:NCAAGATG
+NACCAACAGTCGAATAGTGTCATCTGCT
 +
 #FFFFFFFFFFFFFFFFFFFFFFFFFFF
-@A00228:279:HFWFVDMXX:1:1101:1000:1031 1:N:0:NAGATTCC
-NAGCAGATCAGAGAGAATTTACGATTCT
+@A00228:279:HFWFVDMXX:1:1101:3821:1000 1:N:0:NCAAGATG
+NTGTCTTAGCCTAGGACGGCCTCCGCCA
 +
 #FFFFFFFFFFFFFFFFFFFFFFFFFFF
 ```
@@ -177,14 +188,14 @@ R2 reads are longer (91 bp in this dataset) and contain transcript sequence
 that will be mapped to the genome.
 
 ```output
-@A00228:279:HFWFVDMXX:1:1101:1000:1000 2:N:0:NAGATTCC
-NTCCAATCTGTGAGTCTTTATCACTAAGCATGGTGTTAAGCCTACTCCGTAATTGCTTAACTTCTCTTGTGAAAACAACATCCCAGTAGGC
+@A00228:279:HFWFVDMXX:1:1101:3260:1000 2:N:0:NCAAGATG
+NTATAAAATCACCACGGTCTTTAGCCATGCACAAACGGTAGTTTTGTGTGTTGGCTGCTCCACTGTCCTCTGCCAGCCTACAGGAGGAAAA
 +
-#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF:FFFFF
-@A00228:279:HFWFVDMXX:1:1101:1000:1031 2:N:0:NAGATTCC
-NCCTGCGTGTATCAGTCTCTTAAATATAATCTAGCAGAAGGCACTGTTTCATCCCCTTGCAATATCAAGGAAATCACTTCTTTCTGTCAAT
+#FFFFFFFFFFFFFFFFF:FFFFFFFFFFFFFFFF:FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+@A00228:279:HFWFVDMXX:1:1101:3821:1000 2:N:0:NCAAGATG
+NTTCTATTGGAAACCCGGTCTTTACAAAAAAATACAAAAATCAGCTGGGCGTTGGCCGCGCGTGGTGGCTCACACCTGTAATCTCAGCACT
 +
-#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF:FFFFF:FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF:FFFFFFFFFFFF
+#FFFFFFFFFFFFFFFFFFFFFF:,FFFFFFFFFFFFFFFFFFFFFFFFFFFFF:FFFFFFF:FFFFFF:FFF:F:FFFFFFFFFFFFFFF
 ```
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -235,10 +246,11 @@ Create the job script:
 cat << 'EOF' > ${RCAC_SCRATCH}/scrna_workshop/run_cellranger.sh
 #!/bin/bash
 #SBATCH --nodes=1
-#SBATCH --ntasks=16
+#SBATCH --ntasks=64
 #SBATCH --time=02:00:00
 #SBATCH --job-name=cellranger
 #SBATCH --account=workshop
+#SBATCH --partition=cpu
 #SBATCH --output=cellranger_%j.out
 #SBATCH --error=cellranger_%j.err
 
@@ -255,9 +267,10 @@ cellranger count \
     --id=pbmc10k \
     --transcriptome=${RCAC_SCRATCH}/scrna_workshop/reference/refdata-gex-GRCh38-2024-A \
     --fastqs=${RCAC_SCRATCH}/scrna_workshop/fastq \
+    --create-bam true \
     --sample=pbmc_10k_v3 \
     --localcores=${SLURM_CPUS_ON_NODE} \
-    --localmem=64
+    --localmem=100
 EOF
 ```
 
@@ -266,7 +279,7 @@ Submit the job and monitor its progress:
 ```bash
 cd ${RCAC_SCRATCH}/scrna_workshop
 sbatch run_cellranger.sh
-squeue -u ${USER}
+squeue -u ${USER} # or squeue --me
 ```
 
 The job typically takes 30--60 minutes on 16 cores, depending on cluster load.
@@ -278,9 +291,52 @@ The job typically takes 30--60 minutes on 16 cores, depending on cluster load.
 | `--id` | `pbmc10k` | A unique run ID. Cell Ranger creates an output directory with this name. |
 | `--transcriptome` | `.../refdata-gex-GRCh38-2024-A` | Path to the 10x-compatible reference genome package containing the FASTA, GTF, and STAR index. |
 | `--fastqs` | `.../fastq` | Directory containing the FASTQ files. Cell Ranger auto-detects files matching the sample name. |
+| `--create-bam` | `true` | Generate a BAM file with aligned reads. Starting with Cell Ranger v8, BAM output is off by default; set to `true` if you need the BAM for downstream tools such as velocyto or variant calling. |
 | `--sample` | `pbmc_10k_v3` | The sample name prefix in the FASTQ file names. Cell Ranger selects files matching this prefix. |
 | `--localcores` | `${SLURM_CPUS_ON_NODE}` | Number of CPU cores to use. We set this to match the SLURM allocation so Cell Ranger does not try to use more cores than allocated. |
 | `--localmem` | `64` | Maximum memory (in GB) that Cell Ranger is allowed to use. |
+
+:::::::::::::::::::::::::::::::::::::::: callout
+
+## What if I have multiple samples?
+
+**Q:** I have 4 samples (WT_rep1, WT_rep2, KO_rep1, KO_rep2). Do I pass them
+all to one `cellranger count` command?
+
+**A:** No. `cellranger count` processes **one sample** per invocation. Use a
+SLURM array job to run them in parallel:
+
+```bash
+#!/bin/bash
+#SBATCH --array=0-3
+#SBATCH --nodes=1
+#SBATCH --ntasks=16
+#SBATCH --time=02:00:00
+#SBATCH --job-name=cellranger
+#SBATCH --account=workshop
+
+ml --force purge
+ml biocontainers cellranger
+
+SAMPLES=(WT_rep1 WT_rep2 KO_rep1 KO_rep2)
+SAMPLE=${SAMPLES[$SLURM_ARRAY_TASK_ID]}
+
+cd ${RCAC_SCRATCH}/scrna_workshop/cellranger_output
+
+cellranger count \
+    --id=${SAMPLE} \
+    --transcriptome=${RCAC_SCRATCH}/scrna_workshop/reference/refdata-gex-GRCh38-2024-A \
+    --fastqs=${RCAC_SCRATCH}/scrna_workshop/fastq \
+    --create-bam true \
+    --sample=${SAMPLE} \
+    --localcores=${SLURM_CPUS_ON_NODE} \
+    --localmem=64
+```
+
+For most downstream analyses, merge samples in Seurat (e.g., with
+`merge()` or `IntegrateLayers()`) rather than using `cellranger aggr`.
+
+:::::::::::::::::::::::::::::::::::::::
 
 ### Cell Ranger output files
 
@@ -339,6 +395,35 @@ proceeding to downstream analysis.
 
 :::::::::::::::::::::::::::::::::::::::
 
+### Interpreting Cell Ranger output
+
+![Cell Ranger web_summary.html for PBMC 10k](fig/cellranger-web-summary.png)
+
+The `web_summary.html` file is the first thing to check after every Cell Ranger run. Here are the key QC metrics from our PBMC 10k run:
+
+| Metric | Value | What to look for |
+|--------|-------|------------------|
+| Estimated Number of Cells | 11,809 | Close to expected loading (~10k) |
+| Median Genes per Cell | 3,371 | >1,000 for PBMCs is good |
+| Reads Mapped Confidently to Transcriptome | 79.1% | >70% expected for 3' GEX |
+| Sequencing Saturation | 68.2% | >60% adequate; >80% ideal |
+| Fraction Reads in Cells | 95.7% | >90% indicates clean cell calling |
+| Valid Barcodes | 97.3% | >95% expected |
+
+A low Fraction Reads in Cells or low Median Genes per Cell would indicate problems with cell viability or library quality.
+
+:::::::::::::::::::::::::::::::::::::::: callout
+
+## Sequencing saturation of 68.2%: is that enough?
+
+A saturation of 68.2% means that roughly 32% of additional sequencing would
+yield new UMIs. For most differential expression and cell type identification
+workflows, this depth is sufficient. Diminishing returns set in above ~80%
+saturation, so deeper sequencing of this library would provide only marginal
+gains.
+
+:::::::::::::::::::::::::::::::::::::::
+
 
 ## Processing with STARsolo
 
@@ -376,11 +461,11 @@ Create the index build script:
 cat << 'EOF' > ${RCAC_SCRATCH}/scrna_workshop/build_star_index.sh
 #!/bin/bash
 #SBATCH --nodes=1
-#SBATCH --ntasks=16
-#SBATCH --mem=40G
+#SBATCH --ntasks=64
 #SBATCH --time=01:00:00
 #SBATCH --job-name=star_index
 #SBATCH --account=workshop
+#SBATCH --partition=cpu
 #SBATCH --output=star_index_%j.out
 #SBATCH --error=star_index_%j.err
 
@@ -393,7 +478,7 @@ REF=${RCAC_SCRATCH}/scrna_workshop/reference/refdata-gex-GRCh38-2024-A
 STAR_INDEX=${RCAC_SCRATCH}/scrna_workshop/reference/star_index
 
 mkdir -p ${STAR_INDEX}
-
+gunzip -c ${REF}/genes/genes.gtf.gz > ${REF}/genes/genes.gtf
 STAR \
     --runMode genomeGenerate \
     --runThreadN ${SLURM_CPUS_ON_NODE} \
@@ -421,11 +506,11 @@ first**, followed by the barcode read (R1) in the `--readFilesIn` argument.
 cat << 'EOF' > ${RCAC_SCRATCH}/scrna_workshop/run_starsolo.sh
 #!/bin/bash
 #SBATCH --nodes=1
-#SBATCH --ntasks=16
-#SBATCH --mem=40G
+#SBATCH --ntasks=64
 #SBATCH --time=01:00:00
 #SBATCH --job-name=starsolo
 #SBATCH --account=workshop
+#SBATCH --partition=cpu
 #SBATCH --output=starsolo_%j.out
 #SBATCH --error=starsolo_%j.err
 
@@ -437,7 +522,7 @@ ml star
 # Define paths
 FASTQ=${RCAC_SCRATCH}/scrna_workshop/fastq
 STAR_INDEX=${RCAC_SCRATCH}/scrna_workshop/reference/star_index
-WHITELIST=${RCAC_SCRATCH}/scrna_workshop/reference/refdata-gex-GRCh38-2024-A/star/3M-february-2018.txt
+WHITELIST=${RCAC_SCRATCH}/scrna_workshop/reference/3M-february-2018.txt
 
 cd ${RCAC_SCRATCH}/scrna_workshop/starsolo_output
 
@@ -531,10 +616,10 @@ both compressed and uncompressed formats automatically.
 
 ## Runtime comparison
 
-On 16 cores with the PBMC 10k v3 dataset, typical runtimes are:
+On 64 cores with the PBMC 10k v3 dataset, typical runtimes are:
 
-- **Cell Ranger:** ~45 minutes
-- **STARsolo:** ~5 minutes
+- **Cell Ranger:** ~7 hours
+- **STARsolo:** ~45 minutes
 
 STARsolo is roughly 9x faster because STAR is a highly optimized C++ aligner,
 while Cell Ranger wraps STAR with additional Python and Java orchestration
@@ -542,6 +627,22 @@ layers. Both produce nearly identical count matrices.
 
 :::::::::::::::::::::::::::::::::::::::
 
+### Interpreting STARsolo output
+
+STARsolo writes alignment statistics to `Log.final.out` in the output
+directory. Here are the key metrics from our PBMC 10k run:
+
+| Metric | Value | What to look for |
+|--------|-------|------------------|
+| Uniquely mapped reads % | 89.28% | >80% for human GEX |
+| Multi-mapping reads % | 7.14% | <10% typical |
+| Unmapped: too short % | 2.56% | >10% suggests trimming or degradation |
+| Mismatch rate per base | 0.56% | <1% expected |
+| Mapping speed | 923.7M reads/hr | ~15x faster than Cell Ranger for this run |
+
+Unlike Cell Ranger, STARsolo does not produce an HTML summary report. Check
+`Log.final.out` for alignment statistics and `Solo.out/Gene/Summary.csv` for
+cell-level metrics such as the number of cells detected and UMIs per cell.
 
 ## Comparing Outputs
 
@@ -577,14 +678,14 @@ Both tools should report very similar numbers:
 
 ```output
 Cell Ranger cells:
-11769
+11809
 Cell Ranger genes:
-36601
+38606
 
 STARsolo cells:
-11753
+11682
 STARsolo genes:
-36601
+38606
 ```
 
 The cell counts may differ by a small amount (typically <1%) due to minor

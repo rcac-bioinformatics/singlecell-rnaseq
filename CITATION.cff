@@ -1,11 +1,5 @@
-# This template CITATION.cff file was generated with cffinit.
-# Visit https://bit.ly/cffinit to replace its contents
-# with information about your lesson.
-# Remember to update this file periodically, 
-# ensuring that the author list and other fields remain accurate.
-
 cff-version: 1.2.0
-title: FIXME
+title: "Single-Cell RNA-Seq Analysis: Hands-on Training"
 message: >-
   Please cite this lesson using the information in this file
   when you refer to it in publications, and/or if you
@@ -13,10 +7,29 @@ message: >-
   training material.
 type: dataset
 authors:
-  - given-names: FIXME
-    family-names: FIXME
+  - given-names: Arun
+    family-names: Seetharam
+    affiliation: Rosen Center for Advanced Computing, Purdue University
+    email: rcac-help@purdue.edu
+  - given-names: Michael
+    family-names: Carlson
+    affiliation: Rosen Center for Advanced Computing, Purdue University
 abstract: >-
-  FIXME Replace this with a short abstract describing the
-  lesson, e.g. its target audience and main intended
-  learning objectives.
+  A hands-on workshop teaching the complete single-cell
+  RNA-seq analysis pipeline using Seurat v5 in R on
+  Purdue's HPC cluster. Covers raw data processing with
+  Cell Ranger and STARsolo, quality control, normalization,
+  dimensionality reduction, clustering, cell type
+  annotation, multi-sample integration, and differential
+  expression analysis using a 10x Genomics PBMC dataset.
+keywords:
+  - scRNA-seq
+  - single-cell
+  - seurat
+  - cellranger
+  - starsolo
+  - 10x-genomics
+  - PBMC
 license: CC-BY-4.0
+date-released: "2026-02-24"
+url: "https://rcac-bioinformatics.github.io/singlecell-rnaseq"
