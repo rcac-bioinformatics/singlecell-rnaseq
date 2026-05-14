@@ -631,7 +631,7 @@ instructions for your operating system below.</p>
   Windows
   </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Download and install <a href="https://mobaxterm.mobatek.net/" class="external-link">MobaXterm</a> (recommended) or <a href="https://www.putty.org/" class="external-link">PuTTY</a>
 </li>
@@ -643,12 +643,8 @@ instructions for your operating system below.</p>
 <li>Check <strong>Specify username</strong> and enter your Purdue career
 account username</li>
 <li>Click <strong>OK</strong> and enter your password when prompted</li>
-<li>Complete Duo two-factor authentication</li>
-</ol><p>To set up SSH keys (optional, avoids repeated password entry):</p>
-<pre><code># In MobaXterm local terminal
-ssh-keygen -t ed25519
-ssh-copy-id your_username@negishi.rcac.purdue.edu</code></pre>
-</div>
+<li>Complete Microsoft two-factor authentication</li>
+</ol></div>
 </div>
 </div>
 </div>
@@ -659,29 +655,17 @@ ssh-copy-id your_username@negishi.rcac.purdue.edu</code></pre>
   macOS
   </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Open <strong>Terminal</strong> (Applications &gt; Utilities &gt;
 Terminal)</li>
-<li>Generate an SSH key pair (if you don’t already have one):</li>
-</ol><div class="codewrapper sourceCode" id="cb5">
+<li>Connect to the cluster:</li>
+</ol><div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-C</span> <span class="st">"your_email@purdue.edu"</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1" aria-label="code-block-4-1"></a><span class="fu">ssh</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
 </div>
-<ol style="list-style-type: decimal"><li>Copy the public key to the cluster:</li>
-</ol><div class="codewrapper sourceCode" id="cb6">
-<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="ex">ssh-copy-id</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
-</div>
-<ol style="list-style-type: decimal"><li>Connect to the cluster:</li>
-</ol><div class="codewrapper sourceCode" id="cb7">
-<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1" aria-label="code-block-7-1"></a><span class="fu">ssh</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
-</div>
-<ol style="list-style-type: decimal"><li>Complete Duo two-factor authentication</li>
+<ol start="3" style="list-style-type: decimal"><li>Complete Microsoft two-factor authentication</li>
 </ol></div>
 </div>
 </div>
@@ -693,28 +677,16 @@ Terminal)</li>
   Linux
   </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Open your terminal emulator</li>
-<li>Generate an SSH key pair (if you don’t already have one):</li>
-</ol><div class="codewrapper sourceCode" id="cb8">
+<li>Connect to the cluster:</li>
+</ol><div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1" aria-label="code-block-8-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-C</span> <span class="st">"your_email@purdue.edu"</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="fu">ssh</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
 </div>
-<ol style="list-style-type: decimal"><li>Copy the public key to the cluster:</li>
-</ol><div class="codewrapper sourceCode" id="cb9">
-<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1" aria-label="code-block-9-1"></a><span class="ex">ssh-copy-id</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
-</div>
-<ol style="list-style-type: decimal"><li>Connect to the cluster:</li>
-</ol><div class="codewrapper sourceCode" id="cb10">
-<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1" aria-label="code-block-10-1"></a><span class="fu">ssh</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
-</div>
-<ol style="list-style-type: decimal"><li>Complete Microsoft two-factor authentication</li>
+<ol start="3" style="list-style-type: decimal"><li>Complete Microsoft two-factor authentication</li>
 </ol></div>
 </div>
 </div>
