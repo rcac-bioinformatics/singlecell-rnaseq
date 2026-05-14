@@ -136,7 +136,8 @@ You will need SSH access to the Negishi cluster at Purdue. Choose the instructio
 ssh your_username@negishi.rcac.purdue.edu
 ```
 
-3. Complete Microsoft two-factor authentication
+3. Enter your password (characters may not appear, but your password is being entered)
+4. Complete Microsoft two-factor authentication
 
 :::::::::::::::::::::::::
 
@@ -151,6 +152,7 @@ ssh your_username@negishi.rcac.purdue.edu
 ssh your_username@negishi.rcac.purdue.edu
 ```
 
-3. Complete Microsoft two-factor authentication
+3. Enter your password (characters may not appear, but your password is being entered)
+4. Complete Microsoft two-factor authentication
 
 :::::::::::::::::::::::::
