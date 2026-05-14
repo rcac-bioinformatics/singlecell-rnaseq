@@ -29,29 +29,8 @@ exercises: 15
 
 ``` r
 library(Seurat)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'Seurat'
-```
-
-``` r
 library(ggplot2)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'ggplot2'
-```
-
-``` r
 library(patchwork)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'patchwork'
 ```
 
 ## Loading the Filtered Data
@@ -59,9 +38,19 @@ Error in `library()`:
 We start from the filtered Seurat object saved at the end of the previous
 episode. This object contains only cells that passed our QC thresholds.
 
+Set up the working directory to match the previous episode:
+
 
 ``` r
-pbmc <- readRDS("pbmc_filtered.rds")
+work_dir <- paste0(
+    "/scratch/negishi/", Sys.getenv("USER"),
+    "/scrna_workshop/"
+)
+```
+
+
+``` r
+pbmc <- readRDS(paste0(work_dir, "pbmc_filtered.rds"))
 pbmc
 ```
 

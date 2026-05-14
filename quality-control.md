@@ -29,29 +29,8 @@ exercises: 20
 
 ``` r
 library(Seurat)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'Seurat'
-```
-
-``` r
 library(ggplot2)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'ggplot2'
-```
-
-``` r
 library(patchwork)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'patchwork'
 ```
 
 ## Loading Data into Seurat
@@ -63,9 +42,22 @@ by Cell Ranger in the previous episode. This matrix lives in the
 `Read10X()` function reads all three files and assembles them into a sparse
 matrix in R.
 
+First, set up the path to the Cell Ranger output so that all file references
+in this episode use the same base directory:
+
 
 ``` r
-pbmc.data <- Read10X(data.dir = "filtered_feature_bc_matrix/")
+data_dir <- paste0(
+    "/scratch/negishi/", Sys.getenv("USER"),
+    "/scrna_workshop/cellranger_output/pbmc10k/outs/filtered_feature_bc_matrix/"
+)
+```
+
+Now load the count matrix:
+
+
+``` r
+pbmc.data <- Read10X(data.dir = data_dir)
 ```
 
 `Read10X()` returns a sparse matrix where rows are genes and columns are cell
@@ -81,10 +73,10 @@ dim(pbmc.data)
 ## Expected output
 
 ```output
-[1] 36601 11769
+[1] 38606 11809
 ```
 
-This tells us the matrix contains 36,601 genes (rows) and 11,769 cell barcodes
+This tells us the matrix contains 38,606 genes (rows) and 11,809 cell barcodes
 (columns).
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -114,9 +106,9 @@ pbmc
 ## Expected output
 
 ```output
-An object of class Seurat
-23694 features across 11738 samples within 1 assay
-Active assay: RNA (23694 features, 0 variable features)
+An object of class Seurat 
+29155 features across 11721 samples within 1 assay 
+Active assay: RNA (29155 features, 0 variable features)
  1 layer present: counts
 ```
 
@@ -148,12 +140,14 @@ structure. The key components are:
 - **Metadata**: a data frame with one row per cell, storing QC metrics, cluster
   assignments, and any other per-cell annotations.
 
+![Structure of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns](fig/seurat_object.png)
+
 You can inspect the metadata that Seurat automatically computed during object
 creation:
 
 
 ``` r
-head(pbmc[[]])
+head(pbmc@meta.data)
 ```
 
 :::::::::::::::::::::::::::::::::::::::::: spoiler
@@ -161,13 +155,13 @@ head(pbmc[[]])
 ## Expected output
 
 ```output
-                        orig.ident nCount_RNA nFeature_RNA
-AAACCCAAGAAACACT-1         pbmc10k       9008         2808
-AAACCCAAGAAACCAT-1         pbmc10k       3664         1508
-AAACCCAAGAAACTGT-1         pbmc10k       2515         1199
-AAACCCAAGAAAGCGA-1         pbmc10k      13457         3652
-AAACCCAAGAAAGTTG-1         pbmc10k       2331         1155
-AAACCCAAGAACAATC-1         pbmc10k       5981         2216
+                   orig.ident nCount_RNA nFeature_RNA
+AAACCCAAGCGCCCAT-1    pbmc10k       4282         2152
+AAACCCAAGGTTCCGC-1    pbmc10k      29509         5990
+AAACCCACAGACAAGC-1    pbmc10k        574          358
+AAACCCACAGAGTTGG-1    pbmc10k       8400         2881
+AAACCCACAGGTATGG-1    pbmc10k       9675         3731
+AAACCCACATAGTCAC-1    pbmc10k      10058         3365
 ```
 
 Seurat automatically calculated two metrics per cell:
@@ -241,19 +235,19 @@ summary(pbmc$percent.mt)
 
 ```output
 # nFeature_RNA
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-  201.0   963.0  1831.0  2113.0  2928.0 10184.0
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    201    2895    3378    3557    4270    9540 
 
 # nCount_RNA
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-  269.0  1712.0  3948.0  5556.0  7198.0 86373.0
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    505    8047   10357   12280   15166  103741 
 
 # percent.mt
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
- 0.0000  3.1200  5.5300  6.4780  8.3700 66.4300
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.1752  4.8509  5.7882  6.7695  7.0114 89.8376 
 ```
 
-Most cells have 1,000--3,000 genes, 2,000--7,000 UMIs, and 3--8%
+Most cells have 1,000--3,000 genes, 2,000--8,000 UMIs, and 3--5%
 mitochondrial content. But notice the maximum values: one cell has over 10,000
 genes (possible doublet), another has over 86,000 UMIs, and one cell has 66%
 mitochondrial reads (clearly dying). These outliers are what QC filtering
@@ -271,12 +265,17 @@ are the standard first visualization for scRNA-seq QC.
 VlnPlot(pbmc,
         features = c("nFeature_RNA", "nCount_RNA", "percent.mt"),
         ncol = 3,
-        pt.size = 0)
+        pt.size = 0,
+        layer = "counts")
 ```
+
+
+![Violin plots of nFeature_RNA, nCount_RNA, and percent.mt showing the distribution of QC metrics across all cells before filtering](fig/violin_plots_output.png)
 
 Setting `pt.size = 0` hides individual points so the distribution shape is
 easier to see with 10,000+ cells. If you want to see points, set
 `pt.size = 0.1`.
+
 
 ### Scatter plots
 
@@ -287,14 +286,15 @@ that deviate from this trend are suspicious.
 
 
 ``` r
-FeatureScatter(pbmc,
-               feature1 = "nCount_RNA",
-               feature2 = "nFeature_RNA",
-               group.by = "orig.ident") +
-    geom_point(aes(color = pbmc$percent.mt), size = 0.5) +
-    scale_color_viridis_c(name = "% MT") +
-    theme(legend.position = "right")
+ggplot(pbmc@meta.data, aes(x = nCount_RNA, y = nFeature_RNA, color = percent.mt)) +
+    geom_point(size = 0.5, alpha = 0.4) +
+    scale_color_gradient(low = "grey90", high = "firebrick", name = "% MT") +
+    theme_minimal() +
+    labs(x = "Total UMI counts", y = "Number of genes")
 ```
+
+![Scatter plot of total UMI counts versus number of genes per cell colored by mitochondrial percentage, with high-mito cells highlighted in red](fig/scatterplot-output.png)
+
 
 What to look for in this plot:
 
@@ -343,9 +343,35 @@ remove clear outliers while preserving the bulk of the data.
 For this PBMC dataset, we apply the following thresholds:
 
 - `nFeature_RNA > 200`: remove cells with very few genes (likely empty)
-- `nFeature_RNA < 5000`: remove cells with an extreme number of genes
+- `nFeature_RNA < 7000`: remove cells with an extreme number of genes
+  (possible doublets)
+- `nCount_RNA < 50000`: remove cells with unusually high UMI counts
   (possible doublets)
 - `percent.mt < 15`: remove cells with high mitochondrial content (likely dying)
+
+Let's visualize where these cutoffs fall on the violin plots. Red dashed lines
+mark the thresholds:
+
+
+``` r
+p1 <- VlnPlot(pbmc, features = "nFeature_RNA", pt.size = 0.1, layer = "counts") +
+    geom_hline(yintercept = c(205,7000), linetype = "dashed", color = "red") +
+    NoLegend()
+p2 <- VlnPlot(pbmc, features = "nCount_RNA", pt.size = 0.1, layer = "counts") +
+    geom_hline(yintercept = 50000, linetype = "dashed", color = "red") +
+    NoLegend()
+p3 <- VlnPlot(pbmc, features = "percent.mt", pt.size = 0.1, layer = "counts") +
+    geom_hline(yintercept = 15, linetype = "dashed", color = "red") +
+    NoLegend()
+p1 + p2 + p3 + plot_layout(ncol = 3)
+```
+
+![Violin plots of nFeature_RNA, nCount_RNA, and percent.mt with red dashed lines showing the filtering thresholds and individual cells visible as points](fig/violin_plots_with-pt_output.png)
+
+
+Cells above or below the red lines will be removed. The small point size
+(`pt.size = 0.1`) lets you see how many individual cells fall outside the
+thresholds.
 
 Let's record how many cells we have before filtering:
 
@@ -360,7 +386,8 @@ Apply the filters:
 ``` r
 pbmc <- subset(pbmc,
                subset = nFeature_RNA > 200 &
-                        nFeature_RNA < 5000 &
+                        nFeature_RNA < 7000 &
+                        nCount_RNA < 50000 &
                         percent.mt < 15)
 cat("Cells after filtering:", ncol(pbmc), "\n")
 ```
@@ -370,13 +397,13 @@ cat("Cells after filtering:", ncol(pbmc), "\n")
 ## Expected output
 
 ```output
-Cells before filtering: 11738
-Cells after filtering: 10000
+Cells before filtering: 11721
+Cells after filtering: 11310
 ```
 
-Filtering removes approximately 1,500--1,800 cells (~15% of the total). The
+Filtering removes ~400 cells (~3.5% of the total). The
 exact number depends on minor differences in the Cell Ranger version and
-reference used. You should have roughly 9,500--10,500 cells remaining.
+reference used. You should have roughly 11,300 cells remaining.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -387,8 +414,11 @@ Let's verify the filtering by looking at the QC distributions again:
 VlnPlot(pbmc,
         features = c("nFeature_RNA", "nCount_RNA", "percent.mt"),
         ncol = 3,
-        pt.size = 0)
+        pt.size = 0,
+        layer = "counts")
 ```
+![Structure of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns](fig/violin_plots_after_filtering_output.png)
+
 
 The violin plots should now show tighter distributions with the extreme tails
 removed. The mitochondrial percentage should be capped below 15%.
@@ -397,10 +427,15 @@ Let's also verify with a scatter plot:
 
 
 ``` r
-FeatureScatter(pbmc,
-               feature1 = "nCount_RNA",
-               feature2 = "nFeature_RNA")
+ggplot(pbmc@meta.data, aes(x = nCount_RNA, y = nFeature_RNA, color = percent.mt)) +
+    geom_point(size = 0.5, alpha = 0.4) +
+    scale_color_gradient(low = "grey90", high = "firebrick", name = "% MT") +
+    theme_minimal() +
+    labs(x = "Total UMI counts", y = "Number of genes")
 ```
+
+![Scatter plot of total UMI counts versus number of genes after filtering, colored by mitochondrial percentage, showing a tighter cloud with outliers removed](fig/scatterplot-post_output.png)
+
 
 Finally, save the filtered object for the next episode:
 
