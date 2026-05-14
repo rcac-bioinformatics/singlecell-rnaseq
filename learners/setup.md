@@ -121,15 +121,7 @@ You will need SSH access to the Negishi cluster at Purdue. Choose the instructio
 3. Set **Remote host** to `negishi.rcac.purdue.edu`
 4. Check **Specify username** and enter your Purdue career account username
 5. Click **OK** and enter your password when prompted
-6. Complete Duo two-factor authentication
-
-To set up SSH keys (optional, avoids repeated password entry):
-
-```
-# In MobaXterm local terminal
-ssh-keygen -t ed25519
-ssh-copy-id your_username@negishi.rcac.purdue.edu
-```
+6. Complete Microsoft two-factor authentication
 
 :::::::::::::::::::::::::
 
@@ -138,25 +130,13 @@ ssh-copy-id your_username@negishi.rcac.purdue.edu
 ### macOS
 
 1. Open **Terminal** (Applications > Utilities > Terminal)
-2. Generate an SSH key pair (if you don't already have one):
-
-```bash
-ssh-keygen -t ed25519 -C "your_email@purdue.edu"
-```
-
-1. Copy the public key to the cluster:
-
-```bash
-ssh-copy-id your_username@negishi.rcac.purdue.edu
-```
-
-1. Connect to the cluster:
+2. Connect to the cluster:
 
 ```bash
 ssh your_username@negishi.rcac.purdue.edu
 ```
 
-1. Complete Duo two-factor authentication
+3. Complete Microsoft two-factor authentication
 
 :::::::::::::::::::::::::
 
@@ -165,24 +145,12 @@ ssh your_username@negishi.rcac.purdue.edu
 ### Linux
 
 1. Open your terminal emulator
-2. Generate an SSH key pair (if you don't already have one):
-
-```bash
-ssh-keygen -t ed25519 -C "your_email@purdue.edu"
-```
-
-1. Copy the public key to the cluster:
-
-```bash
-ssh-copy-id your_username@negishi.rcac.purdue.edu
-```
-
-1. Connect to the cluster:
+2. Connect to the cluster:
 
 ```bash
 ssh your_username@negishi.rcac.purdue.edu
 ```
 
-1. Complete Microsoft two-factor authentication
+3. Complete Microsoft two-factor authentication
 
 :::::::::::::::::::::::::
