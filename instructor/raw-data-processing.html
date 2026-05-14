@@ -338,7 +338,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Raw Data Processing</h1>
-        <p>Last updated on 2026-05-12 |
+        <p>Last updated on 2026-05-14 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/raw-data-processing.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -437,11 +437,20 @@ layout and copy the data.</p>
 </h3>
 <pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a><span class="fu">rsync</span> <span class="at">-avP</span> /depot/workshop/data/scrna_workshop/ <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/</span></code></pre>
 </div>
-<p>Verify that the FASTQ files are present:</p>
+<p>Extract the 10x barcode whitelist from the Cell Ranger container
+(needed for STARsolo):</p>
 <div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1" aria-label="code-block-4-1"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/fastq/</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1" aria-label="code-block-4-1"></a><span class="ex">singularity</span> exec <span class="va">${BIOC_IMAGE_DIR}</span>/cumulusprod_cellranger:10.0.0.sif <span class="dt">\</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1" aria-label="code-block-4-2"></a>    zcat /software/cellranger-10.0.0/lib/python/cellranger/barcodes/3M-february-2018_TRU.txt.gz <span class="dt">\</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1" aria-label="code-block-4-3"></a>    <span class="op">&gt;</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/reference/3M-february-2018.txt</span></code></pre>
+</div>
+<p>Verify that the FASTQ files are present:</p>
+<div class="codewrapper sourceCode" id="cb5">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/fastq/</span></code></pre>
 </div>
 <div id="accordionSpoiler1" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
@@ -453,8 +462,10 @@ layout and copy the data.</p>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code><span><span class="va">pbmc_10k_v3_S1_L001_R1_001.fastq.gz</span></span>
+<pre class="output" tabindex="0"><code><span><span class="va">pbmc_10k_v3_S1_L001_I1_001.fastq.gz</span></span>
+<span><span class="va">pbmc_10k_v3_S1_L001_R1_001.fastq.gz</span></span>
 <span><span class="va">pbmc_10k_v3_S1_L001_R2_001.fastq.gz</span></span>
+<span><span class="va">pbmc_10k_v3_S1_L002_I1_001.fastq.gz</span></span>
 <span><span class="va">pbmc_10k_v3_S1_L002_R1_001.fastq.gz</span></span>
 <span><span class="va">pbmc_10k_v3_S1_L002_R2_001.fastq.gz</span></span></code></pre>
 </div>
@@ -463,10 +474,10 @@ layout and copy the data.</p>
 </div>
 </div>
 <p>Verify that the reference genome is present:</p>
-<div class="codewrapper sourceCode" id="cb6">
+<div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/reference/</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1" aria-label="code-block-7-1"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/reference/</span></code></pre>
 </div>
 <div id="accordionSpoiler2" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
@@ -509,11 +520,11 @@ determine which gene the mRNA came from. It is typically 90–150 bp
 long.</p>
 <p>Let’s inspect the first few reads from each file to see this in
 practice:</p>
-<div class="codewrapper sourceCode" id="cb9">
+<div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1" aria-label="code-block-9-1"></a><span class="bu">cd</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/fastq</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1" aria-label="code-block-9-2"></a><span class="fu">zcat</span> pbmc_10k_v3_S1_L001_R1_001.fastq.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-8</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1" aria-label="code-block-10-1"></a><span class="bu">cd</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/fastq</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1" aria-label="code-block-10-2"></a><span class="fu">zcat</span> pbmc_10k_v3_S1_L001_R1_001.fastq.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-8</span></span></code></pre>
 </div>
 <div id="accordionSpoiler3" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
@@ -529,12 +540,12 @@ separator, and quality scores. Notice that every R1 sequence is exactly
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>@A00228:279:HFWFVDMXX:1:1101:1000:1000 1:N:0:NAGATTCC
-NCGATCGTGTTTCCCGATCGTAAGACCT
+<pre class="output" tabindex="0"><code>@A00228:279:HFWFVDMXX:1:1101:3260:1000 1:N:0:NCAAGATG
+NACCAACAGTCGAATAGTGTCATCTGCT
 +
 #FFFFFFFFFFFFFFFFFFFFFFFFFFF
-@A00228:279:HFWFVDMXX:1:1101:1000:1031 1:N:0:NAGATTCC
-NAGCAGATCAGAGAGAATTTACGATTCT
+@A00228:279:HFWFVDMXX:1:1101:3821:1000 1:N:0:NCAAGATG
+NTGTCTTAGCCTAGGACGGCCTCCGCCA
 +
 #FFFFFFFFFFFFFFFFFFFFFFFFFFF</code></pre>
 </div>
@@ -542,10 +553,10 @@ NAGCAGATCAGAGAGAATTTACGATTCT
 </div>
 </div>
 </div>
-<div class="codewrapper sourceCode" id="cb11">
+<div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" tabindex="-1" aria-label="code-block-11-1"></a><span class="fu">zcat</span> pbmc_10k_v3_S1_L001_R2_001.fastq.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-8</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1" aria-label="code-block-12-1"></a><span class="fu">zcat</span> pbmc_10k_v3_S1_L001_R2_001.fastq.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-8</span></span></code></pre>
 </div>
 <div id="accordionSpoiler4" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
@@ -559,14 +570,14 @@ sequence that will be mapped to the genome.</p>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>@A00228:279:HFWFVDMXX:1:1101:1000:1000 2:N:0:NAGATTCC
-NTCCAATCTGTGAGTCTTTATCACTAAGCATGGTGTTAAGCCTACTCCGTAATTGCTTAACTTCTCTTGTGAAAACAACATCCCAGTAGGC
+<pre class="output" tabindex="0"><code>@A00228:279:HFWFVDMXX:1:1101:3260:1000 2:N:0:NCAAGATG
+NTATAAAATCACCACGGTCTTTAGCCATGCACAAACGGTAGTTTTGTGTGTTGGCTGCTCCACTGTCCTCTGCCAGCCTACAGGAGGAAAA
 +
-#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF:FFFFF
-@A00228:279:HFWFVDMXX:1:1101:1000:1031 2:N:0:NAGATTCC
-NCCTGCGTGTATCAGTCTCTTAAATATAATCTAGCAGAAGGCACTGTTTCATCCCCTTGCAATATCAAGGAAATCACTTCTTTCTGTCAAT
+#FFFFFFFFFFFFFFFFF:FFFFFFFFFFFFFFFF:FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+@A00228:279:HFWFVDMXX:1:1101:3821:1000 2:N:0:NCAAGATG
+NTTCTATTGGAAACCCGGTCTTTACAAAAAAATACAAAAATCAGCTGGGCGTTGGCCGCGCGTGGTGGCTCACACCTGTAATCTCAGCACT
 +
-#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF:FFFFF:FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF:FFFFFFFFFFFF</code></pre>
+#FFFFFFFFFFFFFFFFFFFFFF:,FFFFFFFFFFFFFFFFFFFFFFFFFFFFF:FFFFFFF:FFFFFF:FFF:F:FFFFFFFFFFFFFFF</code></pre>
 </div>
 </div>
 </div>
@@ -578,10 +589,10 @@ NCCTGCGTGTATCAGTCTCTTAAATATAATCTAGCAGAAGGCACTGTTTCATCCCCTTGCAATATCAAGGAAATCACTTC
 <p>The reference genome is a 10x Genomics pre-built package based on the
 human GRCh38 assembly. This package contains everything Cell Ranger
 needs to align reads:</p>
-<div class="codewrapper sourceCode" id="cb13">
+<div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" tabindex="-1" aria-label="code-block-13-1"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/reference/refdata-gex-GRCh38-2024-A/</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1" aria-label="code-block-14-1"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/reference/refdata-gex-GRCh38-2024-A/</span></code></pre>
 </div>
 <div id="accordionSpoiler5" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
@@ -621,44 +632,46 @@ index or reuse the one inside this package.</p>
 genome as input and produces a filtered UMI count matrix as output. We
 will run it as a SLURM batch job on Negishi.</p>
 <p>Create the job script:</p>
-<div class="codewrapper sourceCode" id="cb15">
-<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" tabindex="-1" aria-label="code-block-15-1"></a><span class="fu">cat</span> <span class="op">&lt;&lt; 'EOF'</span> <span class="op">&gt;</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/run_cellranger.sh</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1" aria-label="code-block-15-2"></a><span class="st">#!/bin/bash</span></span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1" aria-label="code-block-15-3"></a><span class="st">#SBATCH --nodes=1</span></span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1" aria-label="code-block-15-4"></a><span class="st">#SBATCH --ntasks=16</span></span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1" aria-label="code-block-15-5"></a><span class="st">#SBATCH --time=02:00:00</span></span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1" aria-label="code-block-15-6"></a><span class="st">#SBATCH --job-name=cellranger</span></span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1" aria-label="code-block-15-7"></a><span class="st">#SBATCH --account=workshop</span></span>
-<span id="cb15-8"><a href="#cb15-8" tabindex="-1" aria-label="code-block-15-8"></a><span class="st">#SBATCH --output=cellranger_%j.out</span></span>
-<span id="cb15-9"><a href="#cb15-9" tabindex="-1" aria-label="code-block-15-9"></a><span class="st">#SBATCH --error=cellranger_%j.err</span></span>
-<span id="cb15-10"><a href="#cb15-10" tabindex="-1" aria-label="code-block-15-10"></a></span>
-<span id="cb15-11"><a href="#cb15-11" tabindex="-1" aria-label="code-block-15-11"></a><span class="st"># Load modules</span></span>
-<span id="cb15-12"><a href="#cb15-12" tabindex="-1" aria-label="code-block-15-12"></a><span class="st">ml --force purge</span></span>
-<span id="cb15-13"><a href="#cb15-13" tabindex="-1" aria-label="code-block-15-13"></a><span class="st">ml biocontainers</span></span>
-<span id="cb15-14"><a href="#cb15-14" tabindex="-1" aria-label="code-block-15-14"></a><span class="st">ml cellranger</span></span>
-<span id="cb15-15"><a href="#cb15-15" tabindex="-1" aria-label="code-block-15-15"></a></span>
-<span id="cb15-16"><a href="#cb15-16" tabindex="-1" aria-label="code-block-15-16"></a><span class="st"># Move to the output directory</span></span>
-<span id="cb15-17"><a href="#cb15-17" tabindex="-1" aria-label="code-block-15-17"></a><span class="st">cd ${RCAC_SCRATCH}/scrna_workshop/cellranger_output</span></span>
-<span id="cb15-18"><a href="#cb15-18" tabindex="-1" aria-label="code-block-15-18"></a></span>
-<span id="cb15-19"><a href="#cb15-19" tabindex="-1" aria-label="code-block-15-19"></a><span class="st"># Run Cell Ranger count</span></span>
-<span id="cb15-20"><a href="#cb15-20" tabindex="-1" aria-label="code-block-15-20"></a><span class="st">cellranger count \</span></span>
-<span id="cb15-21"><a href="#cb15-21" tabindex="-1" aria-label="code-block-15-21"></a><span class="st">    --id=pbmc10k \</span></span>
-<span id="cb15-22"><a href="#cb15-22" tabindex="-1" aria-label="code-block-15-22"></a><span class="st">    --transcriptome=${RCAC_SCRATCH}/scrna_workshop/reference/refdata-gex-GRCh38-2024-A \</span></span>
-<span id="cb15-23"><a href="#cb15-23" tabindex="-1" aria-label="code-block-15-23"></a><span class="st">    --fastqs=${RCAC_SCRATCH}/scrna_workshop/fastq \</span></span>
-<span id="cb15-24"><a href="#cb15-24" tabindex="-1" aria-label="code-block-15-24"></a><span class="st">    --sample=pbmc_10k_v3 \</span></span>
-<span id="cb15-25"><a href="#cb15-25" tabindex="-1" aria-label="code-block-15-25"></a><span class="st">    --localcores=${SLURM_CPUS_ON_NODE} \</span></span>
-<span id="cb15-26"><a href="#cb15-26" tabindex="-1" aria-label="code-block-15-26"></a><span class="st">    --localmem=64</span></span>
-<span id="cb15-27"><a href="#cb15-27" tabindex="-1" aria-label="code-block-15-27"></a><span class="op">EOF</span></span></code></pre>
-</div>
-<p>Submit the job and monitor its progress:</p>
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" tabindex="-1" aria-label="code-block-16-1"></a><span class="bu">cd</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1" aria-label="code-block-16-2"></a><span class="ex">sbatch</span> run_cellranger.sh</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1" aria-label="code-block-16-3"></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">${USER}</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" tabindex="-1" aria-label="code-block-16-1"></a><span class="fu">cat</span> <span class="op">&lt;&lt; 'EOF'</span> <span class="op">&gt;</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/run_cellranger.sh</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1" aria-label="code-block-16-2"></a><span class="st">#!/bin/bash</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1" aria-label="code-block-16-3"></a><span class="st">#SBATCH --nodes=1</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1" aria-label="code-block-16-4"></a><span class="st">#SBATCH --ntasks=64</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1" aria-label="code-block-16-5"></a><span class="st">#SBATCH --time=02:00:00</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1" aria-label="code-block-16-6"></a><span class="st">#SBATCH --job-name=cellranger</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1" aria-label="code-block-16-7"></a><span class="st">#SBATCH --account=workshop</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1" aria-label="code-block-16-8"></a><span class="st">#SBATCH --partition=cpu</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1" aria-label="code-block-16-9"></a><span class="st">#SBATCH --output=cellranger_%j.out</span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1" aria-label="code-block-16-10"></a><span class="st">#SBATCH --error=cellranger_%j.err</span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1" aria-label="code-block-16-11"></a></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1" aria-label="code-block-16-12"></a><span class="st"># Load modules</span></span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1" aria-label="code-block-16-13"></a><span class="st">ml --force purge</span></span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1" aria-label="code-block-16-14"></a><span class="st">ml biocontainers</span></span>
+<span id="cb16-15"><a href="#cb16-15" tabindex="-1" aria-label="code-block-16-15"></a><span class="st">ml cellranger</span></span>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1" aria-label="code-block-16-16"></a></span>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1" aria-label="code-block-16-17"></a><span class="st"># Move to the output directory</span></span>
+<span id="cb16-18"><a href="#cb16-18" tabindex="-1" aria-label="code-block-16-18"></a><span class="st">cd ${RCAC_SCRATCH}/scrna_workshop/cellranger_output</span></span>
+<span id="cb16-19"><a href="#cb16-19" tabindex="-1" aria-label="code-block-16-19"></a></span>
+<span id="cb16-20"><a href="#cb16-20" tabindex="-1" aria-label="code-block-16-20"></a><span class="st"># Run Cell Ranger count</span></span>
+<span id="cb16-21"><a href="#cb16-21" tabindex="-1" aria-label="code-block-16-21"></a><span class="st">cellranger count \</span></span>
+<span id="cb16-22"><a href="#cb16-22" tabindex="-1" aria-label="code-block-16-22"></a><span class="st">    --id=pbmc10k \</span></span>
+<span id="cb16-23"><a href="#cb16-23" tabindex="-1" aria-label="code-block-16-23"></a><span class="st">    --transcriptome=${RCAC_SCRATCH}/scrna_workshop/reference/refdata-gex-GRCh38-2024-A \</span></span>
+<span id="cb16-24"><a href="#cb16-24" tabindex="-1" aria-label="code-block-16-24"></a><span class="st">    --fastqs=${RCAC_SCRATCH}/scrna_workshop/fastq \</span></span>
+<span id="cb16-25"><a href="#cb16-25" tabindex="-1" aria-label="code-block-16-25"></a><span class="st">    --create-bam true \</span></span>
+<span id="cb16-26"><a href="#cb16-26" tabindex="-1" aria-label="code-block-16-26"></a><span class="st">    --sample=pbmc_10k_v3 \</span></span>
+<span id="cb16-27"><a href="#cb16-27" tabindex="-1" aria-label="code-block-16-27"></a><span class="st">    --localcores=${SLURM_CPUS_ON_NODE} \</span></span>
+<span id="cb16-28"><a href="#cb16-28" tabindex="-1" aria-label="code-block-16-28"></a><span class="st">    --localmem=100</span></span>
+<span id="cb16-29"><a href="#cb16-29" tabindex="-1" aria-label="code-block-16-29"></a><span class="op">EOF</span></span></code></pre>
+</div>
+<p>Submit the job and monitor its progress:</p>
+<div class="codewrapper sourceCode" id="cb17">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="bu">cd</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1" aria-label="code-block-17-2"></a><span class="ex">sbatch</span> run_cellranger.sh</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">${USER}</span> <span class="co"># or squeue --me</span></span></code></pre>
 </div>
 <p>The job typically takes 30–60 minutes on 16 cores, depending on
 cluster load.</p>
@@ -679,6 +692,11 @@ FASTA, GTF, and STAR index.</td>
 <td><code>.../fastq</code></td>
 <td>Directory containing the FASTQ files. Cell Ranger auto-detects files
 matching the sample name.</td>
+</tr><tr><td><code>--create-bam</code></td>
+<td><code>true</code></td>
+<td>Generate a BAM file with aligned reads. Starting with Cell Ranger
+v8, BAM output is off by default; set to <code>true</code> if you need
+the BAM for downstream tools such as velocyto or variant calling.</td>
 </tr><tr><td><code>--sample</code></td>
 <td><code>pbmc_10k_v3</code></td>
 <td>The sample name prefix in the FASTQ file names. Cell Ranger selects
@@ -691,15 +709,63 @@ allocated.</td>
 </tr><tr><td><code>--localmem</code></td>
 <td><code>64</code></td>
 <td>Maximum memory (in GB) that Cell Ranger is allowed to use.</td>
-</tr></tbody></table></div>
+</tr></tbody></table><div id="what-if-i-have-multiple-samples" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<span class="callout-header">Callout</span>
+<div id="what-if-i-have-multiple-samples" class="callout-inner">
+<h3 class="callout-title">What if I have multiple samples?</h3>
+<div class="callout-content">
+<p><strong>Q:</strong> I have 4 samples (WT_rep1, WT_rep2, KO_rep1,
+KO_rep2). Do I pass them all to one <code>cellranger count</code>
+command?</p>
+<p><strong>A:</strong> No. <code>cellranger count</code> processes
+<strong>one sample</strong> per invocation. Use a SLURM array job to run
+them in parallel:</p>
+<div class="codewrapper sourceCode" id="cb18">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" tabindex="-1" aria-label="code-block-18-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1" aria-label="code-block-18-2"></a><span class="co">#SBATCH --array=0-3</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1" aria-label="code-block-18-3"></a><span class="co">#SBATCH --nodes=1</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1" aria-label="code-block-18-4"></a><span class="co">#SBATCH --ntasks=16</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1" aria-label="code-block-18-5"></a><span class="co">#SBATCH --time=02:00:00</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1" aria-label="code-block-18-6"></a><span class="co">#SBATCH --job-name=cellranger</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1" aria-label="code-block-18-7"></a><span class="co">#SBATCH --account=workshop</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1" aria-label="code-block-18-8"></a></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1" aria-label="code-block-18-9"></a><span class="ex">ml</span> <span class="at">--force</span> purge</span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1" aria-label="code-block-18-10"></a><span class="ex">ml</span> biocontainers cellranger</span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1" aria-label="code-block-18-11"></a></span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1" aria-label="code-block-18-12"></a><span class="va">SAMPLES</span><span class="op">=</span><span class="va">(</span>WT_rep1 WT_rep2 KO_rep1 KO_rep2<span class="va">)</span></span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1" aria-label="code-block-18-13"></a><span class="va">SAMPLE</span><span class="op">=</span><span class="va">${SAMPLES</span><span class="op">[</span><span class="va">$SLURM_ARRAY_TASK_ID</span><span class="op">]</span><span class="va">}</span></span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1" aria-label="code-block-18-14"></a></span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1" aria-label="code-block-18-15"></a><span class="bu">cd</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/cellranger_output</span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1" aria-label="code-block-18-16"></a></span>
+<span id="cb18-17"><a href="#cb18-17" tabindex="-1" aria-label="code-block-18-17"></a><span class="ex">cellranger</span> count <span class="dt">\</span></span>
+<span id="cb18-18"><a href="#cb18-18" tabindex="-1" aria-label="code-block-18-18"></a>    <span class="at">--id</span><span class="op">=</span><span class="va">${SAMPLE}</span> <span class="dt">\</span></span>
+<span id="cb18-19"><a href="#cb18-19" tabindex="-1" aria-label="code-block-18-19"></a>    <span class="at">--transcriptome</span><span class="op">=</span><span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/reference/refdata-gex-GRCh38-2024-A <span class="dt">\</span></span>
+<span id="cb18-20"><a href="#cb18-20" tabindex="-1" aria-label="code-block-18-20"></a>    <span class="at">--fastqs</span><span class="op">=</span><span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/fastq <span class="dt">\</span></span>
+<span id="cb18-21"><a href="#cb18-21" tabindex="-1" aria-label="code-block-18-21"></a>    <span class="at">--create-bam</span> true <span class="dt">\</span></span>
+<span id="cb18-22"><a href="#cb18-22" tabindex="-1" aria-label="code-block-18-22"></a>    <span class="at">--sample</span><span class="op">=</span><span class="va">${SAMPLE}</span> <span class="dt">\</span></span>
+<span id="cb18-23"><a href="#cb18-23" tabindex="-1" aria-label="code-block-18-23"></a>    <span class="at">--localcores</span><span class="op">=</span><span class="va">${SLURM_CPUS_ON_NODE}</span> <span class="dt">\</span></span>
+<span id="cb18-24"><a href="#cb18-24" tabindex="-1" aria-label="code-block-18-24"></a>    <span class="at">--localmem</span><span class="op">=</span>64</span></code></pre>
+</div>
+<p>For most downstream analyses, merge samples in Seurat (e.g., with
+<code>merge()</code> or <code>IntegrateLayers()</code>) rather than
+using <code>cellranger aggr</code>.</p>
+</div>
+</div>
+</div>
+</div>
 <div class="section level3">
 <h3 id="cell-ranger-output-files">Cell Ranger output files<a class="anchor" aria-label="anchor" href="#cell-ranger-output-files"></a></h3>
 <p>When the job completes, Cell Ranger creates the following directory
 structure:</p>
-<div class="codewrapper sourceCode" id="cb17">
+<div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/cellranger_output/pbmc10k/outs/</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" tabindex="-1" aria-label="code-block-19-1"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/cellranger_output/pbmc10k/outs/</span></code></pre>
 </div>
 <p>The key output files are:</p>
 <pre><code>pbmc10k/outs/
@@ -769,6 +835,53 @@ investigate before proceeding to downstream analysis.</p>
 </div>
 </div>
 </div>
+<div class="section level3">
+<h3 id="interpreting-cell-ranger-output">Interpreting Cell Ranger output<a class="anchor" aria-label="anchor" href="#interpreting-cell-ranger-output"></a></h3>
+<figure><img src="../fig/cellranger-web-summary.png" alt="Cell Ranger web_summary.html for PBMC 10k" class="figure mx-auto d-block"><div class="figcaption">Cell Ranger web_summary.html for PBMC 10k</div>
+</figure><p>The <code>web_summary.html</code> file is the first thing to check
+after every Cell Ranger run. Here are the key QC metrics from our PBMC
+10k run:</p>
+<table class="table"><colgroup><col width="24%"><col width="21%"><col width="54%"></colgroup><thead><tr><th>Metric</th>
+<th>Value</th>
+<th>What to look for</th>
+</tr></thead><tbody><tr><td>Estimated Number of Cells</td>
+<td>11,809</td>
+<td>Close to expected loading (~10k)</td>
+</tr><tr><td>Median Genes per Cell</td>
+<td>3,371</td>
+<td>&gt;1,000 for PBMCs is good</td>
+</tr><tr><td>Reads Mapped Confidently to Transcriptome</td>
+<td>79.1%</td>
+<td>&gt;70% expected for 3’ GEX</td>
+</tr><tr><td>Sequencing Saturation</td>
+<td>68.2%</td>
+<td>&gt;60% adequate; &gt;80% ideal</td>
+</tr><tr><td>Fraction Reads in Cells</td>
+<td>95.7%</td>
+<td>&gt;90% indicates clean cell calling</td>
+</tr><tr><td>Valid Barcodes</td>
+<td>97.3%</td>
+<td>&gt;95% expected</td>
+</tr></tbody></table><p>A low Fraction Reads in Cells or low Median Genes per Cell would
+indicate problems with cell viability or library quality.</p>
+<div id="sequencing-saturation-of-68.2-is-that-enough" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<span class="callout-header">Callout</span>
+<div id="sequencing-saturation-of-68.2-is-that-enough" class="callout-inner">
+<h3 class="callout-title">Sequencing saturation of 68.2%: is that
+enough?</h3>
+<div class="callout-content">
+<p>A saturation of 68.2% means that roughly 32% of additional sequencing
+would yield new UMIs. For most differential expression and cell type
+identification workflows, this depth is sufficient. Diminishing returns
+set in above ~80% saturation, so deeper sequencing of this library would
+provide only marginal gains.</p>
+</div>
+</div>
+</div>
+</div>
 </section><section><h2 class="section-heading" id="processing-with-starsolo">Processing with STARsolo<a class="anchor" aria-label="anchor" href="#processing-with-starsolo"></a></h2>
 <hr class="half-width"><p>STARsolo is a single-cell RNA-seq processing mode built into the STAR
 aligner. It replicates the Cell Ranger pipeline – demultiplexing,
@@ -801,42 +914,42 @@ STAR will exit with an error and you will need to build a new index.</p>
 </div>
 </div>
 <p>Create the index build script:</p>
-<div class="codewrapper sourceCode" id="cb19">
+<div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" tabindex="-1" aria-label="code-block-19-1"></a><span class="fu">cat</span> <span class="op">&lt;&lt; 'EOF'</span> <span class="op">&gt;</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/build_star_index.sh</span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1" aria-label="code-block-19-2"></a><span class="st">#!/bin/bash</span></span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1" aria-label="code-block-19-3"></a><span class="st">#SBATCH --nodes=1</span></span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1" aria-label="code-block-19-4"></a><span class="st">#SBATCH --ntasks=16</span></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1" aria-label="code-block-19-5"></a><span class="st">#SBATCH --mem=40G</span></span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1" aria-label="code-block-19-6"></a><span class="st">#SBATCH --time=01:00:00</span></span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1" aria-label="code-block-19-7"></a><span class="st">#SBATCH --job-name=star_index</span></span>
-<span id="cb19-8"><a href="#cb19-8" tabindex="-1" aria-label="code-block-19-8"></a><span class="st">#SBATCH --account=workshop</span></span>
-<span id="cb19-9"><a href="#cb19-9" tabindex="-1" aria-label="code-block-19-9"></a><span class="st">#SBATCH --output=star_index_%j.out</span></span>
-<span id="cb19-10"><a href="#cb19-10" tabindex="-1" aria-label="code-block-19-10"></a><span class="st">#SBATCH --error=star_index_%j.err</span></span>
-<span id="cb19-11"><a href="#cb19-11" tabindex="-1" aria-label="code-block-19-11"></a></span>
-<span id="cb19-12"><a href="#cb19-12" tabindex="-1" aria-label="code-block-19-12"></a><span class="st"># Load modules</span></span>
-<span id="cb19-13"><a href="#cb19-13" tabindex="-1" aria-label="code-block-19-13"></a><span class="st">ml --force purge</span></span>
-<span id="cb19-14"><a href="#cb19-14" tabindex="-1" aria-label="code-block-19-14"></a><span class="st">ml biocontainers</span></span>
-<span id="cb19-15"><a href="#cb19-15" tabindex="-1" aria-label="code-block-19-15"></a><span class="st">ml star</span></span>
-<span id="cb19-16"><a href="#cb19-16" tabindex="-1" aria-label="code-block-19-16"></a></span>
-<span id="cb19-17"><a href="#cb19-17" tabindex="-1" aria-label="code-block-19-17"></a><span class="st">REF=${RCAC_SCRATCH}/scrna_workshop/reference/refdata-gex-GRCh38-2024-A</span></span>
-<span id="cb19-18"><a href="#cb19-18" tabindex="-1" aria-label="code-block-19-18"></a><span class="st">STAR_INDEX=${RCAC_SCRATCH}/scrna_workshop/reference/star_index</span></span>
-<span id="cb19-19"><a href="#cb19-19" tabindex="-1" aria-label="code-block-19-19"></a></span>
-<span id="cb19-20"><a href="#cb19-20" tabindex="-1" aria-label="code-block-19-20"></a><span class="st">mkdir -p ${STAR_INDEX}</span></span>
-<span id="cb19-21"><a href="#cb19-21" tabindex="-1" aria-label="code-block-19-21"></a></span>
-<span id="cb19-22"><a href="#cb19-22" tabindex="-1" aria-label="code-block-19-22"></a><span class="st">STAR \</span></span>
-<span id="cb19-23"><a href="#cb19-23" tabindex="-1" aria-label="code-block-19-23"></a><span class="st">    --runMode genomeGenerate \</span></span>
-<span id="cb19-24"><a href="#cb19-24" tabindex="-1" aria-label="code-block-19-24"></a><span class="st">    --runThreadN ${SLURM_CPUS_ON_NODE} \</span></span>
-<span id="cb19-25"><a href="#cb19-25" tabindex="-1" aria-label="code-block-19-25"></a><span class="st">    --genomeDir ${STAR_INDEX} \</span></span>
-<span id="cb19-26"><a href="#cb19-26" tabindex="-1" aria-label="code-block-19-26"></a><span class="st">    --genomeFastaFiles ${REF}/fasta/genome.fa \</span></span>
-<span id="cb19-27"><a href="#cb19-27" tabindex="-1" aria-label="code-block-19-27"></a><span class="st">    --sjdbGTFfile ${REF}/genes/genes.gtf</span></span>
-<span id="cb19-28"><a href="#cb19-28" tabindex="-1" aria-label="code-block-19-28"></a><span class="op">EOF</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" tabindex="-1" aria-label="code-block-21-1"></a><span class="fu">cat</span> <span class="op">&lt;&lt; 'EOF'</span> <span class="op">&gt;</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/build_star_index.sh</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a><span class="st">#!/bin/bash</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a><span class="st">#SBATCH --nodes=1</span></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a><span class="st">#SBATCH --ntasks=64</span></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a><span class="st">#SBATCH --time=01:00:00</span></span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1" aria-label="code-block-21-6"></a><span class="st">#SBATCH --job-name=star_index</span></span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1" aria-label="code-block-21-7"></a><span class="st">#SBATCH --account=workshop</span></span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1" aria-label="code-block-21-8"></a><span class="st">#SBATCH --partition=cpu</span></span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1" aria-label="code-block-21-9"></a><span class="st">#SBATCH --output=star_index_%j.out</span></span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1" aria-label="code-block-21-10"></a><span class="st">#SBATCH --error=star_index_%j.err</span></span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1" aria-label="code-block-21-11"></a></span>
+<span id="cb21-12"><a href="#cb21-12" tabindex="-1" aria-label="code-block-21-12"></a><span class="st"># Load modules</span></span>
+<span id="cb21-13"><a href="#cb21-13" tabindex="-1" aria-label="code-block-21-13"></a><span class="st">ml --force purge</span></span>
+<span id="cb21-14"><a href="#cb21-14" tabindex="-1" aria-label="code-block-21-14"></a><span class="st">ml biocontainers</span></span>
+<span id="cb21-15"><a href="#cb21-15" tabindex="-1" aria-label="code-block-21-15"></a><span class="st">ml star</span></span>
+<span id="cb21-16"><a href="#cb21-16" tabindex="-1" aria-label="code-block-21-16"></a></span>
+<span id="cb21-17"><a href="#cb21-17" tabindex="-1" aria-label="code-block-21-17"></a><span class="st">REF=${RCAC_SCRATCH}/scrna_workshop/reference/refdata-gex-GRCh38-2024-A</span></span>
+<span id="cb21-18"><a href="#cb21-18" tabindex="-1" aria-label="code-block-21-18"></a><span class="st">STAR_INDEX=${RCAC_SCRATCH}/scrna_workshop/reference/star_index</span></span>
+<span id="cb21-19"><a href="#cb21-19" tabindex="-1" aria-label="code-block-21-19"></a></span>
+<span id="cb21-20"><a href="#cb21-20" tabindex="-1" aria-label="code-block-21-20"></a><span class="st">mkdir -p ${STAR_INDEX}</span></span>
+<span id="cb21-21"><a href="#cb21-21" tabindex="-1" aria-label="code-block-21-21"></a><span class="st">gunzip -c ${REF}/genes/genes.gtf.gz &gt; ${REF}/genes/genes.gtf</span></span>
+<span id="cb21-22"><a href="#cb21-22" tabindex="-1" aria-label="code-block-21-22"></a><span class="st">STAR \</span></span>
+<span id="cb21-23"><a href="#cb21-23" tabindex="-1" aria-label="code-block-21-23"></a><span class="st">    --runMode genomeGenerate \</span></span>
+<span id="cb21-24"><a href="#cb21-24" tabindex="-1" aria-label="code-block-21-24"></a><span class="st">    --runThreadN ${SLURM_CPUS_ON_NODE} \</span></span>
+<span id="cb21-25"><a href="#cb21-25" tabindex="-1" aria-label="code-block-21-25"></a><span class="st">    --genomeDir ${STAR_INDEX} \</span></span>
+<span id="cb21-26"><a href="#cb21-26" tabindex="-1" aria-label="code-block-21-26"></a><span class="st">    --genomeFastaFiles ${REF}/fasta/genome.fa \</span></span>
+<span id="cb21-27"><a href="#cb21-27" tabindex="-1" aria-label="code-block-21-27"></a><span class="st">    --sjdbGTFfile ${REF}/genes/genes.gtf</span></span>
+<span id="cb21-28"><a href="#cb21-28" tabindex="-1" aria-label="code-block-21-28"></a><span class="op">EOF</span></span></code></pre>
 </div>
-<div class="codewrapper sourceCode" id="cb20">
+<div class="codewrapper sourceCode" id="cb22">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" tabindex="-1" aria-label="code-block-20-1"></a><span class="ex">sbatch</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/build_star_index.sh</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" tabindex="-1" aria-label="code-block-22-1"></a><span class="ex">sbatch</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/build_star_index.sh</span></code></pre>
 </div>
 <p>This step requires approximately 32 GB of RAM and takes about 30
 minutes on 16 cores. The resulting index will be written to
@@ -848,62 +961,62 @@ minutes on 16 cores. The resulting index will be written to
 an important difference from Cell Ranger: STAR expects the <strong>cDNA
 read (R2) first</strong>, followed by the barcode read (R1) in the
 <code>--readFilesIn</code> argument.</p>
-<div class="codewrapper sourceCode" id="cb21">
+<div class="codewrapper sourceCode" id="cb23">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" tabindex="-1" aria-label="code-block-21-1"></a><span class="fu">cat</span> <span class="op">&lt;&lt; 'EOF'</span> <span class="op">&gt;</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/run_starsolo.sh</span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a><span class="st">#!/bin/bash</span></span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a><span class="st">#SBATCH --nodes=1</span></span>
-<span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a><span class="st">#SBATCH --ntasks=16</span></span>
-<span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a><span class="st">#SBATCH --mem=40G</span></span>
-<span id="cb21-6"><a href="#cb21-6" tabindex="-1" aria-label="code-block-21-6"></a><span class="st">#SBATCH --time=01:00:00</span></span>
-<span id="cb21-7"><a href="#cb21-7" tabindex="-1" aria-label="code-block-21-7"></a><span class="st">#SBATCH --job-name=starsolo</span></span>
-<span id="cb21-8"><a href="#cb21-8" tabindex="-1" aria-label="code-block-21-8"></a><span class="st">#SBATCH --account=workshop</span></span>
-<span id="cb21-9"><a href="#cb21-9" tabindex="-1" aria-label="code-block-21-9"></a><span class="st">#SBATCH --output=starsolo_%j.out</span></span>
-<span id="cb21-10"><a href="#cb21-10" tabindex="-1" aria-label="code-block-21-10"></a><span class="st">#SBATCH --error=starsolo_%j.err</span></span>
-<span id="cb21-11"><a href="#cb21-11" tabindex="-1" aria-label="code-block-21-11"></a></span>
-<span id="cb21-12"><a href="#cb21-12" tabindex="-1" aria-label="code-block-21-12"></a><span class="st"># Load modules</span></span>
-<span id="cb21-13"><a href="#cb21-13" tabindex="-1" aria-label="code-block-21-13"></a><span class="st">ml --force purge</span></span>
-<span id="cb21-14"><a href="#cb21-14" tabindex="-1" aria-label="code-block-21-14"></a><span class="st">ml biocontainers</span></span>
-<span id="cb21-15"><a href="#cb21-15" tabindex="-1" aria-label="code-block-21-15"></a><span class="st">ml star</span></span>
-<span id="cb21-16"><a href="#cb21-16" tabindex="-1" aria-label="code-block-21-16"></a></span>
-<span id="cb21-17"><a href="#cb21-17" tabindex="-1" aria-label="code-block-21-17"></a><span class="st"># Define paths</span></span>
-<span id="cb21-18"><a href="#cb21-18" tabindex="-1" aria-label="code-block-21-18"></a><span class="st">FASTQ=${RCAC_SCRATCH}/scrna_workshop/fastq</span></span>
-<span id="cb21-19"><a href="#cb21-19" tabindex="-1" aria-label="code-block-21-19"></a><span class="st">STAR_INDEX=${RCAC_SCRATCH}/scrna_workshop/reference/star_index</span></span>
-<span id="cb21-20"><a href="#cb21-20" tabindex="-1" aria-label="code-block-21-20"></a><span class="st">WHITELIST=${RCAC_SCRATCH}/scrna_workshop/reference/refdata-gex-GRCh38-2024-A/star/3M-february-2018.txt</span></span>
-<span id="cb21-21"><a href="#cb21-21" tabindex="-1" aria-label="code-block-21-21"></a></span>
-<span id="cb21-22"><a href="#cb21-22" tabindex="-1" aria-label="code-block-21-22"></a><span class="st">cd ${RCAC_SCRATCH}/scrna_workshop/starsolo_output</span></span>
-<span id="cb21-23"><a href="#cb21-23" tabindex="-1" aria-label="code-block-21-23"></a></span>
-<span id="cb21-24"><a href="#cb21-24" tabindex="-1" aria-label="code-block-21-24"></a><span class="st">STAR \</span></span>
-<span id="cb21-25"><a href="#cb21-25" tabindex="-1" aria-label="code-block-21-25"></a><span class="st">    --runThreadN ${SLURM_CPUS_ON_NODE} \</span></span>
-<span id="cb21-26"><a href="#cb21-26" tabindex="-1" aria-label="code-block-21-26"></a><span class="st">    --genomeDir ${STAR_INDEX} \</span></span>
-<span id="cb21-27"><a href="#cb21-27" tabindex="-1" aria-label="code-block-21-27"></a><span class="st">    --sjdbGTFfile ${RCAC_SCRATCH}/scrna_workshop/reference/refdata-gex-GRCh38-2024-A/genes/genes.gtf \</span></span>
-<span id="cb21-28"><a href="#cb21-28" tabindex="-1" aria-label="code-block-21-28"></a><span class="st">    --readFilesIn \</span></span>
-<span id="cb21-29"><a href="#cb21-29" tabindex="-1" aria-label="code-block-21-29"></a><span class="st">        ${FASTQ}/pbmc_10k_v3_S1_L001_R2_001.fastq.gz,${FASTQ}/pbmc_10k_v3_S1_L002_R2_001.fastq.gz \</span></span>
-<span id="cb21-30"><a href="#cb21-30" tabindex="-1" aria-label="code-block-21-30"></a><span class="st">        ${FASTQ}/pbmc_10k_v3_S1_L001_R1_001.fastq.gz,${FASTQ}/pbmc_10k_v3_S1_L002_R1_001.fastq.gz \</span></span>
-<span id="cb21-31"><a href="#cb21-31" tabindex="-1" aria-label="code-block-21-31"></a><span class="st">    --readFilesCommand zcat \</span></span>
-<span id="cb21-32"><a href="#cb21-32" tabindex="-1" aria-label="code-block-21-32"></a><span class="st">    --soloType CB_UMI_Simple \</span></span>
-<span id="cb21-33"><a href="#cb21-33" tabindex="-1" aria-label="code-block-21-33"></a><span class="st">    --soloCBwhitelist ${WHITELIST} \</span></span>
-<span id="cb21-34"><a href="#cb21-34" tabindex="-1" aria-label="code-block-21-34"></a><span class="st">    --soloCBstart 1 \</span></span>
-<span id="cb21-35"><a href="#cb21-35" tabindex="-1" aria-label="code-block-21-35"></a><span class="st">    --soloCBlen 16 \</span></span>
-<span id="cb21-36"><a href="#cb21-36" tabindex="-1" aria-label="code-block-21-36"></a><span class="st">    --soloUMIstart 17 \</span></span>
-<span id="cb21-37"><a href="#cb21-37" tabindex="-1" aria-label="code-block-21-37"></a><span class="st">    --soloUMIlen 12 \</span></span>
-<span id="cb21-38"><a href="#cb21-38" tabindex="-1" aria-label="code-block-21-38"></a><span class="st">    --soloBarcodeMate 0 \</span></span>
-<span id="cb21-39"><a href="#cb21-39" tabindex="-1" aria-label="code-block-21-39"></a><span class="st">    --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \</span></span>
-<span id="cb21-40"><a href="#cb21-40" tabindex="-1" aria-label="code-block-21-40"></a><span class="st">    --soloUMIfiltering MultiGeneUMI_CR \</span></span>
-<span id="cb21-41"><a href="#cb21-41" tabindex="-1" aria-label="code-block-21-41"></a><span class="st">    --soloUMIdedup 1MM_CR \</span></span>
-<span id="cb21-42"><a href="#cb21-42" tabindex="-1" aria-label="code-block-21-42"></a><span class="st">    --clipAdapterType CellRanger4 \</span></span>
-<span id="cb21-43"><a href="#cb21-43" tabindex="-1" aria-label="code-block-21-43"></a><span class="st">    --soloCellFilter EmptyDrops_CR \</span></span>
-<span id="cb21-44"><a href="#cb21-44" tabindex="-1" aria-label="code-block-21-44"></a><span class="st">    --outSAMtype BAM SortedByCoordinate \</span></span>
-<span id="cb21-45"><a href="#cb21-45" tabindex="-1" aria-label="code-block-21-45"></a><span class="st">    --outSAMattributes CR UR CY UY CB UB \</span></span>
-<span id="cb21-46"><a href="#cb21-46" tabindex="-1" aria-label="code-block-21-46"></a><span class="st">    --outFileNamePrefix starsolo_pbmc10k_</span></span>
-<span id="cb21-47"><a href="#cb21-47" tabindex="-1" aria-label="code-block-21-47"></a><span class="op">EOF</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" tabindex="-1" aria-label="code-block-23-1"></a><span class="fu">cat</span> <span class="op">&lt;&lt; 'EOF'</span> <span class="op">&gt;</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/run_starsolo.sh</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1" aria-label="code-block-23-2"></a><span class="st">#!/bin/bash</span></span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1" aria-label="code-block-23-3"></a><span class="st">#SBATCH --nodes=1</span></span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1" aria-label="code-block-23-4"></a><span class="st">#SBATCH --ntasks=64</span></span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1" aria-label="code-block-23-5"></a><span class="st">#SBATCH --time=01:00:00</span></span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1" aria-label="code-block-23-6"></a><span class="st">#SBATCH --job-name=starsolo</span></span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1" aria-label="code-block-23-7"></a><span class="st">#SBATCH --account=workshop</span></span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1" aria-label="code-block-23-8"></a><span class="st">#SBATCH --partition=cpu</span></span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1" aria-label="code-block-23-9"></a><span class="st">#SBATCH --output=starsolo_%j.out</span></span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1" aria-label="code-block-23-10"></a><span class="st">#SBATCH --error=starsolo_%j.err</span></span>
+<span id="cb23-11"><a href="#cb23-11" tabindex="-1" aria-label="code-block-23-11"></a></span>
+<span id="cb23-12"><a href="#cb23-12" tabindex="-1" aria-label="code-block-23-12"></a><span class="st"># Load modules</span></span>
+<span id="cb23-13"><a href="#cb23-13" tabindex="-1" aria-label="code-block-23-13"></a><span class="st">ml --force purge</span></span>
+<span id="cb23-14"><a href="#cb23-14" tabindex="-1" aria-label="code-block-23-14"></a><span class="st">ml biocontainers</span></span>
+<span id="cb23-15"><a href="#cb23-15" tabindex="-1" aria-label="code-block-23-15"></a><span class="st">ml star</span></span>
+<span id="cb23-16"><a href="#cb23-16" tabindex="-1" aria-label="code-block-23-16"></a></span>
+<span id="cb23-17"><a href="#cb23-17" tabindex="-1" aria-label="code-block-23-17"></a><span class="st"># Define paths</span></span>
+<span id="cb23-18"><a href="#cb23-18" tabindex="-1" aria-label="code-block-23-18"></a><span class="st">FASTQ=${RCAC_SCRATCH}/scrna_workshop/fastq</span></span>
+<span id="cb23-19"><a href="#cb23-19" tabindex="-1" aria-label="code-block-23-19"></a><span class="st">STAR_INDEX=${RCAC_SCRATCH}/scrna_workshop/reference/star_index</span></span>
+<span id="cb23-20"><a href="#cb23-20" tabindex="-1" aria-label="code-block-23-20"></a><span class="st">WHITELIST=${RCAC_SCRATCH}/scrna_workshop/reference/3M-february-2018.txt</span></span>
+<span id="cb23-21"><a href="#cb23-21" tabindex="-1" aria-label="code-block-23-21"></a></span>
+<span id="cb23-22"><a href="#cb23-22" tabindex="-1" aria-label="code-block-23-22"></a><span class="st">cd ${RCAC_SCRATCH}/scrna_workshop/starsolo_output</span></span>
+<span id="cb23-23"><a href="#cb23-23" tabindex="-1" aria-label="code-block-23-23"></a></span>
+<span id="cb23-24"><a href="#cb23-24" tabindex="-1" aria-label="code-block-23-24"></a><span class="st">STAR \</span></span>
+<span id="cb23-25"><a href="#cb23-25" tabindex="-1" aria-label="code-block-23-25"></a><span class="st">    --runThreadN ${SLURM_CPUS_ON_NODE} \</span></span>
+<span id="cb23-26"><a href="#cb23-26" tabindex="-1" aria-label="code-block-23-26"></a><span class="st">    --genomeDir ${STAR_INDEX} \</span></span>
+<span id="cb23-27"><a href="#cb23-27" tabindex="-1" aria-label="code-block-23-27"></a><span class="st">    --sjdbGTFfile ${RCAC_SCRATCH}/scrna_workshop/reference/refdata-gex-GRCh38-2024-A/genes/genes.gtf \</span></span>
+<span id="cb23-28"><a href="#cb23-28" tabindex="-1" aria-label="code-block-23-28"></a><span class="st">    --readFilesIn \</span></span>
+<span id="cb23-29"><a href="#cb23-29" tabindex="-1" aria-label="code-block-23-29"></a><span class="st">        ${FASTQ}/pbmc_10k_v3_S1_L001_R2_001.fastq.gz,${FASTQ}/pbmc_10k_v3_S1_L002_R2_001.fastq.gz \</span></span>
+<span id="cb23-30"><a href="#cb23-30" tabindex="-1" aria-label="code-block-23-30"></a><span class="st">        ${FASTQ}/pbmc_10k_v3_S1_L001_R1_001.fastq.gz,${FASTQ}/pbmc_10k_v3_S1_L002_R1_001.fastq.gz \</span></span>
+<span id="cb23-31"><a href="#cb23-31" tabindex="-1" aria-label="code-block-23-31"></a><span class="st">    --readFilesCommand zcat \</span></span>
+<span id="cb23-32"><a href="#cb23-32" tabindex="-1" aria-label="code-block-23-32"></a><span class="st">    --soloType CB_UMI_Simple \</span></span>
+<span id="cb23-33"><a href="#cb23-33" tabindex="-1" aria-label="code-block-23-33"></a><span class="st">    --soloCBwhitelist ${WHITELIST} \</span></span>
+<span id="cb23-34"><a href="#cb23-34" tabindex="-1" aria-label="code-block-23-34"></a><span class="st">    --soloCBstart 1 \</span></span>
+<span id="cb23-35"><a href="#cb23-35" tabindex="-1" aria-label="code-block-23-35"></a><span class="st">    --soloCBlen 16 \</span></span>
+<span id="cb23-36"><a href="#cb23-36" tabindex="-1" aria-label="code-block-23-36"></a><span class="st">    --soloUMIstart 17 \</span></span>
+<span id="cb23-37"><a href="#cb23-37" tabindex="-1" aria-label="code-block-23-37"></a><span class="st">    --soloUMIlen 12 \</span></span>
+<span id="cb23-38"><a href="#cb23-38" tabindex="-1" aria-label="code-block-23-38"></a><span class="st">    --soloBarcodeMate 0 \</span></span>
+<span id="cb23-39"><a href="#cb23-39" tabindex="-1" aria-label="code-block-23-39"></a><span class="st">    --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \</span></span>
+<span id="cb23-40"><a href="#cb23-40" tabindex="-1" aria-label="code-block-23-40"></a><span class="st">    --soloUMIfiltering MultiGeneUMI_CR \</span></span>
+<span id="cb23-41"><a href="#cb23-41" tabindex="-1" aria-label="code-block-23-41"></a><span class="st">    --soloUMIdedup 1MM_CR \</span></span>
+<span id="cb23-42"><a href="#cb23-42" tabindex="-1" aria-label="code-block-23-42"></a><span class="st">    --clipAdapterType CellRanger4 \</span></span>
+<span id="cb23-43"><a href="#cb23-43" tabindex="-1" aria-label="code-block-23-43"></a><span class="st">    --soloCellFilter EmptyDrops_CR \</span></span>
+<span id="cb23-44"><a href="#cb23-44" tabindex="-1" aria-label="code-block-23-44"></a><span class="st">    --outSAMtype BAM SortedByCoordinate \</span></span>
+<span id="cb23-45"><a href="#cb23-45" tabindex="-1" aria-label="code-block-23-45"></a><span class="st">    --outSAMattributes CR UR CY UY CB UB \</span></span>
+<span id="cb23-46"><a href="#cb23-46" tabindex="-1" aria-label="code-block-23-46"></a><span class="st">    --outFileNamePrefix starsolo_pbmc10k_</span></span>
+<span id="cb23-47"><a href="#cb23-47" tabindex="-1" aria-label="code-block-23-47"></a><span class="op">EOF</span></span></code></pre>
 </div>
 <p>Submit the job:</p>
-<div class="codewrapper sourceCode" id="cb22">
+<div class="codewrapper sourceCode" id="cb24">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" tabindex="-1" aria-label="code-block-22-1"></a><span class="ex">sbatch</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/run_starsolo.sh</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" tabindex="-1" aria-label="code-block-24-1"></a><span class="ex">sbatch</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/run_starsolo.sh</span></code></pre>
 </div>
 </div>
 <div class="section level3">
@@ -996,10 +1109,10 @@ error-corrected versions plus quality scores).</td>
 <h3 id="starsolo-output-files">STARsolo output files<a class="anchor" aria-label="anchor" href="#starsolo-output-files"></a></h3>
 <p>STARsolo writes the count matrices under <code>Solo.out/</code>
 inside the output directory:</p>
-<div class="codewrapper sourceCode" id="cb23">
+<div class="codewrapper sourceCode" id="cb25">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" tabindex="-1" aria-label="code-block-23-1"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/starsolo_output/starsolo_pbmc10k_Solo.out/Gene/filtered/</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" tabindex="-1" aria-label="code-block-25-1"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/starsolo_output/starsolo_pbmc10k_Solo.out/Gene/filtered/</span></code></pre>
 </div>
 <div id="accordionSpoiler6" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
@@ -1041,11 +1154,11 @@ formats automatically.</p>
 <div id="runtime-comparison" class="callout-inner">
 <h3 class="callout-title">Runtime comparison</h3>
 <div class="callout-content">
-<p>On 16 cores with the PBMC 10k v3 dataset, typical runtimes are:</p>
+<p>On 64 cores with the PBMC 10k v3 dataset, typical runtimes are:</p>
 <ul><li>
-<strong>Cell Ranger:</strong> ~45 minutes</li>
+<strong>Cell Ranger:</strong> ~7 hours</li>
 <li>
-<strong>STARsolo:</strong> ~5 minutes</li>
+<strong>STARsolo:</strong> ~45 minutes</li>
 </ul><p>STARsolo is roughly 9x faster because STAR is a highly optimized C++
 aligner, while Cell Ranger wraps STAR with additional Python and Java
 orchestration layers. Both produce nearly identical count matrices.</p>
@@ -1053,29 +1166,57 @@ orchestration layers. Both produce nearly identical count matrices.</p>
 </div>
 </div>
 </div>
+<div class="section level3">
+<h3 id="interpreting-starsolo-output">Interpreting STARsolo output<a class="anchor" aria-label="anchor" href="#interpreting-starsolo-output"></a></h3>
+<p>STARsolo writes alignment statistics to <code>Log.final.out</code> in
+the output directory. Here are the key metrics from our PBMC 10k
+run:</p>
+<table class="table"><colgroup><col width="24%"><col width="21%"><col width="54%"></colgroup><thead><tr><th>Metric</th>
+<th>Value</th>
+<th>What to look for</th>
+</tr></thead><tbody><tr><td>Uniquely mapped reads %</td>
+<td>89.28%</td>
+<td>&gt;80% for human GEX</td>
+</tr><tr><td>Multi-mapping reads %</td>
+<td>7.14%</td>
+<td>&lt;10% typical</td>
+</tr><tr><td>Unmapped: too short %</td>
+<td>2.56%</td>
+<td>&gt;10% suggests trimming or degradation</td>
+</tr><tr><td>Mismatch rate per base</td>
+<td>0.56%</td>
+<td>&lt;1% expected</td>
+</tr><tr><td>Mapping speed</td>
+<td>923.7M reads/hr</td>
+<td>~15x faster than Cell Ranger for this run</td>
+</tr></tbody></table><p>Unlike Cell Ranger, STARsolo does not produce an HTML summary report.
+Check <code>Log.final.out</code> for alignment statistics and
+<code>Solo.out/Gene/Summary.csv</code> for cell-level metrics such as
+the number of cells detected and UMIs per cell.</p>
+</div>
 </section><section><h2 class="section-heading" id="comparing-outputs">Comparing Outputs<a class="anchor" aria-label="anchor" href="#comparing-outputs"></a></h2>
 <hr class="half-width"><p>Now that both tools have finished, let’s compare their outputs. We
 can count the number of cells (barcodes) and genes (features) detected
 by each tool directly from the output files.</p>
 <p>Cell Ranger:</p>
-<div class="codewrapper sourceCode" id="cb25">
+<div class="codewrapper sourceCode" id="cb27">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" tabindex="-1" aria-label="code-block-25-1"></a><span class="bu">echo</span> <span class="st">"Cell Ranger cells:"</span></span>
-<span id="cb25-2"><a href="#cb25-2" tabindex="-1" aria-label="code-block-25-2"></a><span class="fu">zcat</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/cellranger_output/pbmc10k/outs/filtered_feature_bc_matrix/barcodes.tsv.gz <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
-<span id="cb25-3"><a href="#cb25-3" tabindex="-1" aria-label="code-block-25-3"></a></span>
-<span id="cb25-4"><a href="#cb25-4" tabindex="-1" aria-label="code-block-25-4"></a><span class="bu">echo</span> <span class="st">"Cell Ranger genes:"</span></span>
-<span id="cb25-5"><a href="#cb25-5" tabindex="-1" aria-label="code-block-25-5"></a><span class="fu">zcat</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/cellranger_output/pbmc10k/outs/filtered_feature_bc_matrix/features.tsv.gz <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" tabindex="-1" aria-label="code-block-27-1"></a><span class="bu">echo</span> <span class="st">"Cell Ranger cells:"</span></span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1" aria-label="code-block-27-2"></a><span class="fu">zcat</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/cellranger_output/pbmc10k/outs/filtered_feature_bc_matrix/barcodes.tsv.gz <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1" aria-label="code-block-27-3"></a></span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1" aria-label="code-block-27-4"></a><span class="bu">echo</span> <span class="st">"Cell Ranger genes:"</span></span>
+<span id="cb27-5"><a href="#cb27-5" tabindex="-1" aria-label="code-block-27-5"></a><span class="fu">zcat</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/cellranger_output/pbmc10k/outs/filtered_feature_bc_matrix/features.tsv.gz <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span></code></pre>
 </div>
 <p>STARsolo:</p>
-<div class="codewrapper sourceCode" id="cb26">
+<div class="codewrapper sourceCode" id="cb28">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" tabindex="-1" aria-label="code-block-26-1"></a><span class="bu">echo</span> <span class="st">"STARsolo cells:"</span></span>
-<span id="cb26-2"><a href="#cb26-2" tabindex="-1" aria-label="code-block-26-2"></a><span class="fu">wc</span> <span class="at">-l</span> <span class="op">&lt;</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/starsolo_output/starsolo_pbmc10k_Solo.out/Gene/filtered/barcodes.tsv</span>
-<span id="cb26-3"><a href="#cb26-3" tabindex="-1" aria-label="code-block-26-3"></a></span>
-<span id="cb26-4"><a href="#cb26-4" tabindex="-1" aria-label="code-block-26-4"></a><span class="bu">echo</span> <span class="st">"STARsolo genes:"</span></span>
-<span id="cb26-5"><a href="#cb26-5" tabindex="-1" aria-label="code-block-26-5"></a><span class="fu">wc</span> <span class="at">-l</span> <span class="op">&lt;</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/starsolo_output/starsolo_pbmc10k_Solo.out/Gene/filtered/features.tsv</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" tabindex="-1" aria-label="code-block-28-1"></a><span class="bu">echo</span> <span class="st">"STARsolo cells:"</span></span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1" aria-label="code-block-28-2"></a><span class="fu">wc</span> <span class="at">-l</span> <span class="op">&lt;</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/starsolo_output/starsolo_pbmc10k_Solo.out/Gene/filtered/barcodes.tsv</span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1" aria-label="code-block-28-3"></a></span>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1" aria-label="code-block-28-4"></a><span class="bu">echo</span> <span class="st">"STARsolo genes:"</span></span>
+<span id="cb28-5"><a href="#cb28-5" tabindex="-1" aria-label="code-block-28-5"></a><span class="fu">wc</span> <span class="at">-l</span> <span class="op">&lt;</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/starsolo_output/starsolo_pbmc10k_Solo.out/Gene/filtered/features.tsv</span></code></pre>
 </div>
 <div id="accordionSpoiler7" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
@@ -1089,14 +1230,14 @@ by each tool directly from the output files.</p>
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code>Cell Ranger cells:
-11769
+11809
 Cell Ranger genes:
-36601
+38606
 
 STARsolo cells:
-11753
+11682
 STARsolo genes:
-36601</code></pre>
+38606</code></pre>
 </div>
 <p>The cell counts may differ by a small amount (typically &lt;1%) due
 to minor differences in the EmptyDrops cell-calling implementation. The
@@ -1166,13 +1307,13 @@ million.</p></li>
 both v2 and v3 use 16 bp cell barcodes. The cell barcode length did not
 change between chemistry versions.</p></li>
 </ol><p>The updated parameters would look like:</p>
-<div class="codewrapper sourceCode" id="cb28">
+<div class="codewrapper sourceCode" id="cb30">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" tabindex="-1" aria-label="code-block-28-1"></a>    <span class="ex">--soloCBwhitelist</span> /path/to/737K-august-2016.txt <span class="dt">\</span></span>
-<span id="cb28-2"><a href="#cb28-2" tabindex="-1" aria-label="code-block-28-2"></a>    <span class="at">--soloCBlen</span> 16 <span class="dt">\</span></span>
-<span id="cb28-3"><a href="#cb28-3" tabindex="-1" aria-label="code-block-28-3"></a>    <span class="at">--soloUMIstart</span> 17 <span class="dt">\</span></span>
-<span id="cb28-4"><a href="#cb28-4" tabindex="-1" aria-label="code-block-28-4"></a>    <span class="at">--soloUMIlen</span> 10 <span class="dt">\</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" tabindex="-1" aria-label="code-block-30-1"></a>    <span class="ex">--soloCBwhitelist</span> /path/to/737K-august-2016.txt <span class="dt">\</span></span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1" aria-label="code-block-30-2"></a>    <span class="at">--soloCBlen</span> 16 <span class="dt">\</span></span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1" aria-label="code-block-30-3"></a>    <span class="at">--soloUMIstart</span> 17 <span class="dt">\</span></span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1" aria-label="code-block-30-4"></a>    <span class="at">--soloUMIlen</span> 10 <span class="dt">\</span></span></code></pre>
 </div>
 <p>Always check the chemistry version in your experiment’s documentation
 or the <code>web_summary.html</code> from a previous Cell Ranger run.
@@ -1329,8 +1470,8 @@ any links that you are not going to use.
   "url": "https://singlecell-rnaseq.github.io/NA/instructor/raw-data-processing.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/instructor/raw-data-processing.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-05-12",
-  "datePublished": "2026-05-12"
+  "dateModified": "2026-05-14",
+  "datePublished": "2026-05-14"
 }
 
   </script><script>

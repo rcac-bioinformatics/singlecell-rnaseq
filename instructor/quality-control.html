@@ -339,7 +339,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Quality Control</h1>
-        <p>Last updated on 2026-05-12 |
+        <p>Last updated on 2026-05-14 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/quality-control.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -391,37 +391,9 @@ needed</li>
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">library</span><span class="op">(</span><span class="va">Seurat</span><span class="op">)</span></span></code></pre>
-</div>
-<div class="codewrapper">
-<h3 class="code-label">ERROR<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="error" tabindex="0"><code>Error in `library()`:
-! there is no package called 'Seurat'</code></pre>
-</div>
-<div class="codewrapper sourceCode" id="cb3">
-<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">library</span><span class="op">(</span><span class="va">ggplot2</span><span class="op">)</span></span></code></pre>
-</div>
-<div class="codewrapper">
-<h3 class="code-label">ERROR<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="error" tabindex="0"><code>Error in `library()`:
-! there is no package called 'ggplot2'</code></pre>
-</div>
-<div class="codewrapper sourceCode" id="cb5">
-<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">library</span><span class="op">(</span><span class="va">patchwork</span><span class="op">)</span></span></code></pre>
-</div>
-<div class="codewrapper">
-<h3 class="code-label">ERROR<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="error" tabindex="0"><code>Error in `library()`:
-! there is no package called 'patchwork'</code></pre>
+<code class="sourceCode R"><span><span class="kw">library</span><span class="op">(</span><span class="va">Seurat</span><span class="op">)</span></span>
+<span><span class="kw">library</span><span class="op">(</span><span class="va">ggplot2</span><span class="op">)</span></span>
+<span><span class="kw">library</span><span class="op">(</span><span class="va">patchwork</span><span class="op">)</span></span></code></pre>
 </div>
 </section><section><h2 class="section-heading" id="loading-data-into-seurat">Loading Data into Seurat<a class="anchor" aria-label="anchor" href="#loading-data-into-seurat"></a></h2>
 <hr class="half-width"><p>The starting point for this episode is the <strong>filtered count
@@ -431,16 +403,28 @@ and consists of three files: <code>barcodes.tsv.gz</code>,
 <code>features.tsv.gz</code>, and <code>matrix.mtx.gz</code>. Seurat’s
 <code>Read10X()</code> function reads all three files and assembles them
 into a sparse matrix in R.</p>
-<div class="codewrapper sourceCode" id="cb7">
+<p>First, set up the path to the Cell Ranger output so that all file
+references in this episode use the same base directory:</p>
+<div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pbmc.data</span> <span class="op">&lt;-</span> <span class="fu">Read10X</span><span class="op">(</span>data.dir <span class="op">=</span> <span class="st">"filtered_feature_bc_matrix/"</span><span class="op">)</span></span></code></pre>
+<code class="sourceCode R"><span><span class="va">data_dir</span> <span class="op">&lt;-</span> <span class="fu">paste0</span><span class="op">(</span></span>
+<span>    <span class="st">"/scratch/negishi/"</span>, <span class="fu">Sys.getenv</span><span class="op">(</span><span class="st">"USER"</span><span class="op">)</span>,</span>
+<span>    <span class="st">"/scrna_workshop/cellranger_output/pbmc10k/outs/filtered_feature_bc_matrix/"</span></span>
+<span><span class="op">)</span></span></code></pre>
+</div>
+<p>Now load the count matrix:</p>
+<div class="codewrapper sourceCode" id="cb3">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pbmc.data</span> <span class="op">&lt;-</span> <span class="fu">Read10X</span><span class="op">(</span>data.dir <span class="op">=</span> <span class="va">data_dir</span><span class="op">)</span></span></code></pre>
 </div>
 <p><code>Read10X()</code> returns a sparse matrix where rows are genes
 and columns are cell barcodes. Let’s check its dimensions before
 creating the Seurat object:</p>
-<div class="codewrapper sourceCode" id="cb8">
+<div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -451,14 +435,14 @@ creating the Seurat object:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>[1] 36601 11769</code></pre>
+<pre class="output" tabindex="0"><code>[1] 38606 11809</code></pre>
 </div>
-<p>This tells us the matrix contains 36,601 genes (rows) and 11,769 cell
+<p>This tells us the matrix contains 38,606 genes (rows) and 11,809 cell
 barcodes (columns).</p>
 </div>
 </div>
@@ -474,7 +458,7 @@ cells (these are too rare to be informative)</li>
 <li>
 <code>min.features = 200</code> removes cells with fewer than 200
 detected genes (these are likely empty droplets or debris)</li>
-</ul><div class="codewrapper sourceCode" id="cb10">
+</ul><div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -491,14 +475,14 @@ detected genes (these are likely empty droplets or debris)</li>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code>An object of class Seurat
-23694 features across 11738 samples within 1 assay
-Active assay: RNA (23694 features, 0 variable features)
+29155 features across 11721 samples within 1 assay
+Active assay: RNA (29155 features, 0 variable features)
  1 layer present: counts</code></pre>
 </div>
 <p>After the initial filters, we have approximately 23,700 genes and
@@ -548,31 +532,34 @@ after scaling)</li>
 <strong>Metadata</strong>: a data frame with one row per cell,
 storing QC metrics, cluster assignments, and any other per-cell
 annotations.</li>
-</ul><p>You can inspect the metadata that Seurat automatically computed
+</ul><figure><img src="../fig/seurat_object.png" alt="Structure of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns" class="figure mx-auto d-block"><div class="figcaption">Structure of the Seurat v5 object showing the
+RNA assay with its three layers (counts, data, scale.data) and the
+per-cell metadata columns</div>
+</figure><p>You can inspect the metadata that Seurat automatically computed
 during object creation:</p>
-<div class="codewrapper sourceCode" id="cb12">
+<div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">head</span><span class="op">(</span><span class="va">pbmc</span><span class="op">[[</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre>
+<code class="sourceCode R"><span><span class="fu">head</span><span class="op">(</span><span class="va">pbmc</span><span class="op">@</span><span class="va">meta.data</span><span class="op">)</span></span></code></pre>
 </div>
 <div id="accordionSpoiler3" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>                        orig.ident nCount_RNA nFeature_RNA
-AAACCCAAGAAACACT-1         pbmc10k       9008         2808
-AAACCCAAGAAACCAT-1         pbmc10k       3664         1508
-AAACCCAAGAAACTGT-1         pbmc10k       2515         1199
-AAACCCAAGAAAGCGA-1         pbmc10k      13457         3652
-AAACCCAAGAAAGTTG-1         pbmc10k       2331         1155
-AAACCCAAGAACAATC-1         pbmc10k       5981         2216</code></pre>
+<pre class="output" tabindex="0"><code>                   orig.ident nCount_RNA nFeature_RNA
+AAACCCAAGCGCCCAT-1    pbmc10k       4282         2152
+AAACCCAAGGTTCCGC-1    pbmc10k      29509         5990
+AAACCCACAGACAAGC-1    pbmc10k        574          358
+AAACCCACAGAGTTGG-1    pbmc10k       8400         2881
+AAACCCACAGGTATGG-1    pbmc10k       9675         3731
+AAACCCACATAGTCAC-1    pbmc10k      10058         3365</code></pre>
 </div>
 <p>Seurat automatically calculated two metrics per cell:</p>
 <ul><li>
@@ -595,7 +582,7 @@ that cell</li>
 <p>Seurat v5 introduced a new <strong>layer-based architecture</strong>.
 To access expression data, use the <code>$</code> operator on the
 assay:</p>
-<div class="codewrapper sourceCode" id="cb14">
+<div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -606,7 +593,7 @@ assay:</p>
 </div>
 <p>If you see older tutorials using the <code>@</code> slot syntax, that
 is Seurat v4 and will not work correctly with v5 objects:</p>
-<div class="codewrapper sourceCode" id="cb15">
+<div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -641,7 +628,7 @@ doublet.</td>
 </tr></tbody></table><p>Let’s calculate the mitochondrial percentage. Human mitochondrial
 gene names start with <code>MT-</code> (e.g., MT-CO1, MT-ND1, MT-ATP6),
 so we use a pattern match:</p>
-<div class="codewrapper sourceCode" id="cb16">
+<div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -649,7 +636,7 @@ so we use a pattern match:</p>
 </div>
 <p>Now let’s inspect the distribution of all three metrics. First, we
 look at the summary statistics:</p>
-<div class="codewrapper sourceCode" id="cb17">
+<div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -662,24 +649,24 @@ look at the summary statistics:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
   <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
+<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code># nFeature_RNA
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-  201.0   963.0  1831.0  2113.0  2928.0 10184.0
+    201    2895    3378    3557    4270    9540
 
 # nCount_RNA
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-  269.0  1712.0  3948.0  5556.0  7198.0 86373.0
+    505    8047   10357   12280   15166  103741
 
 # percent.mt
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
- 0.0000  3.1200  5.5300  6.4780  8.3700 66.4300</code></pre>
+ 0.1752  4.8509  5.7882  6.7695  7.0114 89.8376 </code></pre>
 </div>
-<p>Most cells have 1,000–3,000 genes, 2,000–7,000 UMIs, and 3–8%
+<p>Most cells have 1,000–3,000 genes, 2,000–8,000 UMIs, and 3–5%
 mitochondrial content. But notice the maximum values: one cell has over
 10,000 genes (possible doublet), another has over 86,000 UMIs, and one
 cell has 66% mitochondrial reads (clearly dying). These outliers are
@@ -692,16 +679,20 @@ what QC filtering removes.</p>
 <h3 id="violin-plots">Violin plots<a class="anchor" aria-label="anchor" href="#violin-plots"></a></h3>
 <p>Violin plots show the distribution of each metric across all cells.
 They are the standard first visualization for scRNA-seq QC.</p>
-<div class="codewrapper sourceCode" id="cb19">
+<div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">VlnPlot</span><span class="op">(</span><span class="va">pbmc</span>,</span>
 <span>        features <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"nFeature_RNA"</span>, <span class="st">"nCount_RNA"</span>, <span class="st">"percent.mt"</span><span class="op">)</span>,</span>
 <span>        ncol <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>        pt.size <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre>
+<span>        pt.size <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>        layer <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span></code></pre>
 </div>
-<p>Setting <code>pt.size = 0</code> hides individual points so the
+<figure><img src="../fig/violin_plots_output.png" alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt showing the distribution of QC metrics across all cells before filtering" class="figure mx-auto d-block"><div class="figcaption">Violin plots of nFeature_RNA, nCount_RNA, and
+percent.mt showing the distribution of QC metrics across all cells
+before filtering</div>
+</figure><p>Setting <code>pt.size = 0</code> hides individual points so the
 distribution shape is easier to see with 10,000+ cells. If you want to
 see points, set <code>pt.size = 0.1</code>.</p>
 </div>
@@ -712,19 +703,20 @@ The most informative plot is <code>nCount_RNA</code>
 vs. <code>nFeature_RNA</code>, which should show a strong positive
 correlation: cells with more total UMIs generally detect more genes.
 Points that deviate from this trend are suspicious.</p>
-<div class="codewrapper sourceCode" id="cb20">
+<div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">FeatureScatter</span><span class="op">(</span><span class="va">pbmc</span>,</span>
-<span>               feature1 <span class="op">=</span> <span class="st">"nCount_RNA"</span>,</span>
-<span>               feature2 <span class="op">=</span> <span class="st">"nFeature_RNA"</span>,</span>
-<span>               group.by <span class="op">=</span> <span class="st">"orig.ident"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">pbmc</span><span class="op">$</span><span class="va">percent.mt</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">scale_color_viridis_c</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"% MT"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span></span></code></pre>
+<code class="sourceCode R"><span><span class="fu">ggplot</span><span class="op">(</span><span class="va">pbmc</span><span class="op">@</span><span class="va">meta.data</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">nCount_RNA</span>, y <span class="op">=</span> <span class="va">nFeature_RNA</span>, color <span class="op">=</span> <span class="va">percent.mt</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.5</span>, alpha <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">scale_color_gradient</span><span class="op">(</span>low <span class="op">=</span> <span class="st">"grey90"</span>, high <span class="op">=</span> <span class="st">"firebrick"</span>, name <span class="op">=</span> <span class="st">"% MT"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Total UMI counts"</span>, y <span class="op">=</span> <span class="st">"Number of genes"</span><span class="op">)</span></span></code></pre>
 </div>
-<p>What to look for in this plot:</p>
+<figure><img src="../fig/scatterplot-output.png" alt="Scatter plot of total UMI counts versus number of genes per cell colored by mitochondrial percentage, with high-mito cells highlighted in red" class="figure mx-auto d-block"><div class="figcaption">Scatter plot of total UMI counts versus number
+of genes per cell colored by mitochondrial percentage, with high-mito
+cells highlighted in red</div>
+</figure><p>What to look for in this plot:</p>
 <ul><li>
 <strong>Main cloud</strong>: most cells should form a dense cloud
 along a rough diagonal. These are healthy cells with a proportional
@@ -785,26 +777,53 @@ remove clear outliers while preserving the bulk of the data.</p>
 <code>nFeature_RNA &gt; 200</code>: remove cells with very few genes
 (likely empty)</li>
 <li>
-<code>nFeature_RNA &lt; 5000</code>: remove cells with an extreme
+<code>nFeature_RNA &lt; 7000</code>: remove cells with an extreme
 number of genes (possible doublets)</li>
+<li>
+<code>nCount_RNA &lt; 50000</code>: remove cells with unusually high
+UMI counts (possible doublets)</li>
 <li>
 <code>percent.mt &lt; 15</code>: remove cells with high
 mitochondrial content (likely dying)</li>
-</ul><p>Let’s record how many cells we have before filtering:</p>
-<div class="codewrapper sourceCode" id="cb21">
+</ul><p>Let’s visualize where these cutoffs fall on the violin plots. Red
+dashed lines mark the thresholds:</p>
+<div class="codewrapper sourceCode" id="cb17">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu">VlnPlot</span><span class="op">(</span><span class="va">pbmc</span>, features <span class="op">=</span> <span class="st">"nFeature_RNA"</span>, pt.size <span class="op">=</span> <span class="fl">0.1</span>, layer <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="fl">205</span>,<span class="fl">7000</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu">VlnPlot</span><span class="op">(</span><span class="va">pbmc</span>, features <span class="op">=</span> <span class="st">"nCount_RNA"</span>, pt.size <span class="op">=</span> <span class="fl">0.1</span>, layer <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">50000</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">p3</span> <span class="op">&lt;-</span> <span class="fu">VlnPlot</span><span class="op">(</span><span class="va">pbmc</span>, features <span class="op">=</span> <span class="st">"percent.mt"</span>, pt.size <span class="op">=</span> <span class="fl">0.1</span>, layer <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">15</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">p1</span> <span class="op">+</span> <span class="va">p2</span> <span class="op">+</span> <span class="va">p3</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre>
+</div>
+<figure><img src="../fig/violin_plots_with-pt_output.png" alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt with red dashed lines showing the filtering thresholds and individual cells visible as points" class="figure mx-auto d-block"><div class="figcaption">Violin plots of nFeature_RNA, nCount_RNA, and
+percent.mt with red dashed lines showing the filtering thresholds and
+individual cells visible as points</div>
+</figure><p>Cells above or below the red lines will be removed. The small point
+size (<code>pt.size = 0.1</code>) lets you see how many individual cells
+fall outside the thresholds.</p>
+<p>Let’s record how many cells we have before filtering:</p>
+<div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">cat</span><span class="op">(</span><span class="st">"Cells before filtering:"</span>, <span class="fu">ncol</span><span class="op">(</span><span class="va">pbmc</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre>
 </div>
 <p>Apply the filters:</p>
-<div class="codewrapper sourceCode" id="cb22">
+<div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pbmc</span> <span class="op">&lt;-</span> <span class="fu">subset</span><span class="op">(</span><span class="va">pbmc</span>,</span>
 <span>               subset <span class="op">=</span> <span class="va">nFeature_RNA</span> <span class="op">&gt;</span> <span class="fl">200</span> <span class="op">&amp;</span></span>
-<span>                        <span class="va">nFeature_RNA</span> <span class="op">&lt;</span> <span class="fl">5000</span> <span class="op">&amp;</span></span>
+<span>                        <span class="va">nFeature_RNA</span> <span class="op">&lt;</span> <span class="fl">7000</span> <span class="op">&amp;</span></span>
+<span>                        <span class="va">nCount_RNA</span> <span class="op">&lt;</span> <span class="fl">50000</span> <span class="op">&amp;</span></span>
 <span>                        <span class="va">percent.mt</span> <span class="op">&lt;</span> <span class="fl">15</span><span class="op">)</span></span>
 <span><span class="fu">cat</span><span class="op">(</span><span class="st">"Cells after filtering:"</span>, <span class="fu">ncol</span><span class="op">(</span><span class="va">pbmc</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre>
 </div>
@@ -813,47 +832,55 @@ mitochondrial content (likely dying)</li>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
   <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>Cells before filtering: 11738
-Cells after filtering: 10000</code></pre>
+<pre class="output" tabindex="0"><code>Cells before filtering: 11721
+Cells after filtering: 11310</code></pre>
 </div>
-<p>Filtering removes approximately 1,500–1,800 cells (~15% of the
-total). The exact number depends on minor differences in the Cell Ranger
-version and reference used. You should have roughly 9,500–10,500 cells
-remaining.</p>
+<p>Filtering removes ~400 cells (~3.5% of the total). The exact number
+depends on minor differences in the Cell Ranger version and reference
+used. You should have roughly 11,300 cells remaining.</p>
 </div>
 </div>
 </div>
 </div>
 <p>Let’s verify the filtering by looking at the QC distributions
 again:</p>
-<div class="codewrapper sourceCode" id="cb24">
+<div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">VlnPlot</span><span class="op">(</span><span class="va">pbmc</span>,</span>
 <span>        features <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"nFeature_RNA"</span>, <span class="st">"nCount_RNA"</span>, <span class="st">"percent.mt"</span><span class="op">)</span>,</span>
 <span>        ncol <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>        pt.size <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre>
+<span>        pt.size <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>        layer <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span></code></pre>
 </div>
-<p>The violin plots should now show tighter distributions with the
+<figure><img src="../fig/violin_plots_after_filtering_output.png" alt="Structure of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns" class="figure mx-auto d-block"><div class="figcaption">Structure of the Seurat v5 object showing the
+RNA assay with its three layers (counts, data, scale.data) and the
+per-cell metadata columns</div>
+</figure><p>The violin plots should now show tighter distributions with the
 extreme tails removed. The mitochondrial percentage should be capped
 below 15%.</p>
 <p>Let’s also verify with a scatter plot:</p>
-<div class="codewrapper sourceCode" id="cb25">
+<div class="codewrapper sourceCode" id="cb22">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">FeatureScatter</span><span class="op">(</span><span class="va">pbmc</span>,</span>
-<span>               feature1 <span class="op">=</span> <span class="st">"nCount_RNA"</span>,</span>
-<span>               feature2 <span class="op">=</span> <span class="st">"nFeature_RNA"</span><span class="op">)</span></span></code></pre>
+<code class="sourceCode R"><span><span class="fu">ggplot</span><span class="op">(</span><span class="va">pbmc</span><span class="op">@</span><span class="va">meta.data</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">nCount_RNA</span>, y <span class="op">=</span> <span class="va">nFeature_RNA</span>, color <span class="op">=</span> <span class="va">percent.mt</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.5</span>, alpha <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">scale_color_gradient</span><span class="op">(</span>low <span class="op">=</span> <span class="st">"grey90"</span>, high <span class="op">=</span> <span class="st">"firebrick"</span>, name <span class="op">=</span> <span class="st">"% MT"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Total UMI counts"</span>, y <span class="op">=</span> <span class="st">"Number of genes"</span><span class="op">)</span></span></code></pre>
 </div>
-<p>Finally, save the filtered object for the next episode:</p>
-<div class="codewrapper sourceCode" id="cb26">
+<figure><img src="../fig/scatterplot-post_output.png" alt="Scatter plot of total UMI counts versus number of genes after filtering, colored by mitochondrial percentage, showing a tighter cloud with outliers removed" class="figure mx-auto d-block"><div class="figcaption">Scatter plot of total UMI counts versus number
+of genes after filtering, colored by mitochondrial percentage, showing a
+tighter cloud with outliers removed</div>
+</figure><p>Finally, save the filtered object for the next episode:</p>
+<div class="codewrapper sourceCode" id="cb23">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -947,15 +974,15 @@ on the distributions, propose your own filtering thresholds for
 filters compared to the default thresholds
 (<code>nFeature_RNA &gt; 200 &amp; nFeature_RNA &lt; 5000 &amp; percent.mt &lt; 15</code>)?</p>
 <p>Run the following code with your chosen values:</p>
-<div class="codewrapper sourceCode" id="cb27">
+<div class="codewrapper sourceCode" id="cb24">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode r" tabindex="0"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1" aria-label="code-block-27-1"></a><span class="co"># Replace the ??? with your thresholds</span></span>
-<span id="cb27-2"><a href="#cb27-2" tabindex="-1" aria-label="code-block-27-2"></a>pbmc_custom <span class="ot">&lt;-</span> <span class="fu">subset</span>(pbmc,</span>
-<span id="cb27-3"><a href="#cb27-3" tabindex="-1" aria-label="code-block-27-3"></a>                      <span class="at">subset =</span> nFeature_RNA <span class="sc">&gt;</span> ??? <span class="sc">&amp;</span></span>
-<span id="cb27-4"><a href="#cb27-4" tabindex="-1" aria-label="code-block-27-4"></a>                               nFeature_RNA <span class="sc">&lt;</span> ??? <span class="sc">&amp;</span></span>
-<span id="cb27-5"><a href="#cb27-5" tabindex="-1" aria-label="code-block-27-5"></a>                               percent.mt <span class="sc">&lt;</span> ???)</span>
-<span id="cb27-6"><a href="#cb27-6" tabindex="-1" aria-label="code-block-27-6"></a><span class="fu">cat</span>(<span class="st">"Cells with custom thresholds:"</span>, <span class="fu">ncol</span>(pbmc_custom), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre>
+<pre class="sourceCode r" tabindex="0"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1" aria-label="code-block-24-1"></a><span class="co"># Replace the ??? with your thresholds</span></span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1" aria-label="code-block-24-2"></a>pbmc_custom <span class="ot">&lt;-</span> <span class="fu">subset</span>(pbmc,</span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1" aria-label="code-block-24-3"></a>                      <span class="at">subset =</span> nFeature_RNA <span class="sc">&gt;</span> ??? <span class="sc">&amp;</span></span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1" aria-label="code-block-24-4"></a>                               nFeature_RNA <span class="sc">&lt;</span> ??? <span class="sc">&amp;</span></span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1" aria-label="code-block-24-5"></a>                               percent.mt <span class="sc">&lt;</span> ???)</span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1" aria-label="code-block-24-6"></a><span class="fu">cat</span>(<span class="st">"Cells with custom thresholds:"</span>, <span class="fu">ncol</span>(pbmc_custom), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre>
 </div>
 </div>
 </div>
@@ -965,12 +992,12 @@ filters compared to the default thresholds
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single correct answer – reasonable thresholds depend on
 how conservative you want to be. Here is one example of a slightly more
 conservative approach:</p>
-<div class="codewrapper sourceCode" id="cb28">
+<div class="codewrapper sourceCode" id="cb25">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -1015,7 +1042,7 @@ Filtering</h3>
 <code>percent.mt &lt; 15</code>? Run the following code and compare the
 number of remaining cells. Would this threshold be too aggressive for
 PBMCs?</p>
-<div class="codewrapper sourceCode" id="cb29">
+<div class="codewrapper sourceCode" id="cb26">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -1040,7 +1067,7 @@ PBMCs?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>With <code>percent.mt &lt; 5</code>, approximately 5,500–6,500 cells
 remain, compared to ~10,000 with <code>percent.mt &lt; 15</code>. This
@@ -1158,8 +1185,8 @@ any links that you are not going to use.
   "url": "https://singlecell-rnaseq.github.io/NA/instructor/quality-control.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/instructor/quality-control.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-05-12",
-  "datePublished": "2026-05-12"
+  "dateModified": "2026-05-14",
+  "datePublished": "2026-05-14"
 }
 
   </script><script>
