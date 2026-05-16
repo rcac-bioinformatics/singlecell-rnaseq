@@ -341,7 +341,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Differential Expression Analysis</h1>
-        <p>Last updated on 2026-05-14 |
+        <p>Last updated on 2026-05-16 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/differential-expression.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -399,83 +399,33 @@ reproducibility and sharing</li>
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">library</span><span class="op">(</span><span class="va">Seurat</span><span class="op">)</span></span></code></pre>
-</div>
-<div class="codewrapper">
-<h3 class="code-label">ERROR<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="error" tabindex="0"><code>Error in `library()`:
-! there is no package called 'Seurat'</code></pre>
-</div>
-<div class="codewrapper sourceCode" id="cb3">
-<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">library</span><span class="op">(</span><span class="va">ggplot2</span><span class="op">)</span></span></code></pre>
-</div>
-<div class="codewrapper">
-<h3 class="code-label">ERROR<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="error" tabindex="0"><code>Error in `library()`:
-! there is no package called 'ggplot2'</code></pre>
-</div>
-<div class="codewrapper sourceCode" id="cb5">
-<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">library</span><span class="op">(</span><span class="va">patchwork</span><span class="op">)</span></span></code></pre>
-</div>
-<div class="codewrapper">
-<h3 class="code-label">ERROR<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="error" tabindex="0"><code>Error in `library()`:
-! there is no package called 'patchwork'</code></pre>
-</div>
-<div class="codewrapper sourceCode" id="cb7">
-<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">library</span><span class="op">(</span><span class="va">dplyr</span><span class="op">)</span></span></code></pre>
-</div>
-<div class="codewrapper">
-<h3 class="code-label">ERROR<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="error" tabindex="0"><code>Error in `library()`:
-! there is no package called 'dplyr'</code></pre>
-</div>
-<div class="codewrapper sourceCode" id="cb9">
-<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">library</span><span class="op">(</span><span class="va">clusterProfiler</span><span class="op">)</span></span></code></pre>
-</div>
-<div class="codewrapper">
-<h3 class="code-label">ERROR<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="error" tabindex="0"><code>Error in `library()`:
-! there is no package called 'clusterProfiler'</code></pre>
-</div>
-<div class="codewrapper sourceCode" id="cb11">
-<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">library</span><span class="op">(</span><span class="va">org.Hs.eg.db</span><span class="op">)</span></span></code></pre>
-</div>
-<div class="codewrapper">
-<h3 class="code-label">ERROR<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="error" tabindex="0"><code>Error in `library()`:
-! there is no package called 'org.Hs.eg.db'</code></pre>
+<code class="sourceCode R"><span><span class="kw">library</span><span class="op">(</span><span class="va">Seurat</span><span class="op">)</span></span>
+<span><span class="kw">library</span><span class="op">(</span><span class="va">ggplot2</span><span class="op">)</span></span>
+<span><span class="kw">library</span><span class="op">(</span><span class="va">patchwork</span><span class="op">)</span></span>
+<span><span class="kw">library</span><span class="op">(</span><span class="va">dplyr</span><span class="op">)</span></span>
+<span><span class="kw">library</span><span class="op">(</span><span class="va">clusterProfiler</span><span class="op">)</span></span>
+<span><span class="kw">library</span><span class="op">(</span><span class="va">org.Hs.eg.db</span><span class="op">)</span></span></code></pre>
 </div>
 </section><section><h2 class="section-heading" id="loading-the-integrated-data">Loading the Integrated Data<a class="anchor" aria-label="anchor" href="#loading-the-integrated-data"></a></h2>
 <hr class="half-width"><p>We continue from the integrated and annotated IFNB dataset produced
 in the previous episode. Make sure the cell type annotation is set as
 the active identity.</p>
-<div class="codewrapper sourceCode" id="cb13">
+<p>Set up the working directory to match the previous episodes:</p>
+<div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ifnb</span> <span class="op">&lt;-</span> <span class="fu">readRDS</span><span class="op">(</span><span class="st">"ifnb_annotated.rds"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">work_dir</span> <span class="op">&lt;-</span> <span class="fu">paste0</span><span class="op">(</span></span>
+<span>    <span class="st">"/scratch/negishi/"</span>, <span class="fu">Sys.getenv</span><span class="op">(</span><span class="st">"USER"</span><span class="op">)</span>,</span>
+<span>    <span class="st">"/scrna_workshop/"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">setwd</span><span class="op">(</span><span class="va">work_dir</span><span class="op">)</span></span></code></pre>
+</div>
+<div class="codewrapper sourceCode" id="cb3">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ifnb</span> <span class="op">&lt;-</span> <span class="fu">readRDS</span><span class="op">(</span><span class="fu">paste0</span><span class="op">(</span><span class="va">work_dir</span>, <span class="st">"ifnb_annotated.rds"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">Idents</span><span class="op">(</span><span class="va">ifnb</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"celltype"</span></span>
 <span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">ifnb</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, label <span class="op">=</span> <span class="cn">TRUE</span>, repel <span class="op">=</span> <span class="cn">TRUE</span>, split.by <span class="op">=</span> <span class="st">"stim"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span></code></pre>
@@ -519,7 +469,7 @@ per-cell testing with better modeling</td>
 are available</td>
 </tr></tbody></table><p>Let’s start with the <strong>Wilcoxon test</strong> to quickly
 identify DE genes between stimulated and control CD14+ monocytes:</p>
-<div class="codewrapper sourceCode" id="cb14">
+<div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -589,7 +539,7 @@ cells.</p>
 </div>
 </div>
 </div>
-<div class="codewrapper sourceCode" id="cb16">
+<div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -631,7 +581,7 @@ have a single sample per condition and have no other option.</p>
 all cells of the same cell type from the same sample, producing a
 bulk-like count matrix with one column per sample-celltype
 combination.</p>
-<div class="codewrapper sourceCode" id="cb17">
+<div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -676,7 +626,7 @@ condition + donor combinations in the dataset.</p>
 </div>
 <p>Now we can run DESeq2-based DE testing on the pseudobulk object. We
 subset to CD14+ monocytes and compare conditions:</p>
-<div class="codewrapper sourceCode" id="cb19">
+<div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -693,7 +643,7 @@ subset to CD14+ monocytes and compare conditions:</p>
 <span>                           test.use <span class="op">=</span> <span class="st">"DESeq2"</span><span class="op">)</span></span>
 <span><span class="fu">head</span><span class="op">(</span><span class="va">mono.pseudo</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre>
 </div>
-<div class="codewrapper sourceCode" id="cb20">
+<div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -723,7 +673,7 @@ cells.</p>
 significance (-log10 p-value, y-axis) and biological effect size (log2
 fold change, x-axis). Each point is a gene. Genes in the upper corners
 are both statistically significant and biologically meaningful.</p>
-<div class="codewrapper sourceCode" id="cb21">
+<div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -763,7 +713,7 @@ change or high p-value)</li>
 <div class="section level3">
 <h3 id="feature-and-violin-plots">Feature and violin plots<a class="anchor" aria-label="anchor" href="#feature-and-violin-plots"></a></h3>
 <p>Visualize specific DE genes on the UMAP and across conditions:</p>
-<div class="codewrapper sourceCode" id="cb22">
+<div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -772,7 +722,7 @@ change or high p-value)</li>
 <span>            split.by <span class="op">=</span> <span class="st">"stim"</span>,</span>
 <span>            cols <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"grey85"</span>, <span class="st">"firebrick"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
-<div class="codewrapper sourceCode" id="cb23">
+<div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -788,7 +738,7 @@ change or high p-value)</li>
 <p>A dot plot can show the top DE genes across all cell types
 simultaneously, revealing which responses are shared and which are
 cell-type-specific:</p>
-<div class="codewrapper sourceCode" id="cb24">
+<div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -810,7 +760,7 @@ individual gene changes to broader biological themes.</p>
 <h3 id="converting-gene-symbols-to-entrez-ids">Converting gene symbols to Entrez IDs<a class="anchor" aria-label="anchor" href="#converting-gene-symbols-to-entrez-ids"></a></h3>
 <p>clusterProfiler requires Entrez gene IDs. We convert from gene
 symbols using <code>bitr()</code>:</p>
-<div class="codewrapper sourceCode" id="cb25">
+<div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -843,7 +793,7 @@ symbols using <code>bitr()</code>:</p>
 </tr></tbody></table></div>
 <div class="section level3">
 <h3 id="running-go-enrichment">Running GO enrichment<a class="anchor" aria-label="anchor" href="#running-go-enrichment"></a></h3>
-<div class="codewrapper sourceCode" id="cb26">
+<div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -878,7 +828,7 @@ Function), or “CC” (Cellular Component).</td>
 <td>Convert Entrez IDs in the output back to gene symbols for
 readability.</td>
 </tr></tbody></table><p>Visualize the top enriched GO terms with a dot plot:</p>
-<div class="codewrapper sourceCode" id="cb27">
+<div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -913,7 +863,7 @@ concentrated in exactly these pathways.</p>
 <div class="section level3">
 <h3 id="kegg-pathway-enrichment">KEGG pathway enrichment<a class="anchor" aria-label="anchor" href="#kegg-pathway-enrichment"></a></h3>
 <p>For a complementary view, we can also test KEGG pathways:</p>
-<div class="codewrapper sourceCode" id="cb28">
+<div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -944,18 +894,18 @@ interferon/antiviral response.</p>
 that support reproducibility, sharing, and downstream use.</p>
 <div class="section level3">
 <h3 id="save-the-annotated-seurat-object">Save the annotated Seurat object<a class="anchor" aria-label="anchor" href="#save-the-annotated-seurat-object"></a></h3>
-<div class="codewrapper sourceCode" id="cb29">
+<div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">saveRDS</span><span class="op">(</span><span class="va">ifnb</span>, file <span class="op">=</span> <span class="st">"ifnb_annotated.rds"</span><span class="op">)</span></span></code></pre>
+<code class="sourceCode R"><span><span class="fu">saveRDS</span><span class="op">(</span><span class="va">ifnb</span>, file <span class="op">=</span> <span class="fu">paste0</span><span class="op">(</span><span class="va">work_dir</span>, <span class="st">"ifnb_annotated.rds"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
 </div>
 <div class="section level3">
 <h3 id="export-the-count-matrix-and-metadata">Export the count matrix and metadata<a class="anchor" aria-label="anchor" href="#export-the-count-matrix-and-metadata"></a></h3>
 <p>For the PBMC 10k dataset from earlier episodes, you can export the
 raw counts and metadata as CSV files:</p>
-<div class="codewrapper sourceCode" id="cb30">
+<div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -971,7 +921,7 @@ raw counts and metadata as CSV files:</p>
 <span>          row.names <span class="op">=</span> <span class="cn">FALSE</span>, quote <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre>
 </div>
 <p>For smaller datasets, you can export as a dense CSV:</p>
-<div class="codewrapper sourceCode" id="cb31">
+<div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -984,7 +934,7 @@ raw counts and metadata as CSV files:</p>
 <p>If collaborators use the Python/Scanpy ecosystem, you can convert
 your Seurat object to AnnData format using the <code>sceasy</code>
 package:</p>
-<div class="codewrapper sourceCode" id="cb32">
+<div class="codewrapper sourceCode" id="cb22">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -1020,7 +970,7 @@ parameters, filtering criteria)</li>
 <ul><li>
 <p><strong>Saved your R session info</strong> so others know exactly
 which package versions you used:</p>
-<div class="codewrapper sourceCode" id="cb33">
+<div class="codewrapper sourceCode" id="cb23">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -1052,7 +1002,7 @@ method, and DE test used.</p></li>
 <p>Run both Wilcoxon (per-cell) and pseudobulk (DESeq2) DE testing for
 stimulated vs. control CD14+ monocytes. Compare the number of
 significant genes and the p-value distributions.</p>
-<div class="codewrapper sourceCode" id="cb34">
+<div class="codewrapper sourceCode" id="cb24">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -1133,7 +1083,7 @@ Response Genes</h3>
 <p>Run GO enrichment on the top 200 upregulated genes (by fold change)
 in stimulated vs. control CD14+ monocytes. What are the top 5 biological
 processes? Do they make sense for IFN-beta stimulation?</p>
-<div class="codewrapper sourceCode" id="cb35">
+<div class="codewrapper sourceCode" id="cb25">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -1303,8 +1253,8 @@ any links that you are not going to use.
   "url": "https://singlecell-rnaseq.github.io/NA/instructor/differential-expression.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/instructor/differential-expression.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-05-14",
-  "datePublished": "2026-05-14"
+  "dateModified": "2026-05-16",
+  "datePublished": "2026-05-16"
 }
 
   </script><script>

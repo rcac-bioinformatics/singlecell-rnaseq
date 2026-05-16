@@ -339,7 +339,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Quality Control</h1>
-        <p>Last updated on 2026-05-14 |
+        <p>Last updated on 2026-05-16 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/quality-control.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -410,6 +410,10 @@ references in this episode use the same base directory:</p>
 <code class="sourceCode R"><span><span class="va">data_dir</span> <span class="op">&lt;-</span> <span class="fu">paste0</span><span class="op">(</span></span>
 <span>    <span class="st">"/scratch/negishi/"</span>, <span class="fu">Sys.getenv</span><span class="op">(</span><span class="st">"USER"</span><span class="op">)</span>,</span>
 <span>    <span class="st">"/scrna_workshop/cellranger_output/pbmc10k/outs/filtered_feature_bc_matrix/"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">work_dir</span> <span class="op">&lt;-</span> <span class="fu">paste0</span><span class="op">(</span></span>
+<span>    <span class="st">"/scratch/negishi/"</span>, <span class="fu">Sys.getenv</span><span class="op">(</span><span class="st">"USER"</span><span class="op">)</span>,</span>
+<span>    <span class="st">"/scrna_workshop/"</span></span>
 <span><span class="op">)</span></span></code></pre>
 </div>
 <p>Now load the count matrix:</p>
@@ -417,7 +421,8 @@ references in this episode use the same base directory:</p>
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pbmc.data</span> <span class="op">&lt;-</span> <span class="fu">Read10X</span><span class="op">(</span>data.dir <span class="op">=</span> <span class="va">data_dir</span><span class="op">)</span></span></code></pre>
+<code class="sourceCode R"><span><span class="fu">setwd</span><span class="op">(</span><span class="va">work_dir</span><span class="op">)</span></span>
+<span><span class="va">pbmc.data</span> <span class="op">&lt;-</span> <span class="fu">Read10X</span><span class="op">(</span>data.dir <span class="op">=</span> <span class="va">data_dir</span><span class="op">)</span></span></code></pre>
 </div>
 <p><code>Read10X()</code> returns a sparse matrix where rows are genes
 and columns are cell barcodes. Let’s check its dimensions before
@@ -530,9 +535,7 @@ after scaling)</li>
 <strong>Metadata</strong>: a data frame with one row per cell,
 storing QC metrics, cluster assignments, and any other per-cell
 annotations.</li>
-</ul><figure><img src="fig/seurat_object.png" alt="Structure of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns" class="figure mx-auto d-block"><div class="figcaption">Structure of the Seurat v5 object showing the
-RNA assay with its three layers (counts, data, scale.data) and the
-per-cell metadata columns</div>
+</ul><figure><img src="fig/seurat_object.png" alt="Diagram of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns" class="figure mx-auto d-block"><div class="figcaption">Structure of the Seurat v5 object</div>
 </figure><p>You can inspect the metadata that Seurat automatically computed
 during object creation:</p>
 <div class="codewrapper sourceCode" id="cb8">
@@ -664,11 +667,11 @@ look at the summary statistics:</p>
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
  0.1752  4.8509  5.7882  6.7695  7.0114 89.8376 </code></pre>
 </div>
-<p>Most cells have 1,000–3,000 genes, 2,000–8,000 UMIs, and 3–5%
-mitochondrial content. But notice the maximum values: one cell has over
-10,000 genes (possible doublet), another has over 86,000 UMIs, and one
-cell has 66% mitochondrial reads (clearly dying). These outliers are
-what QC filtering removes.</p>
+<p>Most cells have 2,900-4,300 genes (IQR), 8,000-15,000 UMIs (IQR), and
+4.9-7.0% mitochondrial content (IQR). But notice the maximum values: one
+cell has 9,540 genes (possible doublet), another has over 103,000 UMIs,
+and one cell has nearly 90% mitochondrial reads (clearly dying). These
+outliers are what QC filtering removes.</p>
 </div>
 </div>
 </div>
@@ -687,9 +690,7 @@ They are the standard first visualization for scRNA-seq QC.</p>
 <span>        pt.size <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>        layer <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/violin_plots_output.png" alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt showing the distribution of QC metrics across all cells before filtering" class="figure mx-auto d-block"><div class="figcaption">Violin plots of nFeature_RNA, nCount_RNA, and
-percent.mt showing the distribution of QC metrics across all cells
-before filtering</div>
+<figure><img src="fig/violin_plots_output.png" alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt showing the distribution of QC metrics across all cells before filtering" class="figure mx-auto d-block"><div class="figcaption">QC violin plots before filtering</div>
 </figure><p>Setting <code>pt.size = 0</code> hides individual points so the
 distribution shape is easier to see with 10,000+ cells. If you want to
 see points, set <code>pt.size = 0.1</code>.</p>
@@ -711,9 +712,8 @@ Points that deviate from this trend are suspicious.</p>
 <span>    <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Total UMI counts"</span>, y <span class="op">=</span> <span class="st">"Number of genes"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/scatterplot-output.png" alt="Scatter plot of total UMI counts versus number of genes per cell colored by mitochondrial percentage, with high-mito cells highlighted in red" class="figure mx-auto d-block"><div class="figcaption">Scatter plot of total UMI counts versus number
-of genes per cell colored by mitochondrial percentage, with high-mito
-cells highlighted in red</div>
+<figure><img src="fig/scatterplot-output.png" alt="Scatter plot of total UMI counts versus number of genes per cell colored by mitochondrial percentage, with high-mito cells highlighted in red" class="figure mx-auto d-block"><div class="figcaption">QC scatter plot colored by mitochondrial
+percentage</div>
 </figure><p>What to look for in this plot:</p>
 <ul><li>
 <strong>Main cloud</strong>: most cells should form a dense cloud
@@ -800,9 +800,7 @@ dashed lines mark the thresholds:</p>
 <span>    <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">p1</span> <span class="op">+</span> <span class="va">p2</span> <span class="op">+</span> <span class="va">p3</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/violin_plots_with-pt_output.png" alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt with red dashed lines showing the filtering thresholds and individual cells visible as points" class="figure mx-auto d-block"><div class="figcaption">Violin plots of nFeature_RNA, nCount_RNA, and
-percent.mt with red dashed lines showing the filtering thresholds and
-individual cells visible as points</div>
+<figure><img src="fig/violin_plots_with-pt_output.png" alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt with red dashed lines showing the filtering thresholds and individual cells visible as points" class="figure mx-auto d-block"><div class="figcaption">Violin plots with filtering thresholds</div>
 </figure><p>Cells above or below the red lines will be removed. The small point
 size (<code>pt.size = 0.1</code>) lets you see how many individual cells
 fall outside the thresholds.</p>
@@ -857,9 +855,7 @@ again:</p>
 <span>        pt.size <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>        layer <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/violin_plots_after_filtering_output.png" alt="Structure of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns" class="figure mx-auto d-block"><div class="figcaption">Structure of the Seurat v5 object showing the
-RNA assay with its three layers (counts, data, scale.data) and the
-per-cell metadata columns</div>
+<figure><img src="fig/violin_plots_after_filtering_output.png" alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt after filtering, showing tighter distributions with extreme outliers removed" class="figure mx-auto d-block"><div class="figcaption">QC violin plots after filtering</div>
 </figure><p>The violin plots should now show tighter distributions with the
 extreme tails removed. The mitochondrial percentage should be capped
 below 15%.</p>
@@ -874,9 +870,7 @@ below 15%.</p>
 <span>    <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Total UMI counts"</span>, y <span class="op">=</span> <span class="st">"Number of genes"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/scatterplot-post_output.png" alt="Scatter plot of total UMI counts versus number of genes after filtering, colored by mitochondrial percentage, showing a tighter cloud with outliers removed" class="figure mx-auto d-block"><div class="figcaption">Scatter plot of total UMI counts versus number
-of genes after filtering, colored by mitochondrial percentage, showing a
-tighter cloud with outliers removed</div>
+<figure><img src="fig/scatterplot-post_output.png" alt="Scatter plot of total UMI counts versus number of genes after filtering, colored by mitochondrial percentage, showing a tighter cloud with outliers removed" class="figure mx-auto d-block"><div class="figcaption">Scatter plot after filtering</div>
 </figure><p>Finally, save the filtered object for the next episode:</p>
 <div class="codewrapper sourceCode" id="cb23">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1005,23 +999,27 @@ conservative approach:</p>
 <span>                               <span class="va">percent.mt</span> <span class="op">&lt;</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu">cat</span><span class="op">(</span><span class="st">"Cells with custom thresholds:"</span>, <span class="fu">ncol</span><span class="op">(</span><span class="va">pbmc_custom</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre>
 </div>
-<p>This would retain roughly 8,500–9,000 cells compared to ~10,000 with
-the default thresholds. The trade-offs are:</p>
+<p>This retains 7,579 cells compared to ~11,000 with the default
+thresholds – a loss of roughly 26% of the data. The trade-offs are:</p>
 <ul><li>
 <code>nFeature_RNA &gt; 300</code> (vs. 200): slightly more
 aggressive removal of low-complexity cells, but may also remove some
 small cell types like platelets that naturally express few genes.</li>
 <li>
-<code>nFeature_RNA &lt; 4000</code> (vs. 5000): catches more
-potential doublets, but could remove some large, highly
-transcriptionally active cells like monocytes.</li>
+<code>nFeature_RNA &lt; 4000</code> (vs. 5000): this is the biggest
+driver of cell loss here. The median nFeature_RNA in this dataset is
+~3,378, so a 4,000 ceiling cuts into the upper quartile and removes a
+substantial number of valid cells, not just doublets.</li>
 <li>
 <code>percent.mt &lt; 10</code> (vs. 15): removes more potentially
 stressed cells, but some immune cell types (e.g., activated T cells)
 naturally have moderately elevated mitochondrial content.</li>
 </ul><p>The key point is that <strong>more aggressive filtering is not always
-better</strong>. Every cell you remove is data you lose. The goal is to
-remove cells that would distort the analysis, not to enforce an
+better</strong>. Every cell you remove is data you lose. Dropping from
+~10,000 to 7,579 cells means losing nearly a quarter of the dataset,
+which could reduce statistical power and under-represent cell types that
+naturally have higher gene counts or mitochondrial content. The goal is
+to remove cells that would distort the analysis, not to enforce an
 artificially narrow definition of “high quality.”</p>
 </div>
 </div>
@@ -1033,8 +1031,8 @@ artificially narrow definition of “high quality.”</p>
 </div>
 <span class="callout-header">Challenge</span>
 <div id="challenge-2-aggressive-mitochondrial-filtering" class="callout-inner">
-<h3 class="callout-title">Challenge 2: Aggressive Mitochondrial
-Filtering</h3>
+<h3 class="callout-title">Challenge 2: Aggressive mitochondrial
+filtering</h3>
 <div class="callout-content">
 <p>What happens if you set <code>percent.mt &lt; 5</code> instead of
 <code>percent.mt &lt; 15</code>? Run the following code and compare the
@@ -1067,22 +1065,24 @@ PBMCs?</p>
 </button>
 <div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
-<p>With <code>percent.mt &lt; 5</code>, approximately 5,500–6,500 cells
-remain, compared to ~10,000 with <code>percent.mt &lt; 15</code>. This
-means you would lose roughly <strong>35–40% of your cells</strong> with
-the stricter threshold.</p>
-<p>This is <strong>too aggressive for PBMCs</strong>. Here is why:</p>
-<ul><li>The median mitochondrial percentage in this dataset is around 5.5%,
-meaning that a <code>&lt; 5</code> cutoff removes more than half the
-cells by definition.</li>
+<p>With <code>percent.mt &lt; 5</code>, only <strong>2,709 cells
+remain</strong>, compared to 9,874 with <code>percent.mt &lt; 15</code>.
+That is a loss of <strong>over 72% of the dataset</strong>.</p>
+<p>This is <strong>far too aggressive for PBMCs</strong>. Here is
+why:</p>
+<ul><li>The median mitochondrial percentage in this dataset is ~5.8%,
+meaning a <code>&lt; 5</code> cutoff removes the majority of cells by
+definition – not just dying cells, but most of the healthy
+population.</li>
 <li>Different immune cell types have naturally different mitochondrial
 content. Activated T cells, monocytes, and NK cells tend to have higher
-mitochondrial content (6–12%) because they are metabolically active
-cells. A strict threshold disproportionately removes these populations,
-biasing your downstream analysis.</li>
+mitochondrial content (6-12%) because they are metabolically active. A
+<code>&lt; 5</code> threshold disproportionately removes these
+populations, biasing your downstream analysis toward cell types with low
+metabolic activity.</li>
 <li>A threshold of <code>&lt; 5</code> might be appropriate for some
 cell lines or tissues where mitochondrial content is uniformly low, but
-for primary immune cells from blood, 10–15% is a more appropriate
+for primary immune cells from blood, 10-15% is a more appropriate
 cutoff.</li>
 </ul><p>As a general rule, look at the distribution of
 <code>percent.mt</code> in your data. If there is a clear separation
@@ -1183,8 +1183,8 @@ any links that you are not going to use.
   "url": "https://singlecell-rnaseq.github.io/NA/quality-control.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/quality-control.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-05-14",
-  "datePublished": "2026-05-14"
+  "dateModified": "2026-05-16",
+  "datePublished": "2026-05-16"
 }
 
   </script><script>

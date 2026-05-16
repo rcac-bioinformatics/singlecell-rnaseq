@@ -400,50 +400,144 @@
 <figure><img src="../fig/workshop-pipeline-overview.png" alt="Flowchart of the scRNA-seq analysis pipeline covered in this workshop. Eight boxes arranged vertically show the progression: Raw Data Processing, Quality Control, Normalization and Feature Selection, Dimensionality Reduction and Clustering, Cell Type Annotation, Multi-Sample Integration, and Differential Expression. Arrows connect each step to the next." class="figure mx-auto d-block"></figure><hr></section><section id="raw-data-processing"><h2 class="section-heading"><a href="raw-data-processing.html">Raw Data Processing</a></h2>
 <hr class="half-width">
 <h3 id="raw-data-processing-figure-1">Figure 1</h3>
-<p aria-hidden="true">Image 1 of 1: ‘Cell Ranger web_summary.html for PBMC 10k’</p>
-<figure><img src="../fig/cellranger-web-summary.png" alt="Cell Ranger web_summary.html for PBMC 10k" class="figure mx-auto d-block"><div class="figcaption">Cell Ranger web_summary.html for PBMC 10k</div>
+<p aria-hidden="true">Image 1 of 1: ‘Screenshot of the Cell Ranger web_summary.html report for the PBMC 10k dataset showing key QC metrics’</p>
+<figure><img src="../fig/cellranger-web-summary.png" alt="Screenshot of the Cell Ranger web_summary.html report for the PBMC 10k dataset showing key QC metrics" class="figure mx-auto d-block"><div class="figcaption">Cell Ranger web_summary.html for PBMC 10k</div>
 </figure><hr></section><section id="quality-control"><h2 class="section-heading"><a href="quality-control.html">Quality Control</a></h2>
 <hr class="half-width">
 <h3 id="quality-control-figure-1">Figure 1</h3>
-<p aria-hidden="true">Image 1 of 1: ‘Structure of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns’</p>
-<figure><img src="../fig/seurat_object.png" alt="Structure of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns" class="figure mx-auto d-block"><div class="figcaption">Structure of the Seurat v5 object showing the
-RNA assay with its three layers (counts, data, scale.data) and the
-per-cell metadata columns</div>
+<p aria-hidden="true">Image 1 of 1: ‘Diagram of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns’</p>
+<figure><img src="../fig/seurat_object.png" alt="Diagram of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns" class="figure mx-auto d-block"><div class="figcaption">Structure of the Seurat v5 object</div>
 </figure><hr>
 <h3 id="quality-control-figure-2">Figure 2</h3>
 <p aria-hidden="true">Image 1 of 1: ‘Violin plots of nFeature_RNA, nCount_RNA, and percent.mt showing the distribution of QC metrics across all cells before filtering’</p>
-<figure><img src="../fig/violin_plots_output.png" alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt showing the distribution of QC metrics across all cells before filtering" class="figure mx-auto d-block"><div class="figcaption">Violin plots of nFeature_RNA, nCount_RNA, and
-percent.mt showing the distribution of QC metrics across all cells
-before filtering</div>
+<figure><img src="../fig/violin_plots_output.png" alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt showing the distribution of QC metrics across all cells before filtering" class="figure mx-auto d-block"><div class="figcaption">QC violin plots before filtering</div>
 </figure><hr>
 <h3 id="quality-control-figure-3">Figure 3</h3>
 <p aria-hidden="true">Image 1 of 1: ‘Scatter plot of total UMI counts versus number of genes per cell colored by mitochondrial percentage, with high-mito cells highlighted in red’</p>
-<figure><img src="../fig/scatterplot-output.png" alt="Scatter plot of total UMI counts versus number of genes per cell colored by mitochondrial percentage, with high-mito cells highlighted in red" class="figure mx-auto d-block"><div class="figcaption">Scatter plot of total UMI counts versus number
-of genes per cell colored by mitochondrial percentage, with high-mito
-cells highlighted in red</div>
+<figure><img src="../fig/scatterplot-output.png" alt="Scatter plot of total UMI counts versus number of genes per cell colored by mitochondrial percentage, with high-mito cells highlighted in red" class="figure mx-auto d-block"><div class="figcaption">QC scatter plot colored by mitochondrial
+percentage</div>
 </figure><hr>
 <h3 id="quality-control-figure-4">Figure 4</h3>
 <p aria-hidden="true">Image 1 of 1: ‘Violin plots of nFeature_RNA, nCount_RNA, and percent.mt with red dashed lines showing the filtering thresholds and individual cells visible as points’</p>
-<figure><img src="../fig/violin_plots_with-pt_output.png" alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt with red dashed lines showing the filtering thresholds and individual cells visible as points" class="figure mx-auto d-block"><div class="figcaption">Violin plots of nFeature_RNA, nCount_RNA, and
-percent.mt with red dashed lines showing the filtering thresholds and
-individual cells visible as points</div>
+<figure><img src="../fig/violin_plots_with-pt_output.png" alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt with red dashed lines showing the filtering thresholds and individual cells visible as points" class="figure mx-auto d-block"><div class="figcaption">Violin plots with filtering thresholds</div>
 </figure><hr>
 <h3 id="quality-control-figure-5">Figure 5</h3>
-<p aria-hidden="true">Image 1 of 1: ‘Structure of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns’</p>
-<figure><img src="../fig/violin_plots_after_filtering_output.png" alt="Structure of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns" class="figure mx-auto d-block"><div class="figcaption">Structure of the Seurat v5 object showing the
-RNA assay with its three layers (counts, data, scale.data) and the
-per-cell metadata columns</div>
+<p aria-hidden="true">Image 1 of 1: ‘Violin plots of nFeature_RNA, nCount_RNA, and percent.mt after filtering, showing tighter distributions with extreme outliers removed’</p>
+<figure><img src="../fig/violin_plots_after_filtering_output.png" alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt after filtering, showing tighter distributions with extreme outliers removed" class="figure mx-auto d-block"><div class="figcaption">QC violin plots after filtering</div>
 </figure><hr>
 <h3 id="quality-control-figure-6">Figure 6</h3>
 <p aria-hidden="true">Image 1 of 1: ‘Scatter plot of total UMI counts versus number of genes after filtering, colored by mitochondrial percentage, showing a tighter cloud with outliers removed’</p>
-<figure><img src="../fig/scatterplot-post_output.png" alt="Scatter plot of total UMI counts versus number of genes after filtering, colored by mitochondrial percentage, showing a tighter cloud with outliers removed" class="figure mx-auto d-block"><div class="figcaption">Scatter plot of total UMI counts versus number
-of genes after filtering, colored by mitochondrial percentage, showing a
-tighter cloud with outliers removed</div>
+<figure><img src="../fig/scatterplot-post_output.png" alt="Scatter plot of total UMI counts versus number of genes after filtering, colored by mitochondrial percentage, showing a tighter cloud with outliers removed" class="figure mx-auto d-block"><div class="figcaption">Scatter plot after filtering</div>
 </figure><hr></section><section id="normalization-and-features"><h2 class="section-heading"><a href="normalization-and-features.html">Normalization and Feature Selection</a></h2>
-<hr class="half-width"></section><section id="dimensionality-reduction-clustering"><h2 class="section-heading"><a href="dimensionality-reduction-clustering.html">Dimensionality Reduction and Clustering</a></h2>
-<hr class="half-width"></section><section id="cell-type-annotation"><h2 class="section-heading"><a href="cell-type-annotation.html">Cell Type Annotation</a></h2>
-<hr class="half-width"></section><section id="multi-sample-integration"><h2 class="section-heading"><a href="multi-sample-integration.html">Multi-Sample Integration</a></h2>
-<hr class="half-width"></section><section id="differential-expression"><h2 class="section-heading"><a href="differential-expression.html">Differential Expression Analysis</a></h2>
+<hr class="half-width">
+<h3 id="normalization-and-features-figure-1">Figure 1</h3>
+<p aria-hidden="true">Image 1 of 1: ‘Two histograms comparing raw UMI counts and log-normalized expression for the LYZ gene, showing how normalization reduces the right skew’</p>
+<figure><img src="../fig/norm_compare_LYZ.png" alt="Two histograms comparing raw UMI counts and log-normalized expression for the LYZ gene, showing how normalization reduces the right skew" class="figure mx-auto d-block"><div class="figcaption">LYZ raw vs. normalized expression</div>
+</figure><hr>
+<h3 id="normalization-and-features-figure-2">Figure 2</h3>
+<p aria-hidden="true">Image 1 of 1: ‘Variable feature plot showing mean expression versus standardized variance for all genes, with the top 2000 variable features highlighted in red and the top 10 labeled’</p>
+<figure><img src="../fig/vf_plot.png" alt="Variable feature plot showing mean expression versus standardized variance for all genes, with the top 2000 variable features highlighted in red and the top 10 labeled" class="figure mx-auto d-block"><div class="figcaption">Variable feature selection plot</div>
+</figure><hr>
+<h3 id="normalization-and-features-figure-3">Figure 3</h3>
+<p aria-hidden="true">Image 1 of 1: ‘Four histograms comparing raw and normalized expression for ACTB (housekeeping) and CD3D (cell-type marker), showing that normalization compresses the housekeeping gene distribution while preserving the bimodal pattern of the marker gene’</p>
+<figure><img src="../fig/norm_housekeeping.png" alt="Four histograms comparing raw and normalized expression for ACTB (housekeeping) and CD3D (cell-type marker), showing that normalization compresses the housekeeping gene distribution while preserving the bimodal pattern of the marker gene" class="figure mx-auto d-block"><div class="figcaption">ACTB and CD3D raw vs. normalized
+expression</div>
+</figure><hr></section><section id="dimensionality-reduction-clustering"><h2 class="section-heading"><a href="dimensionality-reduction-clustering.html">Dimensionality Reduction and Clustering</a></h2>
+<hr class="half-width">
+<h3 id="dimensionality-reduction-clustering-figure-1">Figure 1</h3>
+<p aria-hidden="true">Image 1 of 1: ‘Bar plots showing the top genes with the highest positive and negative loadings for PC1 and PC2. Genes like CST3 and LYZ appear in PC1, while CD3D and IL32 appear in PC2.’</p>
+<figure><img src="../fig/viz-dim-loadings.png" alt="Bar plots showing the top genes with the highest positive and negative loadings for PC1 and PC2. Genes like CST3 and LYZ appear in PC1, while CD3D and IL32 appear in PC2." class="figure mx-auto d-block"><div class="figcaption">Bar plots showing the top genes with the highest
+positive and negative loadings for PC1 and PC2. Genes like CST3 and LYZ
+appear in PC1, while CD3D and IL32 appear in PC2.</div>
+</figure><hr>
+<h3 id="dimensionality-reduction-clustering-figure-2">Figure 2</h3>
+<p aria-hidden="true">Image 1 of 1: ‘Grid of nine heatmaps showing gene expression patterns for PC1 through PC9. Each heatmap shows the top genes ordered by loading with cells ordered by PC score, revealing distinct expression programs.’</p>
+<figure><img src="../fig/DimHeatmap.png" alt="Grid of nine heatmaps showing gene expression patterns for PC1 through PC9. Each heatmap shows the top genes ordered by loading with cells ordered by PC score, revealing distinct expression programs." class="figure mx-auto d-block"><div class="figcaption">Grid of nine heatmaps showing gene expression
+patterns for PC1 through PC9. Each heatmap shows the top genes ordered
+by loading with cells ordered by PC score, revealing distinct expression
+programs.</div>
+</figure><hr>
+<h3 id="dimensionality-reduction-clustering-figure-3">Figure 3</h3>
+<p aria-hidden="true">Image 1 of 1: ‘Line plot of standard deviation versus principal component number. The curve drops steeply for the first 10 PCs then gradually flattens, with an elbow around PC 12 to 15.’</p>
+<figure><img src="../fig/elbowplot.png" alt="Line plot of standard deviation versus principal component number. The curve drops steeply for the first 10 PCs then gradually flattens, with an elbow around PC 12 to 15." class="figure mx-auto d-block"><div class="figcaption">Line plot of standard deviation versus principal
+component number. The curve drops steeply for the first 10 PCs then
+gradually flattens, with an elbow around PC 12 to 15.</div>
+</figure><hr>
+<h3 id="dimensionality-reduction-clustering-figure-4">Figure 4</h3>
+<p aria-hidden="true">Image 1 of 1: ‘UMAP plot showing approximately 10000 cells arranged in distinct clusters. Cells are colored by their identity, forming several well-separated groups.’</p>
+<figure><img src="../fig/umap-plot-1.png" alt="UMAP plot showing approximately 10000 cells arranged in distinct clusters. Cells are colored by their identity, forming several well-separated groups." class="figure mx-auto d-block"><div class="figcaption">UMAP plot showing approximately 10000 cells
+arranged in distinct clusters. Cells are colored by their identity,
+forming several well-separated groups.</div>
+</figure><hr>
+<h3 id="dimensionality-reduction-clustering-figure-5">Figure 5</h3>
+<figure><img src="../fig/umap-plot-2.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="dimensionality-reduction-clustering-figure-6">Figure 6</h3>
+<p aria-hidden="true">Image 1 of 1: ‘Clustree diagram showing how clusters split as resolution increases from 0.2 to 1.2. At low resolution a few large clusters exist, which progressively split into more subclusters at higher resolutions. Stable splits show clean branches while unstable splits show cells moving between multiple clusters.’</p>
+<figure><img src="../fig/clustree.png" alt="Clustree diagram showing how clusters split as resolution increases from 0.2 to 1.2. At low resolution a few large clusters exist, which progressively split into more subclusters at higher resolutions. Stable splits show clean branches while unstable splits show cells moving between multiple clusters." class="figure mx-auto d-block"><div class="figcaption">Clustree diagram showing how clusters split as
+resolution increases from 0.2 to 1.2. At low resolution a few large
+clusters exist, which progressively split into more subclusters at
+higher resolutions. Stable splits show clean branches while unstable
+splits show cells moving between multiple clusters.</div>
+</figure><hr>
+<h3 id="dimensionality-reduction-clustering-figure-7">Figure 7</h3>
+<p aria-hidden="true">Image 1 of 1: ‘Four UMAP plots showing expression of CD3D, MS4A1, LYZ, and GNLY. Each gene is highlighted in a different cluster region, indicating T cells, B cells, monocytes, and NK cells respectively.’</p>
+<figure><img src="../fig/feature-plot-4genes.png" alt="Four UMAP plots showing expression of CD3D, MS4A1, LYZ, and GNLY. Each gene is highlighted in a different cluster region, indicating T cells, B cells, monocytes, and NK cells respectively." class="figure mx-auto d-block"><div class="figcaption">Four UMAP plots showing expression of CD3D,
+MS4A1, LYZ, and GNLY. Each gene is highlighted in a different cluster
+region, indicating T cells, B cells, monocytes, and NK cells
+respectively.</div>
+</figure><hr>
+<h3 id="dimensionality-reduction-clustering-figure-8">Figure 8</h3>
+<p aria-hidden="true">Image 1 of 1: ‘Violin plots showing expression of CD3D, MS4A1, LYZ, and GNLY across all clusters. Each marker shows high expression in one or two specific clusters and low or zero expression in the others.’</p>
+<figure><img src="../fig/vlnplot-plot-4genes.png" alt="Violin plots showing expression of CD3D, MS4A1, LYZ, and GNLY across all clusters. Each marker shows high expression in one or two specific clusters and low or zero expression in the others." class="figure mx-auto d-block"><div class="figcaption">Violin plots showing expression of CD3D, MS4A1,
+LYZ, and GNLY across all clusters. Each marker shows high expression in
+one or two specific clusters and low or zero expression in the
+others.</div>
+</figure><hr>
+<h3 id="dimensionality-reduction-clustering-figure-9">Figure 9</h3>
+<p aria-hidden="true">Image 1 of 1: ‘Four UMAP plots comparing clustering at resolutions 0.2, 0.5, 0.8, and 1.2. Lower resolutions produce fewer large clusters while higher resolutions split cells into progressively more subclusters.’</p>
+<figure><img src="../fig/snn-res.png" alt="Four UMAP plots comparing clustering at resolutions 0.2, 0.5, 0.8, and 1.2. Lower resolutions produce fewer large clusters while higher resolutions split cells into progressively more subclusters." class="figure mx-auto d-block"><div class="figcaption">Four UMAP plots comparing clustering at
+resolutions 0.2, 0.5, 0.8, and 1.2. Lower resolutions produce fewer
+large clusters while higher resolutions split cells into progressively
+more subclusters.</div>
+</figure><hr>
+<h3 id="dimensionality-reduction-clustering-figure-10">Figure 10</h3>
+<figure><img src="../fig/challenge2_plot1.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="dimensionality-reduction-clustering-figure-11">Figure 11</h3>
+<figure><img src="../fig/challenge2_plot2.png" class="figure mx-auto d-block"></figure><hr></section><section id="cell-type-annotation"><h2 class="section-heading"><a href="cell-type-annotation.html">Cell Type Annotation</a></h2>
+<hr class="half-width">
+<h3 id="cell-type-annotation-figure-1">Figure 1</h3>
+<figure><img src="../fig/umap-plot-3.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="cell-type-annotation-figure-2">Figure 2</h3>
+<figure><img src="../fig/top3-heatmap.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="cell-type-annotation-figure-3">Figure 3</h3>
+<figure><img src="../fig/top3-dotplot.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="cell-type-annotation-figure-4">Figure 4</h3>
+<figure><img src="../fig/known-marker-featureplot.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="cell-type-annotation-figure-5">Figure 5</h3>
+<figure><img src="../fig/known-marker-vlnplot.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="cell-type-annotation-figure-6">Figure 6</h3>
+<figure><img src="../fig/umap-plot-4.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="cell-type-annotation-figure-7">Figure 7</h3>
+<figure><img src="../fig/umap-plot-5.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="cell-type-annotation-figure-8">Figure 8</h3>
+<figure><img src="../fig/umap-plot-6.png" class="figure mx-auto d-block"></figure><hr></section><section id="multi-sample-integration"><h2 class="section-heading"><a href="multi-sample-integration.html">Multi-Sample Integration</a></h2>
+<hr class="half-width">
+<h3 id="multi-sample-integration-figure-1">Figure 1</h3>
+<figure><img src="../fig/umap-plot-7.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="multi-sample-integration-figure-2">Figure 2</h3>
+<figure><img src="../fig/umap-plot-8.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="multi-sample-integration-figure-3">Figure 3</h3>
+<figure><img src="../fig/umap-plot-9.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="multi-sample-integration-figure-4">Figure 4</h3>
+<figure><img src="../fig/umap-plot-10.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="multi-sample-integration-figure-5">Figure 5</h3>
+<figure><img src="../fig/dimplot_ifnb_de1.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="multi-sample-integration-figure-6">Figure 6</h3>
+<figure><img src="../fig/vlnplot_ifnb_de1.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="multi-sample-integration-figure-7">Figure 7</h3>
+<figure><img src="../fig/dimplot_challenge-ifnb1.png" class="figure mx-auto d-block"></figure><hr>
+<h3 id="multi-sample-integration-figure-8">Figure 8</h3>
+<figure><img src="../fig/dimplot_challenge2-ifnb1.png" class="figure mx-auto d-block"></figure><hr></section><section id="differential-expression"><h2 class="section-heading"><a href="differential-expression.html">Differential Expression Analysis</a></h2>
 <hr class="half-width"></section>
 </div>
     </main>
@@ -494,8 +588,8 @@ tighter cloud with outliers removed</div>
   "url": "https://singlecell-rnaseq.github.io/NA/instructor/images.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/instructor/images.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-05-14",
-  "datePublished": "2026-05-14"
+  "dateModified": "2026-05-16",
+  "datePublished": "2026-05-16"
 }
 
   </script><script>

@@ -340,7 +340,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Normalization and Feature Selection</h1>
-        <p>Last updated on 2026-05-14 |
+        <p>Last updated on 2026-05-16 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/normalization-and-features.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -407,7 +407,8 @@ thresholds.</p>
 <code class="sourceCode R"><span><span class="va">work_dir</span> <span class="op">&lt;-</span> <span class="fu">paste0</span><span class="op">(</span></span>
 <span>    <span class="st">"/scratch/negishi/"</span>, <span class="fu">Sys.getenv</span><span class="op">(</span><span class="st">"USER"</span><span class="op">)</span>,</span>
 <span>    <span class="st">"/scrna_workshop/"</span></span>
-<span><span class="op">)</span></span></code></pre>
+<span><span class="op">)</span></span>
+<span><span class="fu">setwd</span><span class="op">(</span><span class="va">work_dir</span><span class="op">)</span></span></code></pre>
 </div>
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -421,17 +422,17 @@ thresholds.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code>An object of class Seurat
-23694 features across 10000 samples within 1 assay
-Active assay: RNA (23694 features, 0 variable features)
+29155 features across 11310 samples within 1 assay
+Active assay: RNA (29155 features, 0 variable features)
  1 layer present: counts</code></pre>
 </div>
-<p>The object has approximately 23,700 genes and 10,000 cells. Only the
+<p>The object has 29,155 genes and 11,310 cells. Only the
 <code>counts</code> layer is populated at this stage. By the end of this
 episode we will fill in the <code>data</code> and
 <code>scale.data</code> layers as well.</p>
@@ -499,14 +500,14 @@ layer of the RNA assay:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code>An object of class Seurat
-23694 features across 10000 samples within 1 assay
-Active assay: RNA (23694 features, 0 variable features)
+29155 features across 11310 samples within 1 assay
+Active assay: RNA (29155 features, 0 variable features)
  2 layers present: counts, data</code></pre>
 </div>
 <p>Notice that we now have <strong>2 layers</strong>:
@@ -526,13 +527,93 @@ Active assay: RNA (23694 features, 0 variable features)
 <span><span class="co"># Normalized values for the same genes and cells</span></span>
 <span><span class="va">pbmc</span><span class="op">[[</span><span class="st">"RNA"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre>
 </div>
+<div id="accordionSpoiler3" class="accordion spoiler-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
+  <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected Output </h3>
+</button>
+<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
+<div class="accordion-body">
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code># Raw counts for the first 5 genes in the first 3 cells
+5 x 3 sparse Matrix of class "dgCMatrix"
+                AAACCCAAGCGCCCAT-1 AAACCCAAGGTTCCGC-1 AAACCCACAGACAAGC-1
+ENSG00000238009                  .                  .                  .
+ENSG00000239945                  .                  .                  .
+ENSG00000241860                  .                  .                  .
+ENSG00000290385                  .                  .                  .
+ENSG00000235146                  .                  .                  .
+
+# Normalized values for the same genes and cells
+5 x 3 sparse Matrix of class "dgCMatrix"
+                AAACCCAAGCGCCCAT-1 AAACCCAAGGTTCCGC-1 AAACCCACAGACAAGC-1
+ENSG00000238009                  .                  .                  .
+ENSG00000239945                  .                  .                  .
+ENSG00000241860                  .                  .                  .
+ENSG00000290385                  .                  .                  .
+ENSG00000235146                  .                  .                  .</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>The first few genes in the matrix are mostly zeros, so the output
+above is not very illuminating. To see the actual difference between raw
+and normalized values, we can filter for genes with non-zero counts
+first:</p>
+<div class="codewrapper sourceCode" id="cb10">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Raw counts for the first 5 genes in the first 3 cells, with row sum &gt; 0</span></span>
+<span><span class="va">mat</span> <span class="op">&lt;-</span> <span class="va">pbmc</span><span class="op">[[</span><span class="st">"RNA"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">counts</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
+<span><span class="va">mat</span><span class="op">[</span><span class="fu">rowSums</span><span class="op">(</span><span class="va">mat</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">]</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Normalized values for the same genes and cells, with row sum &gt; 0</span></span>
+<span><span class="va">mat2</span> <span class="op">&lt;-</span> <span class="va">pbmc</span><span class="op">[[</span><span class="st">"RNA"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
+<span><span class="va">mat2</span><span class="op">[</span><span class="fu">rowSums</span><span class="op">(</span><span class="va">mat2</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">]</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span></span></code></pre>
+</div>
+<div id="accordionSpoiler4" class="accordion spoiler-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
+  <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected Output </h3>
+</button>
+<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
+<div class="accordion-body">
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code># Raw counts for the first 5 genes in the first 3 cells, with row sum &gt; 0
+5 x 3 sparse Matrix of class "dgCMatrix"
+         AAACCCAAGCGCCCAT-1 AAACCCAAGGTTCCGC-1 AAACCCACAGACAAGC-1
+ISG15                     1                  2                  .
+C1orf159                  .                  1                  .
+SDF4                      .                  2                  .
+B3GALT6                   .                  1                  .
+DVL1                      .                  1                  .
+
+# Normalized values for the same genes and cells, with row sum &gt; 0
+5 x 3 sparse Matrix of class "dgCMatrix"
+         AAACCCAAGCGCCCAT-1 AAACCCAAGGTTCCGC-1 AAACCCACAGACAAGC-1
+ISG15               1.20458          0.5174592                  .
+C1orf159            .                0.2918332                  .
+SDF4                .                0.5174592                  .
+B3GALT6             .                0.2918332                  .
+DVL1                .                0.2918332                  .</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 <div class="section level3">
 <h3 id="visualizing-the-effect-of-normalization">Visualizing the effect of normalization<a class="anchor" aria-label="anchor" href="#visualizing-the-effect-of-normalization"></a></h3>
 <p>To see what normalization does, let’s compare the distribution of a
 gene before and after normalization. We’ll look at <strong>LYZ</strong>,
 a marker for CD14+ monocytes that has high and variable expression
 across cells.</p>
-<div class="codewrapper sourceCode" id="cb9">
+<div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -552,7 +633,8 @@ across cells.</p>
 <span></span>
 <span><span class="va">p1</span> <span class="op">+</span> <span class="va">p2</span></span></code></pre>
 </div>
-<p>The raw count distribution is heavily right-skewed with a large spike
+<figure><img src="fig/norm_compare_LYZ.png" alt="Two histograms comparing raw UMI counts and log-normalized expression for the LYZ gene, showing how normalization reduces the right skew" class="figure mx-auto d-block"><div class="figcaption">LYZ raw vs. normalized expression</div>
+</figure><p>The raw count distribution is heavily right-skewed with a large spike
 at zero (cells that don’t express LYZ – mostly non-monocytes). After log
 normalization, the non-zero values are spread more evenly and the
 influence of sequencing depth differences is reduced.</p>
@@ -577,7 +659,7 @@ capture biological differences between cell types. By selecting the top
 2,000 variable features, we focus downstream analysis (PCA, clustering)
 on the genes that matter most, while reducing noise and computation
 time.</p>
-<div class="codewrapper sourceCode" id="cb10">
+<div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -599,24 +681,24 @@ expected given their expression level).</td>
 <td>Number of variable features to select. 2,000 is the standard default
 for most scRNA-seq analyses.</td>
 </tr></tbody></table><p>Let’s see which genes were selected:</p>
-<div class="codewrapper sourceCode" id="cb11">
+<div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">head</span><span class="op">(</span><span class="fu">VariableFeatures</span><span class="op">(</span><span class="va">pbmc</span><span class="op">)</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre>
 </div>
-<div id="accordionSpoiler3" class="accordion spoiler-accordion accordion-flush">
+<div id="accordionSpoiler5" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
-  <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
+<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
+  <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code> [1] "S100A9" "LYZ"    "S100A8" "GNLY"   "FTL"    "NKG7"   "IGKC"   "FTH1"
- [9] "CST3"   "TYROBP"</code></pre>
+<pre class="output" tabindex="0"><code> [1] "PPBP"            "PF4"             "LINC01478"       "LINC01374"       "PTGDS"
+ [6] "JCHAIN"          "GP1BB"           "SOX5"            "ENSG00000225885" "EREG"     </code></pre>
 </div>
 <p>The top variable features include known immune cell markers: S100A9
 and LYZ (monocytes), GNLY and NKG7 (NK cells), IGKC (B cells), and CST3
@@ -629,7 +711,7 @@ variance.</p>
 </div>
 <p>Visualize the variable feature selection with a mean-variance
 plot:</p>
-<div class="codewrapper sourceCode" id="cb13">
+<div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -637,7 +719,8 @@ plot:</p>
 <span><span class="va">top10</span> <span class="op">&lt;-</span> <span class="fu">head</span><span class="op">(</span><span class="fu">VariableFeatures</span><span class="op">(</span><span class="va">pbmc</span><span class="op">)</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu">LabelPoints</span><span class="op">(</span>plot <span class="op">=</span> <span class="va">vf_plot</span>, points <span class="op">=</span> <span class="va">top10</span>, repel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
 </div>
-<p>In this plot, each point is a gene. The x-axis shows mean expression
+<figure><img src="fig/vf_plot.png" alt="Variable feature plot showing mean expression versus standardized variance for all genes, with the top 2000 variable features highlighted in red and the top 10 labeled" class="figure mx-auto d-block"><div class="figcaption">Variable feature selection plot</div>
+</figure><p>In this plot, each point is a gene. The x-axis shows mean expression
 across cells and the y-axis shows standardized variance. The red points
 are the 2,000 selected variable features. Genes in the upper right are
 both highly expressed and highly variable – these are strong cell-type
@@ -654,7 +737,7 @@ highly expressed genes simply because they have larger absolute values,
 not because they carry more biological information. Scaling puts all
 genes on equal footing so that PCA identifies the axes of true
 biological variation rather than expression magnitude.</p>
-<div class="codewrapper sourceCode" id="cb14">
+<div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -667,25 +750,25 @@ you later need scaled values for all genes (e.g., for a heatmap of a
 non-variable gene), you can re-run <code>ScaleData()</code> with
 <code>features = rownames(pbmc)</code>.</p>
 <p>After scaling, a third layer appears in the object:</p>
-<div class="codewrapper sourceCode" id="cb15">
+<div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pbmc</span></span></code></pre>
 </div>
-<div id="accordionSpoiler4" class="accordion spoiler-accordion accordion-flush">
+<div id="accordionSpoiler6" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
-  <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
+<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler6" aria-expanded="false" aria-controls="collapseSpoiler6">
+  <h3 class="accordion-header" id="headingSpoiler6">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
+<div id="collapseSpoiler6" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler6" aria-labelledby="headingSpoiler6">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code>An object of class Seurat
-23694 features across 10000 samples within 1 assay
-Active assay: RNA (23694 features, 2000 variable features)
+29155 features across 11310 samples within 1 assay
+Active assay: RNA (29155 features, 2000 variable features)
  3 layers present: counts, data, scale.data</code></pre>
 </div>
 <p>All three layers are now populated: <code>counts</code> (raw),
@@ -701,7 +784,7 @@ Active assay: RNA (23694 features, 2000 variable features)
 unwanted sources of variation using the <code>vars.to.regress</code>
 parameter. A common use case is regressing out mitochondrial percentage
 so that cell damage does not influence clustering:</p>
-<div class="codewrapper sourceCode" id="cb17">
+<div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -729,7 +812,7 @@ because our QC filtering already removed cells with
 <code>percent.mt &gt; 15</code>, and the remaining variation does not
 dominate the PCA.</p>
 <p>Save the normalized object for the next episode:</p>
-<div class="codewrapper sourceCode" id="cb18">
+<div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -757,7 +840,7 @@ each gene’s expression as a function of total UMI counts per cell,
 estimates the expected variance at each expression level, and returns
 Pearson residuals that serve as normalized, variance-stabilized values.
 A single function call replaces all three steps:</p>
-<div class="codewrapper sourceCode" id="cb19">
+<div class="codewrapper sourceCode" id="cb22">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -810,12 +893,12 @@ method for most production analyses.</p>
 <span class="callout-header">Challenge</span>
 <div id="challenge-1-lognormalize-vs.-sctransform-variable-features" class="callout-inner">
 <h3 class="callout-title">Challenge 1: LogNormalize vs. SCTransform
-Variable Features</h3>
+variable features</h3>
 <div class="callout-content">
 <p>Run both normalization approaches on the same filtered dataset and
 compare the top 20 variable features from each method. How many genes
 appear in both lists?</p>
-<div class="codewrapper sourceCode" id="cb20">
+<div class="codewrapper sourceCode" id="cb23">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -844,27 +927,65 @@ appear in both lists?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
-<p>You should find that approximately <strong>12–14 of the top 20 genes
-overlap</strong> (~60–70%), which means both methods broadly agree on
-which genes are most variable. The shared genes typically include strong
-cell-type markers like S100A9, LYZ, GNLY, NKG7, and IGKC.</p>
-<p>The differences arise because the two methods define “variable”
-differently:</p>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>LogNormalize top 20:
+ [1] "PPBP"            "PF4"             "LINC01478"       "LINC01374"       "PTGDS"
+ [6] "JCHAIN"          "GP1BB"           "SOX5"            "ENSG00000225885" "EREG"
+[11] "TCF4"            "IGKC"            "ZNF385D"         "GNLY"            "LYPD2"
+[16] "CUX2"            "LINGO2"          "CAVIN2"          "CLNK"            "HTR1F"
+
+SCTransform top 20:
+ [1] "S100A9" "S100A8" "GNLY"   "IGKC"   "PPBP"   "IGLC2"  "LYZ"    "PF4"    "GP1BB"  "NRGN"   "IGLC3"
+[12] "IGHM"   "CAVIN2" "AFF3"   "NKG7"   "GNG11"  "BANK1"  "VCAN"   "TUBB1"  "LINGO2"
+
+Genes in both lists:
+[1] "PPBP"   "PF4"    "GP1BB"  "IGKC"   "GNLY"   "LINGO2" "CAVIN2"</code></pre>
+</div>
+<p>The overlap is <strong>7 out of 20</strong> (~35%), which is lower
+than you might expect. The shared genes are PPBP, PF4, GP1BB, IGKC,
+GNLY, LINGO2, and CAVIN2.</p>
+<p>The two methods rank variable genes quite differently:</p>
 <ul><li>
-<strong>vst</strong> (LogNormalize) fits a mean-variance curve and
-selects genes with the highest residual variance. It can be influenced
-by a few outlier cells with extreme counts.</li>
+<strong>LogNormalize + vst</strong> picks up several lincRNAs
+(LINC01478, LINC01374) and even an Ensembl ID (ENSG00000225885) in the
+top 20. These are genes with sparse but extreme expression in a few
+cells, which inflates their residual variance in the vst model.</li>
 <li>
-<strong>SCTransform</strong> uses a negative binomial model that is
-more robust to outliers and better handles the mean-variance
-relationship at low expression levels.</li>
-</ul><p>Despite these differences in the top-ranked features, the downstream
-results (PCA, clustering, cell type identification) are usually very
-similar because both methods capture the major axes of biological
-variation. The differences tend to matter more for subtle distinctions
-between closely related cell states.</p>
+<strong>SCTransform</strong> surfaces well-known immune markers
+instead: S100A9, S100A8, LYZ, NKG7, VCAN. Its negative binomial model is
+more robust to outlier cells, so it favors genes with consistent
+cell-type-specific expression over genes that are simply noisy.</li>
+</ul><p>Despite only 35% overlap in the <strong>top 20</strong>, the broader
+variable feature sets (all 2,000-3,000 genes) agree much more. The
+top-ranked differences rarely change the downstream PCA, clustering, or
+cell type assignments because both methods capture the same major axes
+of biological variation. The practical difference is that SCTransform
+tends to produce cleaner ranked lists with fewer noise-driven genes at
+the top.</p>
+<div id="glmgampoi-speeds-up-sctransform" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<span class="callout-header">Callout</span>
+<div id="glmgampoi-speeds-up-sctransform" class="callout-inner">
+<h3 class="callout-title">glmGamPoi speeds up SCTransform</h3>
+<div class="callout-content">
+<p>If you see the warning about glmGamPoi not being installed,
+SCTransform still runs but falls back to a slower implementation.
+Install it for faster runs:</p>
+<div class="codewrapper sourceCode" id="cb25">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu">install</span><span class="op">(</span><span class="st">"glmGamPoi"</span><span class="op">)</span></span></code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -881,7 +1002,7 @@ Behavior</h3>
 <p>Plot the expression of <strong>ACTB</strong> (a housekeeping gene)
 and <strong>LYZ</strong> (a variable monocyte marker) before and after
 normalization. What changes for each gene, and why?</p>
-<div class="codewrapper sourceCode" id="cb21">
+<div class="codewrapper sourceCode" id="cb26">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -914,9 +1035,11 @@ normalization. What changes for each gene, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
-<p><strong>ACTB (housekeeping gene):</strong></p>
+<figure><img src="fig/norm_housekeeping.png" alt="Four histograms comparing raw and normalized expression for ACTB (housekeeping) and CD3D (cell-type marker), showing that normalization compresses the housekeeping gene distribution while preserving the bimodal pattern of the marker gene" class="figure mx-auto d-block"><div class="figcaption">ACTB and CD3D raw vs. normalized
+expression</div>
+</figure><p><strong>ACTB (housekeeping gene):</strong></p>
 <ul><li>
 <strong>Before normalization:</strong> the raw count distribution is
 right-skewed because cells with higher sequencing depth have
@@ -924,29 +1047,33 @@ proportionally more ACTB counts. The apparent variation is mostly
 technical (sequencing depth), not biological.</li>
 <li>
 <strong>After normalization:</strong> the distribution becomes
-tighter and more uniform. Because ACTB is expressed at similar levels in
-all cell types, once you correct for sequencing depth the remaining
-variation is small. This is exactly why ACTB is <strong>not</strong>
-selected as a variable feature – it doesn’t help distinguish cell
-types.</li>
+approximately bell-shaped, centered around 3.5-4 on the log-normalized
+scale. Because ACTB is expressed at similar levels across all cell
+types, removing depth effects reveals a tight, unimodal distribution.
+This is exactly why ACTB is <strong>not</strong> selected as a variable
+feature – it doesn’t help distinguish cell types.</li>
 </ul><p><strong>LYZ (variable gene):</strong></p>
 <ul><li>
-<strong>Before normalization:</strong> there is a large spike at
-zero (non-monocyte cells that don’t express LYZ) and a spread of
-non-zero values. Part of the variation in non-zero values is technical
-(depth) and part is biological (different amounts of LYZ in
-monocytes).</li>
+<strong>Before normalization:</strong> there is a massive spike at
+zero (~7,000 cells that don’t express LYZ) and a low, flat spread of
+non-zero values extending to ~500. The zero-dominated distribution makes
+it hard to see any structure in the expressing cells.</li>
 <li>
-<strong>After normalization:</strong> the zero spike remains (you
-can’t normalize away true absence of expression), but the non-zero
-values are corrected for depth. The biological variation between
-monocytes and non-monocytes is preserved and stands out more clearly.
-This is why LYZ <strong>is</strong> selected as a highly variable
+<strong>After normalization:</strong> the zero spike persists (you
+can’t normalize away true absence of expression), but the non-zero cells
+now reveal a clear <strong>bimodal</strong> pattern – a small cluster of
+cells with low expression (~1-2) and a distinct second peak of highly
+expressing cells (~4-5). This bimodality reflects the biological
+reality: CD14+ monocytes express LYZ at high levels, while other cell
+types either don’t express it at all or express it minimally. This
+separation is why LYZ <strong>is</strong> selected as a highly variable
 feature.</li>
 </ul><p>The key takeaway: normalization makes expression comparable across
 cells by removing sequencing depth effects. Housekeeping genes become
-more uniform (confirming they don’t vary biologically), while cell-type
-marker genes retain their meaningful variation.</p>
+unimodal (confirming they don’t vary biologically), while cell-type
+marker genes reveal biologically meaningful structure – like the bimodal
+split in LYZ – that was obscured by technical noise in the raw
+counts.</p>
 </div>
 </div>
 </div>
@@ -1039,8 +1166,8 @@ any links that you are not going to use.
   "url": "https://singlecell-rnaseq.github.io/NA/normalization-and-features.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/normalization-and-features.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-05-14",
-  "datePublished": "2026-05-14"
+  "dateModified": "2026-05-16",
+  "datePublished": "2026-05-16"
 }
 
   </script><script>
