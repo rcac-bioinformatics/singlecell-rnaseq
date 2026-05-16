@@ -30,56 +30,11 @@ exercises: 20
 
 ``` r
 library(Seurat)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'Seurat'
-```
-
-``` r
 library(ggplot2)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'ggplot2'
-```
-
-``` r
 library(patchwork)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'patchwork'
-```
-
-``` r
 library(dplyr)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'dplyr'
-```
-
-``` r
 library(clusterProfiler)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'clusterProfiler'
-```
-
-``` r
 library(org.Hs.eg.db)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'org.Hs.eg.db'
 ```
 
 ## Loading the Integrated Data
@@ -88,9 +43,20 @@ We continue from the integrated and annotated IFNB dataset produced in the
 previous episode. Make sure the cell type annotation is set as the active
 identity.
 
+Set up the working directory to match the previous episodes:
+
 
 ``` r
-ifnb <- readRDS("ifnb_annotated.rds")
+work_dir <- paste0(
+    "/scratch/negishi/", Sys.getenv("USER"),
+    "/scrna_workshop/"
+)
+setwd(work_dir)
+```
+
+
+``` r
+ifnb <- readRDS(paste0(work_dir, "ifnb_annotated.rds"))
 Idents(ifnb) <- "celltype"
 DimPlot(ifnb, reduction = "umap", label = TRUE, repel = TRUE, split.by = "stim") +
     NoLegend()
@@ -474,7 +440,7 @@ support reproducibility, sharing, and downstream use.
 
 
 ``` r
-saveRDS(ifnb, file = "ifnb_annotated.rds")
+saveRDS(ifnb, file = paste0(work_dir, "ifnb_annotated.rds"))
 ```
 
 ### Export the count matrix and metadata

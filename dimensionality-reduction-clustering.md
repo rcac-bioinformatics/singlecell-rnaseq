@@ -30,38 +30,9 @@ exercises: 15
 
 ``` r
 library(Seurat)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'Seurat'
-```
-
-``` r
 library(ggplot2)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'ggplot2'
-```
-
-``` r
 library(patchwork)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'patchwork'
-```
-
-``` r
 library(clustree)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'clustree'
 ```
 
 ## Loading the Normalized Data
@@ -70,9 +41,20 @@ We start from the normalized, scaled Seurat object saved at the end of the
 previous episode. This object has the `counts`, `data`, and `scale.data`
 layers populated, with 2,000 variable features selected.
 
+Set up the working directory to match the previous episodes:
+
 
 ``` r
-pbmc <- readRDS("pbmc_normalized.rds")
+work_dir <- paste0(
+    "/scratch/negishi/", Sys.getenv("USER"),
+    "/scrna_workshop/"
+)
+setwd(work_dir)
+```
+
+
+``` r
+pbmc <- readRDS(paste0(work_dir, "pbmc_normalized.rds"))
 pbmc
 ```
 
@@ -81,9 +63,9 @@ pbmc
 ## Expected output
 
 ```output
-An object of class Seurat
-23694 features across 10000 samples within 1 assay
-Active assay: RNA (23694 features, 2000 variable features)
+An object of class Seurat 
+29155 features across 11310 samples within 1 assay 
+Active assay: RNA (29155 features, 2000 variable features)
  3 layers present: counts, data, scale.data
 ```
 
@@ -123,6 +105,7 @@ two components:
 ``` r
 VizDimLoadings(pbmc, dims = 1:2, reduction = "pca")
 ```
+![Bar plots showing the top genes with the highest positive and negative loadings for PC1 and PC2. Genes like CST3 and LYZ appear in PC1, while CD3D and IL32 appear in PC2.](fig/viz-dim-loadings.png)
 
 Each bar represents a gene's **loading** (contribution) to that PC. Genes with
 large positive loadings push cells in one direction along the PC, while genes
@@ -150,6 +133,9 @@ Each heatmap shows the top genes (rows) ordered by their loading, with cells
 indicate PCs that capture real biological structure. PCs that look noisy
 (no clear pattern) are capturing technical variation or random noise.
 
+![Grid of nine heatmaps showing gene expression patterns for PC1 through PC9. Each heatmap shows the top genes ordered by loading with cells ordered by PC score, revealing distinct expression programs.](fig/DimHeatmap.png)
+
+
 ### Choosing the number of PCs
 
 Not all 50 PCs are informative. Later PCs capture decreasing amounts of
@@ -162,6 +148,9 @@ The **elbow plot** shows the standard deviation explained by each PC:
 ``` r
 ElbowPlot(pbmc, ndims = 30)
 ```
+
+![Line plot of standard deviation versus principal component number. The curve drops steeply for the first 10 PCs then gradually flattens, with an elbow around PC 12 to 15.](fig/elbowplot.png)
+
 
 Look for the **elbow** -- the point where the curve transitions from steep
 decline to a flatter plateau. PCs before the elbow capture substantial
@@ -215,6 +204,8 @@ Visualize the UMAP embedding:
 ``` r
 DimPlot(pbmc, reduction = "umap")
 ```
+
+![UMAP plot showing approximately 10000 cells arranged in distinct clusters. Cells are colored by their identity, forming several well-separated groups.](fig/umap-plot-1.png)
 
 At this point, cells are not yet clustered (all are the same color). But you
 can already see that cells organize into distinct groups on the UMAP. These
@@ -320,9 +311,25 @@ pbmc <- FindClusters(pbmc, resolution = 0.5)
 
 ## Expected output
 
-At resolution 0.5, you should get approximately **9--12 clusters**, numbered
+At resolution 0.5, you should get approximately **18 clusters**, numbered
 starting from 0. The exact number may vary slightly depending on random seed
 and software versions.
+
+
+``` output
+Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck
+
+Number of nodes: 11310
+Number of edges: 410535
+
+Running Louvain algorithm...
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Maximum modularity in 10 random starts: 0.9317
+Number of communities: 18
+Elapsed time: 1 seconds
+```
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -339,13 +346,15 @@ table(Idents(pbmc))
 ## Expected output
 
 ```output
-AAACCCAAGAAACACT-1 AAACCCAAGAAACCAT-1 AAACCCAAGAAACTGT-1 AAACCCAAGAAAGCGA-1
-                 0                  2                  4                  0
-AAACCCAAGAAAGTTG-1 AAACCCAAGAACAATC-1
-                 4                  1
+AAACCCAAGCGCCCAT-1 AAACCCAAGGTTCCGC-1 AAACCCACAGACAAGC-1 AAACCCACAGAGTTGG-1 AAACCCACAGGTATGG-1 
+                 0                 12                 13                  1                  7 
+AAACCCACATAGTCAC-1 
+                 4 
+Levels: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
 
-   0    1    2    3    4    5    6    7    8    9
-3412 1897 1335 1022  858  547  391  277  152  109
+
+   0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17 
+2112 1810 1187 1015 1006  716  639  634  517  429  357  234  176  175  122   78   64   39 
 ```
 
 Cluster 0 is the largest (T cells, which are the most abundant PBMC type).
@@ -361,6 +370,8 @@ Now let's visualize the clusters on the UMAP:
 DimPlot(pbmc, reduction = "umap", label = TRUE, label.size = 5) +
     NoLegend()
 ```
+
+![](fig/umap-plot-2.png)
 
 ### Exploring multiple resolutions
 
@@ -385,6 +396,7 @@ different resolutions using **clustree**:
 ``` r
 clustree(pbmc, prefix = "RNA_snn_res.")
 ```
+![Clustree diagram showing how clusters split as resolution increases from 0.2 to 1.2. At low resolution a few large clusters exist, which progressively split into more subclusters at higher resolutions. Stable splits show clean branches while unstable splits show cells moving between multiple clusters.](fig/clustree.png)
 
 In the clustree plot, each row is a resolution and each node is a cluster.
 Arrows show how cells move between clusters as resolution increases. Look for:
@@ -423,6 +435,9 @@ FeaturePlot(pbmc,
             ncol = 2)
 ```
 
+![Four UMAP plots showing expression of CD3D, MS4A1, LYZ, and GNLY. Each gene is highlighted in a different cluster region, indicating T cells, B cells, monocytes, and NK cells respectively.](fig/feature-plot-4genes.png)
+
+
 | Gene | Cell type | Expected pattern |
 |------|:----------|:----------------|
 | `CD3D` | T cells | Lights up the large T cell clusters (the biggest groups on the UMAP) |
@@ -440,6 +455,7 @@ VlnPlot(pbmc,
         ncol = 2,
         pt.size = 0)
 ```
+![Violin plots showing expression of CD3D, MS4A1, LYZ, and GNLY across all clusters. Each marker shows high expression in one or two specific clusters and low or zero expression in the others.](fig/vlnplot-plot-4genes.png)
 
 Even without formal annotation, you can see that these markers segregate
 cleanly into distinct clusters. CD3D marks several clusters (T cell subtypes),
@@ -485,16 +501,20 @@ p4 <- DimPlot(pbmc, group.by = "RNA_snn_res.1.2", label = TRUE) +
 
 ::::::::::::::::::::::::: solution
 
+
+![Four UMAP plots comparing clustering at resolutions 0.2, 0.5, 0.8, and 1.2. Lower resolutions produce fewer large clusters while higher resolutions split cells into progressively more subclusters.](fig/snn-res.png)
+
+
 Expected cluster counts:
 
 | Resolution | Approximate clusters |
 |:----------:|:--------------------:|
-| 0.2 | 6--7 |
-| 0.5 | 9--11 |
-| 0.8 | 12--14 |
-| 1.2 | 15--18 |
+| 0.2 | 16 |
+| 0.5 | 18 |
+| 0.8 | 21 |
+| 1.2 | 25 |
 
-**Resolution 0.5** gives approximately 9--11 clusters, which aligns well with
+**Resolution 0.5** gives approximately 16 clusters, which aligns well with
 the 8 major PBMC cell types (CD4+ T, CD8+ T, B cells, CD14+ monocytes,
 FCGR3A+ monocytes, NK cells, dendritic cells, platelets). Some cell types may
 be split into sub-clusters (e.g., naive vs. memory T cells), which is
@@ -540,6 +560,12 @@ DimPlot(pbmc, reduction = "umap", label = TRUE, label.size = 5) + NoLegend()
 ```
 
 :::::::::::::::::::::::: solution
+
+
+![](fig/challenge2_plot1.png)
+
+![](fig/challenge2_plot2.png)
+
 
 By comparing the FeaturePlot panels with the labeled UMAP, you should see the
 following pattern (exact cluster numbers may differ depending on your run):

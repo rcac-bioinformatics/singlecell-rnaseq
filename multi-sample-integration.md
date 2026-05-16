@@ -30,40 +30,21 @@ exercises: 15
 
 ``` r
 library(Seurat)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'Seurat'
-```
-
-``` r
 library(SeuratData)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'SeuratData'
-```
-
-``` r
 library(ggplot2)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'ggplot2'
-```
-
-``` r
 library(patchwork)
 ```
 
-``` error
-Error in `library()`:
-! there is no package called 'patchwork'
-```
+Set up the working directory to match the previous episodes:
 
+
+``` r
+work_dir <- paste0(
+    "/scratch/negishi/", Sys.getenv("USER"),
+    "/scrna_workshop/"
+)
+setwd(work_dir)
+```
 
 ## Why Integration Is Needed
 
@@ -110,10 +91,10 @@ ifnb
 ## Expected output
 
 ```output
-An object of class Seurat
-14053 features across 13999 samples within 1 assay
+An object of class Seurat 
+14053 features across 13999 samples within 1 assay 
 Active assay: RNA (14053 features, 0 variable features)
- 1 layer present: counts
+ 2 layers present: counts, data
 ```
 
 The dataset has approximately 14,000 cells and 14,000 genes. The `stim` column
@@ -131,8 +112,9 @@ table(ifnb$stim)
 ## Expected output
 
 ```output
-CTRL STIM
-6548 7451
+CTRL STIM 
+6548 7451 
+
 ```
 
 Roughly 6,500 control cells and 7,500 stimulated cells.
@@ -157,10 +139,10 @@ ifnb
 ## Expected output
 
 ```output
-An object of class Seurat
-14053 features across 13999 samples within 1 assay
+An object of class Seurat 
+14053 features across 13999 samples within 1 assay 
 Active assay: RNA (14053 features, 0 variable features)
- 2 layers present: counts.CTRL, counts.STIM
+ 4 layers present: counts.CTRL, counts.STIM, data.CTRL, data.STIM
 ```
 
 The counts are now stored in two separate layers: `counts.CTRL` and
@@ -192,6 +174,9 @@ ifnb <- RunUMAP(ifnb, dims = 1:30, reduction = "pca")
 ``` r
 DimPlot(ifnb, reduction = "umap", group.by = "stim")
 ```
+
+
+![](fig/umap-plot-7.png)
 
 You should see a clear separation between control (CTRL) and stimulated (STIM)
 cells. Instead of clustering by cell type (T cells with T cells, monocytes
@@ -246,6 +231,7 @@ Visualize the integrated result:
 ``` r
 DimPlot(ifnb, reduction = "umap", group.by = "stim")
 ```
+![](fig/umap-plot-8.png)
 
 The control and stimulated cells should now be intermingled within each
 cluster. Cell types from both conditions co-cluster, which is what we want.
@@ -256,6 +242,7 @@ Let's verify with a split view:
 ``` r
 DimPlot(ifnb, reduction = "umap", split.by = "stim")
 ```
+![](fig/umap-plot-9.png)
 
 Both panels should show the same overall structure, with the same clusters
 present in both conditions. This confirms that integration successfully
@@ -361,6 +348,8 @@ ifnb$celltype <- Idents(ifnb)
 ``` r
 DimPlot(ifnb, reduction = "umap", label = TRUE, repel = TRUE) + NoLegend()
 ```
+![](fig/umap-plot-10.png)
+
 
 ### Conserved markers
 
@@ -374,6 +363,8 @@ conserved <- FindConservedMarkers(ifnb,
                                   ident.1 = "CD14 Mono",
                                   grouping.var = "stim",
                                   only.pos = TRUE)
+
+
 head(conserved, 10)
 ```
 
@@ -387,6 +378,39 @@ The output has columns for each condition (e.g., `CTRL_avg_log2FC`,
 `STIM_avg_log2FC`) showing that the marker is consistent across both. Genes
 like LYZ, S100A9, and CD14 should appear as strong conserved markers for
 monocytes.
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+
+``` output
+         CTRL_p_val CTRL_avg_log2FC CTRL_pct.1 CTRL_pct.2 CTRL_p_val_adj    STIM_p_val STIM_avg_log2FC
+TYROBP            0        2.356269      0.940      0.227              0  0.000000e+00        2.337569
+FCER1G            0        2.197678      0.930      0.233              0  0.000000e+00        2.549589
+S100A8            0        4.739502      0.743      0.071              0  0.000000e+00        5.318497
+C15orf48          0        2.720354      0.869      0.201              0  0.000000e+00        2.751572
+IL8               0        3.651882      0.799      0.144              0 9.967253e-252        3.819957
+CD63              0        2.740801      0.958      0.333              0  0.000000e+00        2.889984
+S100A9            0        4.606045      0.691      0.069              0  0.000000e+00        5.236085
+CTSB              0        3.116819      0.772      0.183              0  0.000000e+00        3.400786
+LGALS1            0        2.400262      0.905      0.321              0  0.000000e+00        2.848345
+TYMP              0        2.084914      0.860      0.282              0  0.000000e+00        2.267578
+         STIM_pct.1 STIM_pct.2 STIM_p_val_adj      max_pval minimump_p_val
+TYROBP        0.952      0.199   0.000000e+00  0.000000e+00              0
+FCER1G        0.910      0.197   0.000000e+00  0.000000e+00              0
+S100A8        0.445      0.020   0.000000e+00  0.000000e+00              0
+C15orf48      0.860      0.201   0.000000e+00  0.000000e+00              0
+IL8           0.295      0.028  1.400698e-247 9.967253e-252              0
+CD63          0.931      0.276   0.000000e+00  0.000000e+00              0
+S100A9        0.584      0.036   0.000000e+00  0.000000e+00              0
+CTSB          0.822      0.183   0.000000e+00  0.000000e+00              0
+LGALS1        0.867      0.217   0.000000e+00  0.000000e+00              0
+TYMP          0.926      0.438   0.000000e+00  0.000000e+00              0
+```
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
 
 ### Condition-specific differential expression
 
@@ -415,22 +439,23 @@ head(mono.de, 10)
 
 ## Expected output
 
-```output
-              p_val avg_log2FC pct.1 pct.2    p_val_adj
-IFIT1  0.000e+00      4.528 0.992 0.056 0.000e+00
-ISG15  0.000e+00      4.345 0.995 0.186 0.000e+00
-IFI6   0.000e+00      4.123 0.968 0.042 0.000e+00
-ISG20  0.000e+00      3.159 0.940 0.124 0.000e+00
-MX1    0.000e+00      3.023 0.893 0.029 0.000e+00
-IFIT3  0.000e+00      3.752 0.959 0.048 0.000e+00
-IFI44L 0.000e+00      3.697 0.888 0.022 0.000e+00
-IFIT2  0.000e+00      3.583 0.919 0.027 0.000e+00
-LY6E   0.000e+00      3.243 0.919 0.077 0.000e+00
-RSAD2  0.000e+00      3.443 0.828 0.013 0.000e+00
+
+``` output
+        p_val avg_log2FC pct.1 pct.2 p_val_adj
+IFIT1       0   7.117626 0.965 0.034         0
+IFIT3       0   6.737338 0.971 0.057         0
+TNFSF10     0   6.322227 0.959 0.062         0
+RSAD2       0   6.619577 0.920 0.042         0
+IFIT2       0   6.893956 0.909 0.040         0
+MX1         0   4.824046 0.953 0.099         0
+CXCL10      0   7.975000 0.873 0.032         0
+LY6E        0   4.255152 0.990 0.174         0
+CXCL11      0   8.521702 0.800 0.011         0
+CCL8        0   9.063100 0.800 0.015         0
 ```
 
-The top DE genes are all **interferon-stimulated genes (ISGs)**: IFIT1, ISG15,
-IFI6, MX1, IFIT3. These are exactly the genes you would expect to be
+The top DE genes are all **interferon-stimulated genes (ISGs)**: IFIT1, IFIT3,
+TNFSF10, RSAD2, IFIT2. These are exactly the genes you would expect to be
 upregulated by IFN-beta stimulation, confirming that our integration preserved
 the biological signal while correcting the batch effect.
 
@@ -443,21 +468,27 @@ Let's visualize a few ISGs to see the condition-specific response:
 
 ``` r
 FeaturePlot(ifnb,
-            features = c("ISG15", "IFIT1"),
+            features = c("IFIT3", "IFIT1"),
             split.by = "stim",
             cols = c("grey85", "firebrick"))
 ```
 
+![](fig/dimplot_ifnb_de1.png)
+
+
 
 ``` r
 VlnPlot(ifnb,
-        features = "ISG15",
+        features = c("IFIT1", "IFIT3", "TNFSF10", "RSAD2"),
         split.by = "stim",
         idents = "CD14 Mono",
+        ncol = 4,
         pt.size = 0)
 ```
 
-ISG15 and IFIT1 are strongly induced in the stimulated condition across
+![](fig/vlnplot_ifnb_de1.png)
+
+IFIT1 and IFIT13 are strongly induced in the stimulated condition across
 multiple cell types, with particularly strong expression in monocytes. This
 demonstrates that integration corrected the batch effect (cell types co-cluster)
 while preserving the biological effect of IFN-beta stimulation (ISGs are still
@@ -466,7 +497,7 @@ differentially expressed).
 
 ::::::::::::::::::::::::::::::::::::: challenge
 
-## Challenge 1: Quantifying Integration Quality
+## Challenge 1: Quantifying integration quality
 
 After integration, check whether control and stimulated cells of the same type
 are well mixed within each cluster. Use `DimPlot(split.by = "stim")` to
@@ -486,38 +517,50 @@ Are the proportions roughly balanced (close to 50/50) within each cell type?
 
 :::::::::::::::::::::::: solution
 
-The proportion table should show values close to **0.45--0.55** for each
-condition within each cell type, indicating good mixing. For example:
+## Solution
 
 ```output
-          CellType
-Condition  CD14 Mono CD4 T CD8 T   NK    B   FCGR3A Mono  DC    Mk
-  CTRL         0.47  0.48  0.47 0.46 0.48         0.43 0.44  0.50
-  STIM         0.53  0.52  0.53 0.54 0.52         0.57 0.56  0.50
+         CellType
+Condition CD14 Mono  CD4 T  CD8 T     NK      B FCGR3A Mono     DC     Mk  Eryth
+     CTRL     0.504  0.432  0.477  0.435  0.482       0.530  0.447  0.446  0.458
+     STIM     0.496  0.568  0.523  0.565  0.518       0.470  0.553  0.554  0.542
 ```
 
-The proportions are close to 50/50 within each cell type, confirming that
-integration successfully mixed cells from both conditions. Small deviations
-from 50/50 are normal and may reflect real differences in cell type abundance
-between conditions (e.g., slightly more monocytes in the stimulated condition).
+![](fig/dimplot_challenge-ifnb1.png)
 
-If you see a cell type that is heavily skewed (e.g., 90% from one condition),
-that could indicate:
+Most cell types fall in the **0.43--0.57** range, confirming that integration
+successfully mixed cells from both conditions. The split UMAP shows the same
+cell types present in both panels with similar spatial arrangement -- each
+cluster appears in both CTRL and STIM with comparable density.
 
-- A condition-specific cell population that should not have been integrated
-- Poor integration for that particular cell type
-- A real biological shift in cell type composition
+Some observations worth discussing:
 
-The split UMAP should show the same clusters in both panels, with similar
-density patterns.
+- **CD14 Mono** is the best-mixed cell type (50.4/49.6), essentially a perfect
+  split. This is expected for the most abundant population.
+- **CD4 T and NK** show the largest deviation (~43/57), with more cells in the
+  stimulated condition. This could reflect a real biological shift -- IFN-beta
+  stimulation may promote T cell and NK cell survival or proliferation in
+  culture -- rather than a failure of integration.
+- **Rare populations** (Mk, Eryth, DC) show reasonable balance despite small
+  cell numbers, where stochastic variation has more impact.
+
+The key diagnostic: if integration had failed, you would see a cell type that
+is 90%+ from one condition, or you would see the same cell type forming
+separate clusters in the two panels. Neither is the case here. The moderate
+CD4 T skew (43/57) is well within the range of expected biological variation
+between a control and stimulated sample.
 
 :::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+
+
+
+
 ::::::::::::::::::::::::::::::::::::: challenge
 
-## Challenge 2: Interferon Response Genes in Monocytes
+## Challenge 2: Interferon response genes in monocytes
 
 Find the top 10 differentially expressed genes between stimulated and control
 **CD14+ monocytes** (we computed this above as `mono.de`). Are these genes
@@ -539,39 +582,66 @@ FeaturePlot(ifnb,
 
 :::::::::::::::::::::::: solution
 
-The top 10 upregulated genes should include several well-known
-**interferon-stimulated genes (ISGs)**:
+## Solution
 
-| Gene | Function | Evidence of IFN response |
-|------|:---------|:------------------------|
-| IFIT1 | Interferon-induced protein with tetratricopeptide repeats | Direct target of type I interferon signaling |
-| ISG15 | Ubiquitin-like modifier | Conjugated to target proteins during antiviral response |
-| IFI6 | Interferon alpha-inducible protein 6 | Inhibits apoptosis in response to viral infection |
-| MX1 | Myxovirus resistance protein 1 | GTPase that blocks viral replication |
-| IFIT3 | Interferon-induced protein with tetratricopeptide repeats 3 | Antiviral effector |
-| IFI44L | Interferon-induced protein 44-like | Induced by type I interferons |
-| IFIT2 | Interferon-induced protein with tetratricopeptide repeats 2 | Antiviral, regulates translation |
-| ISG20 | Interferon-stimulated exonuclease gene 20 | Degrades viral RNA |
-| LY6E | Lymphocyte antigen 6E | Modulates viral entry |
-| RSAD2 (Viperin) | Radical SAM domain-containing 2 | Broad-spectrum antiviral enzyme |
+![](fig/dimplot_challenge2-ifnb1.png)
 
-Every gene in the top 10 is a known component of the **type I interferon
-response pathway**. This makes perfect biological sense: IFN-beta is a type I
-interferon, and stimulating PBMCs with it activates the JAK-STAT signaling
-cascade, which induces transcription of hundreds of ISGs.
 
-The FeaturePlot should show these genes as nearly absent in the CTRL panel
-and strongly expressed across multiple cell types (especially monocytes) in
-the STIM panel. This confirms that:
 
-1. Integration successfully corrected technical batch effects
-2. The biological response to IFN-beta stimulation was preserved
-3. We can detect meaningful condition-specific changes after integration
+``` output
+                 p_val avg_log2FC pct.1 pct.2     p_val_adj
+CCL8      0.000000e+00   9.063    0.800 0.015  0.000000e+00
+CXCL11    0.000000e+00   8.522    0.800 0.011  0.000000e+00
+CXCL10    0.000000e+00   7.975    0.873 0.032  0.000000e+00
+HESX1    1.756212e-217   7.935    0.335 0.002 2.468004e-213
+IFIT1     0.000000e+00   7.118    0.965 0.034  0.000000e+00
+IFIT2     0.000000e+00   6.894    0.909 0.040  0.000000e+00
+IFIT3     0.000000e+00   6.737    0.971 0.057  0.000000e+00
+GMPR     1.772282e-239   6.634    0.371 0.005 2.490588e-235
+RSAD2     0.000000e+00   6.620    0.920 0.042  0.000000e+00
+APOBEC3B 1.261976e-127   6.600    0.273 0.034 1.773454e-123
+```
+
+The top 10 genes fall into two functional categories, both consistent with
+IFN-beta stimulation:
+
+| Gene | log2FC | pct.1 / pct.2 | Function |
+|------|:------:|:--------------|:---------|
+| CCL8 | 9.06 | 0.80 / 0.02 | Chemokine; recruits monocytes and T cells to sites of inflammation |
+| CXCL11 | 8.52 | 0.80 / 0.01 | IFN-inducible chemokine; attracts activated T cells via CXCR3 |
+| CXCL10 | 7.98 | 0.87 / 0.03 | IFN-inducible chemokine (IP-10); major recruiter of immune cells |
+| HESX1 | 7.93 | 0.34 / 0.00 | Transcription factor; emerging role in IFN signaling |
+| IFIT1 | 7.12 | 0.97 / 0.03 | Directly induced by type I IFN; inhibits viral translation |
+| IFIT2 | 6.89 | 0.91 / 0.04 | Antiviral effector; regulates translation during infection |
+| IFIT3 | 6.74 | 0.97 / 0.06 | Antiviral effector; forms complex with IFIT1 and IFIT2 |
+| GMPR | 6.63 | 0.37 / 0.01 | Guanosine monophosphate reductase; modulates purine metabolism |
+| RSAD2 | 6.62 | 0.92 / 0.04 | Viperin; broad-spectrum antiviral enzyme induced by IFN |
+| APOBEC3B | 6.60 | 0.27 / 0.03 | Cytidine deaminase; innate antiviral defense via RNA editing |
+
+Two patterns stand out:
+
+**Chemokines dominate the top 3.** CCL8, CXCL11, and CXCL10 have the highest
+fold changes (7.9-9.1), reflecting the monocyte's primary role as a sentinel
+cell: upon IFN stimulation, monocytes broadcast chemokine signals to recruit
+other immune cells. Note the pct.2 values (0.01-0.03) -- these chemokines are
+essentially absent in control cells and massively induced by stimulation.
+
+**Classical ISGs fill the rest.** IFIT1/2/3, RSAD2, and APOBEC3B are
+canonical interferon-stimulated genes that directly inhibit viral replication.
+The IFIT family shows the highest pct.1 values (0.91-0.97), meaning nearly
+every stimulated monocyte expresses them -- a hallmark of a robust, uniform
+interferon response.
+
+The FeaturePlot confirms this visually: CCL8, CXCL11, CXCL10, and HESX1 are
+virtually absent in the CTRL panels (gray) and strongly expressed in the STIM
+panels (red), with the signal concentrated in the monocyte clusters (right
+side of the UMAP). CXCL10 and CXCL11 also show some expression in the
+stimulated CD4 T and NK clusters, consistent with these cell types also
+responding to IFN-beta, though less strongly than monocytes.
 
 :::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
-
 ::::::::::::::::::::::::::::::::::::: keypoints
 
 - Batch effects cause cells to cluster by sample rather than by cell type, preventing cross-condition comparisons

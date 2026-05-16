@@ -46,6 +46,7 @@ work_dir <- paste0(
     "/scratch/negishi/", Sys.getenv("USER"),
     "/scrna_workshop/"
 )
+setwd(work_dir)
 ```
 
 
@@ -59,13 +60,13 @@ pbmc
 ## Expected output
 
 ```output
-An object of class Seurat
-23694 features across 10000 samples within 1 assay
-Active assay: RNA (23694 features, 0 variable features)
+An object of class Seurat 
+29155 features across 11310 samples within 1 assay 
+Active assay: RNA (29155 features, 0 variable features)
  1 layer present: counts
 ```
 
-The object has approximately 23,700 genes and 10,000 cells. Only the `counts`
+The object has 29,155 genes and 11,310 cells. Only the `counts`
 layer is populated at this stage. By the end of this episode we will fill in
 the `data` and `scale.data` layers as well.
 
@@ -123,9 +124,9 @@ pbmc
 ## Expected output
 
 ```output
-An object of class Seurat
-23694 features across 10000 samples within 1 assay
-Active assay: RNA (23694 features, 0 variable features)
+An object of class Seurat 
+29155 features across 11310 samples within 1 assay 
+Active assay: RNA (29155 features, 0 variable features)
  2 layers present: counts, data
 ```
 
@@ -143,6 +144,76 @@ pbmc[["RNA"]]$counts[1:5, 1:3]
 # Normalized values for the same genes and cells
 pbmc[["RNA"]]$data[1:5, 1:3]
 ```
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected Output
+
+
+``` output
+# Raw counts for the first 5 genes in the first 3 cells
+5 x 3 sparse Matrix of class "dgCMatrix"
+                AAACCCAAGCGCCCAT-1 AAACCCAAGGTTCCGC-1 AAACCCACAGACAAGC-1
+ENSG00000238009                  .                  .                  .
+ENSG00000239945                  .                  .                  .
+ENSG00000241860                  .                  .                  .
+ENSG00000290385                  .                  .                  .
+ENSG00000235146                  .                  .                  .
+
+# Normalized values for the same genes and cells
+5 x 3 sparse Matrix of class "dgCMatrix"
+                AAACCCAAGCGCCCAT-1 AAACCCAAGGTTCCGC-1 AAACCCACAGACAAGC-1
+ENSG00000238009                  .                  .                  .
+ENSG00000239945                  .                  .                  .
+ENSG00000241860                  .                  .                  .
+ENSG00000290385                  .                  .                  .
+ENSG00000235146                  .                  .                  .
+```
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+The first few genes in the matrix are mostly zeros, so the output above is not
+very illuminating. To see the actual difference between raw and normalized
+values, we can filter for genes with non-zero counts first:
+
+
+
+``` r
+# Raw counts for the first 5 genes in the first 3 cells, with row sum > 0
+mat <- pbmc[["RNA"]]$counts[, 1:3]
+mat[rowSums(mat) > 0, ][1:5, ]
+
+# Normalized values for the same genes and cells, with row sum > 0
+mat2 <- pbmc[["RNA"]]$data[, 1:3]
+mat2[rowSums(mat2) > 0, ][1:5, ]
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected Output
+
+```output
+# Raw counts for the first 5 genes in the first 3 cells, with row sum > 0
+5 x 3 sparse Matrix of class "dgCMatrix"
+         AAACCCAAGCGCCCAT-1 AAACCCAAGGTTCCGC-1 AAACCCACAGACAAGC-1
+ISG15                     1                  2                  .
+C1orf159                  .                  1                  .
+SDF4                      .                  2                  .
+B3GALT6                   .                  1                  .
+DVL1                      .                  1                  .
+
+# Normalized values for the same genes and cells, with row sum > 0
+5 x 3 sparse Matrix of class "dgCMatrix"
+         AAACCCAAGCGCCCAT-1 AAACCCAAGGTTCCGC-1 AAACCCACAGACAAGC-1
+ISG15               1.20458          0.5174592                  .
+C1orf159            .                0.2918332                  .
+SDF4                .                0.5174592                  .
+B3GALT6             .                0.2918332                  .
+DVL1                .                0.2918332                  .
+```
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ### Visualizing the effect of normalization
 
@@ -168,6 +239,8 @@ p2 <- ggplot(data.frame(x = as.numeric(lyz_norm)), aes(x = x)) +
 
 p1 + p2
 ```
+![LYZ raw vs. normalized expression](fig/norm_compare_LYZ.png){alt="Two histograms comparing raw UMI counts and log-normalized expression for the LYZ gene, showing how normalization reduces the right skew"}
+
 
 The raw count distribution is heavily right-skewed with a large spike at zero
 (cells that don't express LYZ -- mostly non-monocytes). After log
@@ -216,8 +289,8 @@ head(VariableFeatures(pbmc), 10)
 ## Expected output
 
 ```output
- [1] "S100A9" "LYZ"    "S100A8" "GNLY"   "FTL"    "NKG7"   "IGKC"   "FTH1"
- [9] "CST3"   "TYROBP"
+ [1] "PPBP"            "PF4"             "LINC01478"       "LINC01374"       "PTGDS"          
+ [6] "JCHAIN"          "GP1BB"           "SOX5"            "ENSG00000225885" "EREG"     
 ```
 
 The top variable features include known immune cell markers: S100A9 and LYZ
@@ -235,6 +308,8 @@ vf_plot <- VariableFeaturePlot(pbmc)
 top10 <- head(VariableFeatures(pbmc), 10)
 LabelPoints(plot = vf_plot, points = top10, repel = TRUE)
 ```
+
+![Variable feature selection plot](fig/vf_plot.png){alt="Variable feature plot showing mean expression versus standardized variance for all genes, with the top 2000 variable features highlighted in red and the top 10 labeled"}
 
 In this plot, each point is a gene. The x-axis shows mean expression across
 cells and the y-axis shows standardized variance. The red points are the 2,000
@@ -279,9 +354,9 @@ pbmc
 ## Expected output
 
 ```output
-An object of class Seurat
-23694 features across 10000 samples within 1 assay
-Active assay: RNA (23694 features, 2000 variable features)
+An object of class Seurat 
+29155 features across 11310 samples within 1 assay 
+Active assay: RNA (29155 features, 2000 variable features)
  3 layers present: counts, data, scale.data
 ```
 
@@ -392,7 +467,7 @@ However, SCTransform is the preferred method for most production analyses.
 
 ::::::::::::::::::::::::::::::::::::: challenge
 
-## Challenge 1: LogNormalize vs. SCTransform Variable Features
+## Challenge 1: LogNormalize vs. SCTransform variable features
 
 Run both normalization approaches on the same filtered dataset and compare the
 top 20 variable features from each method. How many genes appear in both lists?
@@ -419,24 +494,59 @@ cat("\nOverlap:", length(shared), "out of 20\n")
 
 :::::::::::::::::::::::: solution
 
-You should find that approximately **12--14 of the top 20 genes overlap**
-(~60--70%), which means both methods broadly agree on which genes are most
-variable. The shared genes typically include strong cell-type markers like
-S100A9, LYZ, GNLY, NKG7, and IGKC.
+## Solution
 
-The differences arise because the two methods define "variable" differently:
 
-- **vst** (LogNormalize) fits a mean-variance curve and selects genes with the
-  highest residual variance. It can be influenced by a few outlier cells with
-  extreme counts.
-- **SCTransform** uses a negative binomial model that is more robust to
-  outliers and better handles the mean-variance relationship at low expression
-  levels.
 
-Despite these differences in the top-ranked features, the downstream results
-(PCA, clustering, cell type identification) are usually very similar because
-both methods capture the major axes of biological variation. The differences
-tend to matter more for subtle distinctions between closely related cell states.
+``` output
+LogNormalize top 20:
+ [1] "PPBP"            "PF4"             "LINC01478"       "LINC01374"       "PTGDS"          
+ [6] "JCHAIN"          "GP1BB"           "SOX5"            "ENSG00000225885" "EREG"           
+[11] "TCF4"            "IGKC"            "ZNF385D"         "GNLY"            "LYPD2"          
+[16] "CUX2"            "LINGO2"          "CAVIN2"          "CLNK"            "HTR1F"          
+
+SCTransform top 20:
+ [1] "S100A9" "S100A8" "GNLY"   "IGKC"   "PPBP"   "IGLC2"  "LYZ"    "PF4"    "GP1BB"  "NRGN"   "IGLC3" 
+[12] "IGHM"   "CAVIN2" "AFF3"   "NKG7"   "GNG11"  "BANK1"  "VCAN"   "TUBB1"  "LINGO2"
+
+Genes in both lists:
+[1] "PPBP"   "PF4"    "GP1BB"  "IGKC"   "GNLY"   "LINGO2" "CAVIN2"
+```
+
+The overlap is **7 out of 20** (~35%), which is lower than you might expect.
+The shared genes are PPBP, PF4, GP1BB, IGKC, GNLY, LINGO2, and CAVIN2.
+
+The two methods rank variable genes quite differently:
+
+- **LogNormalize + vst** picks up several lincRNAs (LINC01478, LINC01374) and
+  even an Ensembl ID (ENSG00000225885) in the top 20. These are genes with
+  sparse but extreme expression in a few cells, which inflates their residual
+  variance in the vst model.
+- **SCTransform** surfaces well-known immune markers instead: S100A9, S100A8,
+  LYZ, NKG7, VCAN. Its negative binomial model is more robust to outlier
+  cells, so it favors genes with consistent cell-type-specific expression over
+  genes that are simply noisy.
+
+Despite only 35% overlap in the **top 20**, the broader variable feature sets
+(all 2,000-3,000 genes) agree much more. The top-ranked differences rarely
+change the downstream PCA, clustering, or cell type assignments because both
+methods capture the same major axes of biological variation. The practical
+difference is that SCTransform tends to produce cleaner ranked lists with fewer
+noise-driven genes at the top.
+
+::: callout
+
+## glmGamPoi speeds up SCTransform
+
+If you see the warning about glmGamPoi not being installed, SCTransform still
+runs but falls back to a slower implementation. Install it for faster runs:
+
+
+``` r
+BiocManager::install("glmGamPoi")
+```
+
+:::
 
 :::::::::::::::::::::::::::::::::
 
@@ -476,33 +586,40 @@ p4 <- ggplot(data.frame(x = lyz_norm), aes(x)) +
 
 :::::::::::::::::::::::: solution
 
+
+![ACTB and CD3D raw vs. normalized expression](fig/norm_housekeeping.png){alt="Four histograms comparing raw and normalized expression for ACTB (housekeeping) and CD3D (cell-type marker), showing that normalization compresses the housekeeping gene distribution while preserving the bimodal pattern of the marker gene"}
+
+
 **ACTB (housekeeping gene):**
 
 - **Before normalization:** the raw count distribution is right-skewed because
   cells with higher sequencing depth have proportionally more ACTB counts. The
   apparent variation is mostly technical (sequencing depth), not biological.
-- **After normalization:** the distribution becomes tighter and more uniform.
-  Because ACTB is expressed at similar levels in all cell types, once you
-  correct for sequencing depth the remaining variation is small. This is exactly
-  why ACTB is **not** selected as a variable feature -- it doesn't help
-  distinguish cell types.
+- **After normalization:** the distribution becomes approximately bell-shaped,
+  centered around 3.5-4 on the log-normalized scale. Because ACTB is expressed
+  at similar levels across all cell types, removing depth effects reveals a
+  tight, unimodal distribution. This is exactly why ACTB is **not** selected
+  as a variable feature -- it doesn't help distinguish cell types.
 
 **LYZ (variable gene):**
 
-- **Before normalization:** there is a large spike at zero (non-monocyte cells
-  that don't express LYZ) and a spread of non-zero values. Part of the
-  variation in non-zero values is technical (depth) and part is biological
-  (different amounts of LYZ in monocytes).
-- **After normalization:** the zero spike remains (you can't normalize away
-  true absence of expression), but the non-zero values are corrected for depth.
-  The biological variation between monocytes and non-monocytes is preserved and
-  stands out more clearly. This is why LYZ **is** selected as a highly variable
-  feature.
+- **Before normalization:** there is a massive spike at zero (~7,000 cells that
+  don't express LYZ) and a low, flat spread of non-zero values extending to
+  ~500. The zero-dominated distribution makes it hard to see any structure in
+  the expressing cells.
+- **After normalization:** the zero spike persists (you can't normalize away
+  true absence of expression), but the non-zero cells now reveal a clear
+  **bimodal** pattern -- a small cluster of cells with low expression (~1-2)
+  and a distinct second peak of highly expressing cells (~4-5). This bimodality
+  reflects the biological reality: CD14+ monocytes express LYZ at high levels,
+  while other cell types either don't express it at all or express it minimally.
+  This separation is why LYZ **is** selected as a highly variable feature.
 
 The key takeaway: normalization makes expression comparable across cells by
-removing sequencing depth effects. Housekeeping genes become more uniform
-(confirming they don't vary biologically), while cell-type marker genes retain
-their meaningful variation.
+removing sequencing depth effects. Housekeeping genes become unimodal
+(confirming they don't vary biologically), while cell-type marker genes reveal
+biologically meaningful structure -- like the bimodal split in LYZ -- that was
+obscured by technical noise in the raw counts.
 
 :::::::::::::::::::::::::::::::::
 

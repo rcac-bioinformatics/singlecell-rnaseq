@@ -51,12 +51,17 @@ data_dir <- paste0(
     "/scratch/negishi/", Sys.getenv("USER"),
     "/scrna_workshop/cellranger_output/pbmc10k/outs/filtered_feature_bc_matrix/"
 )
+work_dir <- paste0(
+    "/scratch/negishi/", Sys.getenv("USER"),
+    "/scrna_workshop/"
+)
 ```
 
 Now load the count matrix:
 
 
 ``` r
+setwd(work_dir)
 pbmc.data <- Read10X(data.dir = data_dir)
 ```
 
@@ -140,7 +145,7 @@ structure. The key components are:
 - **Metadata**: a data frame with one row per cell, storing QC metrics, cluster
   assignments, and any other per-cell annotations.
 
-![Structure of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns](fig/seurat_object.png)
+![Structure of the Seurat v5 object](fig/seurat_object.png){alt="Diagram of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns"}
 
 You can inspect the metadata that Seurat automatically computed during object
 creation:
@@ -247,11 +252,11 @@ summary(pbmc$percent.mt)
  0.1752  4.8509  5.7882  6.7695  7.0114 89.8376 
 ```
 
-Most cells have 1,000--3,000 genes, 2,000--8,000 UMIs, and 3--5%
-mitochondrial content. But notice the maximum values: one cell has over 10,000
-genes (possible doublet), another has over 86,000 UMIs, and one cell has 66%
-mitochondrial reads (clearly dying). These outliers are what QC filtering
-removes.
+Most cells have 2,900-4,300 genes (IQR), 8,000-15,000 UMIs (IQR), and
+4.9-7.0% mitochondrial content (IQR). But notice the maximum values: one cell
+has 9,540 genes (possible doublet), another has over 103,000 UMIs, and one
+cell has nearly 90% mitochondrial reads (clearly dying). These outliers are
+what QC filtering removes.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -270,7 +275,7 @@ VlnPlot(pbmc,
 ```
 
 
-![Violin plots of nFeature_RNA, nCount_RNA, and percent.mt showing the distribution of QC metrics across all cells before filtering](fig/violin_plots_output.png)
+![QC violin plots before filtering](fig/violin_plots_output.png){alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt showing the distribution of QC metrics across all cells before filtering"}
 
 Setting `pt.size = 0` hides individual points so the distribution shape is
 easier to see with 10,000+ cells. If you want to see points, set
@@ -293,7 +298,7 @@ ggplot(pbmc@meta.data, aes(x = nCount_RNA, y = nFeature_RNA, color = percent.mt)
     labs(x = "Total UMI counts", y = "Number of genes")
 ```
 
-![Scatter plot of total UMI counts versus number of genes per cell colored by mitochondrial percentage, with high-mito cells highlighted in red](fig/scatterplot-output.png)
+![QC scatter plot colored by mitochondrial percentage](fig/scatterplot-output.png){alt="Scatter plot of total UMI counts versus number of genes per cell colored by mitochondrial percentage, with high-mito cells highlighted in red"}
 
 
 What to look for in this plot:
@@ -366,7 +371,7 @@ p3 <- VlnPlot(pbmc, features = "percent.mt", pt.size = 0.1, layer = "counts") +
 p1 + p2 + p3 + plot_layout(ncol = 3)
 ```
 
-![Violin plots of nFeature_RNA, nCount_RNA, and percent.mt with red dashed lines showing the filtering thresholds and individual cells visible as points](fig/violin_plots_with-pt_output.png)
+![Violin plots with filtering thresholds](fig/violin_plots_with-pt_output.png){alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt with red dashed lines showing the filtering thresholds and individual cells visible as points"}
 
 
 Cells above or below the red lines will be removed. The small point size
@@ -417,7 +422,7 @@ VlnPlot(pbmc,
         pt.size = 0,
         layer = "counts")
 ```
-![Structure of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns](fig/violin_plots_after_filtering_output.png)
+![QC violin plots after filtering](fig/violin_plots_after_filtering_output.png){alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt after filtering, showing tighter distributions with extreme outliers removed"}
 
 
 The violin plots should now show tighter distributions with the extreme tails
@@ -434,7 +439,7 @@ ggplot(pbmc@meta.data, aes(x = nCount_RNA, y = nFeature_RNA, color = percent.mt)
     labs(x = "Total UMI counts", y = "Number of genes")
 ```
 
-![Scatter plot of total UMI counts versus number of genes after filtering, colored by mitochondrial percentage, showing a tighter cloud with outliers removed](fig/scatterplot-post_output.png)
+![Scatter plot after filtering](fig/scatterplot-post_output.png){alt="Scatter plot of total UMI counts versus number of genes after filtering, colored by mitochondrial percentage, showing a tighter cloud with outliers removed"}
 
 
 Finally, save the filtered object for the next episode:
@@ -554,22 +559,26 @@ pbmc_custom <- subset(pbmc,
 cat("Cells with custom thresholds:", ncol(pbmc_custom), "\n")
 ```
 
-This would retain roughly 8,500--9,000 cells compared to ~10,000 with the
-default thresholds. The trade-offs are:
+This retains 7,579 cells compared to ~11,000 with the default thresholds --
+a loss of roughly 26% of the data. The trade-offs are:
 
 - `nFeature_RNA > 300` (vs. 200): slightly more aggressive removal of
   low-complexity cells, but may also remove some small cell types like
   platelets that naturally express few genes.
-- `nFeature_RNA < 4000` (vs. 5000): catches more potential doublets, but could
-  remove some large, highly transcriptionally active cells like monocytes.
+- `nFeature_RNA < 4000` (vs. 5000): this is the biggest driver of cell loss
+  here. The median nFeature_RNA in this dataset is ~3,378, so a 4,000 ceiling
+  cuts into the upper quartile and removes a substantial number of valid cells,
+  not just doublets.
 - `percent.mt < 10` (vs. 15): removes more potentially stressed cells, but
   some immune cell types (e.g., activated T cells) naturally have moderately
   elevated mitochondrial content.
 
 The key point is that **more aggressive filtering is not always better**. Every
-cell you remove is data you lose. The goal is to remove cells that would
-distort the analysis, not to enforce an artificially narrow definition of
-"high quality."
+cell you remove is data you lose. Dropping from ~10,000 to 7,579 cells means
+losing nearly a quarter of the dataset, which could reduce statistical power
+and under-represent cell types that naturally have higher gene counts or
+mitochondrial content. The goal is to remove cells that would distort the
+analysis, not to enforce an artificially narrow definition of "high quality."
 
 :::::::::::::::::::::::::::::::::
 
@@ -577,7 +586,7 @@ distort the analysis, not to enforce an artificially narrow definition of
 
 ::::::::::::::::::::::::::::::::::::: challenge
 
-## Challenge 2: Aggressive Mitochondrial Filtering
+## Challenge 2: Aggressive mitochondrial filtering
 
 What happens if you set `percent.mt < 5` instead of `percent.mt < 15`? Run the
 following code and compare the number of remaining cells. Would this threshold
@@ -601,22 +610,24 @@ cat("Cells with percent.mt < 15:", ncol(pbmc_default), "\n")
 
 :::::::::::::::::::::::: solution
 
-With `percent.mt < 5`, approximately 5,500--6,500 cells remain, compared to
-~10,000 with `percent.mt < 15`. This means you would lose roughly **35--40% of
-your cells** with the stricter threshold.
+## Solution
 
-This is **too aggressive for PBMCs**. Here is why:
+With `percent.mt < 5`, only **2,709 cells remain**, compared to 9,874 with
+`percent.mt < 15`. That is a loss of **over 72% of the dataset**.
 
-- The median mitochondrial percentage in this dataset is around 5.5%, meaning
-  that a `< 5` cutoff removes more than half the cells by definition.
+This is **far too aggressive for PBMCs**. Here is why:
+
+- The median mitochondrial percentage in this dataset is ~5.8%, meaning a `< 5`
+  cutoff removes the majority of cells by definition -- not just dying cells,
+  but most of the healthy population.
 - Different immune cell types have naturally different mitochondrial content.
   Activated T cells, monocytes, and NK cells tend to have higher mitochondrial
-  content (6--12%) because they are metabolically active cells. A strict
-  threshold disproportionately removes these populations, biasing your
-  downstream analysis.
+  content (6-12%) because they are metabolically active. A `< 5` threshold
+  disproportionately removes these populations, biasing your downstream
+  analysis toward cell types with low metabolic activity.
 - A threshold of `< 5` might be appropriate for some cell lines or tissues
   where mitochondrial content is uniformly low, but for primary immune cells
-  from blood, 10--15% is a more appropriate cutoff.
+  from blood, 10-15% is a more appropriate cutoff.
 
 As a general rule, look at the distribution of `percent.mt` in your data. If
 there is a clear separation between a low-mt peak and a high-mt tail, set your
@@ -627,7 +638,6 @@ an arbitrary round number.
 :::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
-
 ::::::::::::::::::::::::::::::::::::: keypoints
 
 - `Read10X()` loads a Cell Ranger count matrix and `CreateSeuratObject()` creates the central data structure for Seurat analysis

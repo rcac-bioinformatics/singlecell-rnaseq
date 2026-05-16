@@ -30,47 +30,10 @@ exercises: 20
 
 ``` r
 library(Seurat)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'Seurat'
-```
-
-``` r
 library(ggplot2)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'ggplot2'
-```
-
-``` r
 library(patchwork)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'patchwork'
-```
-
-``` r
 library(SingleR)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'SingleR'
-```
-
-``` r
 library(celldex)
-```
-
-``` error
-Error in `library()`:
-! there is no package called 'celldex'
 ```
 
 ## Loading the Clustered Data
@@ -78,19 +41,32 @@ Error in `library()`:
 We start from the clustered Seurat object saved at the end of the previous
 episode. Make sure the active identity is set to the resolution 0.5 clusters.
 
+Set up the working directory to match the previous episodes:
+
 
 ``` r
-pbmc <- readRDS("pbmc_clustered.rds")
+work_dir <- paste0(
+    "/scratch/negishi/", Sys.getenv("USER"),
+    "/scrna_workshop/"
+)
+setwd(work_dir)
+```
+
+
+``` r
+pbmc <- readRDS(paste0(work_dir, "pbmc_clustered.rds"))
 Idents(pbmc) <- "RNA_snn_res.0.5"
 DimPlot(pbmc, reduction = "umap", label = TRUE, label.size = 5) + NoLegend()
 ```
+
 
 :::::::::::::::::::::::::::::::::::::::::: spoiler
 
 ## Expected output
 
-You should see the UMAP with approximately 9--11 clusters labeled by number,
-matching the clustering results from the previous episode.
+![](fig/umap-plot-3.png)
+
+You should see the UMAP 18 clusters labeled by number (0 to 17), matching the clustering results from the previous episode.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -119,8 +95,39 @@ pbmc.markers <- FindAllMarkers(pbmc,
 | `min.pct` | `0.25` | Only test genes detected in at least 25% of cells in either the cluster or the rest. This speeds up the computation by skipping very rare genes that cannot be reliable markers. |
 | `logfc.threshold` | `0.25` | Only test genes with at least a 0.25 log2 fold change between the cluster and the rest. This pre-filters out genes with trivially small differences. |
 
-This step may take 1--2 minutes. The result is a data frame with one row per
+This step may take 5 minutes. 
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+```output
+Calculating cluster 0
+Calculating cluster 1
+Calculating cluster 2
+Calculating cluster 3
+Calculating cluster 4
+Calculating cluster 5
+Calculating cluster 6
+Calculating cluster 7
+Calculating cluster 8
+Calculating cluster 9
+Calculating cluster 10
+Calculating cluster 11
+Calculating cluster 12
+Calculating cluster 13
+Calculating cluster 14
+Calculating cluster 15
+Calculating cluster 16
+Calculating cluster 17
+```
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+The result is a data frame with one row per
 gene per cluster. Let's look at the key columns:
+
 
 
 ``` r
@@ -132,13 +139,13 @@ head(pbmc.markers)
 ## Expected output
 
 ```output
-               p_val avg_log2FC pct.1 pct.2 p_val_adj cluster gene
-S100A9  0.000e+00      3.862 0.975 0.108 0.000e+00       1 S100A9
-S100A8  0.000e+00      3.796 0.960 0.094 0.000e+00       1 S100A8
-LYZ     0.000e+00      3.210 0.988 0.255 0.000e+00       1 LYZ
-FCN1    0.000e+00      2.543 0.791 0.045 0.000e+00       1 FCN1
-TYROBP  0.000e+00      2.372 0.995 0.320 0.000e+00       1 TYROBP
-CD14    0.000e+00      2.123 0.683 0.034 0.000e+00       1 CD14
+       p_val avg_log2FC pct.1 pct.2 p_val_adj cluster   gene
+INPP4B     0   2.607036 0.972 0.345         0       0 INPP4B
+CAMK4      0   1.653160 0.950 0.324         0       0  CAMK4
+IL7R       0   2.067086 0.935 0.336         0       0   IL7R
+CD3D       0   1.523352 0.923 0.334         0       0   CD3D
+ITK        0   1.775408 0.920 0.338         0       0    ITK
+BCL11B     0   1.586310 0.991 0.413         0       0 BCL11B
 ```
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -166,10 +173,34 @@ Let's extract the top 5 markers per cluster ranked by fold change:
 
 ``` r
 top5 <- pbmc.markers %>%
-    group_by(cluster) %>%
-    slice_max(n = 5, order_by = avg_log2FC)
+    dplyr::group_by(cluster) %>%
+    dplyr::slice_max(n = 5, order_by = avg_log2FC)
 top5
 ```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+
+``` output
+# A tibble: 90 × 7
+# Groups:   cluster [18]
+   p_val avg_log2FC pct.1 pct.2 p_val_adj cluster gene           
+   <dbl>      <dbl> <dbl> <dbl>     <dbl> <fct>   <chr>          
+ 1     0       5.23 0.258 0.011         0 0       IATPR          
+ 2     0       3.69 0.345 0.036         0 0       ST8SIA1        
+ 3     0       3.17 0.346 0.052         0 0       IL2RA          
+ 4     0       2.88 0.414 0.072         0 0       ICOS           
+ 5     0       2.75 0.521 0.103         0 0       FAAH2          
+ 6     0       4.46 0.29  0.023         0 1       ENSG00000289381
+ 7     0       4.28 0.5   0.05          0 1       AQP9           
+ 8     0       4.13 0.423 0.043         0 1       MTARC1         
+ 9     0       4.09 1     0.549         0 1       S100A8         
+10     0       3.98 0.996 0.248         0 1       S100A12   
+```
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ### Visualizing markers with a heatmap
 
@@ -180,11 +211,13 @@ and color intensity represents scaled expression:
 
 ``` r
 top3 <- pbmc.markers %>%
-    group_by(cluster) %>%
-    slice_max(n = 3, order_by = avg_log2FC)
+    dplyr::group_by(cluster) %>%
+    dplyr::slice_max(n = 3, order_by = avg_log2FC)
 
 DoHeatmap(pbmc, features = top3$gene) + NoLegend()
 ```
+![](fig/top3-heatmap.png)
+
 
 Each cluster should show a distinct block of highly expressed genes (bright
 yellow/white) that are low in other clusters (dark purple). Clusters with very
@@ -201,6 +234,8 @@ color intensity encodes the average expression level:
 DotPlot(pbmc, features = unique(top3$gene)) + coord_flip() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+![](fig/top3-dotplot.png)
 
 
 ## Manual Annotation with Known Markers
@@ -229,6 +264,8 @@ FeaturePlot(pbmc,
             ncol = 4)
 ```
 
+![](fig/known-marker-featureplot.png)
+
 And as violin plots to see expression across clusters:
 
 
@@ -240,6 +277,9 @@ VlnPlot(pbmc,
         pt.size = 0)
 ```
 
+![](fig/known-marker-vlnplot.png)
+
+
 Based on these plots and the `FindAllMarkers` results, we can build a mapping
 from cluster numbers to cell type names. Your exact cluster numbers will depend
 on the random seed, but the logic is the same: find which clusters express each
@@ -250,16 +290,24 @@ set of markers.
 # Build the cluster-to-cell-type mapping
 # Adjust cluster IDs to match YOUR results
 new.cluster.ids <- c(
-    "CD4 T",           # 0: CD3D+, IL7R+
-    "CD14 Mono",       # 1: LYZ+, CD14+, S100A9+
-    "CD4 T",           # 2: CD3D+, IL7R+ (memory subset)
-    "B",               # 3: MS4A1+, CD79A+
-    "CD8 T",           # 4: CD3D+, CD8A+
-    "NK",              # 5: GNLY+, NKG7+
-    "FCGR3A Mono",     # 6: FCGR3A+, MS4A7+
-    "DC",              # 7: FCER1A+, CST3+
-    "Platelet",        # 8: PPBP+, PF4+
-    "CD4 T"            # 9: CD3D+, IL7R+ (if present)
+    "CD4 T",           # 0: CD3D+, IL7R+, large central cluster
+    "CD14 Mono",       # 1: LYZ+ high, large bottom cluster
+    "CD14 Mono",       # 2: LYZ+ high, adjacent to cluster 1
+    "CD4 T",           # 3: CD3D+, IL7R+, upper-left
+    "CD8 T",           # 4: CD8A+, right side
+    "CD4 T",           # 5: CD3D+, IL7R+, upper-center
+    "NK",              # 6: GNLY+ high, center-right
+    "NK",              # 7: GNLY+, upper-right island
+    "B",               # 8: MS4A1+, right side
+    "FCGR3A+ Mono",   # 9: FCGR3A+ high, lower-right
+    "CD4 T",           # 10: CD3D+, IL7R+, small upper cluster
+    "CD14 Mono",       # 11: LYZ+, between mono clusters
+    "pDC",             # 12: small isolated, low expression of all major markers
+    "DC",              # 13: FCER1A+, small upper-right
+    "B",               # 14: MS4A1+, adjacent to cluster 8
+    "Platelet",        # 15: PPBP+ high, small isolated bottom
+    "CD14 Mono",       # 16: LYZ+, near mono territory
+    "CD4 T"            # 17: CD3D+, small isolated far-left
 )
 names(new.cluster.ids) <- levels(pbmc)
 pbmc <- RenameIdents(pbmc, new.cluster.ids)
@@ -290,6 +338,9 @@ Visualize the final annotated UMAP:
 ``` r
 DimPlot(pbmc, reduction = "umap", label = TRUE, repel = TRUE) + NoLegend()
 ```
+
+![](fig/umap-plot-4.png)
+
 
 Store the annotation in the metadata so it persists after saving:
 
@@ -323,14 +374,13 @@ ref
 ## Expected output
 
 ```output
-class: SummarizedExperiment
-dim: 46077 114
+class: SummarizedExperiment 
+dim: 46077 114 
 metadata(0):
 assays(1): logcounts
-rownames(46077): A1BG A1BG-AS1 ... ZZEF1 ZZZ3
+rownames(46077): A1BG A1BG-AS1 ... ZYX ZZEF1
 rowData names(0):
-colnames(114): DZQV_CD14+_monocytes DZQV_Exhausted_B_cells ...
-  DZQV_T_regulatory_cells DZQV_Terminal_effector_CD8_T_cells
+colnames(114): DZQV_CD8_naive DZQV_CD8_CM ... G4YW_Neutrophils G4YW_Basophils
 colData names(3): label.main label.fine label.ont
 ```
 
@@ -378,6 +428,8 @@ DimPlot(pbmc, group.by = "singler_labels", reduction = "umap",
         label = TRUE, repel = TRUE) + NoLegend()
 ```
 
+![](fig/umap-plot-5.png)
+
 ### Comparing manual and automated annotations
 
 The real power of annotation comes from comparing multiple approaches. Let's
@@ -392,19 +444,70 @@ table(Manual = pbmc$manual_annotation, SingleR = pbmc$singler_labels)
 
 ## Expected output
 
-You should see a table where most cells along the diagonal agree. For example,
-cells you labeled "CD14 Mono" should predominantly be called "Monocytes" by
-SingleR. Typical areas of agreement and disagreement:
 
-- **Strong agreement**: CD14+ Monocytes, B cells, NK cells -- these have
-  distinctive expression profiles and are called consistently by both methods.
-- **Partial agreement**: CD4+ T cells may be split by SingleR into "CD4+ T
-  cells" and "T regulatory cells"; CD8+ T cells may be split into subtypes.
-  These finer distinctions from SingleR are often correct.
-- **Possible disagreement**: FCGR3A+ Monocytes may be labeled as "Non-classical
-  monocytes" by SingleR (which is the correct immunological term) or
-  occasionally as "NK cells" if FCGR3A expression is high. Dendritic cells may
-  also show disagreement if the cluster is small.
+
+``` output
+              SingleR
+Manual         B cells Basophils CD4+ T cells CD8+ T cells Dendritic cells Monocytes NK cells Progenitors
+  CD4 T              3         0         2596          583               0         5       43          22
+  CD14 Mono          3         0            0            0              32      3259        1           0
+  CD8 T           1006         0            0            0               0         0        0           0
+  NK                 0         0            3            1               0         0      607           0
+  B                608         0            0            0               5         0       15           0
+  FCGR3A+ Mono       0         0            0            0               1       428        0           0
+  pDC                0         0            0            0             157        19        0           0
+  DC                 4         2            3            2               1         6        0         154
+  Platelet           0         0            0            0              78         0        0           0
+              SingleR
+Manual         T cells
+  CD4 T            987
+  CD14 Mono          0
+  CD8 T              0
+  NK               662
+  B                 11
+  FCGR3A+ Mono       0
+  pDC                0
+  DC                 3
+  Platelet           0
+```
+
+The table reveals a mix of strong agreement and instructive disagreements:
+
+- **Strong agreement**: CD14+ Monocytes are overwhelmingly called "Monocytes"
+  by SingleR (3,259 of 3,295). B cells agree well (608 of 639). FCGR3A+
+  Monocytes are correctly called "Monocytes" (428 of 429). These cell types
+  have distinctive transcriptional profiles that both methods recognize.
+- **CD4 T cell splitting**: SingleR splits our CD4 T cells across "CD4+ T
+  cells" (2,596), generic "T cells" (987), and "CD8+ T cells" (583). The
+  generic "T cells" label reflects SingleR's uncertainty about subtype when
+  activation or memory signatures blur the CD4/CD8 boundary. The 583 cells
+  called "CD8+ T" may be misclassified by SingleR or represent a subset where
+  our manual annotation was too broad.
+- **CD8 T mislabeled as B cells**: this is the largest disagreement. All 1,006
+  cells we labeled "CD8 T" are called "B cells" by SingleR. This likely means
+  our manual annotation of cluster 8 as CD8 T is wrong and should be
+  reconsidered -- the MS4A1 expression in that cluster (visible in the
+  VlnPlot) supports SingleR's call. **Go back and verify CD8A expression in
+  this cluster.**
+- **NK split with T cells**: SingleR calls 607 of our NK cells as "NK cells"
+  but labels 662 as "T cells." This likely reflects NKT cells or cytotoxic
+  CD8+ T cells that share expression of GNLY and NKG7 with NK cells. Our
+  manual annotation grouped them based on GNLY expression alone, which is
+  insufficient to distinguish NK from NKT populations.
+- **DC and pDC**: SingleR calls our pDC cluster "Dendritic cells" (157), which
+  is correct at a coarser level. However, it calls our DC cluster
+  "Progenitors" (154), suggesting the reference dataset's progenitor signature
+  overlaps with the markers in that small cluster. This is a case where manual
+  annotation with known markers (FCER1A, CST3) is more trustworthy.
+- **Platelets misclassified**: SingleR calls all 78 platelets "Dendritic
+  cells." Platelets are often absent from SingleR reference datasets (Monaco
+  Immune Data does not include them), so the classifier assigns the nearest
+  available label. This is a known limitation -- always verify rare or
+  non-standard cell types manually.
+
+The key takeaway: neither method is always right. SingleR caught a likely
+error in our manual CD8 T annotation but failed on platelets and DCs. The
+best practice is to use both methods and investigate every disagreement.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -418,6 +521,9 @@ p2 <- DimPlot(pbmc, group.by = "singler_labels", label = TRUE, repel = TRUE) +
     NoLegend() + ggtitle("SingleR annotation")
 p1 + p2
 ```
+
+
+![](fig/umap-plot-6.png) 
 
 When the two methods **agree**, you can be very confident in the label. When
 they **disagree**, check the marker gene expression for the disputed cluster
@@ -477,13 +583,12 @@ saveRDS(pbmc, file = "pbmc_annotated.rds")
 
 ::::::::::::::::::::::::::::::::::::: challenge
 
-## Challenge 1: Identifying a T Cell Subtype
+## Challenge 1: Identifying T cell subtypes from marker combinations
 
-One of the T cell clusters expresses **CD3D** and **SELL** (CD62L) at high
-levels, but **CD69** expression is low. Use what you know about T cell biology
-to determine what T cell subtype this is.
-
-Check the expression of these additional markers in the cluster:
+The CD4 T cell group shows high expression of **CD3D**, **SELL**, and **IL7R**.
+But look at the **CD69** panel -- the violin is wide, not uniformly low or
+high. What does this heterogeneity tell you about the composition of this
+group?
 
 
 ``` r
@@ -492,28 +597,39 @@ VlnPlot(pbmc, features = c("CD3D", "SELL", "CCR7", "CD69", "IL7R"), ncol = 5, pt
 
 :::::::::::::::::::::::: solution
 
-This cluster represents **naive T cells**. The key evidence:
+## Solution
 
-| Marker | Expression | Interpretation |
-|--------|:----------|:---------------|
-| CD3D | High | Confirms T cell identity |
-| SELL (CD62L) | High | Expressed on naive and central memory T cells; required for lymph node homing |
-| CCR7 | High | Another lymph node homing receptor; high in naive T cells |
-| CD69 | Low | An early activation marker; low expression confirms these are NOT recently activated |
-| IL7R (CD127) | High | IL-7 receptor, expressed on naive and memory T cells for homeostatic survival |
+The broad CD69 violin in CD4 T cells reveals that this group is **not a single
+subtype** -- it contains a mixture of naive and activated T cells that were
+merged during our annotation.
 
-The combination of **SELL-high, CCR7-high, CD69-low** is the hallmark of
-**naive T cells** that have not yet encountered their antigen. They recirculate
-between blood and lymph nodes (hence the homing receptors) but have not been
-activated (hence low CD69).
+| Marker | CD4 T pattern | Interpretation |
+|--------|:-------------|:---------------|
+| CD3D | Uniformly high | Confirms T cell identity across the group |
+| SELL (CD62L) | High | Lymph node homing receptor; enriched in naive and central memory T cells |
+| CCR7 | Moderate, variable | Another homing receptor; high in naive, low in effector memory |
+| CD69 | Broad (bimodal) | Early activation marker; low in naive, high in recently activated cells |
+| IL7R (CD127) | High | IL-7 receptor for homeostatic survival; expressed on naive and memory T cells |
 
-By contrast, **effector memory T cells** would be SELL-low, CCR7-low (they
-patrol peripheral tissues rather than homing to lymph nodes) and may have
-higher CD69 if recently activated.
+The CD69-low subset represents **naive T cells** (SELL-high, CCR7+, CD69-low)
+that recirculate between blood and lymph nodes but have not yet encountered
+antigen. The CD69-high subset represents **recently activated T cells** that
+have been stimulated.
 
-This illustrates why multiple markers are needed: CD3D alone tells you it is
-a T cell, but the combination of homing and activation markers tells you the
-functional subtype.
+Also note how these markers behave in other cell types:
+
+- **NK cells** show the highest CD69 expression of any group, consistent with
+  constitutive activation in circulating NK cells.
+- **B cells** express SELL and IL7R, so these markers alone cannot distinguish
+  T cells from B cells -- you need CD3D to confirm T cell identity.
+- **CD8 T cells** show high CD69 but low SELL, suggesting they are
+  predominantly effector or effector memory cells rather than naive.
+
+This illustrates why our coarse "CD4 T" label is a simplification. With
+higher clustering resolution or sub-clustering, you could separate the naive
+and activated subsets. For many analyses this level of granularity is
+sufficient, but for studies focused on T cell biology you would want to
+sub-cluster further.
 
 :::::::::::::::::::::::::::::::::
 
@@ -521,10 +637,10 @@ functional subtype.
 
 ::::::::::::::::::::::::::::::::::::: challenge
 
-## Challenge 2: Comparing Two SingleR References
+## Challenge 2: Comparing two SingleR references
 
 Run SingleR with both `MonacoImmuneData` and `HumanPrimaryCellAtlasData`.
-For which clusters do the two references disagree? Why might they disagree?
+For which cell types do the two references disagree? Why might they disagree?
 
 
 ``` r
@@ -546,36 +662,82 @@ table(Monaco = pbmc$singler_monaco, HPCA = pbmc$singler_hpca)
 
 :::::::::::::::::::::::: solution
 
-You should find that the two references **agree** on the major cell types
-(T cells, B cells, monocytes, NK cells) but **disagree** on some clusters.
-Common disagreements include:
+## Solution
 
-**1. HPCA labels some immune cells with non-immune terms.** The HPCA reference
-includes tissue types like "Tissue_stem_cells", "Epithelial_cells", and
-"Smooth_muscle_cells" that are not present in a PBMC sample. When a cell does
-not closely match any immune profile in the HPCA reference, it may be
-incorrectly assigned to one of these non-immune categories. The Monaco
-reference, which contains only immune cell types, avoids this problem.
 
-**2. T cell subtype resolution differs.** Monaco distinguishes "CD4+ T cells"
-from "CD8+ T cells" and further subtypes. HPCA may label all T cells
-generically as "T_cells" without subtype distinction, because its T cell
-reference profiles are less granular.
+``` output
+                 HPCA
+Monaco            B_cell   BM  CMP  GMP HSC_-G-CSF  MEP Monocyte NK_cell Platelets Pre-B_cell_CD34-
+  B cells           1575    0    0    0          1    0        3       0         2                1
+  Basophils            0    0    0    0          0    0        0       0         2                0
+  CD4+ T cells         0    0    0    0          0    0        0       0         0                0
+  CD8+ T cells         0    0    0    0          0    0        0       0         1                0
+  Dendritic cells     36    0    0    8          1    0      218       0         1                6
+  Monocytes            4    0    0    0          7    0     3669       5         5                8
+  NK cells             2    0    0    0          0    0        0     649         0                1
+  Progenitors          0    1   20    0          0    1        3       0       151                0
+  T cells              3    0    0    0          0    0        0      20         1                0
+                 HPCA
+Monaco            Pro-Myelocyte T_cells
+  B cells                     1      41
+  Basophils                   0       0
+  CD4+ T cells                0    2602
+  CD8+ T cells                0     585
+  Dendritic cells             0       4
+  Monocytes                   0      19
+  NK cells                    0      14
+  Progenitors                 0       0
+  T cells                     0    1639
+```
 
-**3. Monocyte and dendritic cell boundaries differ.** The boundary between
-monocytes and dendritic cells is biologically continuous, and different
-references draw the line in slightly different places. Monocyte-derived DCs
-may be called "Monocytes" by one reference and "DC" by the other.
+The two references agree well on some cell types and disagree sharply on
+others. Here are the key patterns:
 
-**Lesson:** Use a reference that matches your tissue type. For PBMCs, the
-Monaco Immune reference is more appropriate because it was built from sorted
-immune populations. HPCA is better when you have a mixed tissue sample that
-may contain both immune and non-immune cells.
+**1. Strong agreement: Monocytes, B cells, NK cells.** Monaco "Monocytes"
+map almost entirely to HPCA "Monocyte" (3,669 of 3,717). Monaco "B cells"
+map to HPCA "B_cell" (1,575 of 1,623). Monaco "NK cells" map to HPCA
+"NK_cell" (649 of 666). These cell types have distinctive profiles that
+both references recognize.
+
+**2. T cell subtyping collapses in HPCA.** Monaco distinguishes "CD4+ T cells"
+(2,602), "CD8+ T cells" (586), and generic "T cells" (1,663). HPCA labels
+all of these simply as "T_cells." If your analysis requires T cell subtype
+resolution, Monaco is the better reference. Interestingly, Monaco assigns
+41 B cells to HPCA "T_cells," suggesting a small population that sits near
+the T/B boundary (possibly NKT cells or doublets).
+
+**3. Dendritic cells split across HPCA labels.** Monaco calls 274 cells
+"Dendritic cells," but HPCA scatters these across "Monocyte" (218), "CMP"
+(8), "Pre-B_cell_CD34-" (6), "B_cell" (36), and only 4 as "T_cells." HPCA
+lacks a dedicated dendritic cell category with sufficient resolution, so DCs
+get assigned to the nearest available profile -- usually monocytes, which
+share many myeloid markers.
+
+**4. Progenitors become Platelets in HPCA.** Monaco labels 176 cells as
+"Progenitors," and HPCA calls 151 of those "Platelets." These are the cells
+we manually annotated as platelets. Monaco does not have a platelet reference
+profile, so it assigns them to "Progenitors" (the nearest match based on low
+transcriptional complexity). HPCA does include a platelet profile and gets
+this right. Neither reference is wrong -- they just have different coverage.
+
+**5. HPCA introduces hematopoietic progenitor labels.** HPCA assigns some
+cells to "BM," "CMP," "GMP," "MEP," "HSC_-G-CSF," and "Pro-Myelocyte" --
+categories that should not be present in PBMCs. These are artifacts of the
+HPCA reference containing bone marrow profiles. When a cell's expression
+sits between two immune types, HPCA may assign a progenitor label rather
+than committing to either.
+
+**Lesson:** No single reference is universally best. Monaco gives better
+immune subtype resolution (especially for T cells and DCs) and avoids
+spurious non-immune labels, making it the better default for PBMCs. HPCA
+correctly identifies platelets where Monaco fails. The practical approach:
+use Monaco as your primary reference for immune tissues, cross-check
+disagreements with HPCA, and always validate automated labels against known
+marker genes.
 
 :::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
-
 ::::::::::::::::::::::::::::::::::::: keypoints
 
 - FindAllMarkers identifies genes upregulated in each cluster versus all others; key output columns are avg_log2FC, pct.1, pct.2, and p_val_adj
