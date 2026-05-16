@@ -397,7 +397,7 @@ proceeding to downstream analysis.
 
 ### Interpreting Cell Ranger output
 
-![Cell Ranger web_summary.html for PBMC 10k](fig/cellranger-web-summary.png)
+![Cell Ranger web_summary.html for PBMC 10k](fig/cellranger-web-summary.png){alt="Screenshot of the Cell Ranger web_summary.html report for the PBMC 10k dataset showing key QC metrics"}
 
 The `web_summary.html` file is the first thing to check after every Cell Ranger run. Here are the key QC metrics from our PBMC 10k run:
 

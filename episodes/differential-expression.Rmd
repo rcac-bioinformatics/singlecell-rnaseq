@@ -27,7 +27,7 @@ exercises: 20
 
 ## Setup
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r setup, message=FALSE, warning=FALSE, eval=FALSE}
 library(Seurat)
 library(ggplot2)
 library(patchwork)
@@ -42,8 +42,18 @@ We continue from the integrated and annotated IFNB dataset produced in the
 previous episode. Make sure the cell type annotation is set as the active
 identity.
 
+Set up the working directory to match the previous episodes:
+
+```{r set-paths, eval=FALSE}
+work_dir <- paste0(
+    "/scratch/negishi/", Sys.getenv("USER"),
+    "/scrna_workshop/"
+)
+setwd(work_dir)
+```
+
 ```{r load-data, eval=FALSE}
-ifnb <- readRDS("ifnb_annotated.rds")
+ifnb <- readRDS(paste0(work_dir, "ifnb_annotated.rds"))
 Idents(ifnb) <- "celltype"
 DimPlot(ifnb, reduction = "umap", label = TRUE, repel = TRUE, split.by = "stim") +
     NoLegend()
@@ -413,7 +423,7 @@ support reproducibility, sharing, and downstream use.
 ### Save the annotated Seurat object
 
 ```{r save-rds, eval=FALSE}
-saveRDS(ifnb, file = "ifnb_annotated.rds")
+saveRDS(ifnb, file = paste0(work_dir, "ifnb_annotated.rds"))
 ```
 
 ### Export the count matrix and metadata
