@@ -49,6 +49,63 @@ This workshop focuses on the core scRNA-seq analysis workflow. The following top
 - Generating your own Cell Ranger reference genomes
 - Multi-modal data integration
 
+## SSH Setup
+
+You need SSH access to the Negishi cluster for Episode 2 (raw data processing) and to copy the workshop data. Follow the instructions for your operating system below.
+
+::::::::::::::::::::::::::::::::::::::: discussion
+
+## Connecting to the Cluster
+
+You will need SSH access to the Negishi cluster at Purdue. Choose the instructions for your operating system below.
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::: solution
+
+### Windows
+
+1. Download and install [MobaXterm](https://mobaxterm.mobatek.net/) (recommended) or [PuTTY](https://www.putty.org/)
+2. Open MobaXterm and click **Session > SSH**
+3. Set **Remote host** to `negishi.rcac.purdue.edu`
+4. Check **Specify username** and enter your Purdue career account username
+5. Click **OK** and enter your password when prompted
+6. Complete Microsoft two-factor authentication
+
+:::::::::::::::::::::::::
+
+:::::::::::::::: solution
+
+### macOS
+
+1. Open **Terminal** (Applications > Utilities > Terminal)
+2. Connect to the cluster:
+
+```bash
+ssh your_username@negishi.rcac.purdue.edu
+```
+
+3. Enter your password (characters may not appear, but your password is being entered)
+4. Complete Microsoft two-factor authentication
+
+:::::::::::::::::::::::::
+
+:::::::::::::::: solution
+
+### Linux
+
+1. Open your terminal emulator
+2. Connect to the cluster:
+
+```bash
+ssh your_username@negishi.rcac.purdue.edu
+```
+
+3. Enter your password (characters may not appear, but your password is being entered)
+4. Complete Microsoft two-factor authentication
+
+:::::::::::::::::::::::::
+
 ## Data Setup
 
 ### Copying Workshop Data
@@ -77,7 +134,7 @@ ls ${RCAC_SCRATCH}/scrna_workshop/filtered_feature_bc_matrix/
 
 ## Starting RStudio on Open OnDemand
 
-For Episodes 3--8, we will use RStudio through Purdue's Open OnDemand (OOD) web portal. Follow these steps to launch an RStudio session on Negishi.
+For Episodes 3 to 8, we will use RStudio through Negishi's Open OnDemand (OOD) web portal. Follow these steps to launch an RStudio session.
 
 ### Step 1: Log in to Open OnDemand
 
@@ -145,57 +202,3 @@ install.packages("remotes")
 remotes::install_github("satijalab/seurat-data")
 ```
 
-## SSH Setup
-
-::::::::::::::::::::::::::::::::::::::: discussion
-
-## Connecting to the Cluster
-
-You will need SSH access to the Negishi cluster at Purdue. Choose the instructions for your operating system below.
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-
-:::::::::::::::: solution
-
-### Windows
-
-1. Download and install [MobaXterm](https://mobaxterm.mobatek.net/) (recommended) or [PuTTY](https://www.putty.org/)
-2. Open MobaXterm and click **Session > SSH**
-3. Set **Remote host** to `negishi.rcac.purdue.edu`
-4. Check **Specify username** and enter your Purdue career account username
-5. Click **OK** and enter your password when prompted
-6. Complete Microsoft two-factor authentication
-
-:::::::::::::::::::::::::
-
-:::::::::::::::: solution
-
-### macOS
-
-1. Open **Terminal** (Applications > Utilities > Terminal)
-2. Connect to the cluster:
-
-```bash
-ssh your_username@negishi.rcac.purdue.edu
-```
-
-3. Enter your password (characters may not appear, but your password is being entered)
-4. Complete Microsoft two-factor authentication
-
-:::::::::::::::::::::::::
-
-:::::::::::::::: solution
-
-### Linux
-
-1. Open your terminal emulator
-2. Connect to the cluster:
-
-```bash
-ssh your_username@negishi.rcac.purdue.edu
-```
-
-3. Enter your password (characters may not appear, but your password is being entered)
-4. Complete Microsoft two-factor authentication
-
-:::::::::::::::::::::::::

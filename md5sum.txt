@@ -14,6 +14,6 @@
 "episodes/differential-expression.Rmd" "06da2b7c05ff7661888b77fbccc84fe4" "site/built/differential-expression.md" "2026-05-18"
 "instructors/instructor-notes.md" "7571f8e6f0ad2b036abc58576d8d9151" "site/built/instructor-notes.md" "2026-05-18"
 "learners/reference.md" "32dfd22e3d3adc52e39da7f8e7f37d70" "site/built/reference.md" "2026-05-18"
-"learners/setup.md" "e696f921d8feb9a1ea5193ee2c8b6de7" "site/built/setup.md" "2026-05-18"
+"learners/setup.md" "0d8d6b83939120ad5e73b893970fef26" "site/built/setup.md" "2026-05-18"
 "profiles/learner-profiles.md" "5fe5bf7537072422b91ed393ada03f9a" "site/built/learner-profiles.md" "2026-05-18"
 "renv/profiles/lesson-requirements/renv.lock" "afe507859e6c21a599a94be1b910bdcf" "site/built/renv.lock" "2026-05-18"
