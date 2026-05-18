@@ -75,7 +75,50 @@ ls ${RCAC_SCRATCH}/scrna_workshop/fastq/
 ls ${RCAC_SCRATCH}/scrna_workshop/filtered_feature_bc_matrix/
 ```
 
-## R Package Installation
+## Starting RStudio on Open OnDemand
+
+For Episodes 3--8, we will use RStudio through Purdue's Open OnDemand (OOD) web portal. Follow these steps to launch an RStudio session on Negishi.
+
+### Step 1: Log in to Open OnDemand
+
+Open your browser and navigate to [gateway.negishi.rcac.purdue.edu](https://gateway.negishi.rcac.purdue.edu). Complete the Purdue SSO login (BoilerKey/Duo with Microsoft authentication).
+
+### Step 2: Launch RStudio (Bioconductor)
+
+From the top menu bar, click the **Interactive Apps** tab. Under the **Bioinformatics Apps** section, select **RStudio (bioconductor)**.
+
+::: callout
+
+## Choose the correct app
+
+Make sure you select **RStudio (bioconductor)** under **Bioinformatics Apps** --- *not* the **RStudio Server** option listed under the **GUIs** section. The Bioconductor version includes pre-installed single-cell analysis packages that we need for this workshop.
+
+<img src="fig/ood_rstudio_dropdown.png" alt="Open OnDemand Interactive Apps menu showing RStudio (bioconductor) under the Bioinformatics Apps section" width="800px" />
+
+:::
+
+### Step 3: Fill in the resource request
+
+Enter the following settings:
+
+| Field | Value |
+|:------|:------|
+| Partition | `cpu` |
+| Account | *(provided by instructor)* |
+| QoS | `normal` |
+| Wall Time (hours) | `8` |
+| Cores | `16` |
+| R version | `4.4.0-bioconductor` |
+
+<img src="fig/ood_rstudio_resources.png" alt="Open OnDemand resource request form filled in with the workshop settings" width="800px" />
+
+Click **Launch** to submit the job.
+
+### Step 4: Connect to the session
+
+Your job will be queued briefly. Once the status changes to **Running**, click the **Connect to RStudio Server** button to open RStudio in a new browser tab.
+
+## R Package Installation (skip this section if using OOD)
 
 The R packages are pre-installed on the cluster. If you need to install them locally:
 
@@ -102,7 +145,7 @@ install.packages("remotes")
 remotes::install_github("satijalab/seurat-data")
 ```
 
-## SSH Key Setup
+## SSH Setup
 
 ::::::::::::::::::::::::::::::::::::::: discussion
 

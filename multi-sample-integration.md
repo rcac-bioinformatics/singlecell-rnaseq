@@ -461,6 +461,16 @@ the biological signal while correcting the batch effect.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
+
+
+Save the annotated ifnb object for the next episode:
+
+
+``` r
+saveRDS(ifnb, file = "ifnb_annotated.rds")
+```
+
+
 ### Visualizing condition-specific changes
 
 Let's visualize a few ISGs to see the condition-specific response:
