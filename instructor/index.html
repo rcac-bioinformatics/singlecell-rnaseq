@@ -545,16 +545,104 @@ transcriptomics)</li>
 <li>Advanced doublet detection methods (DoubletFinder, scDblFinder)</li>
 <li>Generating your own Cell Ranger reference genomes</li>
 <li>Multi-modal data integration</li>
-</ul></section><section><h2 class="section-heading" id="data-setup">Data Setup<a class="anchor" aria-label="anchor" href="#data-setup"></a></h2>
+</ul></section><section><h2 class="section-heading" id="ssh-setup">SSH Setup<a class="anchor" aria-label="anchor" href="#ssh-setup"></a></h2>
+<hr class="half-width"><p>You need SSH access to the Negishi cluster for Episode 2 (raw data
+processing) and to copy the workshop data. Follow the instructions for
+your operating system below.</p>
+<div id="connecting-to-the-cluster" class="callout discussion">
+<div class="callout-square">
+<i class="callout-icon" data-feather="message-circle"></i>
+</div>
+<span class="callout-header">Discussion</span>
+<div id="connecting-to-the-cluster" class="callout-inner">
+<h3 class="callout-title">Connecting to the Cluster</h3>
+<div class="callout-content">
+<p>You will need SSH access to the Negishi cluster at Purdue. Choose the
+instructions for your operating system below.</p>
+</div>
+</div>
+</div>
+<div id="accordionSolution1" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
+  <h4 class="accordion-header" id="headingSolution1">
+  Windows
+  </h4>
+</button>
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div class="accordion-body">
+<ol style="list-style-type: decimal"><li>Download and install <a href="https://mobaxterm.mobatek.net/" class="external-link">MobaXterm</a> (recommended) or <a href="https://www.putty.org/" class="external-link">PuTTY</a>
+</li>
+<li>Open MobaXterm and click <strong>Session &gt; SSH</strong>
+</li>
+<li>Set <strong>Remote host</strong> to
+<code>negishi.rcac.purdue.edu</code>
+</li>
+<li>Check <strong>Specify username</strong> and enter your Purdue career
+account username</li>
+<li>Click <strong>OK</strong> and enter your password when prompted</li>
+<li>Complete Microsoft two-factor authentication</li>
+</ol></div>
+</div>
+</div>
+</div>
+<div id="accordionSolution2" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
+  <h4 class="accordion-header" id="headingSolution2">
+  macOS
+  </h4>
+</button>
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div class="accordion-body">
+<ol style="list-style-type: decimal"><li>Open <strong>Terminal</strong> (Applications &gt; Utilities &gt;
+Terminal)</li>
+<li>Connect to the cluster:</li>
+</ol><div class="codewrapper sourceCode" id="cb1">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="fu">ssh</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
+</div>
+<ol start="3" style="list-style-type: decimal"><li>Enter your password (characters may not appear, but your password is
+being entered)</li>
+<li>Complete Microsoft two-factor authentication</li>
+</ol></div>
+</div>
+</div>
+</div>
+<div id="accordionSolution3" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
+  <h4 class="accordion-header" id="headingSolution3">
+  Linux
+  </h4>
+</button>
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div class="accordion-body">
+<ol style="list-style-type: decimal"><li>Open your terminal emulator</li>
+<li>Connect to the cluster:</li>
+</ol><div class="codewrapper sourceCode" id="cb2">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="fu">ssh</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
+</div>
+<ol start="3" style="list-style-type: decimal"><li>Enter your password (characters may not appear, but your password is
+being entered)</li>
+<li>Complete Microsoft two-factor authentication</li>
+</ol></div>
+</div>
+</div>
+</div>
+</section><section><h2 class="section-heading" id="data-setup">Data Setup<a class="anchor" aria-label="anchor" href="#data-setup"></a></h2>
 <hr class="half-width"><div class="section level3">
 <h3 id="copying-workshop-data">Copying Workshop Data<a class="anchor" aria-label="anchor" href="#copying-workshop-data"></a></h3>
 <p>The workshop data is pre-staged on the cluster. Copy it to your
 scratch directory:</p>
-<div class="codewrapper sourceCode" id="cb1">
+<div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="fu">rsync</span> <span class="at">-avP</span> /depot/workshop/data/scrna_workshop/ <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a><span class="fu">rsync</span> <span class="at">-avP</span> /depot/workshop/data/scrna_workshop/ <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/</span></code></pre>
 </div>
 <p>This will copy:</p>
 <ul><li>
@@ -574,18 +662,18 @@ scratch directory:</p>
 </ul></div>
 <div class="section level3">
 <h3 id="verifying-the-data">Verifying the Data<a class="anchor" aria-label="anchor" href="#verifying-the-data"></a></h3>
-<div class="codewrapper sourceCode" id="cb2">
+<div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1" aria-label="code-block-2-2"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/fastq/</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/filtered_feature_bc_matrix/</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1" aria-label="code-block-4-1"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1" aria-label="code-block-4-2"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/fastq/</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1" aria-label="code-block-4-3"></a><span class="fu">ls</span> <span class="va">${RCAC_SCRATCH}</span>/scrna_workshop/filtered_feature_bc_matrix/</span></code></pre>
 </div>
 </div>
 </section><section><h2 class="section-heading" id="starting-rstudio-on-open-ondemand">Starting RStudio on Open OnDemand<a class="anchor" aria-label="anchor" href="#starting-rstudio-on-open-ondemand"></a></h2>
-<hr class="half-width"><p>For Episodes 3–8, we will use RStudio through Purdue’s Open OnDemand
-(OOD) web portal. Follow these steps to launch an RStudio session on
-Negishi.</p>
+<hr class="half-width"><p>For Episodes 3 to 8, we will use RStudio through Negishi’s Open
+OnDemand (OOD) web portal. Follow these steps to launch an RStudio
+session.</p>
 <div class="section level3">
 <h3 id="step-1-log-in-to-open-ondemand">Step 1: Log in to Open OnDemand<a class="anchor" aria-label="anchor" href="#step-1-log-in-to-open-ondemand"></a></h3>
 <p>Open your browser and navigate to <a href="https://gateway.negishi.rcac.purdue.edu" class="external-link">gateway.negishi.rcac.purdue.edu</a>.
@@ -642,7 +730,7 @@ Server</strong> button to open RStudio in a new browser tab.</p>
 </section><section><h2 class="section-heading" id="r-package-installation-skip-this-section-if-using-ood">R Package Installation (skip this section if using OOD)<a class="anchor" aria-label="anchor" href="#r-package-installation-skip-this-section-if-using-ood"></a></h2>
 <hr class="half-width"><p>The R packages are pre-installed on the cluster. If you need to
 install them locally:</p>
-<div class="codewrapper sourceCode" id="cb3">
+<div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -666,91 +754,6 @@ install them locally:</p>
 <span><span class="co"># SeuratData for integration dataset</span></span>
 <span><span class="fu">install.packages</span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"satijalab/seurat-data"</span><span class="op">)</span></span></code></pre>
-</div>
-</section><section><h2 class="section-heading" id="ssh-setup">SSH Setup<a class="anchor" aria-label="anchor" href="#ssh-setup"></a></h2>
-<hr class="half-width"><div id="connecting-to-the-cluster" class="callout discussion">
-<div class="callout-square">
-<i class="callout-icon" data-feather="message-circle"></i>
-</div>
-<span class="callout-header">Discussion</span>
-<div id="connecting-to-the-cluster" class="callout-inner">
-<h3 class="callout-title">Connecting to the Cluster</h3>
-<div class="callout-content">
-<p>You will need SSH access to the Negishi cluster at Purdue. Choose the
-instructions for your operating system below.</p>
-</div>
-</div>
-</div>
-<div id="accordionSolution1" class="accordion challenge-accordion accordion-flush">
-<div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
-  <h4 class="accordion-header" id="headingSolution1">
-  Windows
-  </h4>
-</button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
-<div class="accordion-body">
-<ol style="list-style-type: decimal"><li>Download and install <a href="https://mobaxterm.mobatek.net/" class="external-link">MobaXterm</a> (recommended) or <a href="https://www.putty.org/" class="external-link">PuTTY</a>
-</li>
-<li>Open MobaXterm and click <strong>Session &gt; SSH</strong>
-</li>
-<li>Set <strong>Remote host</strong> to
-<code>negishi.rcac.purdue.edu</code>
-</li>
-<li>Check <strong>Specify username</strong> and enter your Purdue career
-account username</li>
-<li>Click <strong>OK</strong> and enter your password when prompted</li>
-<li>Complete Microsoft two-factor authentication</li>
-</ol></div>
-</div>
-</div>
-</div>
-<div id="accordionSolution2" class="accordion challenge-accordion accordion-flush">
-<div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
-  <h4 class="accordion-header" id="headingSolution2">
-  macOS
-  </h4>
-</button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
-<div class="accordion-body">
-<ol style="list-style-type: decimal"><li>Open <strong>Terminal</strong> (Applications &gt; Utilities &gt;
-Terminal)</li>
-<li>Connect to the cluster:</li>
-</ol><div class="codewrapper sourceCode" id="cb4">
-<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1" aria-label="code-block-4-1"></a><span class="fu">ssh</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
-</div>
-<ol start="3" style="list-style-type: decimal"><li>Enter your password (characters may not appear, but your password is
-being entered)</li>
-<li>Complete Microsoft two-factor authentication</li>
-</ol></div>
-</div>
-</div>
-</div>
-<div id="accordionSolution3" class="accordion challenge-accordion accordion-flush">
-<div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
-  <h4 class="accordion-header" id="headingSolution3">
-  Linux
-  </h4>
-</button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
-<div class="accordion-body">
-<ol style="list-style-type: decimal"><li>Open your terminal emulator</li>
-<li>Connect to the cluster:</li>
-</ol><div class="codewrapper sourceCode" id="cb5">
-<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="fu">ssh</span> your_username@negishi.rcac.purdue.edu</span></code></pre>
-</div>
-<ol start="3" style="list-style-type: decimal"><li>Enter your password (characters may not appear, but your password is
-being entered)</li>
-<li>Complete Microsoft two-factor authentication</li>
-</ol></div>
-</div>
-</div>
 </div>
 <!--
 Place links that you need to refer to multiple times across pages here. Delete
