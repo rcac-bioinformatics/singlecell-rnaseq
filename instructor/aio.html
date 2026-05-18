@@ -386,7 +386,7 @@
         
 <section id="aio-introduction"><p>Content from <a href="introduction.html">Introduction to Single-Cell RNA-Seq</a></p>
 <hr>
-<p>Last updated on 2026-05-16 |
+<p>Last updated on 2026-05-18 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/introduction.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 30 minutes</p>
@@ -804,7 +804,7 @@ any links that you are not going to use.
 <!-- Links used across the lesson -->
 </section></section><section id="aio-raw-data-processing"><p>Content from <a href="raw-data-processing.html">Raw Data Processing</a></p>
 <hr>
-<p>Last updated on 2026-05-16 |
+<p>Last updated on 2026-05-18 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/raw-data-processing.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 60 minutes</p>
@@ -922,7 +922,7 @@ layout and copy the data.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -949,7 +949,7 @@ layout and copy the data.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -998,7 +998,7 @@ practice:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
 <div class="accordion-body">
 <p>You will see two FASTQ records. Each record has four lines: a header
 line starting with <code>@</code>, the sequence, a <code>+</code>
@@ -1030,7 +1030,7 @@ NTGTCTTAGCCTAGGACGGCCTCCGCCA
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
   <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
+<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
 <div class="accordion-body">
 <p>R2 reads are longer (91 bp in this dataset) and contain transcript
 sequence that will be mapped to the genome.</p>
@@ -1067,7 +1067,7 @@ needs to align reads:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
   <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1722,7 +1722,7 @@ inside the output directory:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler6" aria-expanded="false" aria-controls="collapseSpoiler6">
   <h3 class="accordion-header" id="headingSpoiler6">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler6" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler6" aria-labelledby="headingSpoiler6">
+<div id="collapseSpoiler6" class="accordion-collapse collapse" aria-labelledby="headingSpoiler6" data-bs-parent="#accordionSpoiler6">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1854,7 +1854,7 @@ by each tool directly from the output files.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler7" aria-expanded="false" aria-controls="collapseSpoiler7">
   <h3 class="accordion-header" id="headingSpoiler7">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler7" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler7" aria-labelledby="headingSpoiler7">
+<div id="collapseSpoiler7" class="accordion-collapse collapse" aria-labelledby="headingSpoiler7" data-bs-parent="#accordionSpoiler7">
 <div class="accordion-body">
 <p>Both tools should report very similar numbers:</p>
 <div class="codewrapper">
@@ -1928,7 +1928,7 @@ parameter needs a different file.)</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Three changes are required for v2 chemistry:</p>
 <ol style="list-style-type: decimal">
@@ -2012,7 +2012,7 @@ suggests a potential quality concern.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>Two metrics stand out:</p>
 <ol style="list-style-type: decimal">
@@ -2072,7 +2072,7 @@ any links that you are not going to use.
 </div>
 </section></section><section id="aio-quality-control"><p>Content from <a href="quality-control.html">Quality Control</a></p>
 <hr>
-<p>Last updated on 2026-05-16 |
+<p>Last updated on 2026-05-18 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/quality-control.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 60 minutes</p>
@@ -2928,7 +2928,7 @@ any links that you are not going to use.
 <!-- Links used across the lesson -->
 </section></section><section id="aio-normalization-and-features"><p>Content from <a href="normalization-and-features.html">Normalization and Feature Selection</a></p>
 <hr>
-<p>Last updated on 2026-05-16 |
+<p>Last updated on 2026-05-18 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/normalization-and-features.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 55 minutes</p>
@@ -3772,7 +3772,7 @@ any links that you are not going to use.
 <!-- Links used across the lesson -->
 </section></section><section id="aio-dimensionality-reduction-clustering"><p>Content from <a href="dimensionality-reduction-clustering.html">Dimensionality Reduction and Clustering</a></p>
 <hr>
-<p>Last updated on 2026-05-16 |
+<p>Last updated on 2026-05-18 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/dimensionality-reduction-clustering.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 60 minutes</p>
@@ -3862,7 +3862,7 @@ of the previous episode. This object has the <code>counts</code>,
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -4274,7 +4274,7 @@ package).</td>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
 <div class="accordion-body">
 <p>At resolution 0.5, you should get approximately <strong>18
 clusters</strong>, numbered starting from 0. The exact number may vary
@@ -4313,7 +4313,7 @@ check them:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -4530,7 +4530,7 @@ known PBMC cell types (~8–10 major types)?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <figure><img src="../fig/snn-res.png" alt="Four UMAP plots comparing clustering at resolutions 0.2, 0.5, 0.8, and 1.2. Lower resolutions produce fewer large clusters while higher resolutions split cells into progressively more subclusters." class="figure mx-auto d-block"><div class="figcaption">Four UMAP plots comparing clustering at
 resolutions 0.2, 0.5, 0.8, and 1.2. Lower resolutions produce fewer
@@ -4621,7 +4621,7 @@ number(s) correspond to each cell type.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <figure><img src="../fig/challenge2_plot1.png" class="figure mx-auto d-block"></figure><figure><img src="../fig/challenge2_plot2.png" class="figure mx-auto d-block"></figure><p>By comparing the FeaturePlot panels with the labeled UMAP, you should
 see the following pattern (exact cluster numbers may differ depending on
@@ -4703,7 +4703,7 @@ any links that you are not going to use.
 <!-- Links used across the lesson -->
 </section></section><section id="aio-cell-type-annotation"><p>Content from <a href="cell-type-annotation.html">Cell Type Annotation</a></p>
 <hr>
-<p>Last updated on 2026-05-16 |
+<p>Last updated on 2026-05-18 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/cell-type-annotation.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 60 minutes</p>
@@ -4792,7 +4792,7 @@ previous episode. Make sure the active identity is set to the resolution
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
 <div class="accordion-body">
 <figure><img src="../fig/umap-plot-3.png" class="figure mx-auto d-block"></figure><p>You should see the UMAP 18 clusters labeled by number (0 to 17),
 matching the clustering results from the previous episode.</p>
@@ -4861,7 +4861,7 @@ differences.</td>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -4902,7 +4902,7 @@ look at the key columns:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -4989,7 +4989,7 @@ change:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
   <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
+<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5227,7 +5227,7 @@ for PBMC annotation.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
   <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5335,7 +5335,7 @@ SingleR labels:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler6" aria-expanded="false" aria-controls="collapseSpoiler6">
   <h3 class="accordion-header" id="headingSpoiler6">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler6" class="accordion-collapse collapse" aria-labelledby="headingSpoiler6" data-bs-parent="#accordionSpoiler6">
+<div id="collapseSpoiler6" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler6" aria-labelledby="headingSpoiler6">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5534,7 +5534,7 @@ this group?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>The broad CD69 violin in CD4 T cells reveals that this group is
 <strong>not a single subtype</strong> – it contains a mixture of naive
@@ -5650,7 +5650,7 @@ references disagree? Why might they disagree?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5752,7 +5752,7 @@ any links that you are not going to use.
 <!-- Links used across the lesson -->
 </section></section><section id="aio-multi-sample-integration"><p>Content from <a href="multi-sample-integration.html">Multi-Sample Integration</a></p>
 <hr>
-<p>Last updated on 2026-05-16 |
+<p>Last updated on 2026-05-18 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/multi-sample-integration.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 60 minutes</p>
@@ -5871,7 +5871,7 @@ PBMCs from two conditions:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5899,7 +5899,7 @@ cell came from.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5932,7 +5932,7 @@ sample separately.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -6282,7 +6282,7 @@ should appear as strong conserved markers for monocytes.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
   <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
+<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -6345,7 +6345,7 @@ compare conditions:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
   <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -6371,13 +6371,20 @@ correcting the batch effect.</p>
 </div>
 </div>
 </div>
+<p>Save the annotated ifnb object for the next episode:</p>
+<div class="codewrapper sourceCode" id="cb24">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">saveRDS</span><span class="op">(</span><span class="va">ifnb</span>, file <span class="op">=</span> <span class="st">"ifnb_annotated.rds"</span><span class="op">)</span></span></code></pre>
+</div>
 </div>
 <div class="section level3">
 <h3 id="visualizing-condition-specific-changes">Visualizing condition-specific changes<a class="anchor" aria-label="anchor" href="#visualizing-condition-specific-changes"></a>
 </h3>
 <p>Let’s visualize a few ISGs to see the condition-specific
 response:</p>
-<div class="codewrapper sourceCode" id="cb24">
+<div class="codewrapper sourceCode" id="cb25">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -6386,7 +6393,7 @@ response:</p>
 <span>            split.by <span class="op">=</span> <span class="st">"stim"</span>,</span>
 <span>            cols <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"grey85"</span>, <span class="st">"firebrick"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="../fig/dimplot_ifnb_de1.png" class="figure mx-auto d-block"></figure><div class="codewrapper sourceCode" id="cb25">
+<figure><img src="../fig/dimplot_ifnb_de1.png" class="figure mx-auto d-block"></figure><div class="codewrapper sourceCode" id="cb26">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -6415,7 +6422,7 @@ quality</h3>
 same type are well mixed within each cluster. Use
 <code>DimPlot(split.by = "stim")</code> to visualize, then compute the
 proportion of each condition per cluster.</p>
-<div class="codewrapper sourceCode" id="cb26">
+<div class="codewrapper sourceCode" id="cb27">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -6436,7 +6443,7 @@ cell type?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -6491,7 +6498,7 @@ monocytes</h3>
 control <strong>CD14+ monocytes</strong> (we computed this above as
 <code>mono.de</code>). Are these genes consistent with an interferon
 stimulation response?</p>
-<div class="codewrapper sourceCode" id="cb28">
+<div class="codewrapper sourceCode" id="cb29">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -6514,7 +6521,7 @@ stimulation response?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <figure><img src="../fig/dimplot_challenge2-ifnb1.png" class="figure mx-auto d-block"></figure><div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -6673,7 +6680,7 @@ any links that you are not going to use.
 </div>
 </section></section><section id="aio-differential-expression"><p>Content from <a href="differential-expression.html">Differential Expression Analysis</a></p>
 <hr>
-<p>Last updated on 2026-05-16 |
+<p>Last updated on 2026-05-18 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/differential-expression.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 60 minutes</p>
@@ -6770,7 +6777,7 @@ the active identity.</p>
 </button>
 <div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
 <div class="accordion-body">
-<p>You should see two UMAP panels (CTRL and STIM) with the same cell
+<figure><img src="../fig/ep8_umap_split.png" class="figure mx-auto d-block"></figure><p>You should see two UMAP panels (CTRL and STIM) with the same cell
 type structure in both. Cell types are labeled and colored consistently
 across panels.</p>
 </div>
@@ -6883,6 +6890,12 @@ group.</td>
 </tr>
 </tbody>
 </table>
+<div class="codewrapper sourceCode" id="cb5">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">cat</span><span class="op">(</span><span class="st">"Significant genes (padj &lt; 0.05):"</span>, <span class="fu">sum</span><span class="op">(</span><span class="va">mono.wilcox</span><span class="op">$</span><span class="va">p_val_adj</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre>
+</div>
 <div id="accordionSpoiler2" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
@@ -6893,31 +6906,30 @@ group.</td>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>              p_val avg_log2FC pct.1 pct.2    p_val_adj
-IFIT1  0.000e+00      4.528 0.992 0.056 0.000e+00
-ISG15  0.000e+00      4.345 0.995 0.186 0.000e+00
-IFI6   0.000e+00      4.123 0.968 0.042 0.000e+00
-IFIT3  0.000e+00      3.752 0.959 0.048 0.000e+00
-IFI44L 0.000e+00      3.697 0.888 0.022 0.000e+00
-IFIT2  0.000e+00      3.583 0.919 0.027 0.000e+00
-RSAD2  0.000e+00      3.443 0.828 0.013 0.000e+00
-ISG20  0.000e+00      3.159 0.940 0.124 0.000e+00
-LY6E   0.000e+00      3.243 0.919 0.077 0.000e+00
-MX1    0.000e+00      3.023 0.893 0.029 0.000e+00</code></pre>
+<pre class="output" tabindex="0"><code>        p_val avg_log2FC pct.1 pct.2 p_val_adj
+IFIT1       0   7.118    0.965 0.034         0
+IFIT3       0   6.737    0.971 0.057         0
+TNFSF10     0   6.322    0.959 0.062         0
+RSAD2       0   6.620    0.920 0.042         0
+IFIT2       0   6.894    0.909 0.040         0
+MX1         0   4.824    0.953 0.099         0
+CXCL10      0   7.975    0.873 0.032         0
+LY6E        0   4.255    0.990 0.174         0
+CXCL11      0   8.522    0.800 0.011         0
+CCL8        0   9.063    0.800 0.015         0
+
+
+Significant genes (padj &lt; 0.05): 765 </code></pre>
 </div>
-<p>The top genes are all interferon-stimulated genes (ISGs), as
-expected. But notice that the p-values are extremely small (effectively
-zero). This is a symptom of per-cell testing with thousands of
-cells.</p>
+<p>You should see approximately <strong>765 significant genes</strong>
+at padj &lt; 0.05. The top genes include interferon-stimulated genes
+(IFIT1/2/3, RSAD2, MX1) and IFN-inducible chemokines (CXCL10, CXCL11,
+CCL8). But notice that the p-values are extremely small (effectively
+zero). This is a symptom of per-cell testing with thousands of cells –
+even modest differences become “significant.”</p>
 </div>
 </div>
 </div>
-</div>
-<div class="codewrapper sourceCode" id="cb6">
-<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">cat</span><span class="op">(</span><span class="st">"Significant genes (padj &lt; 0.05):"</span>, <span class="fu">sum</span><span class="op">(</span><span class="va">mono.wilcox</span><span class="op">$</span><span class="va">p_val_adj</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre>
 </div>
 <div id="the-pseudobulk-revolution" class="callout">
 <div class="callout-square">
@@ -6957,14 +6969,57 @@ have a single sample per condition and have no other option.</p>
 all cells of the same cell type from the same sample, producing a
 bulk-like count matrix with one column per sample-celltype
 combination.</p>
+<div id="the-ifnb-dataset-has-no-biological-replicates" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<span class="callout-header">Callout</span>
+<div id="the-ifnb-dataset-has-no-biological-replicates" class="callout-inner">
+<h3 class="callout-title">The IFNB dataset has no biological
+replicates</h3>
+<div class="callout-content">
+<p>The IFNB dataset has only one <code>orig.ident</code> per condition
+(IMMUNE_CTRL and IMMUNE_STIM). If we aggregate by
+<code>celltype + stim + orig.ident</code>, we get <strong>one pseudobulk
+sample per group</strong> – not enough for DESeq2, which requires at
+least 3.</p>
+<p>To demonstrate the pseudobulk workflow, we create
+<strong>pseudo-replicates</strong> by randomly splitting cells within
+each condition into 3 groups. This is a common workaround for teaching
+and exploration, but be aware: pseudo-replicates do not capture true
+biological variability across donors. For publication-quality DE, you
+need genuine biological replicates (multiple donors or independent
+experiments).</p>
+</div>
+</div>
+</div>
 <div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Create pseudo-replicates by randomly assigning cells to 3 groups per condition</span></span>
+<span><span class="fu">set.seed</span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">ifnb</span><span class="op">$</span><span class="va">pseudo_rep</span> <span class="op">&lt;-</span> <span class="fu">paste0</span><span class="op">(</span><span class="st">"rep"</span>, <span class="fu">sample</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fu">ncol</span><span class="op">(</span><span class="va">ifnb</span><span class="op">)</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Verify: should see 3 roughly equal groups per condition</span></span>
+<span><span class="fu">table</span><span class="op">(</span><span class="va">ifnb</span><span class="op">$</span><span class="va">stim</span>, <span class="va">ifnb</span><span class="op">$</span><span class="va">pseudo_rep</span><span class="op">)</span></span></code></pre>
+</div>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>       rep1 rep2 rep3
+  CTRL 2198 2198 2152
+  STIM 2533 2465 2453</code></pre>
+</div>
+<p>Now aggregate using the pseudo-replicate labels:</p>
+<div class="codewrapper sourceCode" id="cb9">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create pseudobulk counts</span></span>
-<span><span class="co"># Group by cell type, condition, and sample (orig.ident)</span></span>
+<span><span class="co"># Group by cell type, condition, and pseudo-replicate</span></span>
 <span><span class="va">bulk</span> <span class="op">&lt;-</span> <span class="fu">AggregateExpression</span><span class="op">(</span><span class="va">ifnb</span>,</span>
-<span>                            group.by <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"celltype"</span>, <span class="st">"stim"</span>, <span class="st">"orig.ident"</span><span class="op">)</span>,</span>
+<span>                            group.by <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"celltype"</span>, <span class="st">"stim"</span>, <span class="st">"pseudo_rep"</span><span class="op">)</span>,</span>
 <span>                            return.seurat <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">bulk</span></span></code></pre>
 </div>
@@ -6982,9 +7037,10 @@ combination.</p>
 <tbody>
 <tr>
 <td><code>group.by</code></td>
-<td><code>c("celltype", "stim", "orig.ident")</code></td>
+<td><code>c("celltype", "stim", "pseudo_rep")</code></td>
 <td>Metadata columns to group cells by. Each unique combination of cell
-type, condition, and sample becomes one pseudobulk column.</td>
+type, condition, and pseudo-replicate becomes one pseudobulk
+column.</td>
 </tr>
 <tr>
 <td><code>return.seurat</code></td>
@@ -7005,19 +7061,22 @@ type, condition, and sample becomes one pseudobulk column.</td>
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code>An object of class Seurat
-14053 features across N samples within 1 assay
+14053 features across 54 samples within 1 assay
 Active assay: RNA (14053 features, 0 variable features)
- 1 layer present: counts</code></pre>
+ 3 layers present: counts, data, scale.data</code></pre>
 </div>
-<p>The number of samples (N) depends on the number of unique cell type +
-condition + donor combinations in the dataset.</p>
+<p>The number of samples equals the number of unique cell type x
+condition x pseudo-replicate combinations. With 9 cell types, 2
+conditions, and 3 pseudo-replicates, you get up to 54 pseudobulk samples
+(some may be fewer if a cell type has very few cells in a given
+replicate).</p>
 </div>
 </div>
 </div>
 </div>
 <p>Now we can run DESeq2-based DE testing on the pseudobulk object. We
 subset to CD14+ monocytes and compare conditions:</p>
-<div class="codewrapper sourceCode" id="cb9">
+<div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7034,7 +7093,7 @@ subset to CD14+ monocytes and compare conditions:</p>
 <span>                           test.use <span class="op">=</span> <span class="st">"DESeq2"</span><span class="op">)</span></span>
 <span><span class="fu">head</span><span class="op">(</span><span class="va">mono.pseudo</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre>
 </div>
-<div class="codewrapper sourceCode" id="cb10">
+<div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7047,12 +7106,32 @@ subset to CD14+ monocytes and compare conditions:</p>
 </button>
 <div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
 <div class="accordion-body">
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>       p_val avg_log2FC pct.1 pct.2 p_val_adj
+ISG15      0   6.441088     1     1         0
+IFI6       0   3.705585     1     1         0
+IFI44L     0   3.374846     1     1         0
+GBP1       0   2.535916     1     1         0
+S100A8     0  -2.276587     1     1         0
+MNDA       0   2.661545     1     1         0
+RSAD2      0   5.839812     1     1         0
+TMSB10     0   1.655318     1     1         0
+VAMP5      0   2.977336     1     1         0
+SSB        0   2.470712     1     1         0
+
+
+Significant genes (p_val_adj &lt; 0.05): 1455 </code></pre>
+</div>
 <p>The pseudobulk analysis typically identifies <strong>fewer
 significant genes</strong> than the per-cell Wilcoxon test (often
-hundreds instead of thousands). The top genes are still ISGs (IFIT1,
-ISG15, IFI6), but the p-values are larger and more realistic because the
-effective sample size is the number of donors, not the number of
-cells.</p>
+100-400 instead of 765). The top genes should still be ISGs and
+chemokines, but the p-values are larger because the effective sample
+size is 3 pseudo-replicates per condition, not thousands of cells.</p>
+<p>Note: because we used pseudo-replicates rather than true biological
+replicates, these p-values are still somewhat optimistic. With real
+donor-level replicates, the gene count would likely be even lower.</p>
 </div>
 </div>
 </div>
@@ -7067,7 +7146,7 @@ cells.</p>
 significance (-log10 p-value, y-axis) and biological effect size (log2
 fold change, x-axis). Each point is a gene. Genes in the upper corners
 are both statistically significant and biologically meaningful.</p>
-<div class="codewrapper sourceCode" id="cb11">
+<div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7090,11 +7169,11 @@ are both statistically significant and biologically meaningful.</p>
 <span>         color <span class="op">=</span> <span class="st">"Direction"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<p>How to read the volcano plot:</p>
+<figure><img src="../fig/ep8_volcano.png" class="figure mx-auto d-block"></figure><p>How to read the volcano plot:</p>
 <ul>
 <li>
 <strong>Upper right</strong>: genes significantly upregulated in
-stimulated cells (ISGs)</li>
+stimulated cells (ISGs, chemokines)</li>
 <li>
 <strong>Upper left</strong>: genes significantly downregulated in
 stimulated cells</li>
@@ -7110,25 +7189,26 @@ change or high p-value)</li>
 <h3 id="feature-and-violin-plots">Feature and violin plots<a class="anchor" aria-label="anchor" href="#feature-and-violin-plots"></a>
 </h3>
 <p>Visualize specific DE genes on the UMAP and across conditions:</p>
-<div class="codewrapper sourceCode" id="cb12">
+<div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">FeaturePlot</span><span class="op">(</span><span class="va">ifnb</span>,</span>
-<span>            features <span class="op">=</span> <span class="st">"ISG15"</span>,</span>
+<span>            features <span class="op">=</span> <span class="st">"IFIT1"</span>,</span>
 <span>            split.by <span class="op">=</span> <span class="st">"stim"</span>,</span>
 <span>            cols <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"grey85"</span>, <span class="st">"firebrick"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
-<div class="codewrapper sourceCode" id="cb13">
+<figure><img src="../fig/ep8_featureplot_ifit1.png" class="figure mx-auto d-block"></figure><div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">VlnPlot</span><span class="op">(</span><span class="va">ifnb</span>,</span>
-<span>        features <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"ISG15"</span>, <span class="st">"IFIT1"</span>, <span class="st">"MX1"</span><span class="op">)</span>,</span>
+<span>        features <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"IFIT1"</span>, <span class="st">"CXCL10"</span>, <span class="st">"MX1"</span><span class="op">)</span>,</span>
 <span>        split.by <span class="op">=</span> <span class="st">"stim"</span>,</span>
 <span>        pt.size <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>        ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre>
 </div>
+<figure><img src="../fig/ep8_violin_de.png" class="figure mx-auto d-block"></figure>
 </div>
 <div class="section level3">
 <h3 id="dot-plot-across-cell-types">Dot plot across cell types<a class="anchor" aria-label="anchor" href="#dot-plot-across-cell-types"></a>
@@ -7136,7 +7216,7 @@ change or high p-value)</li>
 <p>A dot plot can show the top DE genes across all cell types
 simultaneously, revealing which responses are shared and which are
 cell-type-specific:</p>
-<div class="codewrapper sourceCode" id="cb14">
+<div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7148,6 +7228,7 @@ cell-type-specific:</p>
 <span>    <span class="fu">coord_flip</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
+<figure><img src="../fig/ep8_dotplot_de.png" class="figure mx-auto d-block"></figure>
 </div>
 </section><section><h2 class="section-heading" id="functional-enrichment">Functional Enrichment<a class="anchor" aria-label="anchor" href="#functional-enrichment"></a>
 </h2>
@@ -7161,7 +7242,7 @@ individual gene changes to broader biological themes.</p>
 </h3>
 <p>clusterProfiler requires Entrez gene IDs. We convert from gene
 symbols using <code>bitr()</code>:</p>
-<div class="codewrapper sourceCode" id="cb15">
+<div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7208,11 +7289,35 @@ symbols using <code>bitr()</code>:</p>
 </tr>
 </tbody>
 </table>
+<div id="accordionSpoiler5" class="accordion spoiler-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
+  <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
+</button>
+<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
+<div class="accordion-body">
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>Number of significant upregulated genes: 271
+
+   SYMBOL ENTREZID
+1   IFIT1     3434
+2   IFIT3     3437
+3 TNFSF10     8743
+4   RSAD2    91543
+5   IFIT2     3433
+6     MX1     4599</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="section level3">
 <h3 id="running-go-enrichment">Running GO enrichment<a class="anchor" aria-label="anchor" href="#running-go-enrichment"></a>
 </h3>
-<div class="codewrapper sourceCode" id="cb16">
+<div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7270,21 +7375,21 @@ readability.</td>
 </tbody>
 </table>
 <p>Visualize the top enriched GO terms with a dot plot:</p>
-<div class="codewrapper sourceCode" id="cb17">
+<div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">dotplot</span><span class="op">(</span><span class="va">go_results</span>, showCategory <span class="op">=</span> <span class="fl">15</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"GO Biological Process: STIM vs CTRL CD14+ Monocytes"</span><span class="op">)</span></span></code></pre>
 </div>
-<div id="accordionSpoiler5" class="accordion spoiler-accordion accordion-flush">
+<div id="accordionSpoiler6" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
-  <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
+<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler6" aria-expanded="false" aria-controls="collapseSpoiler6">
+  <h3 class="accordion-header" id="headingSpoiler6">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
+<div id="collapseSpoiler6" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler6" aria-labelledby="headingSpoiler6">
 <div class="accordion-body">
-<p>The top enriched GO terms should include:</p>
+<figure><img src="../fig/ep8_go_dotplot.png" class="figure mx-auto d-block"></figure><p>The top enriched GO terms should include:</p>
 <ul>
 <li><strong>defense response to virus</strong></li>
 <li><strong>type I interferon signaling pathway</strong></li>
@@ -7308,7 +7413,7 @@ concentrated in exactly these pathways.</p>
 <h3 id="kegg-pathway-enrichment">KEGG pathway enrichment<a class="anchor" aria-label="anchor" href="#kegg-pathway-enrichment"></a>
 </h3>
 <p>For a complementary view, we can also test KEGG pathways:</p>
-<div class="codewrapper sourceCode" id="cb18">
+<div class="codewrapper sourceCode" id="cb22">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7318,13 +7423,41 @@ concentrated in exactly these pathways.</p>
 <span>                           qvalueCutoff <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="fu">head</span><span class="op">(</span><span class="va">kegg_results</span>, <span class="fl">5</span><span class="op">)</span></span></code></pre>
 </div>
-<div id="accordionSpoiler6" class="accordion spoiler-accordion accordion-flush">
+<div id="accordionSpoiler7" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler6" aria-expanded="false" aria-controls="collapseSpoiler6">
-  <h3 class="accordion-header" id="headingSpoiler6">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
+<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler7" aria-expanded="false" aria-controls="collapseSpoiler7">
+  <h3 class="accordion-header" id="headingSpoiler7">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler6" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler6" aria-labelledby="headingSpoiler6">
+<div id="collapseSpoiler7" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler7" aria-labelledby="headingSpoiler7">
 <div class="accordion-body">
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>                   category               subcategory       ID                         Description GeneRatio
+hsa04621 Organismal Systems             Immune system hsa04621 NOD-like receptor signaling pathway    22/166
+hsa05168     Human Diseases Infectious disease: viral hsa05168    Herpes simplex virus 1 infection    17/166
+hsa05169     Human Diseases Infectious disease: viral hsa05169        Epstein-Barr virus infection    18/166
+hsa05164     Human Diseases Infectious disease: viral hsa05164                         Influenza A    16/166
+hsa04612 Organismal Systems             Immune system hsa04612 Antigen processing and presentation    11/166
+          BgRatio RichFactor FoldEnrichment    zScore       pvalue     p.adjust       qvalue
+hsa04621 187/9382 0.11764706       6.649185 10.472204 1.358486e-12 3.124518e-10 2.702672e-10
+hsa05168 180/9382 0.09444444       5.337818  7.886310 1.677668e-08 1.503560e-06 1.300562e-06
+hsa05169 205/9382 0.08780488       4.962562  7.698570 1.961165e-08 1.503560e-06 1.300562e-06
+hsa05164 173/9382 0.09248555       5.227105  7.531253 6.092210e-08 3.503021e-06 3.030073e-06
+hsa04612  82/9382 0.13414634       7.581693  8.033604 1.806443e-07 8.309640e-06 7.187743e-06
+                                                                                                                        geneID
+hsa04621 4938/3665/115361/2633/4939/4940/6347/3428/115362/10616/7295/3320/6772/837/2635/79792/114769/3326/2634/834/10010/10628
+hsa05168                                 4938/3665/5610/64135/684/4939/4940/6347/3133/6890/6772/3107/8717/6672/29992/6892/3134
+hsa05169                              3627/4938/9636/3665/5610/4939/4940/3133/6890/6772/3107/4067/958/8717/9541/4616/6892/3134
+hsa05164                                       8743/91543/4599/3627/4938/4600/3665/5610/64135/4939/4940/6347/6772/8717/103/834
+hsa04612                                                                3303/3133/5721/6890/3320/3107/1520/3326/1514/6892/3134
+         Count
+hsa04621    22
+hsa05168    17
+hsa05169    18
+hsa05164    16
+hsa04612    11</code></pre>
+</div>
 <p>Top KEGG pathways should include entries like “Influenza A”,
 “Hepatitis C”, “RIG-I-like receptor signaling pathway”, and “NOD-like
 receptor signaling pathway” – all pathways involving the
@@ -7342,7 +7475,7 @@ that support reproducibility, sharing, and downstream use.</p>
 <div class="section level3">
 <h3 id="save-the-annotated-seurat-object">Save the annotated Seurat object<a class="anchor" aria-label="anchor" href="#save-the-annotated-seurat-object"></a>
 </h3>
-<div class="codewrapper sourceCode" id="cb19">
+<div class="codewrapper sourceCode" id="cb24">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7354,7 +7487,7 @@ that support reproducibility, sharing, and downstream use.</p>
 </h3>
 <p>For the PBMC 10k dataset from earlier episodes, you can export the
 raw counts and metadata as CSV files:</p>
-<div class="codewrapper sourceCode" id="cb20">
+<div class="codewrapper sourceCode" id="cb25">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7370,7 +7503,7 @@ raw counts and metadata as CSV files:</p>
 <span>          row.names <span class="op">=</span> <span class="cn">FALSE</span>, quote <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre>
 </div>
 <p>For smaller datasets, you can export as a dense CSV:</p>
-<div class="codewrapper sourceCode" id="cb21">
+<div class="codewrapper sourceCode" id="cb26">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7384,7 +7517,7 @@ raw counts and metadata as CSV files:</p>
 <p>If collaborators use the Python/Scanpy ecosystem, you can convert
 your Seurat object to AnnData format using the <code>sceasy</code>
 package:</p>
-<div class="codewrapper sourceCode" id="cb22">
+<div class="codewrapper sourceCode" id="cb27">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7424,7 +7557,7 @@ parameters, filtering criteria)</li>
 <li>
 <p><strong>Saved your R session info</strong> so others know exactly
 which package versions you used:</p>
-<div class="codewrapper sourceCode" id="cb23">
+<div class="codewrapper sourceCode" id="cb28">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7457,7 +7590,7 @@ method, and DE test used.</p></li>
 <p>Run both Wilcoxon (per-cell) and pseudobulk (DESeq2) DE testing for
 stimulated vs. control CD14+ monocytes. Compare the number of
 significant genes and the p-value distributions.</p>
-<div class="codewrapper sourceCode" id="cb24">
+<div class="codewrapper sourceCode" id="cb29">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7497,14 +7630,13 @@ significant genes and the p-value distributions.</p>
 </button>
 <div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
-<p>You should find that:</p>
+<figure><img src="../fig/ep8_pval_comparison.png" class="figure mx-auto d-block"></figure><p>You should find that:</p>
 <ul>
 <li>
-<strong>Wilcoxon</strong> identifies thousands of significant genes
-(often 2,000–4,000+)</li>
+<strong>Wilcoxon</strong> identifies 765 significant genes</li>
 <li>
-<strong>Pseudobulk</strong> identifies far fewer (often
-200–800)</li>
+<strong>Pseudobulk</strong> identifies 1455 with
+pseudo-replicates)</li>
 </ul>
 <p>The scatter plot shows that most points fall <strong>below</strong>
 the diagonal (the red dashed line), meaning pseudobulk p-values are
@@ -7512,10 +7644,10 @@ consistently <strong>larger</strong> (less significant) than Wilcoxon
 p-values for the same genes.</p>
 <p>This is expected and correct. The Wilcoxon test has inflated
 significance because it treats each cell as an independent observation.
-With ~2,000 monocytes per condition, even tiny expression differences
-become “significant.” The pseudobulk test treats each
-<strong>donor</strong> as one observation, giving a realistic sample
-size and honest p-values.</p>
+With ~1,600 monocytes per condition, even tiny expression differences
+become “significant.” The pseudobulk test aggregates cells into 3
+pseudo-replicates per condition, giving a more realistic (though still
+imperfect) sample size and more conservative p-values.</p>
 <p>The genes that are significant in <strong>both</strong> methods are
 the most trustworthy – these are genes with large, robust effects that
 survive the more stringent pseudobulk test. The genes significant only
@@ -7523,7 +7655,8 @@ in Wilcoxon but not in pseudobulk are likely false positives driven by
 pseudoreplication.</p>
 <p><strong>Rule of thumb:</strong> Use Wilcoxon for quick exploration
 and hypothesis generation. Use pseudobulk for any result you plan to
-report or publish.</p>
+report or publish. And for publication, ensure you have true biological
+replicates, not pseudo-replicates.</p>
 </div>
 </div>
 </div>
@@ -7540,7 +7673,7 @@ Response Genes</h3>
 <p>Run GO enrichment on the top 200 upregulated genes (by fold change)
 in stimulated vs. control CD14+ monocytes. What are the top 5 biological
 processes? Do they make sense for IFN-beta stimulation?</p>
-<div class="codewrapper sourceCode" id="cb25">
+<div class="codewrapper sourceCode" id="cb30">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7582,7 +7715,7 @@ processes? Do they make sense for IFN-beta stimulation?</p>
 </button>
 <div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
-<p>The top 5 biological processes should include terms like:</p>
+<figure><img src="../fig/ep8_go_top200.png" class="figure mx-auto d-block"></figure><p>The top 5 biological processes should include terms like:</p>
 <table class="table">
 <colgroup>
 <col width="20%">
@@ -7615,9 +7748,9 @@ effector mechanisms</td>
 </tr>
 <tr>
 <td align="center">4</td>
-<td align="left">negative regulation of viral genome replication</td>
-<td align="left">Specific antiviral effectors (MX1, IFIT proteins) that
-block viral replication</td>
+<td align="left">chemokine-mediated signaling pathway</td>
+<td align="left">Reflects the dominance of CCL8, CXCL10, CXCL11 in the
+top DE genes</td>
 </tr>
 <tr>
 <td align="center">5</td>
@@ -7631,9 +7764,9 @@ signaling is a central component</td>
 beta) is a <strong>type I interferon</strong> that signals through the
 IFNAR receptor complex, activating the JAK-STAT pathway, which turns on
 hundreds of interferon-stimulated genes (ISGs). These ISGs encode
-proteins that directly inhibit viral replication (MX1, IFIT1), degrade
-viral RNA (ISG20, OAS proteins), and alert neighboring cells to the
-viral threat (chemokines, cytokines).</p>
+proteins that directly inhibit viral replication (MX1, IFIT1/2/3),
+degrade viral RNA (RSAD2), recruit immune cells via chemokines (CXCL10,
+CXCL11, CCL8), and alert neighboring cells to the viral threat.</p>
 <p>The GO enrichment confirms that our DE analysis is capturing the
 expected biology: the top upregulated genes in stimulated monocytes are
 overwhelmingly involved in antiviral and interferon signaling pathways.
@@ -7723,8 +7856,8 @@ any links that you are not going to use.
   "url": "https://singlecell-rnaseq.github.io/NA/instructor/aio.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/instructor/aio.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-05-16",
-  "datePublished": "2026-05-16"
+  "dateModified": "2026-05-18",
+  "datePublished": "2026-05-18"
 }
 
   </script><script>
