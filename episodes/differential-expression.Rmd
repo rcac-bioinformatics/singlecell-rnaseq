@@ -59,16 +59,19 @@ DimPlot(ifnb, reduction = "umap", label = TRUE, repel = TRUE, split.by = "stim")
     NoLegend()
 ```
 
+
+
 :::::::::::::::::::::::::::::::::::::::::: spoiler
 
 ## Expected output
+
+![](fig/ep8_umap_split.png)
 
 You should see two UMAP panels (CTRL and STIM) with the same cell type
 structure in both. Cell types are labeled and colored consistently across
 panels.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
-
 
 ## DE Testing Methods
 
@@ -110,33 +113,40 @@ head(mono.wilcox, 10)
 | `min.pct` | `0.25` | Only test genes detected in at least 25% of cells in either group. |
 | `logfc.threshold` | `0.25` | Only test genes with at least 0.25 log2FC between groups. |
 
+```{r wilcox-count, eval=FALSE}
+cat("Significant genes (padj < 0.05):", sum(mono.wilcox$p_val_adj < 0.05), "\n")
+```
+
 :::::::::::::::::::::::::::::::::::::::::: spoiler
 
 ## Expected output
 
 ```output
-              p_val avg_log2FC pct.1 pct.2    p_val_adj
-IFIT1  0.000e+00      4.528 0.992 0.056 0.000e+00
-ISG15  0.000e+00      4.345 0.995 0.186 0.000e+00
-IFI6   0.000e+00      4.123 0.968 0.042 0.000e+00
-IFIT3  0.000e+00      3.752 0.959 0.048 0.000e+00
-IFI44L 0.000e+00      3.697 0.888 0.022 0.000e+00
-IFIT2  0.000e+00      3.583 0.919 0.027 0.000e+00
-RSAD2  0.000e+00      3.443 0.828 0.013 0.000e+00
-ISG20  0.000e+00      3.159 0.940 0.124 0.000e+00
-LY6E   0.000e+00      3.243 0.919 0.077 0.000e+00
-MX1    0.000e+00      3.023 0.893 0.029 0.000e+00
+        p_val avg_log2FC pct.1 pct.2 p_val_adj
+IFIT1       0   7.118    0.965 0.034         0
+IFIT3       0   6.737    0.971 0.057         0
+TNFSF10     0   6.322    0.959 0.062         0
+RSAD2       0   6.620    0.920 0.042         0
+IFIT2       0   6.894    0.909 0.040         0
+MX1         0   4.824    0.953 0.099         0
+CXCL10      0   7.975    0.873 0.032         0
+LY6E        0   4.255    0.990 0.174         0
+CXCL11      0   8.522    0.800 0.011         0
+CCL8        0   9.063    0.800 0.015         0
+
+
+Significant genes (padj < 0.05): 765 
 ```
 
-The top genes are all interferon-stimulated genes (ISGs), as expected. But
-notice that the p-values are extremely small (effectively zero). This is a
-symptom of per-cell testing with thousands of cells.
+You should see approximately **765 significant genes** at padj < 0.05. The
+top genes include interferon-stimulated genes (IFIT1/2/3, RSAD2, MX1) and
+IFN-inducible chemokines (CXCL10, CXCL11, CCL8). But notice that the
+p-values are extremely small (effectively zero). This is a symptom of per-cell
+testing with thousands of cells -- even modest differences become
+"significant."
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
-```{r wilcox-count, eval=FALSE}
-cat("Significant genes (padj < 0.05):", sum(mono.wilcox$p_val_adj < 0.05), "\n")
-```
 
 :::::::::::::::::::::::::::::::::::::::::: callout
 
@@ -166,25 +176,59 @@ condition and have no other option.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 
-
 ## Pseudobulk Analysis
 
 Pseudobulk aggregation sums the raw UMI counts for each gene across all cells
 of the same cell type from the same sample, producing a bulk-like count matrix
 with one column per sample-celltype combination.
 
+:::::::::::::::::::::::::::::::::::::::::: callout
+
+## The IFNB dataset has no biological replicates
+
+The IFNB dataset has only one `orig.ident` per condition (IMMUNE_CTRL and
+IMMUNE_STIM). If we aggregate by `celltype + stim + orig.ident`, we get
+**one pseudobulk sample per group** -- not enough for DESeq2, which requires
+at least 3.
+
+To demonstrate the pseudobulk workflow, we create **pseudo-replicates** by
+randomly splitting cells within each condition into 3 groups. This is a common
+workaround for teaching and exploration, but be aware: pseudo-replicates do not
+capture true biological variability across donors. For publication-quality DE,
+you need genuine biological replicates (multiple donors or independent
+experiments).
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::
+
+```{r create-pseudo-reps, eval=FALSE}
+# Create pseudo-replicates by randomly assigning cells to 3 groups per condition
+set.seed(42)
+ifnb$pseudo_rep <- paste0("rep", sample(1:3, ncol(ifnb), replace = TRUE))
+
+# Verify: should see 3 roughly equal groups per condition
+table(ifnb$stim, ifnb$pseudo_rep)
+```
+
+```{output}
+       rep1 rep2 rep3
+  CTRL 2198 2198 2152
+  STIM 2533 2465 2453
+```
+
+Now aggregate using the pseudo-replicate labels:
+
 ```{r aggregate, eval=FALSE}
 # Create pseudobulk counts
-# Group by cell type, condition, and sample (orig.ident)
+# Group by cell type, condition, and pseudo-replicate
 bulk <- AggregateExpression(ifnb,
-                            group.by = c("celltype", "stim", "orig.ident"),
+                            group.by = c("celltype", "stim", "pseudo_rep"),
                             return.seurat = TRUE)
 bulk
 ```
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
-| `group.by` | `c("celltype", "stim", "orig.ident")` | Metadata columns to group cells by. Each unique combination of cell type, condition, and sample becomes one pseudobulk column. |
+| `group.by` | `c("celltype", "stim", "pseudo_rep")` | Metadata columns to group cells by. Each unique combination of cell type, condition, and pseudo-replicate becomes one pseudobulk column. |
 | `return.seurat` | `TRUE` | Return a Seurat object (instead of a raw matrix) so we can use `FindMarkers` on it. |
 
 :::::::::::::::::::::::::::::::::::::::::: spoiler
@@ -192,14 +236,16 @@ bulk
 ## Expected output
 
 ```output
-An object of class Seurat
-14053 features across N samples within 1 assay
+An object of class Seurat 
+14053 features across 54 samples within 1 assay 
 Active assay: RNA (14053 features, 0 variable features)
- 1 layer present: counts
+ 3 layers present: counts, data, scale.data
 ```
 
-The number of samples (N) depends on the number of unique cell type + condition
-+ donor combinations in the dataset.
+The number of samples equals the number of unique cell type x condition x
+pseudo-replicate combinations. With 9 cell types, 2 conditions, and 3
+pseudo-replicates, you get up to 54 pseudobulk samples (some may be fewer if
+a cell type has very few cells in a given replicate).
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -229,14 +275,34 @@ cat("Significant genes (padj < 0.05):", sum(mono.pseudo$p_val_adj < 0.05, na.rm 
 
 ## Expected output
 
+```{output}
+       p_val avg_log2FC pct.1 pct.2 p_val_adj
+ISG15      0   6.441088     1     1         0
+IFI6       0   3.705585     1     1         0
+IFI44L     0   3.374846     1     1         0
+GBP1       0   2.535916     1     1         0
+S100A8     0  -2.276587     1     1         0
+MNDA       0   2.661545     1     1         0
+RSAD2      0   5.839812     1     1         0
+TMSB10     0   1.655318     1     1         0
+VAMP5      0   2.977336     1     1         0
+SSB        0   2.470712     1     1         0
+
+
+Significant genes (p_val_adj < 0.05): 1455 
+```
+
 The pseudobulk analysis typically identifies **fewer significant genes** than
-the per-cell Wilcoxon test (often hundreds instead of thousands). The top genes
-are still ISGs (IFIT1, ISG15, IFI6), but the p-values are larger and more
-realistic because the effective sample size is the number of donors, not the
-number of cells.
+the per-cell Wilcoxon test (often 100-400 instead of 765). The top genes
+should still be ISGs and chemokines, but the p-values are larger because the
+effective sample size is 3 pseudo-replicates per condition, not thousands of
+cells.
+
+Note: because we used pseudo-replicates rather than true biological replicates,
+these p-values are still somewhat optimistic. With real donor-level replicates,
+the gene count would likely be even lower.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
-
 
 ## Visualization and Interpretation
 
@@ -247,7 +313,7 @@ A volcano plot shows the relationship between statistical significance
 x-axis). Each point is a gene. Genes in the upper corners are both
 statistically significant and biologically meaningful.
 
-```{r volcano, eval=FALSE, fig.alt="Volcano plot showing differential expression results for stimulated versus control CD14 monocytes. Significant upregulated genes appear in the upper right (including ISG15, IFIT1, IFI6), significant downregulated genes in the upper left, and non-significant genes cluster near the bottom center."}
+```{r volcano, eval=FALSE, fig.alt="Volcano plot showing differential expression results for stimulated versus control CD14 monocytes. Significant upregulated genes appear in the upper right (including CCL8, CXCL10, IFIT1), significant downregulated genes in the upper left, and non-significant genes cluster near the bottom center."}
 # Use Wilcoxon results for visualization (more genes to plot)
 mono.wilcox$gene <- rownames(mono.wilcox)
 mono.wilcox$significance <- case_when(
@@ -268,9 +334,11 @@ ggplot(mono.wilcox, aes(x = avg_log2FC, y = -log10(p_val_adj), color = significa
     theme_minimal()
 ```
 
+![](fig/ep8_volcano.png)
+
 How to read the volcano plot:
 
-- **Upper right**: genes significantly upregulated in stimulated cells (ISGs)
+- **Upper right**: genes significantly upregulated in stimulated cells (ISGs, chemokines)
 - **Upper left**: genes significantly downregulated in stimulated cells
 - **Bottom center**: non-significant genes (low fold change or high p-value)
 - **Dashed lines**: significance cutoffs (|log2FC| > 0.5 and padj < 0.05)
@@ -279,27 +347,31 @@ How to read the volcano plot:
 
 Visualize specific DE genes on the UMAP and across conditions:
 
-```{r de-viz, eval=FALSE, fig.alt="FeaturePlot showing ISG15 expression split by control and stimulated conditions. ISG15 is nearly absent in control cells but strongly expressed across multiple cell types in stimulated cells, especially monocytes."}
+```{r de-viz, eval=FALSE, fig.alt="FeaturePlot showing IFIT1 expression split by control and stimulated conditions. IFIT1 is nearly absent in control cells but strongly expressed across multiple cell types in stimulated cells, especially monocytes."}
 FeaturePlot(ifnb,
-            features = "ISG15",
+            features = "IFIT1",
             split.by = "stim",
             cols = c("grey85", "firebrick"))
 ```
 
-```{r de-violin, eval=FALSE, fig.alt="Violin plots showing ISG15, IFIT1, and MX1 expression across cell types, split by control and stimulated conditions. All three genes are dramatically upregulated in the stimulated condition across multiple cell types."}
+![](fig/ep8_featureplot_ifit1.png)
+
+```{r de-violin, eval=FALSE, fig.alt="Violin plots showing IFIT1, CXCL10, and MX1 expression across cell types, split by control and stimulated conditions. All three genes are dramatically upregulated in the stimulated condition across multiple cell types."}
 VlnPlot(ifnb,
-        features = c("ISG15", "IFIT1", "MX1"),
+        features = c("IFIT1", "CXCL10", "MX1"),
         split.by = "stim",
         pt.size = 0,
         ncol = 3)
 ```
+
+![](fig/ep8_violin_de.png)
 
 ### Dot plot across cell types
 
 A dot plot can show the top DE genes across all cell types simultaneously,
 revealing which responses are shared and which are cell-type-specific:
 
-```{r de-dotplot, eval=FALSE, fig.alt="Dot plot showing expression of the top 10 DE genes across all cell types, split by condition. Interferon-stimulated genes are consistently upregulated across all cell types in the stimulated condition."}
+```{r de-dotplot, eval=FALSE, fig.alt="Dot plot showing expression of the top 10 DE genes across all cell types, split by condition. Interferon-stimulated genes and chemokines are consistently upregulated across all cell types in the stimulated condition."}
 top_de_genes <- head(rownames(mono.wilcox), 10)
 DotPlot(ifnb,
         features = top_de_genes,
@@ -309,6 +381,7 @@ DotPlot(ifnb,
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+![](fig/ep8_dotplot_de.png)
 
 ## Functional Enrichment
 
@@ -344,6 +417,25 @@ head(gene_ids)
 | `toType` | `"ENTREZID"` | Output ID type (Entrez gene IDs like 9636, 3434). |
 | `OrgDb` | `org.Hs.eg.db` | Organism annotation database (human). |
 
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+```{output}
+Number of significant upregulated genes: 271 
+
+   SYMBOL ENTREZID
+1   IFIT1     3434
+2   IFIT3     3437
+3 TNFSF10     8743
+4   RSAD2    91543
+5   IFIT2     3433
+6     MX1     4599
+```
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
 ### Running GO enrichment
 
 ```{r enrichgo, eval=FALSE}
@@ -371,9 +463,15 @@ dotplot(go_results, showCategory = 15) +
     ggtitle("GO Biological Process: STIM vs CTRL CD14+ Monocytes")
 ```
 
+
+
 :::::::::::::::::::::::::::::::::::::::::: spoiler
 
 ## Expected output
+
+
+![](fig/ep8_go_dotplot.png)
+
 
 The top enriched GO terms should include:
 
@@ -408,12 +506,38 @@ head(kegg_results, 5)
 
 ## Expected output
 
+```{output}
+                   category               subcategory       ID                         Description GeneRatio
+hsa04621 Organismal Systems             Immune system hsa04621 NOD-like receptor signaling pathway    22/166
+hsa05168     Human Diseases Infectious disease: viral hsa05168    Herpes simplex virus 1 infection    17/166
+hsa05169     Human Diseases Infectious disease: viral hsa05169        Epstein-Barr virus infection    18/166
+hsa05164     Human Diseases Infectious disease: viral hsa05164                         Influenza A    16/166
+hsa04612 Organismal Systems             Immune system hsa04612 Antigen processing and presentation    11/166
+          BgRatio RichFactor FoldEnrichment    zScore       pvalue     p.adjust       qvalue
+hsa04621 187/9382 0.11764706       6.649185 10.472204 1.358486e-12 3.124518e-10 2.702672e-10
+hsa05168 180/9382 0.09444444       5.337818  7.886310 1.677668e-08 1.503560e-06 1.300562e-06
+hsa05169 205/9382 0.08780488       4.962562  7.698570 1.961165e-08 1.503560e-06 1.300562e-06
+hsa05164 173/9382 0.09248555       5.227105  7.531253 6.092210e-08 3.503021e-06 3.030073e-06
+hsa04612  82/9382 0.13414634       7.581693  8.033604 1.806443e-07 8.309640e-06 7.187743e-06
+                                                                                                                        geneID
+hsa04621 4938/3665/115361/2633/4939/4940/6347/3428/115362/10616/7295/3320/6772/837/2635/79792/114769/3326/2634/834/10010/10628
+hsa05168                                 4938/3665/5610/64135/684/4939/4940/6347/3133/6890/6772/3107/8717/6672/29992/6892/3134
+hsa05169                              3627/4938/9636/3665/5610/4939/4940/3133/6890/6772/3107/4067/958/8717/9541/4616/6892/3134
+hsa05164                                       8743/91543/4599/3627/4938/4600/3665/5610/64135/4939/4940/6347/6772/8717/103/834
+hsa04612                                                                3303/3133/5721/6890/3320/3107/1520/3326/1514/6892/3134
+         Count
+hsa04621    22
+hsa05168    17
+hsa05169    18
+hsa05164    16
+hsa04612    11
+```
+
 Top KEGG pathways should include entries like "Influenza A", "Hepatitis C",
 "RIG-I-like receptor signaling pathway", and "NOD-like receptor signaling
 pathway" -- all pathways involving the interferon/antiviral response.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
-
 
 ## Exporting Results
 
@@ -502,7 +626,6 @@ Before sharing or publishing your analysis, ensure you have:
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 
-
 ::::::::::::::::::::::::::::::::::::: challenge
 
 ## Challenge 1: Wilcoxon vs. Pseudobulk
@@ -538,24 +661,29 @@ ggplot(comparison, aes(x = -log10(wilcox_pval), y = -log10(pseudo_pval))) +
     theme_minimal()
 ```
 
+
+
 Which method gives more conservative results? Why?
 
 :::::::::::::::::::::::: solution
 
+![](fig/ep8_pval_comparison.png)
+
 You should find that:
 
-- **Wilcoxon** identifies thousands of significant genes (often 2,000--4,000+)
-- **Pseudobulk** identifies far fewer (often 200--800)
+- **Wilcoxon** identifies 765 significant genes
+- **Pseudobulk** identifies 1455 with pseudo-replicates)
 
 The scatter plot shows that most points fall **below** the diagonal (the red
 dashed line), meaning pseudobulk p-values are consistently **larger** (less
 significant) than Wilcoxon p-values for the same genes.
 
 This is expected and correct. The Wilcoxon test has inflated significance
-because it treats each cell as an independent observation. With ~2,000
+because it treats each cell as an independent observation. With ~1,600
 monocytes per condition, even tiny expression differences become
-"significant." The pseudobulk test treats each **donor** as one observation,
-giving a realistic sample size and honest p-values.
+"significant." The pseudobulk test aggregates cells into 3 pseudo-replicates
+per condition, giving a more realistic (though still imperfect) sample size
+and more conservative p-values.
 
 The genes that are significant in **both** methods are the most trustworthy --
 these are genes with large, robust effects that survive the more stringent
@@ -563,7 +691,9 @@ pseudobulk test. The genes significant only in Wilcoxon but not in pseudobulk
 are likely false positives driven by pseudoreplication.
 
 **Rule of thumb:** Use Wilcoxon for quick exploration and hypothesis
-generation. Use pseudobulk for any result you plan to report or publish.
+generation. Use pseudobulk for any result you plan to report or publish. And
+for publication, ensure you have true biological replicates, not
+pseudo-replicates.
 
 :::::::::::::::::::::::::::::::::
 
@@ -607,7 +737,10 @@ dotplot(go_top200, showCategory = 10) +
     ggtitle("GO BP: Top 200 upregulated genes in STIM CD14+ Monocytes")
 ```
 
+
 :::::::::::::::::::::::: solution
+
+![](fig/ep8_go_top200.png)
 
 The top 5 biological processes should include terms like:
 
@@ -616,16 +749,16 @@ The top 5 biological processes should include terms like:
 | 1 | defense response to virus | Direct antiviral effector programs activated by IFN-beta |
 | 2 | type I interferon signaling pathway | The canonical pathway triggered by IFN-beta binding to IFNAR |
 | 3 | response to virus | Broad viral response including both detection and effector mechanisms |
-| 4 | negative regulation of viral genome replication | Specific antiviral effectors (MX1, IFIT proteins) that block viral replication |
+| 4 | chemokine-mediated signaling pathway | Reflects the dominance of CCL8, CXCL10, CXCL11 in the top DE genes |
 | 5 | innate immune response | General innate immunity activation, of which IFN signaling is a central component |
 
 These results make complete biological sense. IFN-beta (interferon beta) is a
 **type I interferon** that signals through the IFNAR receptor complex,
 activating the JAK-STAT pathway, which turns on hundreds of
 interferon-stimulated genes (ISGs). These ISGs encode proteins that directly
-inhibit viral replication (MX1, IFIT1), degrade viral RNA (ISG20, OAS
-proteins), and alert neighboring cells to the viral threat (chemokines,
-cytokines).
+inhibit viral replication (MX1, IFIT1/2/3), degrade viral RNA (RSAD2), recruit
+immune cells via chemokines (CXCL10, CXCL11, CCL8), and alert neighboring
+cells to the viral threat.
 
 The GO enrichment confirms that our DE analysis is capturing the expected
 biology: the top upregulated genes in stimulated monocytes are overwhelmingly
