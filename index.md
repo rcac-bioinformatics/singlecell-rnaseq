@@ -15,6 +15,3 @@ After completing this workshop, you will be able to:
 - Identify cell types through marker gene analysis and automated annotation
 - Integrate multiple samples, run differential expression analysis, and interpret pathway enrichment results
 
-## Getting Started
-
-Please visit the [Setup](learners/setup.md) page for prerequisites, software installation, data access instructions, and the workshop schedule.

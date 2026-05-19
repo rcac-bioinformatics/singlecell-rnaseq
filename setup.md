@@ -38,16 +38,35 @@ This workshop assumes:
 
 No prior experience with single-cell RNA-seq is required.
 
-## What is not covered
+## Scope of This Workshop
 
-This workshop focuses on the core scRNA-seq analysis workflow. The following topics are **not** covered:
+This workshop teaches a standard scRNA-seq analysis workflow using a specific
+set of tools and data:
 
-- Experimental design and sample preparation
-- Other single-cell modalities (ATAC-seq, CITE-seq, spatial transcriptomics)
-- Trajectory/pseudotime analysis (Monocle3, RNA velocity)
-- Advanced doublet detection methods (DoubletFinder, scDblFinder)
-- Generating your own Cell Ranger reference genomes
-- Multi-modal data integration
+- **Platform:** 10x Genomics Chromium 3' Gene Expression (v3 chemistry)
+- **Organism:** Human (GRCh38 reference genome)
+- **Dataset:** 10k PBMCs (peripheral blood mononuclear cells), a well-characterized
+  immune cell mixture
+- **Analysis toolkit:** Seurat v5 in R, running on Purdue's Negishi HPC cluster
+- **Integration dataset:** IFN-beta stimulated PBMCs from the SeuratData package
+
+By the end of the workshop you will have a solid understanding of the core
+scRNA-seq analysis pipeline and be able to apply these same steps to your own
+datasets.
+
+## What is NOT covered in this workshop
+
+- **Spatial transcriptomics** (Visium, MERFISH, Slide-seq)
+- **Multi-modal assays** (CITE-seq, Multiome ATAC+GEX)
+- **Trajectory and pseudotime analysis** (Monocle3, RNA velocity, scVelo)
+- **Python-based analysis** (Scanpy / AnnData ecosystem)
+- **Experimental design** and wet-lab sample preparation
+- **Custom reference genome building** for non-model organisms
+
+These are all important topics, but each warrants its own dedicated workshop.
+If you are interested in any of these areas, see the Additional Reading section
+in the [Reference](learners/reference.md) page for pointers to relevant
+resources.
 
 ## SSH Setup
 

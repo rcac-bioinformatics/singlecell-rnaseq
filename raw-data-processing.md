@@ -31,7 +31,9 @@ exercises: 15
 This episode requires an active account on Purdue's Negishi cluster and
 familiarity with basic Linux commands (`cd`, `ls`, `mkdir`, `cat`). You should
 be comfortable submitting SLURM jobs with `sbatch` and monitoring them with
-`squeue`.
+`squeue`. This episode requires shell access to the Negishi cluster via SSH.
+See the [SSH Setup](../learners/setup.md#ssh-setup) section for connection
+instructions.
 
 :::::::::::::::::::::::::::::::::::::::
 
@@ -78,6 +80,7 @@ Extract the 10x barcode whitelist from the Cell Ranger container (needed for
 STARsolo):
 
 ```bash
+module load biocontainers
 singularity exec ${BIOC_IMAGE_DIR}/cumulusprod_cellranger:10.0.0.sif \
     zcat /software/cellranger-10.0.0/lib/python/cellranger/barcodes/3M-february-2018_TRU.txt.gz \
     > ${RCAC_SCRATCH}/scrna_workshop/reference/3M-february-2018.txt
@@ -86,7 +89,7 @@ singularity exec ${BIOC_IMAGE_DIR}/cumulusprod_cellranger:10.0.0.sif \
 Verify that the FASTQ files are present:
 
 ```bash
-ls ${RCAC_SCRATCH}/scrna_workshop/fastq/
+ls -1 ${RCAC_SCRATCH}/scrna_workshop/fastq/
 ```
 
 :::::::::::::::::::::::::::::::::::::::::: spoiler
@@ -115,7 +118,7 @@ ls ${RCAC_SCRATCH}/scrna_workshop/reference/
 ## Expected output
 
 ```output
-refdata-gex-GRCh38-2024-A
+3M-february-2018.txt  refdata-gex-GRCh38-2024-A
 ```
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -247,7 +250,7 @@ cat << 'EOF' > ${RCAC_SCRATCH}/scrna_workshop/run_cellranger.sh
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --ntasks=64
-#SBATCH --time=02:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH --job-name=cellranger
 #SBATCH --account=workshop
 #SBATCH --partition=cpu
@@ -311,7 +314,7 @@ SLURM array job to run them in parallel:
 #SBATCH --array=0-3
 #SBATCH --nodes=1
 #SBATCH --ntasks=16
-#SBATCH --time=02:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH --job-name=cellranger
 #SBATCH --account=workshop
 
@@ -462,7 +465,7 @@ cat << 'EOF' > ${RCAC_SCRATCH}/scrna_workshop/build_star_index.sh
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --ntasks=64
-#SBATCH --time=01:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH --job-name=star_index
 #SBATCH --account=workshop
 #SBATCH --partition=cpu
@@ -507,7 +510,7 @@ cat << 'EOF' > ${RCAC_SCRATCH}/scrna_workshop/run_starsolo.sh
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --ntasks=64
-#SBATCH --time=01:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH --job-name=starsolo
 #SBATCH --account=workshop
 #SBATCH --partition=cpu

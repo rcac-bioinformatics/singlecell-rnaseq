@@ -24,6 +24,17 @@ exercises: 20
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+::::::::::::::::::::::::::::::::::::::: prereq
+
+## Prerequisites
+
+This episode requires an RStudio session on the Negishi cluster. Launch
+**RStudio (bioconductor)** under **Bioinformatics Apps** on
+[Open OnDemand](https://gateway.negishi.rcac.purdue.edu) as described in the
+[Setup](../learners/setup.md#starting-rstudio-on-open-ondemand) instructions.
+
+:::::::::::::::::::::::::::::::::::::::
+
 ## Setup
 
 
@@ -275,7 +286,7 @@ VlnPlot(pbmc,
 ```
 
 
-![QC violin plots before filtering](fig/violin_plots_output.png){alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt showing the distribution of QC metrics across all cells before filtering"}
+![QC violin plots before filtering](fig/ep3_vlnplot.png){alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt showing the distribution of QC metrics across all cells before filtering"}
 
 Setting `pt.size = 0` hides individual points so the distribution shape is
 easier to see with 10,000+ cells. If you want to see points, set
@@ -298,7 +309,7 @@ ggplot(pbmc@meta.data, aes(x = nCount_RNA, y = nFeature_RNA, color = percent.mt)
     labs(x = "Total UMI counts", y = "Number of genes")
 ```
 
-![QC scatter plot colored by mitochondrial percentage](fig/scatterplot-output.png){alt="Scatter plot of total UMI counts versus number of genes per cell colored by mitochondrial percentage, with high-mito cells highlighted in red"}
+![QC scatter plot colored by mitochondrial percentage](fig/ep3_scatter.png){alt="Scatter plot of total UMI counts versus number of genes per cell colored by mitochondrial percentage, with high-mito cells highlighted in red"}
 
 
 What to look for in this plot:
@@ -371,7 +382,7 @@ p3 <- VlnPlot(pbmc, features = "percent.mt", pt.size = 0.1, layer = "counts") +
 p1 + p2 + p3 + plot_layout(ncol = 3)
 ```
 
-![Violin plots with filtering thresholds](fig/violin_plots_with-pt_output.png){alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt with red dashed lines showing the filtering thresholds and individual cells visible as points"}
+![Violin plots with filtering thresholds](fig/ep3_vlnplot-thresholds.png){alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt with red dashed lines showing the filtering thresholds and individual cells visible as points"}
 
 
 Cells above or below the red lines will be removed. The small point size
@@ -422,7 +433,7 @@ VlnPlot(pbmc,
         pt.size = 0,
         layer = "counts")
 ```
-![QC violin plots after filtering](fig/violin_plots_after_filtering_output.png){alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt after filtering, showing tighter distributions with extreme outliers removed"}
+![QC violin plots after filtering](fig/ep3_vlnplot-after.png){alt="Violin plots of nFeature_RNA, nCount_RNA, and percent.mt after filtering, showing tighter distributions with extreme outliers removed"}
 
 
 The violin plots should now show tighter distributions with the extreme tails
@@ -439,7 +450,7 @@ ggplot(pbmc@meta.data, aes(x = nCount_RNA, y = nFeature_RNA, color = percent.mt)
     labs(x = "Total UMI counts", y = "Number of genes")
 ```
 
-![Scatter plot after filtering](fig/scatterplot-post_output.png){alt="Scatter plot of total UMI counts versus number of genes after filtering, colored by mitochondrial percentage, showing a tighter cloud with outliers removed"}
+![Scatter plot after filtering](fig/ep3_scatter-after.png){alt="Scatter plot of total UMI counts versus number of genes after filtering, colored by mitochondrial percentage, showing a tighter cloud with outliers removed"}
 
 
 Finally, save the filtered object for the next episode:
