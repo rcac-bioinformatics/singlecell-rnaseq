@@ -431,24 +431,24 @@ percentage</div>
 </figure><hr></section><section id="normalization-and-features"><h2 class="section-heading"><a href="normalization-and-features.html">Normalization and Feature Selection</a></h2>
 <hr class="half-width">
 <h3 id="normalization-and-features-figure-1">Figure 1</h3>
-<p aria-hidden="true">Image 1 of 1: ‘Two histograms comparing raw UMI counts and log-normalized expression for the LYZ gene, showing how normalization reduces the right skew’</p>
-<figure><img src="../fig/norm_compare_LYZ.png" alt="Two histograms comparing raw UMI counts and log-normalized expression for the LYZ gene, showing how normalization reduces the right skew" class="figure mx-auto d-block"><div class="figcaption">LYZ raw vs. normalized expression</div>
+<p aria-hidden="true">Image 1 of 1: ‘Two histograms for LYZ. Raw counts show a zero-dominated right-skewed distribution. Log-normalized values reveal a bimodal pattern with peaks near 0.5 and 4.5, separating non-monocytes from LYZ-expressing monocytes’</p>
+<figure><img src="../fig/norm_compare_LYZ.png" alt="Two histograms for LYZ. Raw counts show a zero-dominated right-skewed distribution. Log-normalized values reveal a bimodal pattern with peaks near 0.5 and 4.5, separating non-monocytes from LYZ-expressing monocytes" class="figure mx-auto d-block"><div class="figcaption">LYZ raw vs. normalized expression</div>
 </figure><hr>
 <h3 id="normalization-and-features-figure-2">Figure 2</h3>
 <p aria-hidden="true">Image 1 of 1: ‘Variable feature plot showing mean expression versus standardized variance for all genes, with the top 2000 variable features highlighted in red and the top 10 labeled’</p>
 <figure><img src="../fig/vf_plot.png" alt="Variable feature plot showing mean expression versus standardized variance for all genes, with the top 2000 variable features highlighted in red and the top 10 labeled" class="figure mx-auto d-block"><div class="figcaption">Variable feature selection plot</div>
 </figure><hr>
 <h3 id="normalization-and-features-figure-3">Figure 3</h3>
-<p aria-hidden="true">Image 1 of 1: ‘Four histograms comparing raw and normalized expression for ACTB (housekeeping) and CD3D (cell-type marker), showing that normalization compresses the housekeeping gene distribution while preserving the bimodal pattern of the marker gene’</p>
-<figure><img src="../fig/norm_housekeeping.png" alt="Four histograms comparing raw and normalized expression for ACTB (housekeeping) and CD3D (cell-type marker), showing that normalization compresses the housekeeping gene distribution while preserving the bimodal pattern of the marker gene" class="figure mx-auto d-block"><div class="figcaption">ACTB and CD3D raw vs. normalized
-expression</div>
+<p aria-hidden="true">Image 1 of 1: ‘Four histograms in a 2x2 grid. Top row: ACTB raw counts show a right-skewed distribution peaking near zero; ACTB normalized shows a unimodal bell shape centered around 3.5. Bottom row: LYZ raw counts show a massive zero spike with a flat tail to 500; LYZ normalized reveals a bimodal pattern with peaks near 0.5 and 4.5’</p>
+<figure><img src="../fig/norm_housekeeping.png" alt="Four histograms in a 2x2 grid. Top row: ACTB raw counts show a right-skewed distribution peaking near zero; ACTB normalized shows a unimodal bell shape centered around 3.5. Bottom row: LYZ raw counts show a massive zero spike with a flat tail to 500; LYZ normalized reveals a bimodal pattern with peaks near 0.5 and 4.5" class="figure mx-auto d-block"><div class="figcaption">ACTB and LYZ raw vs. normalized expression</div>
 </figure><hr></section><section id="dimensionality-reduction-clustering"><h2 class="section-heading"><a href="dimensionality-reduction-clustering.html">Dimensionality Reduction and Clustering</a></h2>
 <hr class="half-width">
 <h3 id="dimensionality-reduction-clustering-figure-1">Figure 1</h3>
-<p aria-hidden="true">Image 1 of 1: ‘Bar plots showing the top genes with the highest positive and negative loadings for PC1 and PC2. Genes like CST3 and LYZ appear in PC1, while CD3D and IL32 appear in PC2.’</p>
-<figure><img src="../fig/viz-dim-loadings.png" alt="Bar plots showing the top genes with the highest positive and negative loadings for PC1 and PC2. Genes like CST3 and LYZ appear in PC1, while CD3D and IL32 appear in PC2." class="figure mx-auto d-block"><div class="figcaption">Bar plots showing the top genes with the highest
-positive and negative loadings for PC1 and PC2. Genes like CST3 and LYZ
-appear in PC1, while CD3D and IL32 appear in PC2.</div>
+<p aria-hidden="true">Image 1 of 1: ‘Dot plots showing the top 30 genes by loading magnitude for PC1 and PC2. PC1 shows myeloid markers such as LYZ, CST3, and S100A9. PC2 shows B cell markers such as BANK1, CD79A, and MS4A1.’</p>
+<figure><img src="../fig/viz-dim-loadings.png" alt="Dot plots showing the top 30 genes by loading magnitude for PC1 and PC2. PC1 shows myeloid markers such as LYZ, CST3, and S100A9. PC2 shows B cell markers such as BANK1, CD79A, and MS4A1." class="figure mx-auto d-block"><div class="figcaption">Dot plots showing the top 30 genes by loading
+magnitude for PC1 and PC2. PC1 shows myeloid markers such as LYZ, CST3,
+and S100A9. PC2 shows B cell markers such as BANK1, CD79A, and
+MS4A1.</div>
 </figure><hr>
 <h3 id="dimensionality-reduction-clustering-figure-2">Figure 2</h3>
 <p aria-hidden="true">Image 1 of 1: ‘Grid of nine heatmaps showing gene expression patterns for PC1 through PC9. Each heatmap shows the top genes ordered by loading with cells ordered by PC score, revealing distinct expression programs.’</p>
@@ -458,19 +458,23 @@ by loading with cells ordered by PC score, revealing distinct expression
 programs.</div>
 </figure><hr>
 <h3 id="dimensionality-reduction-clustering-figure-3">Figure 3</h3>
-<p aria-hidden="true">Image 1 of 1: ‘Line plot of standard deviation versus principal component number. The curve drops steeply for the first 10 PCs then gradually flattens, with an elbow around PC 12 to 15.’</p>
-<figure><img src="../fig/elbowplot.png" alt="Line plot of standard deviation versus principal component number. The curve drops steeply for the first 10 PCs then gradually flattens, with an elbow around PC 12 to 15." class="figure mx-auto d-block"><div class="figcaption">Line plot of standard deviation versus principal
-component number. The curve drops steeply for the first 10 PCs then
-gradually flattens, with an elbow around PC 12 to 15.</div>
+<p aria-hidden="true">Image 1 of 1: ‘Dot plot of standard deviation versus principal component number. The curve drops steeply for the first 7 PCs then gradually flattens, with an elbow around PC 8 to 10.’</p>
+<figure><img src="../fig/elbowplot.png" alt="Dot plot of standard deviation versus principal component number. The curve drops steeply for the first 7 PCs then gradually flattens, with an elbow around PC 8 to 10." class="figure mx-auto d-block"><div class="figcaption">Dot plot of standard deviation versus principal
+component number. The curve drops steeply for the first 7 PCs then
+gradually flattens, with an elbow around PC 8 to 10.</div>
 </figure><hr>
 <h3 id="dimensionality-reduction-clustering-figure-4">Figure 4</h3>
-<p aria-hidden="true">Image 1 of 1: ‘UMAP plot showing approximately 10000 cells arranged in distinct clusters. Cells are colored by their identity, forming several well-separated groups.’</p>
-<figure><img src="../fig/umap-plot-1.png" alt="UMAP plot showing approximately 10000 cells arranged in distinct clusters. Cells are colored by their identity, forming several well-separated groups." class="figure mx-auto d-block"><div class="figcaption">UMAP plot showing approximately 10000 cells
-arranged in distinct clusters. Cells are colored by their identity,
-forming several well-separated groups.</div>
+<p aria-hidden="true">Image 1 of 1: ‘UMAP plot of all cells shown in a single color before clustering. Cells naturally organize into several spatially distinct groups corresponding to different cell types.’</p>
+<figure><img src="../fig/umap-plot-1.png" alt="UMAP plot of all cells shown in a single color before clustering. Cells naturally organize into several spatially distinct groups corresponding to different cell types." class="figure mx-auto d-block"><div class="figcaption">UMAP plot of all cells shown in a single color
+before clustering. Cells naturally organize into several spatially
+distinct groups corresponding to different cell types.</div>
 </figure><hr>
 <h3 id="dimensionality-reduction-clustering-figure-5">Figure 5</h3>
-<figure><img src="../fig/umap-plot-2.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘UMAP plot with 18 clusters labeled 0 through 17, each shown in a distinct color. Large clusters like 0 and 1 dominate the center and bottom, while smaller clusters appear at the periphery.’</p>
+<figure><img src="../fig/umap-plot-2.png" alt="UMAP plot with 18 clusters labeled 0 through 17, each shown in a distinct color. Large clusters like 0 and 1 dominate the center and bottom, while smaller clusters appear at the periphery." class="figure mx-auto d-block"><div class="figcaption">UMAP plot with 18 clusters labeled 0 through 17,
+each shown in a distinct color. Large clusters like 0 and 1 dominate the
+center and bottom, while smaller clusters appear at the periphery.</div>
+</figure><hr>
 <h3 id="dimensionality-reduction-clustering-figure-6">Figure 6</h3>
 <p aria-hidden="true">Image 1 of 1: ‘Clustree diagram showing how clusters split as resolution increases from 0.2 to 1.2. At low resolution a few large clusters exist, which progressively split into more subclusters at higher resolutions. Stable splits show clean branches while unstable splits show cells moving between multiple clusters.’</p>
 <figure><img src="../fig/clustree.png" alt="Clustree diagram showing how clusters split as resolution increases from 0.2 to 1.2. At low resolution a few large clusters exist, which progressively split into more subclusters at higher resolutions. Stable splits show clean branches while unstable splits show cells moving between multiple clusters." class="figure mx-auto d-block"><div class="figcaption">Clustree diagram showing how clusters split as
@@ -501,60 +505,175 @@ large clusters while higher resolutions split cells into progressively
 more subclusters.</div>
 </figure><hr>
 <h3 id="dimensionality-reduction-clustering-figure-10">Figure 10</h3>
-<figure><img src="../fig/challenge2_plot1.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Three UMAP panels showing expression of CD3D, MS4A1, and LYZ. CD3D expression is concentrated in the upper-left and lower-left regions. MS4A1 lights up a compact group in the upper-right. LYZ is strongest in the lower-left clusters.’</p>
+<figure><img src="../fig/challenge2_plot1.png" alt="Three UMAP panels showing expression of CD3D, MS4A1, and LYZ. CD3D expression is concentrated in the upper-left and lower-left regions. MS4A1 lights up a compact group in the upper-right. LYZ is strongest in the lower-left clusters." class="figure mx-auto d-block"><div class="figcaption">FeaturePlot of CD3D, MS4A1, and LYZ on the UMAP,
+each highlighting distinct cell populations</div>
+</figure><hr>
 <h3 id="dimensionality-reduction-clustering-figure-11">Figure 11</h3>
-<figure><img src="../fig/challenge2_plot2.png" class="figure mx-auto d-block"></figure><hr></section><section id="cell-type-annotation"><h2 class="section-heading"><a href="cell-type-annotation.html">Cell Type Annotation</a></h2>
+<p aria-hidden="true">Image 1 of 1: ‘UMAP plot with 18 clusters labeled 0 through 17 for cross-referencing with the FeaturePlot above.’</p>
+<figure><img src="../fig/challenge2_plot2.png" alt="UMAP plot with 18 clusters labeled 0 through 17 for cross-referencing with the FeaturePlot above." class="figure mx-auto d-block"><div class="figcaption">Cluster-labeled UMAP for reference</div>
+</figure><hr></section><section id="cell-type-annotation"><h2 class="section-heading"><a href="cell-type-annotation.html">Cell Type Annotation</a></h2>
 <hr class="half-width">
 <h3 id="cell-type-annotation-figure-1">Figure 1</h3>
-<figure><img src="../fig/umap-plot-3.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘UMAP plot with 18 clusters labeled 0 through 17 at resolution 0.5, matching the clustering results from the previous episode.’</p>
+<figure><img src="../fig/umap-plot-3.png" alt="UMAP plot with 18 clusters labeled 0 through 17 at resolution 0.5, matching the clustering results from the previous episode." class="figure mx-auto d-block"><div class="figcaption">Clustered UMAP from previous episode</div>
+</figure><hr>
 <h3 id="cell-type-annotation-figure-2">Figure 2</h3>
-<figure><img src="../fig/top3-heatmap.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Heatmap showing expression of the top 3 marker genes per cluster across all 18 clusters. Each cluster shows a distinct block of upregulated genes, confirming distinct transcriptional identities.’</p>
+<figure><img src="../fig/top3-heatmap.png" alt="Heatmap showing expression of the top 3 marker genes per cluster across all 18 clusters. Each cluster shows a distinct block of upregulated genes, confirming distinct transcriptional identities." class="figure mx-auto d-block"><div class="figcaption">Heatmap of top 3 markers per cluster</div>
+</figure><hr>
 <h3 id="cell-type-annotation-figure-3">Figure 3</h3>
-<figure><img src="../fig/top3-dotplot.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Dot plot showing expression of top 3 marker genes across all 18 clusters. Dot size indicates the percentage of cells expressing each gene; dot shading indicates average expression level.’</p>
+<figure><img src="../fig/top3-dotplot.png" alt="Dot plot showing expression of top 3 marker genes across all 18 clusters. Dot size indicates the percentage of cells expressing each gene; dot shading indicates average expression level." class="figure mx-auto d-block"><div class="figcaption">Dot plot of top marker genes</div>
+</figure><hr>
 <h3 id="cell-type-annotation-figure-4">Figure 4</h3>
-<figure><img src="../fig/known-marker-featureplot.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Grid of 8 UMAP panels showing expression of CD3D, IL7R, CD8A, MS4A1, LYZ, FCGR3A, GNLY, and FCER1A. Each marker highlights a distinct UMAP region: CD3D and IL7R in the upper-left T cell area, CD8A in a small cluster on the right, MS4A1 in B cells on the right, LYZ in monocytes at the lower-left, FCGR3A in a small cluster at the lower-right, GNLY in NK cells at the upper-center, and FCER1A in a small dendritic cell group.’</p>
+<figure><img src="../fig/known-marker-featureplot.png" alt="Grid of 8 UMAP panels showing expression of CD3D, IL7R, CD8A, MS4A1, LYZ, FCGR3A, GNLY, and FCER1A. Each marker highlights a distinct UMAP region: CD3D and IL7R in the upper-left T cell area, CD8A in a small cluster on the right, MS4A1 in B cells on the right, LYZ in monocytes at the lower-left, FCGR3A in a small cluster at the lower-right, GNLY in NK cells at the upper-center, and FCER1A in a small dendritic cell group." class="figure mx-auto d-block"><div class="figcaption">FeaturePlot of 8 canonical PBMC markers</div>
+</figure><hr>
 <h3 id="cell-type-annotation-figure-5">Figure 5</h3>
-<figure><img src="../fig/known-marker-vlnplot.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Violin plots of CD3D, IL7R, CD8A, MS4A1, LYZ, FCGR3A, GNLY, and PPBP across all 18 clusters. Each marker shows high expression in the clusters corresponding to its known cell type and low expression elsewhere.’</p>
+<figure><img src="../fig/known-marker-vlnplot.png" alt="Violin plots of CD3D, IL7R, CD8A, MS4A1, LYZ, FCGR3A, GNLY, and PPBP across all 18 clusters. Each marker shows high expression in the clusters corresponding to its known cell type and low expression elsewhere." class="figure mx-auto d-block"><div class="figcaption">Violin plots of 8 PBMC markers across
+clusters</div>
+</figure><hr>
 <h3 id="cell-type-annotation-figure-6">Figure 6</h3>
-<figure><img src="../fig/umap-plot-4.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘UMAP plot with cells labeled by manually assigned cell type names: CD4 T, CD14 Mono, NK, B, CD8 T, FCGR3A+ Mono, DC, pDC, and Platelet.’</p>
+<figure><img src="../fig/umap-plot-4.png" alt="UMAP plot with cells labeled by manually assigned cell type names: CD4 T, CD14 Mono, NK, B, CD8 T, FCGR3A+ Mono, DC, pDC, and Platelet." class="figure mx-auto d-block"><div class="figcaption">Annotated UMAP with cell type labels</div>
+</figure><hr>
 <h3 id="cell-type-annotation-figure-7">Figure 7</h3>
-<figure><img src="../fig/umap-plot-5.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘UMAP plot with cells colored by SingleR automated annotation labels from the Monaco Immune reference, showing CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils.’</p>
+<figure><img src="../fig/umap-plot-5.png" alt="UMAP plot with cells colored by SingleR automated annotation labels from the Monaco Immune reference, showing CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils." class="figure mx-auto d-block"><div class="figcaption">SingleR annotated UMAP</div>
+</figure><hr>
 <h3 id="cell-type-annotation-figure-8">Figure 8</h3>
-<figure><img src="../fig/umap-plot-6.png" class="figure mx-auto d-block"></figure><hr></section><section id="multi-sample-integration"><h2 class="section-heading"><a href="multi-sample-integration.html">Multi-Sample Integration</a></h2>
+<p aria-hidden="true">Image 1 of 1: ‘Two UMAP plots side by side. Left panel shows manual annotation with CD4 T, CD14 Mono, NK, B, CD8 T, FCGR3A+ Mono, DC, pDC, and Platelet labels. Right panel shows SingleR annotation with CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils. Most cell groups receive consistent labels between the two methods.’</p>
+<figure><img src="../fig/umap-plot-6.png" alt="Two UMAP plots side by side. Left panel shows manual annotation with CD4 T, CD14 Mono, NK, B, CD8 T, FCGR3A+ Mono, DC, pDC, and Platelet labels. Right panel shows SingleR annotation with CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils. Most cell groups receive consistent labels between the two methods." class="figure mx-auto d-block"><div class="figcaption">Manual vs SingleR annotation side by side</div>
+</figure><hr></section><section id="multi-sample-integration"><h2 class="section-heading"><a href="multi-sample-integration.html">Multi-Sample Integration</a></h2>
 <hr class="half-width">
 <h3 id="multi-sample-integration-figure-1">Figure 1</h3>
-<figure><img src="../fig/umap-plot-7.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘UMAP plot of IFNB dataset before integration. CTRL (salmon) and STIM (teal) cells form largely separate clusters. Several clusters are dominated by one condition, indicating batch-driven rather than cell-type-driven clustering.’</p>
+<figure><img src="../fig/umap-plot-7.png" alt="UMAP plot of IFNB dataset before integration. CTRL (salmon) and STIM (teal) cells form largely separate clusters. Several clusters are dominated by one condition, indicating batch-driven rather than cell-type-driven clustering." class="figure mx-auto d-block"><div class="figcaption">UMAP plot of IFNB dataset before integration.
+CTRL (salmon) and STIM (teal) cells form largely separate clusters.
+Several clusters are dominated by one condition, indicating batch-driven
+rather than cell-type-driven clustering.</div>
+</figure><hr>
 <h3 id="multi-sample-integration-figure-2">Figure 2</h3>
-<figure><img src="../fig/umap-plot-8.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘UMAP plot after CCA integration. CTRL and STIM cells are now intermingled within each cluster, with teal (STIM) dominating the overlay. Cell types co-cluster regardless of condition.’</p>
+<figure><img src="../fig/umap-plot-8.png" alt="UMAP plot after CCA integration. CTRL and STIM cells are now intermingled within each cluster, with teal (STIM) dominating the overlay. Cell types co-cluster regardless of condition." class="figure mx-auto d-block"><div class="figcaption">UMAP plot after CCA integration. CTRL and STIM
+cells are now intermingled within each cluster, with teal (STIM)
+dominating the overlay. Cell types co-cluster regardless of
+condition.</div>
+</figure><hr>
 <h3 id="multi-sample-integration-figure-3">Figure 3</h3>
-<figure><img src="../fig/umap-plot-9.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Two side-by-side UMAP panels split by condition (CTRL and STIM) after integration. Both panels show 14 clusters numbered 0 through 13, with the same spatial arrangement in each panel, confirming successful integration.’</p>
+<figure><img src="../fig/umap-plot-9.png" alt="Two side-by-side UMAP panels split by condition (CTRL and STIM) after integration. Both panels show 14 clusters numbered 0 through 13, with the same spatial arrangement in each panel, confirming successful integration." class="figure mx-auto d-block"><div class="figcaption">Two side-by-side UMAP panels split by condition
+(CTRL and STIM) after integration. Both panels show 14 clusters numbered
+0 through 13, with the same spatial arrangement in each panel,
+confirming successful integration.</div>
+</figure><hr>
 <h3 id="multi-sample-integration-figure-4">Figure 4</h3>
-<figure><img src="../fig/umap-plot-10.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘UMAP plot with cells colored and labeled by annotated cell type. Nine cell types are visible: CD14 Mono (large cluster, right), CD4 T (large, upper left), CD8 T (upper right), B (center left), NK (left), FCGR3A Mono (lower right), DC (small, center), Mk (small, center right), and Eryth (small, bottom).’</p>
+<figure><img src="../fig/umap-plot-10.png" alt="UMAP plot with cells colored and labeled by annotated cell type. Nine cell types are visible: CD14 Mono (large cluster, right), CD4 T (large, upper left), CD8 T (upper right), B (center left), NK (left), FCGR3A Mono (lower right), DC (small, center), Mk (small, center right), and Eryth (small, bottom)." class="figure mx-auto d-block"><div class="figcaption">UMAP plot with cells colored and labeled by
+annotated cell type. Nine cell types are visible: CD14 Mono (large
+cluster, right), CD4 T (large, upper left), CD8 T (upper right), B
+(center left), NK (left), FCGR3A Mono (lower right), DC (small, center),
+Mk (small, center right), and Eryth (small, bottom).</div>
+</figure><hr>
 <h3 id="multi-sample-integration-figure-5">Figure 5</h3>
-<figure><img src="../fig/dimplot_ifnb_de1.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Four-row FeaturePlot split by CTRL and STIM for ISG15, IFIT1, TNFSF10, and RSAD2. CTRL panels show mostly grey cells with sparse expression. STIM panels show strong red expression across monocyte and other clusters for all four genes.’</p>
+<figure><img src="../fig/dimplot_ifnb_de1.png" alt="Four-row FeaturePlot split by CTRL and STIM for ISG15, IFIT1, TNFSF10, and RSAD2. CTRL panels show mostly grey cells with sparse expression. STIM panels show strong red expression across monocyte and other clusters for all four genes." class="figure mx-auto d-block"><div class="figcaption">Four-row FeaturePlot split by CTRL and STIM for
+ISG15, IFIT1, TNFSF10, and RSAD2. CTRL panels show mostly grey cells
+with sparse expression. STIM panels show strong red expression across
+monocyte and other clusters for all four genes.</div>
+</figure><hr>
 <h3 id="multi-sample-integration-figure-6">Figure 6</h3>
-<figure><img src="../fig/vlnplot_ifnb_de1.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Four violin plots for IFIT1, IFIT3, TNFSF10, and RSAD2 in CD14 monocytes. Each panel shows two violins: a thin line at zero for control and a broad teal shape peaking around expression level 3 to 4 for stimulated, confirming strong IFN-beta induction.’</p>
+<figure><img src="../fig/vlnplot_ifnb_de1.png" alt="Four violin plots for IFIT1, IFIT3, TNFSF10, and RSAD2 in CD14 monocytes. Each panel shows two violins: a thin line at zero for control and a broad teal shape peaking around expression level 3 to 4 for stimulated, confirming strong IFN-beta induction." class="figure mx-auto d-block"><div class="figcaption">Four violin plots for IFIT1, IFIT3, TNFSF10, and
+RSAD2 in CD14 monocytes. Each panel shows two violins: a thin line at
+zero for control and a broad teal shape peaking around expression level
+3 to 4 for stimulated, confirming strong IFN-beta induction.</div>
+</figure><hr>
 <h3 id="multi-sample-integration-figure-7">Figure 7</h3>
-<figure><img src="../fig/dimplot_challenge-ifnb1.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Split UMAP with CTRL and STIM panels, cells labeled by cell type. Both panels show identical cluster arrangement with CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, and Eryth labels, confirming balanced condition mixing within each cell type.’</p>
+<figure><img src="../fig/dimplot_challenge-ifnb1.png" alt="Split UMAP with CTRL and STIM panels, cells labeled by cell type. Both panels show identical cluster arrangement with CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, and Eryth labels, confirming balanced condition mixing within each cell type." class="figure mx-auto d-block"><div class="figcaption">Split UMAP with CTRL and STIM panels, cells
+labeled by cell type. Both panels show identical cluster arrangement
+with CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, and Eryth
+labels, confirming balanced condition mixing within each cell
+type.</div>
+</figure><hr>
 <h3 id="multi-sample-integration-figure-8">Figure 8</h3>
-<figure><img src="../fig/dimplot_challenge2-ifnb1.png" class="figure mx-auto d-block"></figure><hr></section><section id="differential-expression"><h2 class="section-heading"><a href="differential-expression.html">Differential Expression Analysis</a></h2>
+<p aria-hidden="true">Image 1 of 1: ‘Four-row FeaturePlot split by CTRL and STIM showing CCL8, CXCL11, CXCL10, and HESX1. CTRL panels are almost entirely grey. STIM panels show strong red expression concentrated in the monocyte clusters for all four chemokine and ISG genes.’</p>
+<figure><img src="../fig/dimplot_challenge2-ifnb1.png" alt="Four-row FeaturePlot split by CTRL and STIM showing CCL8, CXCL11, CXCL10, and HESX1. CTRL panels are almost entirely grey. STIM panels show strong red expression concentrated in the monocyte clusters for all four chemokine and ISG genes." class="figure mx-auto d-block"><div class="figcaption">Four-row FeaturePlot split by CTRL and STIM
+showing CCL8, CXCL11, CXCL10, and HESX1. CTRL panels are almost entirely
+grey. STIM panels show strong red expression concentrated in the
+monocyte clusters for all four chemokine and ISG genes.</div>
+</figure><hr></section><section id="differential-expression"><h2 class="section-heading"><a href="differential-expression.html">Differential Expression Analysis</a></h2>
 <hr class="half-width">
 <h3 id="differential-expression-figure-1">Figure 1</h3>
-<figure><img src="../fig/ep8_umap_split.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Split UMAP showing CTRL and STIM panels with cells colored and labeled by cell type. Nine cell types (CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, Eryth) appear in both panels with identical spatial arrangement, confirming the integrated structure.’</p>
+<figure><img src="../fig/ep8_umap_split.png" alt="Split UMAP showing CTRL and STIM panels with cells colored and labeled by cell type. Nine cell types (CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, Eryth) appear in both panels with identical spatial arrangement, confirming the integrated structure." class="figure mx-auto d-block"><div class="figcaption">Split UMAP showing CTRL and STIM panels with
+cells colored and labeled by cell type. Nine cell types (CD4 T, CD8 T,
+B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, Eryth) appear in both panels with
+identical spatial arrangement, confirming the integrated
+structure.</div>
+</figure><hr>
 <h3 id="differential-expression-figure-2">Figure 2</h3>
-<figure><img src="../fig/ep8_volcano.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Volcano plot for CD14 monocytes STIM vs CTRL. Red points (upregulated) cluster in the upper right with log2FC up to 9, blue points (downregulated) in the upper left, and grey (NS) points near the bottom center. Dashed lines mark the significance and fold-change cutoffs.’</p>
+<figure><img src="../fig/ep8_volcano.png" alt="Volcano plot for CD14 monocytes STIM vs CTRL. Red points (upregulated) cluster in the upper right with log2FC up to 9, blue points (downregulated) in the upper left, and grey (NS) points near the bottom center. Dashed lines mark the significance and fold-change cutoffs." class="figure mx-auto d-block"><div class="figcaption">Volcano plot for CD14 monocytes STIM vs CTRL.
+Red points (upregulated) cluster in the upper right with log2FC up to 9,
+blue points (downregulated) in the upper left, and grey (NS) points near
+the bottom center. Dashed lines mark the significance and fold-change
+cutoffs.</div>
+</figure><hr>
 <h3 id="differential-expression-figure-3">Figure 3</h3>
-<figure><img src="../fig/ep8_featureplot_ifit1.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘FeaturePlot of IFIT1 split by CTRL and STIM. The CTRL panel is mostly grey with rare red dots. The STIM panel shows strong red expression across all clusters, with particularly intense signal in monocyte clusters on the right side of the UMAP.’</p>
+<figure><img src="../fig/ep8_featureplot_ifit1.png" alt="FeaturePlot of IFIT1 split by CTRL and STIM. The CTRL panel is mostly grey with rare red dots. The STIM panel shows strong red expression across all clusters, with particularly intense signal in monocyte clusters on the right side of the UMAP." class="figure mx-auto d-block"><div class="figcaption">FeaturePlot of IFIT1 split by CTRL and STIM. The
+CTRL panel is mostly grey with rare red dots. The STIM panel shows
+strong red expression across all clusters, with particularly intense
+signal in monocyte clusters on the right side of the UMAP.</div>
+</figure><hr>
 <h3 id="differential-expression-figure-4">Figure 4</h3>
-<figure><img src="../fig/ep8_violin_de.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Three violin plot panels for IFIT1, CXCL10, and MX1 across nine cell types, split by condition. Teal (stimulated) violins are broad and tall for all three genes across most cell types. CXCL10 expression is strongest in CD14 Mono and FCGR3A Mono. Control violins are thin lines near zero.’</p>
+<figure><img src="../fig/ep8_violin_de.png" alt="Three violin plot panels for IFIT1, CXCL10, and MX1 across nine cell types, split by condition. Teal (stimulated) violins are broad and tall for all three genes across most cell types. CXCL10 expression is strongest in CD14 Mono and FCGR3A Mono. Control violins are thin lines near zero." class="figure mx-auto d-block"><div class="figcaption">Three violin plot panels for IFIT1, CXCL10, and
+MX1 across nine cell types, split by condition. Teal (stimulated)
+violins are broad and tall for all three genes across most cell types.
+CXCL10 expression is strongest in CD14 Mono and FCGR3A Mono. Control
+violins are thin lines near zero.</div>
+</figure><hr>
 <h3 id="differential-expression-figure-5">Figure 5</h3>
-<figure><img src="../fig/ep8_dotplot_de.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Dot plot showing the top 10 DE genes (IFIT1, IFIT3, TNFSF10, RSAD2, IFIT2, MX1, CXCL10, LY6E, CXCL11, CCL8) across all cell types split by CTRL and STIM. Dot size indicates percent expressed, color from blue (low) to red (high) shows average expression. STIM columns consistently show larger, redder dots for all genes across cell types.’</p>
+<figure><img src="../fig/ep8_dotplot_de.png" alt="Dot plot showing the top 10 DE genes (IFIT1, IFIT3, TNFSF10, RSAD2, IFIT2, MX1, CXCL10, LY6E, CXCL11, CCL8) across all cell types split by CTRL and STIM. Dot size indicates percent expressed, color from blue (low) to red (high) shows average expression. STIM columns consistently show larger, redder dots for all genes across cell types." class="figure mx-auto d-block"><div class="figcaption">Dot plot showing the top 10 DE genes (IFIT1,
+IFIT3, TNFSF10, RSAD2, IFIT2, MX1, CXCL10, LY6E, CXCL11, CCL8) across
+all cell types split by CTRL and STIM. Dot size indicates percent
+expressed, color from blue (low) to red (high) shows average expression.
+STIM columns consistently show larger, redder dots for all genes across
+cell types.</div>
+</figure><hr>
 <h3 id="differential-expression-figure-6">Figure 6</h3>
-<figure><img src="../fig/ep8_go_dotplot.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘GO Biological Process dot plot for STIM vs CTRL CD14 monocytes showing 15 terms. The top 3 by gene ratio are response to virus (largest dot, approximately 50 genes), defense response to virus, and viral process. Response to type I interferon and interferon-mediated signaling pathway appear near the bottom. Dot color ranges from red (low p.adjust) to blue (higher p.adjust).’</p>
+<figure><img src="../fig/ep8_go_dotplot.png" alt="GO Biological Process dot plot for STIM vs CTRL CD14 monocytes showing 15 terms. The top 3 by gene ratio are response to virus (largest dot, approximately 50 genes), defense response to virus, and viral process. Response to type I interferon and interferon-mediated signaling pathway appear near the bottom. Dot color ranges from red (low p.adjust) to blue (higher p.adjust)." class="figure mx-auto d-block"><div class="figcaption">GO Biological Process dot plot for STIM vs CTRL
+CD14 monocytes showing 15 terms. The top 3 by gene ratio are response to
+virus (largest dot, approximately 50 genes), defense response to virus,
+and viral process. Response to type I interferon and interferon-mediated
+signaling pathway appear near the bottom. Dot color ranges from red (low
+p.adjust) to blue (higher p.adjust).</div>
+</figure><hr>
 <h3 id="differential-expression-figure-7">Figure 7</h3>
-<figure><img src="../fig/ep8_pval_comparison.png" class="figure mx-auto d-block"></figure><hr>
+<p aria-hidden="true">Image 1 of 1: ‘Scatter plot comparing -log10(p-value) from Wilcoxon (x-axis) and Pseudobulk (y-axis) for shared genes. A red dashed diagonal marks equal significance. Points are broadly scattered, with a dense cluster along the x-axis near y equals 0 (genes significant only in Wilcoxon) and many points above the diagonal (genes more significant in pseudobulk).’</p>
+<figure><img src="../fig/ep8_pval_comparison.png" alt="Scatter plot comparing -log10(p-value) from Wilcoxon (x-axis) and Pseudobulk (y-axis) for shared genes. A red dashed diagonal marks equal significance. Points are broadly scattered, with a dense cluster along the x-axis near y equals 0 (genes significant only in Wilcoxon) and many points above the diagonal (genes more significant in pseudobulk)." class="figure mx-auto d-block"><div class="figcaption">Scatter plot comparing -log10(p-value) from
+Wilcoxon (x-axis) and Pseudobulk (y-axis) for shared genes. A red dashed
+diagonal marks equal significance. Points are broadly scattered, with a
+dense cluster along the x-axis near y equals 0 (genes significant only
+in Wilcoxon) and many points above the diagonal (genes more significant
+in pseudobulk).</div>
+</figure><hr>
 <h3 id="differential-expression-figure-8">Figure 8</h3>
-<figure><img src="../fig/ep8_go_top200.png" class="figure mx-auto d-block"></figure><hr></section>
+<p aria-hidden="true">Image 1 of 1: ‘GO BP dot plot for the top 200 upregulated genes in STIM CD14 monocytes showing 10 terms. Response to virus and defense response to virus have the largest gene ratios (approximately 0.28 to 0.30) and deepest red color. Viral process, viral life cycle, and regulation of viral process follow. Dot sizes range from about 15 to over 50 genes.’</p>
+<figure><img src="../fig/ep8_go_top200.png" alt="GO BP dot plot for the top 200 upregulated genes in STIM CD14 monocytes showing 10 terms. Response to virus and defense response to virus have the largest gene ratios (approximately 0.28 to 0.30) and deepest red color. Viral process, viral life cycle, and regulation of viral process follow. Dot sizes range from about 15 to over 50 genes." class="figure mx-auto d-block"><div class="figcaption">GO BP dot plot for the top 200 upregulated genes
+in STIM CD14 monocytes showing 10 terms. Response to virus and defense
+response to virus have the largest gene ratios (approximately 0.28 to
+0.30) and deepest red color. Viral process, viral life cycle, and
+regulation of viral process follow. Dot sizes range from about 15 to
+over 50 genes.</div>
+</figure><hr></section>
 </div>
     </main>
 </div>
@@ -604,8 +723,8 @@ more subclusters.</div>
   "url": "https://singlecell-rnaseq.github.io/NA/instructor/images.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/instructor/images.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-05-18",
-  "datePublished": "2026-05-18"
+  "dateModified": "2026-05-19",
+  "datePublished": "2026-05-19"
 }
 
   </script><script>

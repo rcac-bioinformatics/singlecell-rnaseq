@@ -340,7 +340,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Cell Type Annotation</h1>
-        <p>Last updated on 2026-05-18 |
+        <p>Last updated on 2026-05-19 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/cell-type-annotation.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -426,9 +426,10 @@ previous episode. Make sure the active identity is set to the resolution
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
 <div class="accordion-body">
-<figure><img src="fig/umap-plot-3.png" class="figure mx-auto d-block"></figure><p>You should see the UMAP 18 clusters labeled by number (0 to 17),
+<figure><img src="fig/umap-plot-3.png" alt="UMAP plot with 18 clusters labeled 0 through 17 at resolution 0.5, matching the clustering results from the previous episode." class="figure mx-auto d-block"><div class="figcaption">Clustered UMAP from previous episode</div>
+</figure><p>You should see the UMAP with 18 clusters labeled by number (0 to 17),
 matching the clustering results from the previous episode.</p>
 </div>
 </div>
@@ -476,7 +477,7 @@ differences.</td>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -517,7 +518,7 @@ look at the key columns:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -579,7 +580,7 @@ change:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
   <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
+<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -620,7 +621,8 @@ expression:</p>
 <span></span>
 <span><span class="fu">DoHeatmap</span><span class="op">(</span><span class="va">pbmc</span>, features <span class="op">=</span> <span class="va">top3</span><span class="op">$</span><span class="va">gene</span><span class="op">)</span> <span class="op">+</span> <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/top3-heatmap.png" class="figure mx-auto d-block"></figure><p>Each cluster should show a distinct block of highly expressed genes
+<figure><img src="fig/top3-heatmap.png" alt="Heatmap showing expression of the top 3 marker genes per cluster across all 18 clusters. Each cluster shows a distinct block of upregulated genes, confirming distinct transcriptional identities." class="figure mx-auto d-block"><div class="figcaption">Heatmap of top 3 markers per cluster</div>
+</figure><p>Each cluster should show a distinct block of highly expressed genes
 (bright yellow/white) that are low in other clusters (dark purple).
 Clusters with very similar heatmap profiles may represent subtypes of
 the same cell type.</p>
@@ -637,7 +639,8 @@ gene, and the color intensity encodes the average expression level:</p>
 <code class="sourceCode R"><span><span class="fu">DotPlot</span><span class="op">(</span><span class="va">pbmc</span>, features <span class="op">=</span> <span class="fu">unique</span><span class="op">(</span><span class="va">top3</span><span class="op">$</span><span class="va">gene</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">coord_flip</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/top3-dotplot.png" class="figure mx-auto d-block"></figure></div>
+<figure><img src="fig/top3-dotplot.png" alt="Dot plot showing expression of top 3 marker genes across all 18 clusters. Dot size indicates the percentage of cells expressing each gene; dot shading indicates average expression level." class="figure mx-auto d-block"><div class="figcaption">Dot plot of top marker genes</div>
+</figure></div>
 </section><section><h2 class="section-heading" id="manual-annotation-with-known-markers">Manual Annotation with Known Markers<a class="anchor" aria-label="anchor" href="#manual-annotation-with-known-markers"></a></h2>
 <hr class="half-width"><p>Now we match the marker gene patterns to known PBMC cell types. The
 table below lists the canonical markers for each expected cell type:</p>
@@ -679,7 +682,8 @@ map to:</p>
 <span>                         <span class="st">"LYZ"</span>, <span class="st">"FCGR3A"</span>, <span class="st">"GNLY"</span>, <span class="st">"FCER1A"</span><span class="op">)</span>,</span>
 <span>            ncol <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/known-marker-featureplot.png" class="figure mx-auto d-block"></figure><p>And as violin plots to see expression across clusters:</p>
+<figure><img src="fig/known-marker-featureplot.png" alt="Grid of 8 UMAP panels showing expression of CD3D, IL7R, CD8A, MS4A1, LYZ, FCGR3A, GNLY, and FCER1A. Each marker highlights a distinct UMAP region: CD3D and IL7R in the upper-left T cell area, CD8A in a small cluster on the right, MS4A1 in B cells on the right, LYZ in monocytes at the lower-left, FCGR3A in a small cluster at the lower-right, GNLY in NK cells at the upper-center, and FCER1A in a small dendritic cell group." class="figure mx-auto d-block"><div class="figcaption">FeaturePlot of 8 canonical PBMC markers</div>
+</figure><p>And as violin plots to see expression across clusters:</p>
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -690,7 +694,9 @@ map to:</p>
 <span>        ncol <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>        pt.size <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/known-marker-vlnplot.png" class="figure mx-auto d-block"></figure><p>Based on these plots and the <code>FindAllMarkers</code> results, we
+<figure><img src="fig/known-marker-vlnplot.png" alt="Violin plots of CD3D, IL7R, CD8A, MS4A1, LYZ, FCGR3A, GNLY, and PPBP across all 18 clusters. Each marker shows high expression in the clusters corresponding to its known cell type and low expression elsewhere." class="figure mx-auto d-block"><div class="figcaption">Violin plots of 8 PBMC markers across
+clusters</div>
+</figure><p>Based on these plots and the <code>FindAllMarkers</code> results, we
 can build a mapping from cluster numbers to cell type names. Your exact
 cluster numbers will depend on the random seed, but the logic is the
 same: find which clusters express each set of markers.</p>
@@ -754,7 +760,8 @@ assignments.</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">pbmc</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, label <span class="op">=</span> <span class="cn">TRUE</span>, repel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-4.png" class="figure mx-auto d-block"></figure><p>Store the annotation in the metadata so it persists after saving:</p>
+<figure><img src="fig/umap-plot-4.png" alt="UMAP plot with cells labeled by manually assigned cell type names: CD4 T, CD14 Mono, NK, B, CD8 T, FCGR3A+ Mono, DC, pDC, and Platelet." class="figure mx-auto d-block"><div class="figcaption">Annotated UMAP with cell type labels</div>
+</figure><p>Store the annotation in the metadata so it persists after saving:</p>
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -785,7 +792,7 @@ for PBMC annotation.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
   <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -856,7 +863,8 @@ our Seurat object:</p>
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">pbmc</span>, group.by <span class="op">=</span> <span class="st">"singler_labels"</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>,</span>
 <span>        label <span class="op">=</span> <span class="cn">TRUE</span>, repel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-5.png" class="figure mx-auto d-block"></figure></div>
+<figure><img src="fig/umap-plot-5.png" alt="UMAP plot with cells colored by SingleR automated annotation labels from the Monaco Immune reference, showing CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils." class="figure mx-auto d-block"><div class="figcaption">SingleR annotated UMAP</div>
+</figure></div>
 <div class="section level3">
 <h3 id="comparing-manual-and-automated-annotations">Comparing manual and automated annotations<a class="anchor" aria-label="anchor" href="#comparing-manual-and-automated-annotations"></a></h3>
 <p>The real power of annotation comes from comparing multiple
@@ -873,7 +881,7 @@ SingleR labels:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler6" aria-expanded="false" aria-controls="collapseSpoiler6">
   <h3 class="accordion-header" id="headingSpoiler6">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler6" class="accordion-collapse collapse" aria-labelledby="headingSpoiler6" data-bs-parent="#accordionSpoiler6">
+<div id="collapseSpoiler6" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler6" aria-labelledby="headingSpoiler6">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -920,10 +928,11 @@ broad.</li>
 <li>
 <strong>CD8 T mislabeled as B cells</strong>: this is the largest
 disagreement. All 1,006 cells we labeled “CD8 T” are called “B cells” by
-SingleR. This likely means our manual annotation of cluster 8 as CD8 T
-is wrong and should be reconsidered – the MS4A1 expression in that
-cluster (visible in the VlnPlot) supports SingleR’s call. <strong>Go
-back and verify CD8A expression in this cluster.</strong>
+SingleR. This likely means our manual annotation of cluster 4 as CD8 T
+is wrong and should be reconsidered – check the MS4A1 and CD8A
+expression in that cluster (visible in the VlnPlot) to determine whether
+SingleR’s B cell call is more appropriate. <strong>Go back and verify
+marker expression in this cluster.</strong>
 </li>
 <li>
 <strong>NK split with T cells</strong>: SingleR calls 607 of our NK
@@ -965,7 +974,8 @@ disagreement.</p>
 <span>    <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"SingleR annotation"</span><span class="op">)</span></span>
 <span><span class="va">p1</span> <span class="op">+</span> <span class="va">p2</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-6.png" class="figure mx-auto d-block"></figure><p>When the two methods <strong>agree</strong>, you can be very
+<figure><img src="fig/umap-plot-6.png" alt="Two UMAP plots side by side. Left panel shows manual annotation with CD4 T, CD14 Mono, NK, B, CD8 T, FCGR3A+ Mono, DC, pDC, and Platelet labels. Right panel shows SingleR annotation with CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils. Most cell groups receive consistent labels between the two methods." class="figure mx-auto d-block"><div class="figcaption">Manual vs SingleR annotation side by side</div>
+</figure><p>When the two methods <strong>agree</strong>, you can be very
 confident in the label. When they <strong>disagree</strong>, check the
 marker gene expression for the disputed cluster and decide which label
 fits better. In general:</p>
@@ -1062,7 +1072,7 @@ this group?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>The broad CD69 violin in CD4 T cells reveals that this group is
 <strong>not a single subtype</strong> – it contains a mixture of naive
@@ -1155,7 +1165,7 @@ references disagree? Why might they disagree?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1187,7 +1197,7 @@ Monaco            Pro-Myelocyte T_cells
 on others. Here are the key patterns:</p>
 <p><strong>1. Strong agreement: Monocytes, B cells, NK cells.</strong>
 Monaco “Monocytes” map almost entirely to HPCA “Monocyte” (3,669 of
-3,717). Monaco “B cells” map to HPCA “B_cell” (1,575 of 1,623). Monaco
+3,717). Monaco “B cells” map to HPCA “B_cell” (1,575 of 1,624). Monaco
 “NK cells” map to HPCA “NK_cell” (649 of 666). These cell types have
 distinctive profiles that both references recognize.</p>
 <p><strong>2. T cell subtyping collapses in HPCA.</strong> Monaco
@@ -1313,8 +1323,8 @@ any links that you are not going to use.
   "url": "https://singlecell-rnaseq.github.io/NA/cell-type-annotation.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/cell-type-annotation.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-05-18",
-  "datePublished": "2026-05-18"
+  "dateModified": "2026-05-19",
+  "datePublished": "2026-05-19"
 }
 
   </script><script>

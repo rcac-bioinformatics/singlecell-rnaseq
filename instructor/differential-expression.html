@@ -341,7 +341,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Differential Expression Analysis</h1>
-        <p>Last updated on 2026-05-18 |
+        <p>Last updated on 2026-05-19 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/differential-expression.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -437,7 +437,12 @@ the active identity.</p>
 </button>
 <div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
 <div class="accordion-body">
-<figure><img src="../fig/ep8_umap_split.png" class="figure mx-auto d-block"></figure><p>You should see two UMAP panels (CTRL and STIM) with the same cell
+<figure><img src="../fig/ep8_umap_split.png" alt="Split UMAP showing CTRL and STIM panels with cells colored and labeled by cell type. Nine cell types (CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, Eryth) appear in both panels with identical spatial arrangement, confirming the integrated structure." class="figure mx-auto d-block"><div class="figcaption">Split UMAP showing CTRL and STIM panels with
+cells colored and labeled by cell type. Nine cell types (CD4 T, CD8 T,
+B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, Eryth) appear in both panels with
+identical spatial arrangement, confirming the integrated
+structure.</div>
+</figure><p>You should see two UMAP panels (CTRL and STIM) with the same cell
 type structure in both. Cell types are labeled and colored consistently
 across panels.</p>
 </div>
@@ -726,14 +731,18 @@ SSB        0   2.470712     1     1         0
 
 Significant genes (p_val_adj &lt; 0.05): 1455 </code></pre>
 </div>
-<p>The pseudobulk analysis typically identifies <strong>fewer
-significant genes</strong> than the per-cell Wilcoxon test (often
-100-400 instead of 765). The top genes should still be ISGs and
-chemokines, but the p-values are larger because the effective sample
-size is 3 pseudo-replicates per condition, not thousands of cells.</p>
-<p>Note: because we used pseudo-replicates rather than true biological
-replicates, these p-values are still somewhat optimistic. With real
-donor-level replicates, the gene count would likely be even lower.</p>
+<p>The pseudobulk analysis identifies <strong>1455 significant
+genes</strong> – more than the Wilcoxon test (765). This may seem
+surprising: we said pseudobulk is more conservative, so why does it find
+more? Because we used <strong>pseudo-replicates</strong>, not true
+biological replicates. The 3 random splits within each condition have
+very low within-group variance, giving DESeq2 high statistical
+power.</p>
+<p>With genuine biological replicates (different donors with real
+between-donor variability), the pseudobulk gene count would typically be
+<strong>much lower</strong> than the per-cell test. The high count here
+is an artifact of pseudo-replication and should not be interpreted as
+pseudobulk being more sensitive in general.</p>
 </div>
 </div>
 </div>
@@ -768,7 +777,12 @@ are both statistically significant and biologically meaningful.</p>
 <span>         color <span class="op">=</span> <span class="st">"Direction"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="../fig/ep8_volcano.png" class="figure mx-auto d-block"></figure><p>How to read the volcano plot:</p>
+<figure><img src="../fig/ep8_volcano.png" alt="Volcano plot for CD14 monocytes STIM vs CTRL. Red points (upregulated) cluster in the upper right with log2FC up to 9, blue points (downregulated) in the upper left, and grey (NS) points near the bottom center. Dashed lines mark the significance and fold-change cutoffs." class="figure mx-auto d-block"><div class="figcaption">Volcano plot for CD14 monocytes STIM vs CTRL.
+Red points (upregulated) cluster in the upper right with log2FC up to 9,
+blue points (downregulated) in the upper left, and grey (NS) points near
+the bottom center. Dashed lines mark the significance and fold-change
+cutoffs.</div>
+</figure><p>How to read the volcano plot:</p>
 <ul><li>
 <strong>Upper right</strong>: genes significantly upregulated in
 stimulated cells (ISGs, chemokines)</li>
@@ -794,7 +808,11 @@ change or high p-value)</li>
 <span>            split.by <span class="op">=</span> <span class="st">"stim"</span>,</span>
 <span>            cols <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"grey85"</span>, <span class="st">"firebrick"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="../fig/ep8_featureplot_ifit1.png" class="figure mx-auto d-block"></figure><div class="codewrapper sourceCode" id="cb16">
+<figure><img src="../fig/ep8_featureplot_ifit1.png" alt="FeaturePlot of IFIT1 split by CTRL and STIM. The CTRL panel is mostly grey with rare red dots. The STIM panel shows strong red expression across all clusters, with particularly intense signal in monocyte clusters on the right side of the UMAP." class="figure mx-auto d-block"><div class="figcaption">FeaturePlot of IFIT1 split by CTRL and STIM. The
+CTRL panel is mostly grey with rare red dots. The STIM panel shows
+strong red expression across all clusters, with particularly intense
+signal in monocyte clusters on the right side of the UMAP.</div>
+</figure><div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -804,7 +822,12 @@ change or high p-value)</li>
 <span>        pt.size <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>        ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="../fig/ep8_violin_de.png" class="figure mx-auto d-block"></figure></div>
+<figure><img src="../fig/ep8_violin_de.png" alt="Three violin plot panels for IFIT1, CXCL10, and MX1 across nine cell types, split by condition. Teal (stimulated) violins are broad and tall for all three genes across most cell types. CXCL10 expression is strongest in CD14 Mono and FCGR3A Mono. Control violins are thin lines near zero." class="figure mx-auto d-block"><div class="figcaption">Three violin plot panels for IFIT1, CXCL10, and
+MX1 across nine cell types, split by condition. Teal (stimulated)
+violins are broad and tall for all three genes across most cell types.
+CXCL10 expression is strongest in CD14 Mono and FCGR3A Mono. Control
+violins are thin lines near zero.</div>
+</figure></div>
 <div class="section level3">
 <h3 id="dot-plot-across-cell-types">Dot plot across cell types<a class="anchor" aria-label="anchor" href="#dot-plot-across-cell-types"></a></h3>
 <p>A dot plot can show the top DE genes across all cell types
@@ -822,7 +845,13 @@ cell-type-specific:</p>
 <span>    <span class="fu">coord_flip</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="../fig/ep8_dotplot_de.png" class="figure mx-auto d-block"></figure></div>
+<figure><img src="../fig/ep8_dotplot_de.png" alt="Dot plot showing the top 10 DE genes (IFIT1, IFIT3, TNFSF10, RSAD2, IFIT2, MX1, CXCL10, LY6E, CXCL11, CCL8) across all cell types split by CTRL and STIM. Dot size indicates percent expressed, color from blue (low) to red (high) shows average expression. STIM columns consistently show larger, redder dots for all genes across cell types." class="figure mx-auto d-block"><div class="figcaption">Dot plot showing the top 10 DE genes (IFIT1,
+IFIT3, TNFSF10, RSAD2, IFIT2, MX1, CXCL10, LY6E, CXCL11, CCL8) across
+all cell types split by CTRL and STIM. Dot size indicates percent
+expressed, color from blue (low) to red (high) shows average expression.
+STIM columns consistently show larger, redder dots for all genes across
+cell types.</div>
+</figure></div>
 </section><section><h2 class="section-heading" id="functional-enrichment">Functional Enrichment<a class="anchor" aria-label="anchor" href="#functional-enrichment"></a></h2>
 <hr class="half-width"><p>A list of hundreds of DE genes is difficult to interpret gene by
 gene. <strong>Gene Ontology (GO) enrichment analysis</strong> asks: are
@@ -938,15 +967,20 @@ readability.</td>
 </button>
 <div id="collapseSpoiler6" class="accordion-collapse collapse" aria-labelledby="headingSpoiler6" data-bs-parent="#accordionSpoiler6">
 <div class="accordion-body">
-<figure><img src="../fig/ep8_go_dotplot.png" class="figure mx-auto d-block"></figure><p>The top enriched GO terms should include:</p>
-<ul><li><strong>defense response to virus</strong></li>
-<li><strong>type I interferon signaling pathway</strong></li>
-<li><strong>response to virus</strong></li>
-<li><strong>innate immune response</strong></li>
-<li><strong>negative regulation of viral genome
-replication</strong></li>
-<li><strong>cytokine-mediated signaling pathway</strong></li>
-<li><strong>response to interferon-beta</strong></li>
+<figure><img src="../fig/ep8_go_dotplot.png" alt="GO Biological Process dot plot for STIM vs CTRL CD14 monocytes showing 15 terms. The top 3 by gene ratio are response to virus (largest dot, approximately 50 genes), defense response to virus, and viral process. Response to type I interferon and interferon-mediated signaling pathway appear near the bottom. Dot color ranges from red (low p.adjust) to blue (higher p.adjust)." class="figure mx-auto d-block"><div class="figcaption">GO Biological Process dot plot for STIM vs CTRL
+CD14 monocytes showing 15 terms. The top 3 by gene ratio are response to
+virus (largest dot, approximately 50 genes), defense response to virus,
+and viral process. Response to type I interferon and interferon-mediated
+signaling pathway appear near the bottom. Dot color ranges from red (low
+p.adjust) to blue (higher p.adjust).</div>
+</figure><p>The top enriched GO terms should include:</p>
+<ul><li><strong>response to virus</strong></li>
+<li><strong>defense response to virus</strong></li>
+<li><strong>viral process</strong></li>
+<li><strong>viral life cycle</strong></li>
+<li><strong>regulation of innate immune response</strong></li>
+<li><strong>regulation of viral process</strong></li>
+<li><strong>viral genome replication</strong></li>
 </ul><p>These terms are entirely consistent with IFN-beta stimulation.
 IFN-beta is a type I interferon that activates antiviral defense
 programs, and the GO enrichment confirms that the DE genes are
@@ -1166,27 +1200,37 @@ significant genes and the p-value distributions.</p>
 </button>
 <div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
-<figure><img src="../fig/ep8_pval_comparison.png" class="figure mx-auto d-block"></figure><p>You should find that:</p>
+<figure><img src="../fig/ep8_pval_comparison.png" alt="Scatter plot comparing -log10(p-value) from Wilcoxon (x-axis) and Pseudobulk (y-axis) for shared genes. A red dashed diagonal marks equal significance. Points are broadly scattered, with a dense cluster along the x-axis near y equals 0 (genes significant only in Wilcoxon) and many points above the diagonal (genes more significant in pseudobulk)." class="figure mx-auto d-block"><div class="figcaption">Scatter plot comparing -log10(p-value) from
+Wilcoxon (x-axis) and Pseudobulk (y-axis) for shared genes. A red dashed
+diagonal marks equal significance. Points are broadly scattered, with a
+dense cluster along the x-axis near y equals 0 (genes significant only
+in Wilcoxon) and many points above the diagonal (genes more significant
+in pseudobulk).</div>
+</figure><p>You should find that:</p>
 <ul><li>
 <strong>Wilcoxon</strong> identifies 765 significant genes</li>
 <li>
-<strong>Pseudobulk</strong> identifies 1455 with
+<strong>Pseudobulk</strong> identifies 1455 (with
 pseudo-replicates)</li>
-</ul><p>The scatter plot shows that most points fall <strong>below</strong>
-the diagonal (the red dashed line), meaning pseudobulk p-values are
-consistently <strong>larger</strong> (less significant) than Wilcoxon
-p-values for the same genes.</p>
-<p>This is expected and correct. The Wilcoxon test has inflated
-significance because it treats each cell as an independent observation.
-With ~1,600 monocytes per condition, even tiny expression differences
-become “significant.” The pseudobulk test aggregates cells into 3
-pseudo-replicates per condition, giving a more realistic (though still
-imperfect) sample size and more conservative p-values.</p>
-<p>The genes that are significant in <strong>both</strong> methods are
-the most trustworthy – these are genes with large, robust effects that
-survive the more stringent pseudobulk test. The genes significant only
-in Wilcoxon but not in pseudobulk are likely false positives driven by
-pseudoreplication.</p>
+</ul><p>Pseudobulk finds <strong>more</strong> significant genes here, which
+may seem to contradict the usual advice that pseudobulk is more
+conservative. The reason: our pseudo-replicates (random cell splits)
+have very low within-group variance, so DESeq2 gets very high power.
+With <strong>real</strong> biological replicates (different donors), the
+between-donor variability would inflate variance estimates and the gene
+count would drop substantially.</p>
+<p>The scatter plot shows a complex pattern:</p>
+<ul><li>A <strong>dense band along the x-axis</strong> (Wilcoxon
+significant, pseudobulk not) – genes with small effects that Wilcoxon
+detects via per-cell power but pseudobulk misses.</li>
+<li>Many points <strong>above the diagonal</strong> – genes where
+pseudobulk yields smaller p-values, because DESeq2’s count-based model
+is more powerful when within-group variance is low.</li>
+<li>Some points <strong>below the diagonal</strong> – genes where
+Wilcoxon is more significant.</li>
+</ul><p>With true biological replicates, you would expect most points to
+shift below the diagonal and the overall pseudobulk gene count to drop
+well below the Wilcoxon count.</p>
 <p><strong>Rule of thumb:</strong> Use Wilcoxon for quick exploration
 and hypothesis generation. Use pseudobulk for any result you plan to
 report or publish. And for publication, ensure you have true biological
@@ -1249,30 +1293,36 @@ processes? Do they make sense for IFN-beta stimulation?</p>
 </button>
 <div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
-<figure><img src="../fig/ep8_go_top200.png" class="figure mx-auto d-block"></figure><p>The top 5 biological processes should include terms like:</p>
+<figure><img src="../fig/ep8_go_top200.png" alt="GO BP dot plot for the top 200 upregulated genes in STIM CD14 monocytes showing 10 terms. Response to virus and defense response to virus have the largest gene ratios (approximately 0.28 to 0.30) and deepest red color. Viral process, viral life cycle, and regulation of viral process follow. Dot sizes range from about 15 to over 50 genes." class="figure mx-auto d-block"><div class="figcaption">GO BP dot plot for the top 200 upregulated genes
+in STIM CD14 monocytes showing 10 terms. Response to virus and defense
+response to virus have the largest gene ratios (approximately 0.28 to
+0.30) and deepest red color. Viral process, viral life cycle, and
+regulation of viral process follow. Dot sizes range from about 15 to
+over 50 genes.</div>
+</figure><p>The top 5 biological processes should include terms like:</p>
 <table class="table"><colgroup><col width="20%"><col width="30%"><col width="50%"></colgroup><thead><tr><th align="center">Rank</th>
 <th align="left">GO Term</th>
 <th align="left">Interpretation</th>
 </tr></thead><tbody><tr><td align="center">1</td>
-<td align="left">defense response to virus</td>
-<td align="left">Direct antiviral effector programs activated by
-IFN-beta</td>
-</tr><tr><td align="center">2</td>
-<td align="left">type I interferon signaling pathway</td>
-<td align="left">The canonical pathway triggered by IFN-beta binding to
-IFNAR</td>
-</tr><tr><td align="center">3</td>
 <td align="left">response to virus</td>
 <td align="left">Broad viral response including both detection and
 effector mechanisms</td>
+</tr><tr><td align="center">2</td>
+<td align="left">defense response to virus</td>
+<td align="left">Direct antiviral effector programs activated by
+IFN-beta</td>
+</tr><tr><td align="center">3</td>
+<td align="left">viral process</td>
+<td align="left">Genes involved in the viral life cycle, many of which
+are ISGs that restrict it</td>
 </tr><tr><td align="center">4</td>
-<td align="left">chemokine-mediated signaling pathway</td>
-<td align="left">Reflects the dominance of CCL8, CXCL10, CXCL11 in the
-top DE genes</td>
+<td align="left">viral life cycle</td>
+<td align="left">Overlap with viral process; reflects IFIT, OAS, and MX
+family genes</td>
 </tr><tr><td align="center">5</td>
-<td align="left">innate immune response</td>
-<td align="left">General innate immunity activation, of which IFN
-signaling is a central component</td>
+<td align="left">regulation of viral process</td>
+<td align="left">Regulatory genes that modulate antiviral defense (e.g.,
+TRIM, IRF family)</td>
 </tr></tbody></table><p>These results make complete biological sense. IFN-beta (interferon
 beta) is a <strong>type I interferon</strong> that signals through the
 IFNAR receptor complex, activating the JAK-STAT pathway, which turns on
@@ -1377,8 +1427,8 @@ any links that you are not going to use.
   "url": "https://singlecell-rnaseq.github.io/NA/instructor/differential-expression.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/instructor/differential-expression.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-05-18",
-  "datePublished": "2026-05-18"
+  "dateModified": "2026-05-19",
+  "datePublished": "2026-05-19"
 }
 
   </script><script>

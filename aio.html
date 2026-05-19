@@ -384,7 +384,7 @@
         
 <section id="aio-introduction"><p>Content from <a href="introduction.html">Introduction to Single-Cell RNA-Seq</a></p>
 <hr>
-<p>Last updated on 2026-05-18 |
+<p>Last updated on 2026-05-19 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/introduction.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -801,7 +801,7 @@ any links that you are not going to use.
 <!-- Links used across the lesson -->
 </section></section><section id="aio-raw-data-processing"><p>Content from <a href="raw-data-processing.html">Raw Data Processing</a></p>
 <hr>
-<p>Last updated on 2026-05-18 |
+<p>Last updated on 2026-05-19 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/raw-data-processing.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -2068,7 +2068,7 @@ any links that you are not going to use.
 </div>
 </section></section><section id="aio-quality-control"><p>Content from <a href="quality-control.html">Quality Control</a></p>
 <hr>
-<p>Last updated on 2026-05-18 |
+<p>Last updated on 2026-05-19 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/quality-control.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -2169,7 +2169,7 @@ creating the Seurat object:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2211,7 +2211,7 @@ detected genes (these are likely empty droplets or debris)</li>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2221,9 +2221,9 @@ detected genes (these are likely empty droplets or debris)</li>
 Active assay: RNA (29155 features, 0 variable features)
  1 layer present: counts</code></pre>
 </div>
-<p>After the initial filters, we have approximately 23,700 genes and
-11,700 cells. The gene count dropped from 36,601 because many genes were
-detected in fewer than 3 cells and were removed.</p>
+<p>After the initial filters, we have 29,155 genes and 11,721 cells. The
+gene count dropped from 38,606 because many genes were detected in fewer
+than 3 cells and were removed.</p>
 </div>
 </div>
 </div>
@@ -2306,7 +2306,7 @@ during object creation:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2428,7 +2428,7 @@ look at the summary statistics:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
   <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
+<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2509,10 +2509,10 @@ the Cell Ranger filter.</li>
 counts and very high gene counts. These are potential doublets – two
 cells captured in one droplet, producing double the RNA content.</li>
 <li>
-<strong>High mitochondrial cells</strong>: points colored in
-yellow/bright colors in the viridis scale. These often sit below the
-main diagonal because the cell is losing cytoplasmic RNA while retaining
-mitochondrial RNA.</li>
+<strong>High mitochondrial cells</strong>: points colored in darker
+shades on the grey-to-red gradient. These often sit below the main cloud
+because the cell is losing cytoplasmic RNA while retaining mitochondrial
+RNA.</li>
 </ul>
 <div id="what-do-dying-cells-look-like" class="callout">
 <div class="callout-square">
@@ -2616,7 +2616,7 @@ fall outside the thresholds.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
   <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2715,7 +2715,7 @@ producing a hybrid expression profile that blends two cell types.</p>
 <p><strong>How doublets appear in QC metrics:</strong> Doublets tend to
 have high <code>nCount_RNA</code> and high <code>nFeature_RNA</code>
 because they contain RNA from two cells. Our upper threshold on
-<code>nFeature_RNA &lt; 5000</code> catches some of the most extreme
+<code>nFeature_RNA &lt; 7000</code> catches some of the most extreme
 doublets, but it cannot identify doublets between similar cell types
 (e.g., two T cells) because their combined profile looks like a normal
 high-quality T cell.</p>
@@ -2776,7 +2776,7 @@ filters compared to the default thresholds
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>There is no single correct answer – reasonable thresholds depend on
 how conservative you want to be. Here is one example of a slightly more
@@ -2791,8 +2791,8 @@ conservative approach:</p>
 <span>                               <span class="va">percent.mt</span> <span class="op">&lt;</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu">cat</span><span class="op">(</span><span class="st">"Cells with custom thresholds:"</span>, <span class="fu">ncol</span><span class="op">(</span><span class="va">pbmc_custom</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre>
 </div>
-<p>This retains 7,579 cells compared to ~11,000 with the default
-thresholds – a loss of roughly 26% of the data. The trade-offs are:</p>
+<p>This retains 7,579 cells compared to 9,874 with the default
+thresholds – a loss of roughly 23% of the data. The trade-offs are:</p>
 <ul>
 <li>
 <code>nFeature_RNA &gt; 300</code> (vs. 200): slightly more
@@ -2810,8 +2810,8 @@ naturally have moderately elevated mitochondrial content.</li>
 </ul>
 <p>The key point is that <strong>more aggressive filtering is not always
 better</strong>. Every cell you remove is data you lose. Dropping from
-~10,000 to 7,579 cells means losing nearly a quarter of the dataset,
-which could reduce statistical power and under-represent cell types that
+9,874 to 7,579 cells means losing nearly a quarter of the dataset, which
+could reduce statistical power and under-represent cell types that
 naturally have higher gene counts or mitochondrial content. The goal is
 to remove cells that would distort the analysis, not to enforce an
 artificially narrow definition of “high quality.”</p>
@@ -2857,7 +2857,7 @@ PBMCs?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With <code>percent.mt &lt; 5</code>, only <strong>2,709 cells
 remain</strong>, compared to 9,874 with <code>percent.mt &lt; 15</code>.
@@ -2923,7 +2923,7 @@ any links that you are not going to use.
 <!-- Links used across the lesson -->
 </section></section><section id="aio-normalization-and-features"><p>Content from <a href="normalization-and-features.html">Normalization and Feature Selection</a></p>
 <hr>
-<p>Last updated on 2026-05-18 |
+<p>Last updated on 2026-05-19 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/normalization-and-features.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -3007,7 +3007,7 @@ thresholds.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -3104,7 +3104,7 @@ layer of the RNA assay:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -3136,7 +3136,7 @@ Active assay: RNA (29155 features, 0 variable features)
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected Output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -3184,7 +3184,7 @@ first:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
   <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected Output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
+<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -3238,7 +3238,7 @@ across cells.</p>
 <span></span>
 <span><span class="va">p1</span> <span class="op">+</span> <span class="va">p2</span></span></code></pre>
 </div>
-<figure><img src="fig/norm_compare_LYZ.png" alt="Two histograms comparing raw UMI counts and log-normalized expression for the LYZ gene, showing how normalization reduces the right skew" class="figure mx-auto d-block"><div class="figcaption">LYZ raw vs. normalized expression</div>
+<figure><img src="fig/norm_compare_LYZ.png" alt="Two histograms for LYZ. Raw counts show a zero-dominated right-skewed distribution. Log-normalized values reveal a bimodal pattern with peaks near 0.5 and 4.5, separating non-monocytes from LYZ-expressing monocytes" class="figure mx-auto d-block"><div class="figcaption">LYZ raw vs. normalized expression</div>
 </figure><p>The raw count distribution is heavily right-skewed with a large spike
 at zero (cells that don’t express LYZ – mostly non-monocytes). After log
 normalization, the non-zero values are spread more evenly and the
@@ -3316,7 +3316,7 @@ for most scRNA-seq analyses.</td>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
   <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -3324,10 +3324,11 @@ for most scRNA-seq analyses.</td>
 <pre class="output" tabindex="0"><code> [1] "PPBP"            "PF4"             "LINC01478"       "LINC01374"       "PTGDS"
  [6] "JCHAIN"          "GP1BB"           "SOX5"            "ENSG00000225885" "EREG"     </code></pre>
 </div>
-<p>The top variable features include known immune cell markers: S100A9
-and LYZ (monocytes), GNLY and NKG7 (NK cells), IGKC (B cells), and CST3
-(dendritic cells). This makes sense – these genes are highly expressed
-in specific cell types but absent in others, producing high cell-to-cell
+<p>The top variable features include PPBP and PF4 (platelet markers),
+GP1BB (also platelets), JCHAIN (B/plasma cells), and PTGDS (dendritic
+cells). Several lincRNAs and an Ensembl ID also appear due to sparse but
+extreme expression in a few cells. These genes are highly expressed in
+specific cell types but absent in others, producing high cell-to-cell
 variance.</p>
 </div>
 </div>
@@ -3370,7 +3371,7 @@ biological variation rather than expression magnitude.</p>
 <code class="sourceCode R"><span><span class="va">pbmc</span> <span class="op">&lt;-</span> <span class="fu">ScaleData</span><span class="op">(</span><span class="va">pbmc</span><span class="op">)</span></span></code></pre>
 </div>
 <p>By default, <code>ScaleData()</code> only scales the variable
-features (the 2,000 genes selected above), not all ~23,000 genes. This
+features (the 2,000 genes selected above), not all ~29,000 genes. This
 is faster and sufficient for PCA, which only uses variable features. If
 you later need scaled values for all genes (e.g., for a heatmap of a
 non-variable gene), you can re-run <code>ScaleData()</code> with
@@ -3387,7 +3388,7 @@ non-variable gene), you can re-run <code>ScaleData()</code> with
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler6" aria-expanded="false" aria-controls="collapseSpoiler6">
   <h3 class="accordion-header" id="headingSpoiler6">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler6" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler6" aria-labelledby="headingSpoiler6">
+<div id="collapseSpoiler6" class="accordion-collapse collapse" aria-labelledby="headingSpoiler6" data-bs-parent="#accordionSpoiler6">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -3577,7 +3578,7 @@ appear in both lists?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -3687,10 +3688,9 @@ normalization. What changes for each gene, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
-<figure><img src="fig/norm_housekeeping.png" alt="Four histograms comparing raw and normalized expression for ACTB (housekeeping) and CD3D (cell-type marker), showing that normalization compresses the housekeeping gene distribution while preserving the bimodal pattern of the marker gene" class="figure mx-auto d-block"><div class="figcaption">ACTB and CD3D raw vs. normalized
-expression</div>
+<figure><img src="fig/norm_housekeeping.png" alt="Four histograms in a 2x2 grid. Top row: ACTB raw counts show a right-skewed distribution peaking near zero; ACTB normalized shows a unimodal bell shape centered around 3.5. Bottom row: LYZ raw counts show a massive zero spike with a flat tail to 500; LYZ normalized reveals a bimodal pattern with peaks near 0.5 and 4.5" class="figure mx-auto d-block"><div class="figcaption">ACTB and LYZ raw vs. normalized expression</div>
 </figure><p><strong>ACTB (housekeeping gene):</strong></p>
 <ul>
 <li>
@@ -3766,7 +3766,7 @@ any links that you are not going to use.
 <!-- Links used across the lesson -->
 </section></section><section id="aio-dimensionality-reduction-clustering"><p>Content from <a href="dimensionality-reduction-clustering.html">Dimensionality Reduction and Clustering</a></p>
 <hr>
-<p>Last updated on 2026-05-18 |
+<p>Last updated on 2026-05-19 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/dimensionality-reduction-clustering.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -3923,16 +3923,17 @@ the first two components:</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">VizDimLoadings</span><span class="op">(</span><span class="va">pbmc</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, reduction <span class="op">=</span> <span class="st">"pca"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/viz-dim-loadings.png" alt="Bar plots showing the top genes with the highest positive and negative loadings for PC1 and PC2. Genes like CST3 and LYZ appear in PC1, while CD3D and IL32 appear in PC2." class="figure mx-auto d-block"><div class="figcaption">Bar plots showing the top genes with the highest
-positive and negative loadings for PC1 and PC2. Genes like CST3 and LYZ
-appear in PC1, while CD3D and IL32 appear in PC2.</div>
-</figure><p>Each bar represents a gene’s <strong>loading</strong> (contribution)
-to that PC. Genes with large positive loadings push cells in one
-direction along the PC, while genes with large negative loadings push
-them in the opposite direction. For PC1, you should see monocyte markers
-(CST3, LYZ, S100A9) on one side and lymphocyte markers on the other.
-This tells us that <strong>PC1 separates myeloid from lymphoid
-cells</strong> – the largest source of variation in PBMCs.</p>
+<figure><img src="fig/viz-dim-loadings.png" alt="Dot plots showing the top 30 genes by loading magnitude for PC1 and PC2. PC1 shows myeloid markers such as LYZ, CST3, and S100A9. PC2 shows B cell markers such as BANK1, CD79A, and MS4A1." class="figure mx-auto d-block"><div class="figcaption">Dot plots showing the top 30 genes by loading
+magnitude for PC1 and PC2. PC1 shows myeloid markers such as LYZ, CST3,
+and S100A9. PC2 shows B cell markers such as BANK1, CD79A, and
+MS4A1.</div>
+</figure><p>Each point represents a gene’s <strong>loading</strong>
+(contribution) to that PC. For PC1, you should see monocyte/myeloid
+markers (CST3, LYZ, S100A9, FCN1) among the top genes. This tells us
+that <strong>PC1 separates myeloid from lymphoid cells</strong> – the
+largest source of variation in PBMCs. PC2 is dominated by B cell markers
+(BANK1, CD79A, MS4A1, PAX5), indicating that B cells are the next major
+axis of variation.</p>
 <p>We can also visualize PCs as heatmaps to see which genes and cells
 contribute most:</p>
 <div class="codewrapper sourceCode" id="cb7">
@@ -3995,9 +3996,9 @@ explained by each PC:</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">ElbowPlot</span><span class="op">(</span><span class="va">pbmc</span>, ndims <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/elbowplot.png" alt="Line plot of standard deviation versus principal component number. The curve drops steeply for the first 10 PCs then gradually flattens, with an elbow around PC 12 to 15." class="figure mx-auto d-block"><div class="figcaption">Line plot of standard deviation versus principal
-component number. The curve drops steeply for the first 10 PCs then
-gradually flattens, with an elbow around PC 12 to 15.</div>
+<figure><img src="fig/elbowplot.png" alt="Dot plot of standard deviation versus principal component number. The curve drops steeply for the first 7 PCs then gradually flattens, with an elbow around PC 8 to 10." class="figure mx-auto d-block"><div class="figcaption">Dot plot of standard deviation versus principal
+component number. The curve drops steeply for the first 7 PCs then
+gradually flattens, with an elbow around PC 8 to 10.</div>
 </figure><p>Look for the <strong>elbow</strong> – the point where the curve
 transitions from steep decline to a flatter plateau. PCs before the
 elbow capture substantial biological signal; PCs after the elbow are
@@ -4070,9 +4071,9 @@ dissimilar cells far apart in 2D space.</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">pbmc</span>, reduction <span class="op">=</span> <span class="st">"umap"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-1.png" alt="UMAP plot showing approximately 10000 cells arranged in distinct clusters. Cells are colored by their identity, forming several well-separated groups." class="figure mx-auto d-block"><div class="figcaption">UMAP plot showing approximately 10000 cells
-arranged in distinct clusters. Cells are colored by their identity,
-forming several well-separated groups.</div>
+<figure><img src="fig/umap-plot-1.png" alt="UMAP plot of all cells shown in a single color before clustering. Cells naturally organize into several spatially distinct groups corresponding to different cell types." class="figure mx-auto d-block"><div class="figcaption">UMAP plot of all cells shown in a single color
+before clustering. Cells naturally organize into several spatially
+distinct groups corresponding to different cell types.</div>
 </figure><p>At this point, cells are not yet clustered (all are the same color).
 But you can already see that cells organize into distinct groups on the
 UMAP. These groups correspond to different cell types.</p>
@@ -4281,9 +4282,6 @@ Number of nodes: 11310
 Number of edges: 410535
 
 Running Louvain algorithm...
-0%   10   20   30   40   50   60   70   80   90   100%
-[----|----|----|----|----|----|----|----|----|----|
-**************************************************|
 Maximum modularity in 10 random starts: 0.9317
 Number of communities: 18
 Elapsed time: 1 seconds</code></pre>
@@ -4321,9 +4319,9 @@ Levels: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
    0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17
 2112 1810 1187 1015 1006  716  639  634  517  429  357  234  176  175  122   78   64   39 </code></pre>
 </div>
-<p>Cluster 0 is the largest (T cells, which are the most abundant PBMC
-type). Cluster 9 is the smallest (likely a rare population like
-platelets or dendritic cells).</p>
+<p>Cluster 0 is the largest with 2,112 cells (T cells, which are the
+most abundant PBMC type). Cluster 17 is the smallest with only 39 cells
+(likely a rare population like platelets or dendritic cells).</p>
 </div>
 </div>
 </div>
@@ -4336,7 +4334,10 @@ platelets or dendritic cells).</p>
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">pbmc</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, label <span class="op">=</span> <span class="cn">TRUE</span>, label.size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-2.png" class="figure mx-auto d-block"></figure>
+<figure><img src="fig/umap-plot-2.png" alt="UMAP plot with 18 clusters labeled 0 through 17, each shown in a distinct color. Large clusters like 0 and 1 dominate the center and bottom, while smaller clusters appear at the periphery." class="figure mx-auto d-block"><div class="figcaption">UMAP plot with 18 clusters labeled 0 through 17,
+each shown in a distinct color. Large clusters like 0 and 1 dominate the
+center and bottom, while smaller clusters appear at the periphery.</div>
+</figure>
 </div>
 <div class="section level3">
 <h3 id="exploring-multiple-resolutions">Exploring multiple resolutions<a class="anchor" aria-label="anchor" href="#exploring-multiple-resolutions"></a>
@@ -4554,24 +4555,23 @@ more subclusters.</div>
 </tr>
 </tbody>
 </table>
-<p><strong>Resolution 0.5</strong> gives approximately 16 clusters,
-which aligns well with the 8 major PBMC cell types (CD4+ T, CD8+ T, B
-cells, CD14+ monocytes, FCGR3A+ monocytes, NK cells, dendritic cells,
-platelets). Some cell types may be split into sub-clusters (e.g., naive
-vs. memory T cells), which is biologically reasonable.</p>
-<p><strong>Resolution 0.2</strong> under-clusters: it merges CD4+ and
-CD8+ T cells, or combines monocyte subtypes. You lose meaningful
-biological distinctions.</p>
-<p><strong>Resolution 0.8</strong> starts to over-split: the clustree
-plot shows T cell clusters from resolution 0.5 splitting into
-sub-clusters, with some cells moving between clusters in ways that are
-not stable. This does not mean 0.8 is wrong – it may reveal real
+<p><strong>Resolution 0.5</strong> gives 18 clusters, which captures the
+8 major PBMC cell types (CD4+ T, CD8+ T, B cells, CD14+ monocytes,
+FCGR3A+ monocytes, NK cells, dendritic cells, platelets) along with some
+sub-clusters (e.g., naive vs. memory T cells), which is biologically
+reasonable.</p>
+<p><strong>Resolution 0.2</strong> under-clusters with 16 clusters: it
+merges some distinct cell subtypes. You may lose meaningful biological
+distinctions.</p>
+<p><strong>Resolution 0.8</strong> starts to over-split with 21
+clusters: the clustree plot shows clusters from resolution 0.5 splitting
+into sub-clusters, with some cells moving between clusters in ways that
+are not stable. This does not mean 0.8 is wrong – it may reveal real
 sub-populations – but the splits become harder to annotate
 confidently.</p>
-<p><strong>Resolution 1.2</strong> clearly over-splits: you get 15+
-clusters, many of which are fragments of the same cell type. The
-clustree plot shows extensive cross-cluster mixing at this
-resolution.</p>
+<p><strong>Resolution 1.2</strong> clearly over-splits with 25 clusters,
+many of which are fragments of the same cell type. The clustree plot
+shows extensive cross-cluster mixing at this resolution.</p>
 <p>For this workshop we use <strong>resolution 0.5</strong> as a good
 balance between capturing distinct cell types and avoiding excessive
 fragmentation.</p>
@@ -4616,7 +4616,10 @@ number(s) correspond to each cell type.</p>
 </button>
 <div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
-<figure><img src="fig/challenge2_plot1.png" class="figure mx-auto d-block"></figure><figure><img src="fig/challenge2_plot2.png" class="figure mx-auto d-block"></figure><p>By comparing the FeaturePlot panels with the labeled UMAP, you should
+<figure><img src="fig/challenge2_plot1.png" alt="Three UMAP panels showing expression of CD3D, MS4A1, and LYZ. CD3D expression is concentrated in the upper-left and lower-left regions. MS4A1 lights up a compact group in the upper-right. LYZ is strongest in the lower-left clusters." class="figure mx-auto d-block"><div class="figcaption">FeaturePlot of CD3D, MS4A1, and LYZ on the UMAP,
+each highlighting distinct cell populations</div>
+</figure><figure><img src="fig/challenge2_plot2.png" alt="UMAP plot with 18 clusters labeled 0 through 17 for cross-referencing with the FeaturePlot above." class="figure mx-auto d-block"><div class="figcaption">Cluster-labeled UMAP for reference</div>
+</figure><p>By comparing the FeaturePlot panels with the labeled UMAP, you should
 see the following pattern (exact cluster numbers may differ depending on
 your run):</p>
 <table class="table">
@@ -4634,22 +4637,23 @@ your run):</p>
 <tr>
 <td>CD3D</td>
 <td align="left">T cells</td>
-<td align="left">Clusters 0, 2, 4 (the largest groups on the UMAP). CD3D
-is expressed in both CD4+ and CD8+ T cells, so it marks multiple
-clusters.</td>
+<td align="left">Clusters 0, 2, 3, 5, 6 (several groups across the
+upper-left and lower-left UMAP). CD3D is expressed in both CD4+ and CD8+
+T cells, so it marks multiple clusters.</td>
 </tr>
 <tr>
 <td>MS4A1</td>
 <td align="left">B cells</td>
-<td align="left">Cluster 3 (a compact, clearly separated group). MS4A1
-(also known as CD20) is highly specific to B cells.</td>
+<td align="left">Cluster 7 (a compact, clearly separated group in the
+upper-right). MS4A1 (also known as CD20) is highly specific to B
+cells.</td>
 </tr>
 <tr>
 <td>LYZ</td>
 <td align="left">CD14+ Monocytes</td>
-<td align="left">Cluster 1 (a large group on the opposite side of the
-UMAP from T cells). You may also see weaker LYZ expression in a smaller
-monocyte cluster (FCGR3A+).</td>
+<td align="left">Clusters 1 and 2 (large groups in the lower portion of
+the UMAP). You may also see weaker LYZ expression in a smaller monocyte
+cluster (FCGR3A+).</td>
 </tr>
 </tbody>
 </table>
@@ -4696,7 +4700,7 @@ any links that you are not going to use.
 <!-- Links used across the lesson -->
 </section></section><section id="aio-cell-type-annotation"><p>Content from <a href="cell-type-annotation.html">Cell Type Annotation</a></p>
 <hr>
-<p>Last updated on 2026-05-18 |
+<p>Last updated on 2026-05-19 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/cell-type-annotation.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -4784,9 +4788,10 @@ previous episode. Make sure the active identity is set to the resolution
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
 <div class="accordion-body">
-<figure><img src="fig/umap-plot-3.png" class="figure mx-auto d-block"></figure><p>You should see the UMAP 18 clusters labeled by number (0 to 17),
+<figure><img src="fig/umap-plot-3.png" alt="UMAP plot with 18 clusters labeled 0 through 17 at resolution 0.5, matching the clustering results from the previous episode." class="figure mx-auto d-block"><div class="figcaption">Clustered UMAP from previous episode</div>
+</figure><p>You should see the UMAP with 18 clusters labeled by number (0 to 17),
 matching the clustering results from the previous episode.</p>
 </div>
 </div>
@@ -4853,7 +4858,7 @@ differences.</td>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -4894,7 +4899,7 @@ look at the key columns:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -4981,7 +4986,7 @@ change:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
   <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
+<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5023,7 +5028,8 @@ expression:</p>
 <span></span>
 <span><span class="fu">DoHeatmap</span><span class="op">(</span><span class="va">pbmc</span>, features <span class="op">=</span> <span class="va">top3</span><span class="op">$</span><span class="va">gene</span><span class="op">)</span> <span class="op">+</span> <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/top3-heatmap.png" class="figure mx-auto d-block"></figure><p>Each cluster should show a distinct block of highly expressed genes
+<figure><img src="fig/top3-heatmap.png" alt="Heatmap showing expression of the top 3 marker genes per cluster across all 18 clusters. Each cluster shows a distinct block of upregulated genes, confirming distinct transcriptional identities." class="figure mx-auto d-block"><div class="figcaption">Heatmap of top 3 markers per cluster</div>
+</figure><p>Each cluster should show a distinct block of highly expressed genes
 (bright yellow/white) that are low in other clusters (dark purple).
 Clusters with very similar heatmap profiles may represent subtypes of
 the same cell type.</p>
@@ -5041,7 +5047,8 @@ gene, and the color intensity encodes the average expression level:</p>
 <code class="sourceCode R"><span><span class="fu">DotPlot</span><span class="op">(</span><span class="va">pbmc</span>, features <span class="op">=</span> <span class="fu">unique</span><span class="op">(</span><span class="va">top3</span><span class="op">$</span><span class="va">gene</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">coord_flip</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/top3-dotplot.png" class="figure mx-auto d-block"></figure>
+<figure><img src="fig/top3-dotplot.png" alt="Dot plot showing expression of top 3 marker genes across all 18 clusters. Dot size indicates the percentage of cells expressing each gene; dot shading indicates average expression level." class="figure mx-auto d-block"><div class="figcaption">Dot plot of top marker genes</div>
+</figure>
 </div>
 </section><section><h2 class="section-heading" id="manual-annotation-with-known-markers">Manual Annotation with Known Markers<a class="anchor" aria-label="anchor" href="#manual-annotation-with-known-markers"></a>
 </h2>
@@ -5108,7 +5115,8 @@ map to:</p>
 <span>                         <span class="st">"LYZ"</span>, <span class="st">"FCGR3A"</span>, <span class="st">"GNLY"</span>, <span class="st">"FCER1A"</span><span class="op">)</span>,</span>
 <span>            ncol <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/known-marker-featureplot.png" class="figure mx-auto d-block"></figure><p>And as violin plots to see expression across clusters:</p>
+<figure><img src="fig/known-marker-featureplot.png" alt="Grid of 8 UMAP panels showing expression of CD3D, IL7R, CD8A, MS4A1, LYZ, FCGR3A, GNLY, and FCER1A. Each marker highlights a distinct UMAP region: CD3D and IL7R in the upper-left T cell area, CD8A in a small cluster on the right, MS4A1 in B cells on the right, LYZ in monocytes at the lower-left, FCGR3A in a small cluster at the lower-right, GNLY in NK cells at the upper-center, and FCER1A in a small dendritic cell group." class="figure mx-auto d-block"><div class="figcaption">FeaturePlot of 8 canonical PBMC markers</div>
+</figure><p>And as violin plots to see expression across clusters:</p>
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -5119,7 +5127,9 @@ map to:</p>
 <span>        ncol <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>        pt.size <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/known-marker-vlnplot.png" class="figure mx-auto d-block"></figure><p>Based on these plots and the <code>FindAllMarkers</code> results, we
+<figure><img src="fig/known-marker-vlnplot.png" alt="Violin plots of CD3D, IL7R, CD8A, MS4A1, LYZ, FCGR3A, GNLY, and PPBP across all 18 clusters. Each marker shows high expression in the clusters corresponding to its known cell type and low expression elsewhere." class="figure mx-auto d-block"><div class="figcaption">Violin plots of 8 PBMC markers across
+clusters</div>
+</figure><p>Based on these plots and the <code>FindAllMarkers</code> results, we
 can build a mapping from cluster numbers to cell type names. Your exact
 cluster numbers will depend on the random seed, but the logic is the
 same: find which clusters express each set of markers.</p>
@@ -5185,7 +5195,8 @@ assignments.</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">pbmc</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, label <span class="op">=</span> <span class="cn">TRUE</span>, repel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-4.png" class="figure mx-auto d-block"></figure><p>Store the annotation in the metadata so it persists after saving:</p>
+<figure><img src="fig/umap-plot-4.png" alt="UMAP plot with cells labeled by manually assigned cell type names: CD4 T, CD14 Mono, NK, B, CD8 T, FCGR3A+ Mono, DC, pDC, and Platelet." class="figure mx-auto d-block"><div class="figcaption">Annotated UMAP with cell type labels</div>
+</figure><p>Store the annotation in the metadata so it persists after saving:</p>
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -5219,7 +5230,7 @@ for PBMC annotation.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
   <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5308,7 +5319,8 @@ our Seurat object:</p>
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">pbmc</span>, group.by <span class="op">=</span> <span class="st">"singler_labels"</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>,</span>
 <span>        label <span class="op">=</span> <span class="cn">TRUE</span>, repel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-5.png" class="figure mx-auto d-block"></figure>
+<figure><img src="fig/umap-plot-5.png" alt="UMAP plot with cells colored by SingleR automated annotation labels from the Monaco Immune reference, showing CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils." class="figure mx-auto d-block"><div class="figcaption">SingleR annotated UMAP</div>
+</figure>
 </div>
 <div class="section level3">
 <h3 id="comparing-manual-and-automated-annotations">Comparing manual and automated annotations<a class="anchor" aria-label="anchor" href="#comparing-manual-and-automated-annotations"></a>
@@ -5327,7 +5339,7 @@ SingleR labels:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler6" aria-expanded="false" aria-controls="collapseSpoiler6">
   <h3 class="accordion-header" id="headingSpoiler6">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler6" class="accordion-collapse collapse" aria-labelledby="headingSpoiler6" data-bs-parent="#accordionSpoiler6">
+<div id="collapseSpoiler6" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler6" aria-labelledby="headingSpoiler6">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5375,10 +5387,11 @@ broad.</li>
 <li>
 <strong>CD8 T mislabeled as B cells</strong>: this is the largest
 disagreement. All 1,006 cells we labeled “CD8 T” are called “B cells” by
-SingleR. This likely means our manual annotation of cluster 8 as CD8 T
-is wrong and should be reconsidered – the MS4A1 expression in that
-cluster (visible in the VlnPlot) supports SingleR’s call. <strong>Go
-back and verify CD8A expression in this cluster.</strong>
+SingleR. This likely means our manual annotation of cluster 4 as CD8 T
+is wrong and should be reconsidered – check the MS4A1 and CD8A
+expression in that cluster (visible in the VlnPlot) to determine whether
+SingleR’s B cell call is more appropriate. <strong>Go back and verify
+marker expression in this cluster.</strong>
 </li>
 <li>
 <strong>NK split with T cells</strong>: SingleR calls 607 of our NK
@@ -5421,7 +5434,8 @@ disagreement.</p>
 <span>    <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"SingleR annotation"</span><span class="op">)</span></span>
 <span><span class="va">p1</span> <span class="op">+</span> <span class="va">p2</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-6.png" class="figure mx-auto d-block"></figure><p>When the two methods <strong>agree</strong>, you can be very
+<figure><img src="fig/umap-plot-6.png" alt="Two UMAP plots side by side. Left panel shows manual annotation with CD4 T, CD14 Mono, NK, B, CD8 T, FCGR3A+ Mono, DC, pDC, and Platelet labels. Right panel shows SingleR annotation with CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils. Most cell groups receive consistent labels between the two methods." class="figure mx-auto d-block"><div class="figcaption">Manual vs SingleR annotation side by side</div>
+</figure><p>When the two methods <strong>agree</strong>, you can be very
 confident in the label. When they <strong>disagree</strong>, check the
 marker gene expression for the disputed cluster and decide which label
 fits better. In general:</p>
@@ -5526,7 +5540,7 @@ this group?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>The broad CD69 violin in CD4 T cells reveals that this group is
 <strong>not a single subtype</strong> – it contains a mixture of naive
@@ -5642,7 +5656,7 @@ references disagree? Why might they disagree?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5674,7 +5688,7 @@ Monaco            Pro-Myelocyte T_cells
 on others. Here are the key patterns:</p>
 <p><strong>1. Strong agreement: Monocytes, B cells, NK cells.</strong>
 Monaco “Monocytes” map almost entirely to HPCA “Monocyte” (3,669 of
-3,717). Monaco “B cells” map to HPCA “B_cell” (1,575 of 1,623). Monaco
+3,717). Monaco “B cells” map to HPCA “B_cell” (1,575 of 1,624). Monaco
 “NK cells” map to HPCA “NK_cell” (649 of 666). These cell types have
 distinctive profiles that both references recognize.</p>
 <p><strong>2. T cell subtyping collapses in HPCA.</strong> Monaco
@@ -5744,7 +5758,7 @@ any links that you are not going to use.
 <!-- Links used across the lesson -->
 </section></section><section id="aio-multi-sample-integration"><p>Content from <a href="multi-sample-integration.html">Multi-Sample Integration</a></p>
 <hr>
-<p>Last updated on 2026-05-18 |
+<p>Last updated on 2026-05-19 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/multi-sample-integration.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -5967,7 +5981,11 @@ each layer independently:</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">ifnb</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, group.by <span class="op">=</span> <span class="st">"stim"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-7.png" class="figure mx-auto d-block"></figure><p>You should see a clear separation between control (CTRL) and
+<figure><img src="fig/umap-plot-7.png" alt="UMAP plot of IFNB dataset before integration. CTRL (salmon) and STIM (teal) cells form largely separate clusters. Several clusters are dominated by one condition, indicating batch-driven rather than cell-type-driven clustering." class="figure mx-auto d-block"><div class="figcaption">UMAP plot of IFNB dataset before integration.
+CTRL (salmon) and STIM (teal) cells form largely separate clusters.
+Several clusters are dominated by one condition, indicating batch-driven
+rather than cell-type-driven clustering.</div>
+</figure><p>You should see a clear separation between control (CTRL) and
 stimulated (STIM) cells. Instead of clustering by cell type (T cells
 with T cells, monocytes with monocytes), the cells cluster by condition.
 This means we cannot directly compare the same cell type between
@@ -6048,7 +6066,11 @@ reduction instead of the original PCA:</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">ifnb</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, group.by <span class="op">=</span> <span class="st">"stim"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-8.png" class="figure mx-auto d-block"></figure><p>The control and stimulated cells should now be intermingled within
+<figure><img src="fig/umap-plot-8.png" alt="UMAP plot after CCA integration. CTRL and STIM cells are now intermingled within each cluster, with teal (STIM) dominating the overlay. Cell types co-cluster regardless of condition." class="figure mx-auto d-block"><div class="figcaption">UMAP plot after CCA integration. CTRL and STIM
+cells are now intermingled within each cluster, with teal (STIM)
+dominating the overlay. Cell types co-cluster regardless of
+condition.</div>
+</figure><p>The control and stimulated cells should now be intermingled within
 each cluster. Cell types from both conditions co-cluster, which is what
 we want.</p>
 <p>Let’s verify with a split view:</p>
@@ -6058,7 +6080,11 @@ we want.</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">ifnb</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, split.by <span class="op">=</span> <span class="st">"stim"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-9.png" class="figure mx-auto d-block"></figure><p>Both panels should show the same overall structure, with the same
+<figure><img src="fig/umap-plot-9.png" alt="Two side-by-side UMAP panels split by condition (CTRL and STIM) after integration. Both panels show 14 clusters numbered 0 through 13, with the same spatial arrangement in each panel, confirming successful integration." class="figure mx-auto d-block"><div class="figcaption">Two side-by-side UMAP panels split by condition
+(CTRL and STIM) after integration. Both panels show 14 clusters numbered
+0 through 13, with the same spatial arrangement in each panel,
+confirming successful integration.</div>
+</figure><p>Both panels should show the same overall structure, with the same
 clusters present in both conditions. This confirms that integration
 successfully aligned shared cell types.</p>
 <p>Before proceeding to analysis, rejoin the layers so that expression
@@ -6213,7 +6239,12 @@ Episode 6):</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">ifnb</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, label <span class="op">=</span> <span class="cn">TRUE</span>, repel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-10.png" class="figure mx-auto d-block"></figure>
+<figure><img src="fig/umap-plot-10.png" alt="UMAP plot with cells colored and labeled by annotated cell type. Nine cell types are visible: CD14 Mono (large cluster, right), CD4 T (large, upper left), CD8 T (upper right), B (center left), NK (left), FCGR3A Mono (lower right), DC (small, center), Mk (small, center right), and Eryth (small, bottom)." class="figure mx-auto d-block"><div class="figcaption">UMAP plot with cells colored and labeled by
+annotated cell type. Nine cell types are visible: CD14 Mono (large
+cluster, right), CD4 T (large, upper left), CD8 T (upper right), B
+(center left), NK (left), FCGR3A Mono (lower right), DC (small, center),
+Mk (small, center right), and Eryth (small, bottom).</div>
+</figure>
 </div>
 <div class="section level3">
 <h3 id="conserved-markers">Conserved markers<a class="anchor" aria-label="anchor" href="#conserved-markers"></a>
@@ -6384,7 +6415,11 @@ response:</p>
 <span>            split.by <span class="op">=</span> <span class="st">"stim"</span>,</span>
 <span>            cols <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"grey85"</span>, <span class="st">"firebrick"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/dimplot_ifnb_de1.png" class="figure mx-auto d-block"></figure><div class="codewrapper sourceCode" id="cb26">
+<figure><img src="fig/dimplot_ifnb_de1.png" alt="Four-row FeaturePlot split by CTRL and STIM for ISG15, IFIT1, TNFSF10, and RSAD2. CTRL panels show mostly grey cells with sparse expression. STIM panels show strong red expression across monocyte and other clusters for all four genes." class="figure mx-auto d-block"><div class="figcaption">Four-row FeaturePlot split by CTRL and STIM for
+ISG15, IFIT1, TNFSF10, and RSAD2. CTRL panels show mostly grey cells
+with sparse expression. STIM panels show strong red expression across
+monocyte and other clusters for all four genes.</div>
+</figure><div class="codewrapper sourceCode" id="cb26">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -6395,7 +6430,11 @@ response:</p>
 <span>        ncol <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>        pt.size <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/vlnplot_ifnb_de1.png" class="figure mx-auto d-block"></figure><p>IFIT1 and IFIT13 are strongly induced in the stimulated condition
+<figure><img src="fig/vlnplot_ifnb_de1.png" alt="Four violin plots for IFIT1, IFIT3, TNFSF10, and RSAD2 in CD14 monocytes. Each panel shows two violins: a thin line at zero for control and a broad teal shape peaking around expression level 3 to 4 for stimulated, confirming strong IFN-beta induction." class="figure mx-auto d-block"><div class="figcaption">Four violin plots for IFIT1, IFIT3, TNFSF10, and
+RSAD2 in CD14 monocytes. Each panel shows two violins: a thin line at
+zero for control and a broad teal shape peaking around expression level
+3 to 4 for stimulated, confirming strong IFN-beta induction.</div>
+</figure><p>IFIT1 and IFIT3 are strongly induced in the stimulated condition
 across multiple cell types, with particularly strong expression in
 monocytes. This demonstrates that integration corrected the batch effect
 (cell types co-cluster) while preserving the biological effect of
@@ -6444,7 +6483,12 @@ Condition CD14 Mono  CD4 T  CD8 T     NK      B FCGR3A Mono     DC     Mk  Eryth
      CTRL     0.504  0.432  0.477  0.435  0.482       0.530  0.447  0.446  0.458
      STIM     0.496  0.568  0.523  0.565  0.518       0.470  0.553  0.554  0.542</code></pre>
 </div>
-<figure><img src="fig/dimplot_challenge-ifnb1.png" class="figure mx-auto d-block"></figure><p>Most cell types fall in the <strong>0.43–0.57</strong> range,
+<figure><img src="fig/dimplot_challenge-ifnb1.png" alt="Split UMAP with CTRL and STIM panels, cells labeled by cell type. Both panels show identical cluster arrangement with CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, and Eryth labels, confirming balanced condition mixing within each cell type." class="figure mx-auto d-block"><div class="figcaption">Split UMAP with CTRL and STIM panels, cells
+labeled by cell type. Both panels show identical cluster arrangement
+with CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, and Eryth
+labels, confirming balanced condition mixing within each cell
+type.</div>
+</figure><p>Most cell types fall in the <strong>0.43–0.57</strong> range,
 confirming that integration successfully mixed cells from both
 conditions. The split UMAP shows the same cell types present in both
 panels with similar spatial arrangement – each cluster appears in both
@@ -6514,7 +6558,11 @@ stimulation response?</p>
 </button>
 <div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
-<figure><img src="fig/dimplot_challenge2-ifnb1.png" class="figure mx-auto d-block"></figure><div class="codewrapper">
+<figure><img src="fig/dimplot_challenge2-ifnb1.png" alt="Four-row FeaturePlot split by CTRL and STIM showing CCL8, CXCL11, CXCL10, and HESX1. CTRL panels are almost entirely grey. STIM panels show strong red expression concentrated in the monocyte clusters for all four chemokine and ISG genes." class="figure mx-auto d-block"><div class="figcaption">Four-row FeaturePlot split by CTRL and STIM
+showing CCL8, CXCL11, CXCL10, and HESX1. CTRL panels are almost entirely
+grey. STIM panels show strong red expression concentrated in the
+monocyte clusters for all four chemokine and ISG genes.</div>
+</figure><div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code>                 p_val avg_log2FC pct.1 pct.2     p_val_adj
@@ -6671,7 +6719,7 @@ any links that you are not going to use.
 </div>
 </section></section><section id="aio-differential-expression"><p>Content from <a href="differential-expression.html">Differential Expression Analysis</a></p>
 <hr>
-<p>Last updated on 2026-05-18 |
+<p>Last updated on 2026-05-19 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/differential-expression.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -6767,7 +6815,12 @@ the active identity.</p>
 </button>
 <div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
 <div class="accordion-body">
-<figure><img src="fig/ep8_umap_split.png" class="figure mx-auto d-block"></figure><p>You should see two UMAP panels (CTRL and STIM) with the same cell
+<figure><img src="fig/ep8_umap_split.png" alt="Split UMAP showing CTRL and STIM panels with cells colored and labeled by cell type. Nine cell types (CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, Eryth) appear in both panels with identical spatial arrangement, confirming the integrated structure." class="figure mx-auto d-block"><div class="figcaption">Split UMAP showing CTRL and STIM panels with
+cells colored and labeled by cell type. Nine cell types (CD4 T, CD8 T,
+B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, Eryth) appear in both panels with
+identical spatial arrangement, confirming the integrated
+structure.</div>
+</figure><p>You should see two UMAP panels (CTRL and STIM) with the same cell
 type structure in both. Cell types are labeled and colored consistently
 across panels.</p>
 </div>
@@ -7114,14 +7167,18 @@ SSB        0   2.470712     1     1         0
 
 Significant genes (p_val_adj &lt; 0.05): 1455 </code></pre>
 </div>
-<p>The pseudobulk analysis typically identifies <strong>fewer
-significant genes</strong> than the per-cell Wilcoxon test (often
-100-400 instead of 765). The top genes should still be ISGs and
-chemokines, but the p-values are larger because the effective sample
-size is 3 pseudo-replicates per condition, not thousands of cells.</p>
-<p>Note: because we used pseudo-replicates rather than true biological
-replicates, these p-values are still somewhat optimistic. With real
-donor-level replicates, the gene count would likely be even lower.</p>
+<p>The pseudobulk analysis identifies <strong>1455 significant
+genes</strong> – more than the Wilcoxon test (765). This may seem
+surprising: we said pseudobulk is more conservative, so why does it find
+more? Because we used <strong>pseudo-replicates</strong>, not true
+biological replicates. The 3 random splits within each condition have
+very low within-group variance, giving DESeq2 high statistical
+power.</p>
+<p>With genuine biological replicates (different donors with real
+between-donor variability), the pseudobulk gene count would typically be
+<strong>much lower</strong> than the per-cell test. The high count here
+is an artifact of pseudo-replication and should not be interpreted as
+pseudobulk being more sensitive in general.</p>
 </div>
 </div>
 </div>
@@ -7159,7 +7216,12 @@ are both statistically significant and biologically meaningful.</p>
 <span>         color <span class="op">=</span> <span class="st">"Direction"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/ep8_volcano.png" class="figure mx-auto d-block"></figure><p>How to read the volcano plot:</p>
+<figure><img src="fig/ep8_volcano.png" alt="Volcano plot for CD14 monocytes STIM vs CTRL. Red points (upregulated) cluster in the upper right with log2FC up to 9, blue points (downregulated) in the upper left, and grey (NS) points near the bottom center. Dashed lines mark the significance and fold-change cutoffs." class="figure mx-auto d-block"><div class="figcaption">Volcano plot for CD14 monocytes STIM vs CTRL.
+Red points (upregulated) cluster in the upper right with log2FC up to 9,
+blue points (downregulated) in the upper left, and grey (NS) points near
+the bottom center. Dashed lines mark the significance and fold-change
+cutoffs.</div>
+</figure><p>How to read the volcano plot:</p>
 <ul>
 <li>
 <strong>Upper right</strong>: genes significantly upregulated in
@@ -7188,7 +7250,11 @@ change or high p-value)</li>
 <span>            split.by <span class="op">=</span> <span class="st">"stim"</span>,</span>
 <span>            cols <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"grey85"</span>, <span class="st">"firebrick"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/ep8_featureplot_ifit1.png" class="figure mx-auto d-block"></figure><div class="codewrapper sourceCode" id="cb16">
+<figure><img src="fig/ep8_featureplot_ifit1.png" alt="FeaturePlot of IFIT1 split by CTRL and STIM. The CTRL panel is mostly grey with rare red dots. The STIM panel shows strong red expression across all clusters, with particularly intense signal in monocyte clusters on the right side of the UMAP." class="figure mx-auto d-block"><div class="figcaption">FeaturePlot of IFIT1 split by CTRL and STIM. The
+CTRL panel is mostly grey with rare red dots. The STIM panel shows
+strong red expression across all clusters, with particularly intense
+signal in monocyte clusters on the right side of the UMAP.</div>
+</figure><div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -7198,7 +7264,12 @@ change or high p-value)</li>
 <span>        pt.size <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>        ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/ep8_violin_de.png" class="figure mx-auto d-block"></figure>
+<figure><img src="fig/ep8_violin_de.png" alt="Three violin plot panels for IFIT1, CXCL10, and MX1 across nine cell types, split by condition. Teal (stimulated) violins are broad and tall for all three genes across most cell types. CXCL10 expression is strongest in CD14 Mono and FCGR3A Mono. Control violins are thin lines near zero." class="figure mx-auto d-block"><div class="figcaption">Three violin plot panels for IFIT1, CXCL10, and
+MX1 across nine cell types, split by condition. Teal (stimulated)
+violins are broad and tall for all three genes across most cell types.
+CXCL10 expression is strongest in CD14 Mono and FCGR3A Mono. Control
+violins are thin lines near zero.</div>
+</figure>
 </div>
 <div class="section level3">
 <h3 id="dot-plot-across-cell-types">Dot plot across cell types<a class="anchor" aria-label="anchor" href="#dot-plot-across-cell-types"></a>
@@ -7218,7 +7289,13 @@ cell-type-specific:</p>
 <span>    <span class="fu">coord_flip</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/ep8_dotplot_de.png" class="figure mx-auto d-block"></figure>
+<figure><img src="fig/ep8_dotplot_de.png" alt="Dot plot showing the top 10 DE genes (IFIT1, IFIT3, TNFSF10, RSAD2, IFIT2, MX1, CXCL10, LY6E, CXCL11, CCL8) across all cell types split by CTRL and STIM. Dot size indicates percent expressed, color from blue (low) to red (high) shows average expression. STIM columns consistently show larger, redder dots for all genes across cell types." class="figure mx-auto d-block"><div class="figcaption">Dot plot showing the top 10 DE genes (IFIT1,
+IFIT3, TNFSF10, RSAD2, IFIT2, MX1, CXCL10, LY6E, CXCL11, CCL8) across
+all cell types split by CTRL and STIM. Dot size indicates percent
+expressed, color from blue (low) to red (high) shows average expression.
+STIM columns consistently show larger, redder dots for all genes across
+cell types.</div>
+</figure>
 </div>
 </section><section><h2 class="section-heading" id="functional-enrichment">Functional Enrichment<a class="anchor" aria-label="anchor" href="#functional-enrichment"></a>
 </h2>
@@ -7379,16 +7456,21 @@ readability.</td>
 </button>
 <div id="collapseSpoiler6" class="accordion-collapse collapse" aria-labelledby="headingSpoiler6" data-bs-parent="#accordionSpoiler6">
 <div class="accordion-body">
-<figure><img src="fig/ep8_go_dotplot.png" class="figure mx-auto d-block"></figure><p>The top enriched GO terms should include:</p>
+<figure><img src="fig/ep8_go_dotplot.png" alt="GO Biological Process dot plot for STIM vs CTRL CD14 monocytes showing 15 terms. The top 3 by gene ratio are response to virus (largest dot, approximately 50 genes), defense response to virus, and viral process. Response to type I interferon and interferon-mediated signaling pathway appear near the bottom. Dot color ranges from red (low p.adjust) to blue (higher p.adjust)." class="figure mx-auto d-block"><div class="figcaption">GO Biological Process dot plot for STIM vs CTRL
+CD14 monocytes showing 15 terms. The top 3 by gene ratio are response to
+virus (largest dot, approximately 50 genes), defense response to virus,
+and viral process. Response to type I interferon and interferon-mediated
+signaling pathway appear near the bottom. Dot color ranges from red (low
+p.adjust) to blue (higher p.adjust).</div>
+</figure><p>The top enriched GO terms should include:</p>
 <ul>
-<li><strong>defense response to virus</strong></li>
-<li><strong>type I interferon signaling pathway</strong></li>
 <li><strong>response to virus</strong></li>
-<li><strong>innate immune response</strong></li>
-<li><strong>negative regulation of viral genome
-replication</strong></li>
-<li><strong>cytokine-mediated signaling pathway</strong></li>
-<li><strong>response to interferon-beta</strong></li>
+<li><strong>defense response to virus</strong></li>
+<li><strong>viral process</strong></li>
+<li><strong>viral life cycle</strong></li>
+<li><strong>regulation of innate immune response</strong></li>
+<li><strong>regulation of viral process</strong></li>
+<li><strong>viral genome replication</strong></li>
 </ul>
 <p>These terms are entirely consistent with IFN-beta stimulation.
 IFN-beta is a type I interferon that activates antiviral defense
@@ -7620,29 +7702,41 @@ significant genes and the p-value distributions.</p>
 </button>
 <div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
-<figure><img src="fig/ep8_pval_comparison.png" class="figure mx-auto d-block"></figure><p>You should find that:</p>
+<figure><img src="fig/ep8_pval_comparison.png" alt="Scatter plot comparing -log10(p-value) from Wilcoxon (x-axis) and Pseudobulk (y-axis) for shared genes. A red dashed diagonal marks equal significance. Points are broadly scattered, with a dense cluster along the x-axis near y equals 0 (genes significant only in Wilcoxon) and many points above the diagonal (genes more significant in pseudobulk)." class="figure mx-auto d-block"><div class="figcaption">Scatter plot comparing -log10(p-value) from
+Wilcoxon (x-axis) and Pseudobulk (y-axis) for shared genes. A red dashed
+diagonal marks equal significance. Points are broadly scattered, with a
+dense cluster along the x-axis near y equals 0 (genes significant only
+in Wilcoxon) and many points above the diagonal (genes more significant
+in pseudobulk).</div>
+</figure><p>You should find that:</p>
 <ul>
 <li>
 <strong>Wilcoxon</strong> identifies 765 significant genes</li>
 <li>
-<strong>Pseudobulk</strong> identifies 1455 with
+<strong>Pseudobulk</strong> identifies 1455 (with
 pseudo-replicates)</li>
 </ul>
-<p>The scatter plot shows that most points fall <strong>below</strong>
-the diagonal (the red dashed line), meaning pseudobulk p-values are
-consistently <strong>larger</strong> (less significant) than Wilcoxon
-p-values for the same genes.</p>
-<p>This is expected and correct. The Wilcoxon test has inflated
-significance because it treats each cell as an independent observation.
-With ~1,600 monocytes per condition, even tiny expression differences
-become “significant.” The pseudobulk test aggregates cells into 3
-pseudo-replicates per condition, giving a more realistic (though still
-imperfect) sample size and more conservative p-values.</p>
-<p>The genes that are significant in <strong>both</strong> methods are
-the most trustworthy – these are genes with large, robust effects that
-survive the more stringent pseudobulk test. The genes significant only
-in Wilcoxon but not in pseudobulk are likely false positives driven by
-pseudoreplication.</p>
+<p>Pseudobulk finds <strong>more</strong> significant genes here, which
+may seem to contradict the usual advice that pseudobulk is more
+conservative. The reason: our pseudo-replicates (random cell splits)
+have very low within-group variance, so DESeq2 gets very high power.
+With <strong>real</strong> biological replicates (different donors), the
+between-donor variability would inflate variance estimates and the gene
+count would drop substantially.</p>
+<p>The scatter plot shows a complex pattern:</p>
+<ul>
+<li>A <strong>dense band along the x-axis</strong> (Wilcoxon
+significant, pseudobulk not) – genes with small effects that Wilcoxon
+detects via per-cell power but pseudobulk misses.</li>
+<li>Many points <strong>above the diagonal</strong> – genes where
+pseudobulk yields smaller p-values, because DESeq2’s count-based model
+is more powerful when within-group variance is low.</li>
+<li>Some points <strong>below the diagonal</strong> – genes where
+Wilcoxon is more significant.</li>
+</ul>
+<p>With true biological replicates, you would expect most points to
+shift below the diagonal and the overall pseudobulk gene count to drop
+well below the Wilcoxon count.</p>
 <p><strong>Rule of thumb:</strong> Use Wilcoxon for quick exploration
 and hypothesis generation. Use pseudobulk for any result you plan to
 report or publish. And for publication, ensure you have true biological
@@ -7705,7 +7799,13 @@ processes? Do they make sense for IFN-beta stimulation?</p>
 </button>
 <div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
-<figure><img src="fig/ep8_go_top200.png" class="figure mx-auto d-block"></figure><p>The top 5 biological processes should include terms like:</p>
+<figure><img src="fig/ep8_go_top200.png" alt="GO BP dot plot for the top 200 upregulated genes in STIM CD14 monocytes showing 10 terms. Response to virus and defense response to virus have the largest gene ratios (approximately 0.28 to 0.30) and deepest red color. Viral process, viral life cycle, and regulation of viral process follow. Dot sizes range from about 15 to over 50 genes." class="figure mx-auto d-block"><div class="figcaption">GO BP dot plot for the top 200 upregulated genes
+in STIM CD14 monocytes showing 10 terms. Response to virus and defense
+response to virus have the largest gene ratios (approximately 0.28 to
+0.30) and deepest red color. Viral process, viral life cycle, and
+regulation of viral process follow. Dot sizes range from about 15 to
+over 50 genes.</div>
+</figure><p>The top 5 biological processes should include terms like:</p>
 <table class="table">
 <colgroup>
 <col width="20%">
@@ -7720,33 +7820,33 @@ processes? Do they make sense for IFN-beta stimulation?</p>
 <tbody>
 <tr>
 <td align="center">1</td>
-<td align="left">defense response to virus</td>
-<td align="left">Direct antiviral effector programs activated by
-IFN-beta</td>
-</tr>
-<tr>
-<td align="center">2</td>
-<td align="left">type I interferon signaling pathway</td>
-<td align="left">The canonical pathway triggered by IFN-beta binding to
-IFNAR</td>
-</tr>
-<tr>
-<td align="center">3</td>
 <td align="left">response to virus</td>
 <td align="left">Broad viral response including both detection and
 effector mechanisms</td>
 </tr>
 <tr>
+<td align="center">2</td>
+<td align="left">defense response to virus</td>
+<td align="left">Direct antiviral effector programs activated by
+IFN-beta</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="left">viral process</td>
+<td align="left">Genes involved in the viral life cycle, many of which
+are ISGs that restrict it</td>
+</tr>
+<tr>
 <td align="center">4</td>
-<td align="left">chemokine-mediated signaling pathway</td>
-<td align="left">Reflects the dominance of CCL8, CXCL10, CXCL11 in the
-top DE genes</td>
+<td align="left">viral life cycle</td>
+<td align="left">Overlap with viral process; reflects IFIT, OAS, and MX
+family genes</td>
 </tr>
 <tr>
 <td align="center">5</td>
-<td align="left">innate immune response</td>
-<td align="left">General innate immunity activation, of which IFN
-signaling is a central component</td>
+<td align="left">regulation of viral process</td>
+<td align="left">Regulatory genes that modulate antiviral defense (e.g.,
+TRIM, IRF family)</td>
 </tr>
 </tbody>
 </table>
@@ -7846,8 +7946,8 @@ any links that you are not going to use.
   "url": "https://singlecell-rnaseq.github.io/NA/aio.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/aio.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-05-18",
-  "datePublished": "2026-05-18"
+  "dateModified": "2026-05-19",
+  "datePublished": "2026-05-19"
 }
 
   </script><script>
