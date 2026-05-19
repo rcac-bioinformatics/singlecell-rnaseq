@@ -211,7 +211,6 @@
 <li><a href="#how-does-10x-chromium-work">How Does 10x Chromium Work?</a></li>
 <li><a href="#the-count-matrix">The Count Matrix</a></li>
 <li><a href="#analysis-workflow-overview">Analysis Workflow Overview</a></li>
-<li><a href="#scope-of-this-workshop">Scope of This Workshop</a></li>
         </ul></div><!--/div.accordion-body-->
     </div><!--/div.accordion-collapse-->
 
@@ -475,7 +474,8 @@ thousands of cells in a single run. The core idea is simple: wrap each
 cell in its own tiny droplet along with a barcoded gel bead, so that
 every mRNA molecule from that cell gets tagged with the same unique
 barcode.</p>
-<figure><img src="../fig/10x-chromium-workflow.png" alt="Diagram showing the 10x Chromium microfluidic chip where cells, gel beads, and oil are combined to form gel bead-in-emulsion (GEM) droplets. Each GEM contains one gel bead and ideally one cell." class="figure mx-auto d-block"></figure><p>Here is how the process works, step by step:</p>
+<figure><img src="../fig/10x-chromium-workflow.png" alt="Diagram showing the 10x Chromium microfluidic chip where cells, gel beads, and oil are combined to form gel bead-in-emulsion (GEM) droplets. Each GEM contains one gel bead and ideally one cell." class="figure mx-auto d-block"><div class="figcaption">10x Chromium workflow overview</div>
+</figure><p>Here is how the process works, step by step:</p>
 <p><strong>1. GEM generation.</strong> A suspension of single cells is
 loaded onto a Chromium microfluidic chip along with gel beads and
 partitioning oil. The chip combines these three inputs into tiny
@@ -505,7 +505,8 @@ let us computationally sort the reads back to their cell of origin.</p>
 <p><strong>4. Sequencing.</strong> The library is sequenced on an
 Illumina sequencer, producing paired-end reads plus an index read. The
 read structure is:</p>
-<figure><img src="../fig/fastq-read-structure.png" alt="Schematic showing three sequencing reads from a 10x Chromium library. Read 1 is 28 bp and contains the 16 bp cell barcode followed by the 12 bp UMI. Read 2 is variable length and contains the cDNA insert that maps to the transcriptome. The I1 index read contains the sample index for demultiplexing." class="figure mx-auto d-block"></figure><ul><li>
+<figure><img src="../fig/fastq-read-structure.png" alt="Schematic showing three sequencing reads from a 10x Chromium library. Read 1 is 28 bp and contains the 16 bp cell barcode followed by the 12 bp UMI. Read 2 is variable length and contains the cDNA insert that maps to the transcriptome. The I1 index read contains the sample index for demultiplexing." class="figure mx-auto d-block"><div class="figcaption">10x Chromium FASTQ read structure</div>
+</figure><ul><li>
 <strong>Read 1 (28 bp):</strong> The first 16 bases are the
 <strong>cell barcode</strong> (identifies which cell). The next 12 bases
 are the <strong>UMI</strong> (identifies which original mRNA molecule).
@@ -562,7 +563,8 @@ facilities, which is why we use it here.</p>
 is a <strong>UMI count matrix</strong>. This is a table where each row
 is a gene, each column is a cell, and each entry is the number of unique
 mRNA molecules (UMIs) detected for that gene in that cell.</p>
-<figure><img src="../fig/count-matrix-schematic.png" alt="Schematic of a count matrix with genes on rows and cells on columns. Most cells in the matrix contain zero, with occasional non-zero integer counts scattered throughout, illustrating the sparsity typical of single-cell RNA-seq data." class="figure mx-auto d-block"></figure><p>A few important properties of this matrix:</p>
+<figure><img src="../fig/count-matrix-schematic.png" alt="Schematic of a count matrix with genes on rows and cells on columns. Most cells in the matrix contain zero, with occasional non-zero integer counts scattered throughout, illustrating the sparsity typical of single-cell RNA-seq data." class="figure mx-auto d-block"><div class="figcaption">UMI count matrix schematic</div>
+</figure><p>A few important properties of this matrix:</p>
 <p><strong>It is very sparse.</strong> A typical human cell expresses
 around 2,000 to 5,000 genes out of a total of approximately 30,000
 protein-coding genes in the genome. On top of that, scRNA-seq has
@@ -592,7 +594,8 @@ with roughly 8,000 – 10,000 cells and 15,000 – 20,000 genes.</p>
 well-defined steps. Each step in the pipeline builds on the output of
 the previous one. This workshop covers the complete workflow from raw
 sequencing data through biological interpretation.</p>
-<figure><img src="../fig/workshop-pipeline-overview.png" alt="Flowchart of the scRNA-seq analysis pipeline covered in this workshop. Eight boxes arranged vertically show the progression: Raw Data Processing, Quality Control, Normalization and Feature Selection, Dimensionality Reduction and Clustering, Cell Type Annotation, Multi-Sample Integration, and Differential Expression. Arrows connect each step to the next." class="figure mx-auto d-block"></figure><p><strong>1. Raw Data Processing (Episode 2).</strong> Starting from
+<figure><img src="../fig/workshop-pipeline-overview.png" alt="Flowchart of the scRNA-seq analysis pipeline covered in this workshop. Eight boxes arranged vertically show the progression: Raw Data Processing, Quality Control, Normalization and Feature Selection, Dimensionality Reduction and Clustering, Cell Type Annotation, Multi-Sample Integration, and Differential Expression. Arrows connect each step to the next." class="figure mx-auto d-block"><div class="figcaption">Workshop analysis pipeline overview</div>
+</figure><p><strong>1. Raw Data Processing (Episode 2).</strong> Starting from
 FASTQ files, we align reads to the human reference genome and quantify
 gene expression per cell. We will use two tools: <strong>Cell
 Ranger</strong> (the commercial pipeline from 10x Genomics) and
@@ -642,49 +645,6 @@ analysis (the statistically preferred approach for multi-sample
 experiments). We will also run <strong>gene ontology enrichment</strong>
 to connect lists of differentially expressed genes to biological
 pathways.</p>
-</section><section><h2 class="section-heading" id="scope-of-this-workshop">Scope of This Workshop<a class="anchor" aria-label="anchor" href="#scope-of-this-workshop"></a></h2>
-<hr class="half-width"><p>This workshop teaches a standard scRNA-seq analysis workflow using a
-specific set of tools and data:</p>
-<ul><li>
-<strong>Platform:</strong> 10x Genomics Chromium 3’ Gene Expression
-(v3 chemistry)</li>
-<li>
-<strong>Organism:</strong> Human (GRCh38 reference genome)</li>
-<li>
-<strong>Dataset:</strong> 10k PBMCs (peripheral blood mononuclear
-cells), a well-characterized immune cell mixture</li>
-<li>
-<strong>Analysis toolkit:</strong> Seurat v5 in R, running on
-Purdue’s Negishi HPC cluster</li>
-<li>
-<strong>Integration dataset:</strong> IFN-beta stimulated PBMCs from
-the SeuratData package</li>
-</ul><p>By the end of the workshop you will have a solid understanding of the
-core scRNA-seq analysis pipeline and be able to apply these same steps
-to your own datasets.</p>
-<p><strong>What is NOT covered in this workshop:</strong></p>
-<ul><li>
-<strong>Spatial transcriptomics</strong> (Visium, MERFISH,
-Slide-seq)</li>
-<li>
-<strong>Multi-modal assays</strong> (CITE-seq, Multiome
-ATAC+GEX)</li>
-<li>
-<strong>Trajectory and pseudotime analysis</strong> (Monocle3, RNA
-velocity, scVelo)</li>
-<li>
-<strong>Python-based analysis</strong> (Scanpy / AnnData
-ecosystem)</li>
-<li>
-<strong>Experimental design</strong> and wet-lab sample
-preparation</li>
-<li>
-<strong>Custom reference genome building</strong> for non-model
-organisms</li>
-</ul><p>These are all important topics, but each warrants its own dedicated
-workshop. If you are interested in any of these areas, see the
-Additional Reading section in the <a href="reference.html">Reference</a>
-page for pointers to relevant resources.</p>
 <div id="keypoints1" class="callout keypoints">
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
@@ -751,7 +711,7 @@ any links that you are not going to use.
         <p>Materials licensed under <a href="LICENSE.html">CC-BY 4.0</a> by the authors</p>
 
         <p>Template licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" class="external-link">CC-BY 4.0</a> by <a href="https://carpentries.org/" class="external-link">The Carpentries</a></p>
-        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/0.20.1" class="external-link">sandpaper (0.20.1)</a>, <a href="https://github.com/carpentries/pegboard/tree/0.7.9" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/aseetharam/varnish/tree/aec0ff169ecf0863c0882e93bd191b19f2e7ff1e" class="external-link">varnish (1.0.7)</a></p>
+        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/0.20.2" class="external-link">sandpaper (0.20.2)</a>, <a href="https://github.com/carpentries/pegboard/tree/0.7.9" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/aseetharam/varnish/tree/aec0ff169ecf0863c0882e93bd191b19f2e7ff1e" class="external-link">varnish (1.0.7)</a></p>
 		</div>
 		</footer></div> <!-- / div.container -->
 	<div id="to-top">

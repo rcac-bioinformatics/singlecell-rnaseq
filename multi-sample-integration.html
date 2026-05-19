@@ -389,6 +389,22 @@ design</li>
 </div>
 </div>
 </div>
+<div id="prerequisites" class="callout prereq">
+<div class="callout-square">
+<i class="callout-icon" data-feather="check"></i>
+</div>
+<span class="callout-header">Prerequisite</span>
+<div id="prerequisites" class="callout-inner">
+<h3 class="callout-title">Prerequisites</h3>
+<div class="callout-content">
+<p>This episode requires an RStudio session on the Negishi cluster.
+Launch <strong>RStudio (bioconductor)</strong> under
+<strong>Bioinformatics Apps</strong> on <a href="https://gateway.negishi.rcac.purdue.edu" class="external-link">Open OnDemand</a> as
+described in the <a href="index.html#starting-rstudio-on-open-ondemand">Setup</a>
+instructions.</p>
+</div>
+</div>
+</div>
 <section><h2 class="section-heading" id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a></h2>
 <hr class="half-width"><div class="codewrapper sourceCode" id="cb1">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -452,16 +468,12 @@ PBMCs from two conditions:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
 <div class="accordion-body">
-<div class="codewrapper">
-<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="output" tabindex="0"><code>An object of class Seurat
+<pre><code>An object of class Seurat
 14053 features across 13999 samples within 1 assay
 Active assay: RNA (14053 features, 0 variable features)
  2 layers present: counts, data</code></pre>
-</div>
 <p>The dataset has approximately 14,000 cells and 14,000 genes. The
 <code>stim</code> column in the metadata records which condition each
 cell came from.</p>
@@ -480,15 +492,10 @@ cell came from.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
 <div class="accordion-body">
-<div class="codewrapper">
-<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="output" tabindex="0"><code>CTRL STIM
-6548 7451
-</code></pre>
-</div>
+<pre><code>CTRL STIM
+6548 7451</code></pre>
 <p>Roughly 6,500 control cells and 7,500 stimulated cells.</p>
 </div>
 </div>
@@ -511,16 +518,12 @@ sample separately.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
 <div class="accordion-body">
-<div class="codewrapper">
-<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="output" tabindex="0"><code>An object of class Seurat
+<pre><code>An object of class Seurat
 14053 features across 13999 samples within 1 assay
 Active assay: RNA (14053 features, 0 variable features)
  4 layers present: counts.CTRL, counts.STIM, data.CTRL, data.STIM</code></pre>
-</div>
 <p>The counts are now stored in two separate layers:
 <code>counts.CTRL</code> and <code>counts.STIM</code>.</p>
 </div>
@@ -555,7 +558,7 @@ each layer independently:</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">ifnb</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, group.by <span class="op">=</span> <span class="st">"stim"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-7.png" alt="UMAP plot of IFNB dataset before integration. CTRL (salmon) and STIM (teal) cells form largely separate clusters. Several clusters are dominated by one condition, indicating batch-driven rather than cell-type-driven clustering." class="figure mx-auto d-block"><div class="figcaption">UMAP plot of IFNB dataset before integration.
+<figure><img src="fig/ep7_plot-before.png" alt="UMAP plot of the IFNB dataset before integration showing CTRL and STIM cells forming separate clusters driven by batch effects rather than cell type identity." class="figure mx-auto d-block"><div class="figcaption">UMAP plot of IFNB dataset before integration.
 CTRL (salmon) and STIM (teal) cells form largely separate clusters.
 Several clusters are dominated by one condition, indicating batch-driven
 rather than cell-type-driven clustering.</div>
@@ -619,7 +622,7 @@ reduction instead of the original PCA:</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">ifnb</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, group.by <span class="op">=</span> <span class="st">"stim"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-8.png" alt="UMAP plot after CCA integration. CTRL and STIM cells are now intermingled within each cluster, with teal (STIM) dominating the overlay. Cell types co-cluster regardless of condition." class="figure mx-auto d-block"><div class="figcaption">UMAP plot after CCA integration. CTRL and STIM
+<figure><img src="fig/ep7_plot-after.png" alt="UMAP plot of the IFNB dataset after CCA integration showing control and stimulated cells intermingled within each cluster, indicating successful batch correction." class="figure mx-auto d-block"><div class="figcaption">UMAP plot after CCA integration. CTRL and STIM
 cells are now intermingled within each cluster, with teal (STIM)
 dominating the overlay. Cell types co-cluster regardless of
 condition.</div>
@@ -633,7 +636,7 @@ we want.</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">ifnb</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, split.by <span class="op">=</span> <span class="st">"stim"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-9.png" alt="Two side-by-side UMAP panels split by condition (CTRL and STIM) after integration. Both panels show 14 clusters numbered 0 through 13, with the same spatial arrangement in each panel, confirming successful integration." class="figure mx-auto d-block"><div class="figcaption">Two side-by-side UMAP panels split by condition
+<figure><img src="fig/ep7_split-view.png" alt="Split UMAP view showing CTRL and STIM conditions side by side after integration, with both panels displaying the same 14 clusters in identical spatial arrangement." class="figure mx-auto d-block"><div class="figcaption">Two side-by-side UMAP panels split by condition
 (CTRL and STIM) after integration. Both panels show 14 clusters numbered
 0 through 13, with the same spatial arrangement in each panel,
 confirming successful integration.</div>
@@ -768,7 +771,7 @@ Episode 6):</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">ifnb</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, label <span class="op">=</span> <span class="cn">TRUE</span>, repel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-10.png" alt="UMAP plot with cells colored and labeled by annotated cell type. Nine cell types are visible: CD14 Mono (large cluster, right), CD4 T (large, upper left), CD8 T (upper right), B (center left), NK (left), FCGR3A Mono (lower right), DC (small, center), Mk (small, center right), and Eryth (small, bottom)." class="figure mx-auto d-block"><div class="figcaption">UMAP plot with cells colored and labeled by
+<figure><img src="fig/ep7_annotated-umap.png" alt="Annotated UMAP plot of the integrated IFNB dataset with nine labeled cell types including CD14 Mono, CD4 T, CD8 T, B, NK, FCGR3A Mono, DC, Mk, and Eryth." class="figure mx-auto d-block"><div class="figcaption">UMAP plot with cells colored and labeled by
 annotated cell type. Nine cell types are visible: CD14 Mono (large
 cluster, right), CD4 T (large, upper left), CD8 T (upper right), B
 (center left), NK (left), FCGR3A Mono (lower right), DC (small, center),
@@ -814,12 +817,9 @@ should appear as strong conserved markers for monocytes.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
   <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
+<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
 <div class="accordion-body">
-<div class="codewrapper">
-<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="output" tabindex="0"><code>         CTRL_p_val CTRL_avg_log2FC CTRL_pct.1 CTRL_pct.2 CTRL_p_val_adj    STIM_p_val STIM_avg_log2FC
+<pre><code>         CTRL_p_val CTRL_avg_log2FC CTRL_pct.1 CTRL_pct.2 CTRL_p_val_adj    STIM_p_val STIM_avg_log2FC
 TYROBP            0        2.356269      0.940      0.227              0  0.000000e+00        2.337569
 FCER1G            0        2.197678      0.930      0.233              0  0.000000e+00        2.549589
 S100A8            0        4.739502      0.743      0.071              0  0.000000e+00        5.318497
@@ -841,7 +841,6 @@ S100A9        0.584      0.036   0.000000e+00  0.000000e+00              0
 CTSB          0.822      0.183   0.000000e+00  0.000000e+00              0
 LGALS1        0.867      0.217   0.000000e+00  0.000000e+00              0
 TYMP          0.926      0.438   0.000000e+00  0.000000e+00              0</code></pre>
-</div>
 </div>
 </div>
 </div>
@@ -876,12 +875,9 @@ compare conditions:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
   <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
 <div class="accordion-body">
-<div class="codewrapper">
-<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="output" tabindex="0"><code>        p_val avg_log2FC pct.1 pct.2 p_val_adj
+<pre><code>        p_val avg_log2FC pct.1 pct.2 p_val_adj
 IFIT1       0   7.117626 0.965 0.034         0
 IFIT3       0   6.737338 0.971 0.057         0
 TNFSF10     0   6.322227 0.959 0.062         0
@@ -892,7 +888,6 @@ CXCL10      0   7.975000 0.873 0.032         0
 LY6E        0   4.255152 0.990 0.174         0
 CXCL11      0   8.521702 0.800 0.011         0
 CCL8        0   9.063100 0.800 0.015         0</code></pre>
-</div>
 <p>The top DE genes are all <strong>interferon-stimulated genes
 (ISGs)</strong>: IFIT1, IFIT3, TNFSF10, RSAD2, IFIT2. These are exactly
 the genes you would expect to be upregulated by IFN-beta stimulation,
@@ -923,7 +918,7 @@ response:</p>
 <span>            split.by <span class="op">=</span> <span class="st">"stim"</span>,</span>
 <span>            cols <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"grey85"</span>, <span class="st">"firebrick"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/dimplot_ifnb_de1.png" alt="Four-row FeaturePlot split by CTRL and STIM for ISG15, IFIT1, TNFSF10, and RSAD2. CTRL panels show mostly grey cells with sparse expression. STIM panels show strong red expression across monocyte and other clusters for all four genes." class="figure mx-auto d-block"><div class="figcaption">Four-row FeaturePlot split by CTRL and STIM for
+<figure><img src="fig/ep7_isg-feature.png" alt="FeaturePlot of ISG genes split by condition showing near-absent expression in CTRL panels and strong red expression in STIM panels, especially in monocyte clusters." class="figure mx-auto d-block"><div class="figcaption">Four-row FeaturePlot split by CTRL and STIM for
 ISG15, IFIT1, TNFSF10, and RSAD2. CTRL panels show mostly grey cells
 with sparse expression. STIM panels show strong red expression across
 monocyte and other clusters for all four genes.</div>
@@ -938,7 +933,7 @@ monocyte and other clusters for all four genes.</div>
 <span>        ncol <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>        pt.size <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/vlnplot_ifnb_de1.png" alt="Four violin plots for IFIT1, IFIT3, TNFSF10, and RSAD2 in CD14 monocytes. Each panel shows two violins: a thin line at zero for control and a broad teal shape peaking around expression level 3 to 4 for stimulated, confirming strong IFN-beta induction." class="figure mx-auto d-block"><div class="figcaption">Four violin plots for IFIT1, IFIT3, TNFSF10, and
+<figure><img src="fig/ep7_isg-violin.png" alt="Violin plots of IFIT1, IFIT3, TNFSF10, and RSAD2 in CD14 monocytes showing flat expression in control and broad high expression in stimulated cells." class="figure mx-auto d-block"><div class="figcaption">Four violin plots for IFIT1, IFIT3, TNFSF10, and
 RSAD2 in CD14 monocytes. Each panel shows two violins: a thin line at
 zero for control and a broad teal shape peaking around expression level
 3 to 4 for stimulated, confirming strong IFN-beta induction.</div>
@@ -981,17 +976,13 @@ cell type?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
-<div class="codewrapper">
-<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="output" tabindex="0"><code>         CellType
+<pre><code>         CellType
 Condition CD14 Mono  CD4 T  CD8 T     NK      B FCGR3A Mono     DC     Mk  Eryth
      CTRL     0.504  0.432  0.477  0.435  0.482       0.530  0.447  0.446  0.458
      STIM     0.496  0.568  0.523  0.565  0.518       0.470  0.553  0.554  0.542</code></pre>
-</div>
-<figure><img src="fig/dimplot_challenge-ifnb1.png" alt="Split UMAP with CTRL and STIM panels, cells labeled by cell type. Both panels show identical cluster arrangement with CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, and Eryth labels, confirming balanced condition mixing within each cell type." class="figure mx-auto d-block"><div class="figcaption">Split UMAP with CTRL and STIM panels, cells
+<figure><img src="fig/ep7_challenge1.png" alt="Split UMAP showing CTRL and STIM panels with cell type labels, demonstrating balanced mixing of conditions within each annotated cluster." class="figure mx-auto d-block"><div class="figcaption">Split UMAP with CTRL and STIM panels, cells
 labeled by cell type. Both panels show identical cluster arrangement
 with CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, and Eryth
 labels, confirming balanced condition mixing within each cell
@@ -1062,16 +1053,13 @@ stimulation response?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
-<figure><img src="fig/dimplot_challenge2-ifnb1.png" alt="Four-row FeaturePlot split by CTRL and STIM showing CCL8, CXCL11, CXCL10, and HESX1. CTRL panels are almost entirely grey. STIM panels show strong red expression concentrated in the monocyte clusters for all four chemokine and ISG genes." class="figure mx-auto d-block"><div class="figcaption">Four-row FeaturePlot split by CTRL and STIM
+<figure><img src="fig/ep7_challenge2.png" alt="FeaturePlot of CCL8, CXCL11, CXCL10, and HESX1 split by condition showing absent expression in control and strong monocyte-concentrated expression in stimulated cells." class="figure mx-auto d-block"><div class="figcaption">Four-row FeaturePlot split by CTRL and STIM
 showing CCL8, CXCL11, CXCL10, and HESX1. CTRL panels are almost entirely
 grey. STIM panels show strong red expression concentrated in the
 monocyte clusters for all four chemokine and ISG genes.</div>
-</figure><div class="codewrapper">
-<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="output" tabindex="0"><code>                 p_val avg_log2FC pct.1 pct.2     p_val_adj
+</figure><pre><code>                 p_val avg_log2FC pct.1 pct.2     p_val_adj
 CCL8      0.000000e+00   9.063    0.800 0.015  0.000000e+00
 CXCL11    0.000000e+00   8.522    0.800 0.011  0.000000e+00
 CXCL10    0.000000e+00   7.975    0.873 0.032  0.000000e+00
@@ -1082,7 +1070,6 @@ IFIT3     0.000000e+00   6.737    0.971 0.057  0.000000e+00
 GMPR     1.772282e-239   6.634    0.371 0.005 2.490588e-235
 RSAD2     0.000000e+00   6.620    0.920 0.042  0.000000e+00
 APOBEC3B 1.261976e-127   6.600    0.273 0.034 1.773454e-123</code></pre>
-</div>
 <p>The top 10 genes fall into two functional categories, both consistent
 with IFN-beta stimulation:</p>
 <table class="table"><colgroup><col width="15%"><col width="20%"><col width="38%"><col width="25%"></colgroup><thead><tr><th>Gene</th>
@@ -1227,7 +1214,7 @@ any links that you are not going to use.
         <p>Materials licensed under <a href="LICENSE.html">CC-BY 4.0</a> by the authors</p>
 
         <p>Template licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" class="external-link">CC-BY 4.0</a> by <a href="https://carpentries.org/" class="external-link">The Carpentries</a></p>
-        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/0.20.1" class="external-link">sandpaper (0.20.1)</a>, <a href="https://github.com/carpentries/pegboard/tree/0.7.9" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/aseetharam/varnish/tree/aec0ff169ecf0863c0882e93bd191b19f2e7ff1e" class="external-link">varnish (1.0.7)</a></p>
+        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/0.20.2" class="external-link">sandpaper (0.20.2)</a>, <a href="https://github.com/carpentries/pegboard/tree/0.7.9" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/aseetharam/varnish/tree/aec0ff169ecf0863c0882e93bd191b19f2e7ff1e" class="external-link">varnish (1.0.7)</a></p>
 		</div>
 		</footer></div> <!-- / div.container -->
 	<div id="to-top">

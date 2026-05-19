@@ -201,7 +201,8 @@
         <ul><li><a href="#instructors">Instructors</a></li>
 <li><a href="#workshop-schedule-4212026">Workshop Schedule (4/21/2026)</a></li>
 <li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#what-is-not-covered">What is not covered</a></li>
+<li><a href="#scope-of-this-workshop">Scope of This Workshop</a></li>
+<li><a href="#what-is-not-covered-in-this-workshop">What is NOT covered in this workshop</a></li>
 <li><a href="#ssh-setup">SSH Setup</a></li>
 <li><a href="#data-setup">Data Setup</a></li>
 <li><a href="#starting-rstudio-on-open-ondemand">Starting RStudio on Open OnDemand</a></li>
@@ -353,18 +354,10 @@ with Seurat v5 in R</li>
 annotation</li>
 <li>Integrate multiple samples, run differential expression analysis,
 and interpret pathway enrichment results</li>
-</ul></div>
-<div class="section level2">
-<h2 id="getting-started">Getting Started<a class="anchor" aria-label="anchor" href="#getting-started"></a></h2>
-<p>Please visit the <a href="index.html#setup">Setup</a> page for
-prerequisites, software installation, data access instructions, and the
-workshop schedule.</p>
-<!--
+</ul><!--
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.
- -->
-<!-- Links used across the lesson -->
-</div>
+ --><!-- Links used across the lesson --></div>
 </div>
 
       <section id="setup"><section><h2 class="section-heading" id="instructors">Instructors<a class="anchor" aria-label="anchor" href="#instructors"></a></h2>
@@ -423,17 +416,50 @@ or Scholar (provided)</li>
 <strong>An SSH client</strong>: terminal (macOS/Linux) or
 PuTTY/MobaXterm (Windows)</li>
 </ul><p>No prior experience with single-cell RNA-seq is required.</p>
-</section><section><h2 class="section-heading" id="what-is-not-covered">What is not covered<a class="anchor" aria-label="anchor" href="#what-is-not-covered"></a></h2>
-<hr class="half-width"><p>This workshop focuses on the core scRNA-seq analysis workflow. The
-following topics are <strong>not</strong> covered:</p>
-<ul><li>Experimental design and sample preparation</li>
-<li>Other single-cell modalities (ATAC-seq, CITE-seq, spatial
-transcriptomics)</li>
-<li>Trajectory/pseudotime analysis (Monocle3, RNA velocity)</li>
-<li>Advanced doublet detection methods (DoubletFinder, scDblFinder)</li>
-<li>Generating your own Cell Ranger reference genomes</li>
-<li>Multi-modal data integration</li>
-</ul></section><section><h2 class="section-heading" id="ssh-setup">SSH Setup<a class="anchor" aria-label="anchor" href="#ssh-setup"></a></h2>
+</section><section><h2 class="section-heading" id="scope-of-this-workshop">Scope of This Workshop<a class="anchor" aria-label="anchor" href="#scope-of-this-workshop"></a></h2>
+<hr class="half-width"><p>This workshop teaches a standard scRNA-seq analysis workflow using a
+specific set of tools and data:</p>
+<ul><li>
+<strong>Platform:</strong> 10x Genomics Chromium 3’ Gene Expression
+(v3 chemistry)</li>
+<li>
+<strong>Organism:</strong> Human (GRCh38 reference genome)</li>
+<li>
+<strong>Dataset:</strong> 10k PBMCs (peripheral blood mononuclear
+cells), a well-characterized immune cell mixture</li>
+<li>
+<strong>Analysis toolkit:</strong> Seurat v5 in R, running on
+Purdue’s Negishi HPC cluster</li>
+<li>
+<strong>Integration dataset:</strong> IFN-beta stimulated PBMCs from
+the SeuratData package</li>
+</ul><p>By the end of the workshop you will have a solid understanding of the
+core scRNA-seq analysis pipeline and be able to apply these same steps
+to your own datasets.</p>
+</section><section><h2 class="section-heading" id="what-is-not-covered-in-this-workshop">What is NOT covered in this workshop<a class="anchor" aria-label="anchor" href="#what-is-not-covered-in-this-workshop"></a></h2>
+<hr class="half-width"><ul><li>
+<strong>Spatial transcriptomics</strong> (Visium, MERFISH,
+Slide-seq)</li>
+<li>
+<strong>Multi-modal assays</strong> (CITE-seq, Multiome
+ATAC+GEX)</li>
+<li>
+<strong>Trajectory and pseudotime analysis</strong> (Monocle3, RNA
+velocity, scVelo)</li>
+<li>
+<strong>Python-based analysis</strong> (Scanpy / AnnData
+ecosystem)</li>
+<li>
+<strong>Experimental design</strong> and wet-lab sample
+preparation</li>
+<li>
+<strong>Custom reference genome building</strong> for non-model
+organisms</li>
+</ul><p>These are all important topics, but each warrants its own dedicated
+workshop. If you are interested in any of these areas, see the
+Additional Reading section in the <a href="reference.html">Reference</a>
+page for pointers to relevant resources.</p>
+</section><section><h2 class="section-heading" id="ssh-setup">SSH Setup<a class="anchor" aria-label="anchor" href="#ssh-setup"></a></h2>
 <hr class="half-width"><p>You need SSH access to the Negishi cluster for Episode 2 (raw data
 processing) and to copy the workshop data. Follow the instructions for
 your operating system below.</p>
@@ -457,7 +483,7 @@ instructions for your operating system below.</p>
   Windows
   </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Download and install <a href="https://mobaxterm.mobatek.net/" class="external-link">MobaXterm</a> (recommended) or <a href="https://www.putty.org/" class="external-link">PuTTY</a>
 </li>
@@ -481,7 +507,7 @@ account username</li>
   macOS
   </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Open <strong>Terminal</strong> (Applications &gt; Utilities &gt;
 Terminal)</li>
@@ -505,7 +531,7 @@ being entered)</li>
   Linux
   </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Open your terminal emulator</li>
 <li>Connect to the cluster:</li>
@@ -677,7 +703,7 @@ any links that you are not going to use.
         <p>Materials licensed under <a href="LICENSE.html">CC-BY 4.0</a> by the authors</p>
 
         <p>Template licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" class="external-link">CC-BY 4.0</a> by <a href="https://carpentries.org/" class="external-link">The Carpentries</a></p>
-        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/0.20.1" class="external-link">sandpaper (0.20.1)</a>, <a href="https://github.com/carpentries/pegboard/tree/0.7.9" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/aseetharam/varnish/tree/aec0ff169ecf0863c0882e93bd191b19f2e7ff1e" class="external-link">varnish (1.0.7)</a></p>
+        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/0.20.2" class="external-link">sandpaper (0.20.2)</a>, <a href="https://github.com/carpentries/pegboard/tree/0.7.9" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/aseetharam/varnish/tree/aec0ff169ecf0863c0882e93bd191b19f2e7ff1e" class="external-link">varnish (1.0.7)</a></p>
 		</div>
 		</footer></div> <!-- / div.container -->
 	<div id="to-top">

@@ -389,6 +389,23 @@ identity</li>
 </div>
 </div>
 </div>
+<div id="prerequisites" class="callout prereq">
+<div class="callout-square">
+<i class="callout-icon" data-feather="check"></i>
+</div>
+<span class="callout-header">Prerequisite</span>
+<div id="prerequisites" class="callout-inner">
+<h3 class="callout-title">Prerequisites</h3>
+<div class="callout-content">
+<p>This episode requires an RStudio session on the Negishi cluster.
+Launch <strong>RStudio (bioconductor)</strong> under
+<strong>Bioinformatics Apps</strong> on <a href="https://gateway.negishi.rcac.purdue.edu" class="external-link">Open OnDemand</a> as
+described in the <a href="index.html#starting-rstudio-on-open-ondemand">Setup</a>
+instructions. You will also need the <code>pbmc_normalized.rds</code>
+object saved at the end of the previous episode.</p>
+</div>
+</div>
+</div>
 <section><h2 class="section-heading" id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a></h2>
 <hr class="half-width"><div class="codewrapper sourceCode" id="cb1">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -480,7 +497,7 @@ the first two components:</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">VizDimLoadings</span><span class="op">(</span><span class="va">pbmc</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, reduction <span class="op">=</span> <span class="st">"pca"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/viz-dim-loadings.png" alt="Dot plots showing the top 30 genes by loading magnitude for PC1 and PC2. PC1 shows myeloid markers such as LYZ, CST3, and S100A9. PC2 shows B cell markers such as BANK1, CD79A, and MS4A1." class="figure mx-auto d-block"><div class="figcaption">Dot plots showing the top 30 genes by loading
+<figure><img src="fig/ep5_viz-loadings.png" alt="Dot plots of the top 30 genes by loading magnitude for PC1 and PC2, with PC1 dominated by myeloid markers and PC2 by B cell markers." class="figure mx-auto d-block"><div class="figcaption">Dot plots showing the top 30 genes by loading
 magnitude for PC1 and PC2. PC1 shows myeloid markers such as LYZ, CST3,
 and S100A9. PC2 shows B cell markers such as BANK1, CD79A, and
 MS4A1.</div>
@@ -518,7 +535,7 @@ with cells (columns) ordered by their PC score. Clear blocks of
 correlated expression indicate PCs that capture real biological
 structure. PCs that look noisy (no clear pattern) are capturing
 technical variation or random noise.</p>
-<figure><img src="fig/DimHeatmap.png" alt="Grid of nine heatmaps showing gene expression patterns for PC1 through PC9. Each heatmap shows the top genes ordered by loading with cells ordered by PC score, revealing distinct expression programs." class="figure mx-auto d-block"><div class="figcaption">Grid of nine heatmaps showing gene expression
+<figure><img src="fig/ep5_dim-heatmap.png" alt="Grid of nine heatmaps for PC1 through PC9, each showing top genes ordered by loading and cells ordered by PC score to reveal distinct expression programs." class="figure mx-auto d-block"><div class="figcaption">Grid of nine heatmaps showing gene expression
 patterns for PC1 through PC9. Each heatmap shows the top genes ordered
 by loading with cells ordered by PC score, revealing distinct expression
 programs.</div>
@@ -535,7 +552,7 @@ explained by each PC:</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">ElbowPlot</span><span class="op">(</span><span class="va">pbmc</span>, ndims <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/elbowplot.png" alt="Dot plot of standard deviation versus principal component number. The curve drops steeply for the first 7 PCs then gradually flattens, with an elbow around PC 8 to 10." class="figure mx-auto d-block"><div class="figcaption">Dot plot of standard deviation versus principal
+<figure><img src="fig/ep5_elbow.png" alt="Elbow plot of standard deviation versus PC number showing a steep decline through PC7 and a plateau after PC10, with the elbow around PC 8 to 10." class="figure mx-auto d-block"><div class="figcaption">Dot plot of standard deviation versus principal
 component number. The curve drops steeply for the first 7 PCs then
 gradually flattens, with an elbow around PC 8 to 10.</div>
 </figure><p>Look for the <strong>elbow</strong> – the point where the curve
@@ -597,7 +614,7 @@ dissimilar cells far apart in 2D space.</p>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">pbmc</span>, reduction <span class="op">=</span> <span class="st">"umap"</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-1.png" alt="UMAP plot of all cells shown in a single color before clustering. Cells naturally organize into several spatially distinct groups corresponding to different cell types." class="figure mx-auto d-block"><div class="figcaption">UMAP plot of all cells shown in a single color
+<figure><img src="fig/ep5_umap-plot.png" alt="UMAP scatter plot of 11310 cells in a single color before clustering, with cells forming several spatially distinct groups that correspond to different cell types." class="figure mx-auto d-block"><div class="figcaption">UMAP plot of all cells shown in a single color
 before clustering. Cells naturally organize into several spatially
 distinct groups corresponding to different cell types.</div>
 </figure><p>At this point, cells are not yet clustered (all are the same color).
@@ -808,7 +825,7 @@ most abundant PBMC type). Cluster 17 is the smallest with only 39 cells
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">pbmc</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, label <span class="op">=</span> <span class="cn">TRUE</span>, label.size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/umap-plot-2.png" alt="UMAP plot with 18 clusters labeled 0 through 17, each shown in a distinct color. Large clusters like 0 and 1 dominate the center and bottom, while smaller clusters appear at the periphery." class="figure mx-auto d-block"><div class="figcaption">UMAP plot with 18 clusters labeled 0 through 17,
+<figure><img src="fig/ep5_umap-clusters.png" alt="UMAP plot colored by Louvain cluster identity at resolution 0.5, showing 18 clusters numbered 0 through 17 with large clusters in the center and small clusters at the periphery." class="figure mx-auto d-block"><div class="figcaption">UMAP plot with 18 clusters labeled 0 through 17,
 each shown in a distinct color. Large clusters like 0 and 1 dominate the
 center and bottom, while smaller clusters appear at the periphery.</div>
 </figure></div>
@@ -837,7 +854,7 @@ visualize how cells move between clusters at different resolutions using
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">clustree</span><span class="op">(</span><span class="va">pbmc</span>, prefix <span class="op">=</span> <span class="st">"RNA_snn_res."</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/clustree.png" alt="Clustree diagram showing how clusters split as resolution increases from 0.2 to 1.2. At low resolution a few large clusters exist, which progressively split into more subclusters at higher resolutions. Stable splits show clean branches while unstable splits show cells moving between multiple clusters." class="figure mx-auto d-block"><div class="figcaption">Clustree diagram showing how clusters split as
+<figure><img src="fig/ep5_clustree.png" alt="Clustree diagram tracing cluster membership from resolution 0.2 to 1.2, with clean branches indicating stable splits and tangled arrows indicating unstable over-splitting." class="figure mx-auto d-block"><div class="figcaption">Clustree diagram showing how clusters split as
 resolution increases from 0.2 to 1.2. At low resolution a few large
 clusters exist, which progressively split into more subclusters at
 higher resolutions. Stable splits show clean branches while unstable
@@ -881,7 +898,7 @@ cluster.</p>
 <span>            features <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"CD3D"</span>, <span class="st">"MS4A1"</span>, <span class="st">"LYZ"</span>, <span class="st">"GNLY"</span><span class="op">)</span>,</span>
 <span>            ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/feature-plot-4genes.png" alt="Four UMAP plots showing expression of CD3D, MS4A1, LYZ, and GNLY. Each gene is highlighted in a different cluster region, indicating T cells, B cells, monocytes, and NK cells respectively." class="figure mx-auto d-block"><div class="figcaption">Four UMAP plots showing expression of CD3D,
+<figure><img src="fig/ep5_feature-plot.png" alt="Four UMAP panels showing expression of CD3D, MS4A1, LYZ, and GNLY on a grey-to-purple gradient, each marking distinct cell populations for T cells, B cells, monocytes, and NK cells." class="figure mx-auto d-block"><div class="figcaption">Four UMAP plots showing expression of CD3D,
 MS4A1, LYZ, and GNLY. Each gene is highlighted in a different cluster
 region, indicating T cells, B cells, monocytes, and NK cells
 respectively.</div>
@@ -914,7 +931,7 @@ distribution across clusters:</p>
 <span>        ncol <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>        pt.size <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/vlnplot-plot-4genes.png" alt="Violin plots showing expression of CD3D, MS4A1, LYZ, and GNLY across all clusters. Each marker shows high expression in one or two specific clusters and low or zero expression in the others." class="figure mx-auto d-block"><div class="figcaption">Violin plots showing expression of CD3D, MS4A1,
+<figure><img src="fig/ep5_vln-markers.png" alt="Violin plots of CD3D, MS4A1, LYZ, and GNLY expression across 18 clusters, showing each marker with high expression in specific clusters and near-zero expression elsewhere." class="figure mx-auto d-block"><div class="figcaption">Violin plots showing expression of CD3D, MS4A1,
 LYZ, and GNLY across all clusters. Each marker shows high expression in
 one or two specific clusters and low or zero expression in the
 others.</div>
@@ -973,7 +990,7 @@ known PBMC cell types (~8–10 major types)?</li>
 </button>
 <div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
-<figure><img src="fig/snn-res.png" alt="Four UMAP plots comparing clustering at resolutions 0.2, 0.5, 0.8, and 1.2. Lower resolutions produce fewer large clusters while higher resolutions split cells into progressively more subclusters." class="figure mx-auto d-block"><div class="figcaption">Four UMAP plots comparing clustering at
+<figure><img src="fig/ep5_challenge1.png" alt="Side-by-side UMAP plots at resolutions 0.2, 0.5, 0.8, and 1.2 showing progressively more clusters as resolution increases." class="figure mx-auto d-block"><div class="figcaption">Four UMAP plots comparing clustering at
 resolutions 0.2, 0.5, 0.8, and 1.2. Lower resolutions produce fewer
 large clusters while higher resolutions split cells into progressively
 more subclusters.</div>
@@ -1049,7 +1066,7 @@ number(s) correspond to each cell type.</p>
 <div class="accordion-body">
 <figure><img src="fig/challenge2_plot1.png" alt="Three UMAP panels showing expression of CD3D, MS4A1, and LYZ. CD3D expression is concentrated in the upper-left and lower-left regions. MS4A1 lights up a compact group in the upper-right. LYZ is strongest in the lower-left clusters." class="figure mx-auto d-block"><div class="figcaption">FeaturePlot of CD3D, MS4A1, and LYZ on the UMAP,
 each highlighting distinct cell populations</div>
-</figure><figure><img src="fig/challenge2_plot2.png" alt="UMAP plot with 18 clusters labeled 0 through 17 for cross-referencing with the FeaturePlot above." class="figure mx-auto d-block"><div class="figcaption">Cluster-labeled UMAP for reference</div>
+</figure><figure><img src="fig/ep5_challenge2.png" alt="UMAP plot with 18 clusters labeled 0 through 17 for cross-referencing with the FeaturePlot above." class="figure mx-auto d-block"><div class="figcaption">Cluster-labeled UMAP for reference</div>
 </figure><p>By comparing the FeaturePlot panels with the labeled UMAP, you should
 see the following pattern (exact cluster numbers may differ depending on
 your run):</p>
@@ -1148,7 +1165,7 @@ any links that you are not going to use.
         <p>Materials licensed under <a href="LICENSE.html">CC-BY 4.0</a> by the authors</p>
 
         <p>Template licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" class="external-link">CC-BY 4.0</a> by <a href="https://carpentries.org/" class="external-link">The Carpentries</a></p>
-        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/0.20.1" class="external-link">sandpaper (0.20.1)</a>, <a href="https://github.com/carpentries/pegboard/tree/0.7.9" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/aseetharam/varnish/tree/aec0ff169ecf0863c0882e93bd191b19f2e7ff1e" class="external-link">varnish (1.0.7)</a></p>
+        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/0.20.2" class="external-link">sandpaper (0.20.2)</a>, <a href="https://github.com/carpentries/pegboard/tree/0.7.9" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/aseetharam/varnish/tree/aec0ff169ecf0863c0882e93bd191b19f2e7ff1e" class="external-link">varnish (1.0.7)</a></p>
 		</div>
 		</footer></div> <!-- / div.container -->
 	<div id="to-top">
