@@ -55,3 +55,6 @@ renv/sandbox # OPTIONAL
 
 CLAUDE.md
 schedule.md
+AUDIT_LOG.md
+corrections.md
+episodes/output/
