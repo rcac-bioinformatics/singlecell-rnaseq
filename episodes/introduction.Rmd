@@ -91,7 +91,7 @@ single run. The core idea is simple: wrap each cell in its own tiny droplet
 along with a barcoded gel bead, so that every mRNA molecule from that cell gets
 tagged with the same unique barcode.
 
-<img src="fig/10x-chromium-workflow.png" alt="Diagram showing the 10x Chromium microfluidic chip where cells, gel beads, and oil are combined to form gel bead-in-emulsion (GEM) droplets. Each GEM contains one gel bead and ideally one cell."/>
+![10x Chromium workflow overview](fig/10x-chromium-workflow.png){alt="Diagram showing the 10x Chromium microfluidic chip where cells, gel beads, and oil are combined to form gel bead-in-emulsion (GEM) droplets. Each GEM contains one gel bead and ideally one cell."}
 
 Here is how the process works, step by step:
 
@@ -127,7 +127,7 @@ computationally sort the reads back to their cell of origin.
 The library is sequenced on an Illumina sequencer, producing paired-end reads
 plus an index read. The read structure is:
 
-<img src="fig/fastq-read-structure.png" alt="Schematic showing three sequencing reads from a 10x Chromium library. Read 1 is 28 bp and contains the 16 bp cell barcode followed by the 12 bp UMI. Read 2 is variable length and contains the cDNA insert that maps to the transcriptome. The I1 index read contains the sample index for demultiplexing."/>
+![10x Chromium FASTQ read structure](fig/fastq-read-structure.png){alt="Schematic showing three sequencing reads from a 10x Chromium library. Read 1 is 28 bp and contains the 16 bp cell barcode followed by the 12 bp UMI. Read 2 is variable length and contains the cDNA insert that maps to the transcriptome. The I1 index read contains the sample index for demultiplexing."}
 
 - **Read 1 (28 bp):** The first 16 bases are the **cell barcode** (identifies
   which cell). The next 12 bases are the **UMI** (identifies which original
@@ -176,7 +176,7 @@ count matrix**. This is a table where each row is a gene, each column is a
 cell, and each entry is the number of unique mRNA molecules (UMIs) detected for
 that gene in that cell.
 
-<img src="fig/count-matrix-schematic.png" alt="Schematic of a count matrix with genes on rows and cells on columns. Most cells in the matrix contain zero, with occasional non-zero integer counts scattered throughout, illustrating the sparsity typical of single-cell RNA-seq data."/>
+![UMI count matrix schematic](fig/count-matrix-schematic.png){alt="Schematic of a count matrix with genes on rows and cells on columns. Most cells in the matrix contain zero, with occasional non-zero integer counts scattered throughout, illustrating the sparsity typical of single-cell RNA-seq data."}
 
 A few important properties of this matrix:
 
@@ -213,7 +213,7 @@ steps. Each step in the pipeline builds on the output of the previous one. This
 workshop covers the complete workflow from raw sequencing data through
 biological interpretation.
 
-<img src="fig/workshop-pipeline-overview.png" alt="Flowchart of the scRNA-seq analysis pipeline covered in this workshop. Eight boxes arranged vertically show the progression: Raw Data Processing, Quality Control, Normalization and Feature Selection, Dimensionality Reduction and Clustering, Cell Type Annotation, Multi-Sample Integration, and Differential Expression. Arrows connect each step to the next."/>
+![Workshop analysis pipeline overview](fig/workshop-pipeline-overview.png){alt="Flowchart of the scRNA-seq analysis pipeline covered in this workshop. Eight boxes arranged vertically show the progression: Raw Data Processing, Quality Control, Normalization and Feature Selection, Dimensionality Reduction and Clustering, Cell Type Annotation, Multi-Sample Integration, and Differential Expression. Arrows connect each step to the next."}
 
 **1. Raw Data Processing (Episode 2).**
 Starting from FASTQ files, we align reads to the human reference genome and
@@ -265,35 +265,6 @@ preferred approach for multi-sample experiments). We will also run **gene
 ontology enrichment** to connect lists of differentially expressed genes to
 biological pathways.
 
-## Scope of This Workshop
-
-This workshop teaches a standard scRNA-seq analysis workflow using a specific
-set of tools and data:
-
-- **Platform:** 10x Genomics Chromium 3' Gene Expression (v3 chemistry)
-- **Organism:** Human (GRCh38 reference genome)
-- **Dataset:** 10k PBMCs (peripheral blood mononuclear cells), a well-characterized
-  immune cell mixture
-- **Analysis toolkit:** Seurat v5 in R, running on Purdue's Negishi HPC cluster
-- **Integration dataset:** IFN-beta stimulated PBMCs from the SeuratData package
-
-By the end of the workshop you will have a solid understanding of the core
-scRNA-seq analysis pipeline and be able to apply these same steps to your own
-datasets.
-
-**What is NOT covered in this workshop:**
-
-- **Spatial transcriptomics** (Visium, MERFISH, Slide-seq)
-- **Multi-modal assays** (CITE-seq, Multiome ATAC+GEX)
-- **Trajectory and pseudotime analysis** (Monocle3, RNA velocity, scVelo)
-- **Python-based analysis** (Scanpy / AnnData ecosystem)
-- **Experimental design** and wet-lab sample preparation
-- **Custom reference genome building** for non-model organisms
-
-These are all important topics, but each warrants its own dedicated workshop.
-If you are interested in any of these areas, see the Additional Reading section
-in the [Reference](learners/reference.md) page for pointers to relevant
-resources.
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 

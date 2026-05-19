@@ -24,6 +24,19 @@ exercises: 15
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+::::::::::::::::::::::::::::::::::::::: prereq
+
+## Prerequisites
+
+This episode requires an RStudio session on the Negishi cluster. Launch
+**RStudio (bioconductor)** under **Bioinformatics Apps** on
+[Open OnDemand](https://gateway.negishi.rcac.purdue.edu) as described in the
+[Setup](../learners/setup.md#starting-rstudio-on-open-ondemand) instructions.
+You will also need the `pbmc_filtered.rds` object saved at the end of the
+previous episode.
+
+:::::::::::::::::::::::::::::::::::::::
+
 ## Setup
 
 ```{r setup, message=FALSE, warning=FALSE,  eval=FALSE}
@@ -230,7 +243,7 @@ p2 <- ggplot(data.frame(x = as.numeric(lyz_norm)), aes(x = x)) +
 
 p1 + p2
 ```
-![LYZ raw vs. normalized expression](fig/norm_compare_LYZ.png){alt="Two histograms for LYZ. Raw counts show a zero-dominated right-skewed distribution. Log-normalized values reveal a bimodal pattern with peaks near 0.5 and 4.5, separating non-monocytes from LYZ-expressing monocytes"}
+![LYZ raw vs. normalized expression](fig/ep4_norm-comparison.png){alt="Two histograms for LYZ. Raw counts show a zero-dominated right-skewed distribution. Log-normalized values reveal a bimodal pattern with peaks near 0.5 and 4.5, separating non-monocytes from LYZ-expressing monocytes"}
 
 
 The raw count distribution is heavily right-skewed with a large spike at zero
@@ -298,7 +311,7 @@ top10 <- head(VariableFeatures(pbmc), 10)
 LabelPoints(plot = vf_plot, points = top10, repel = TRUE)
 ```
 
-![Variable feature selection plot](fig/vf_plot.png){alt="Variable feature plot showing mean expression versus standardized variance for all genes, with the top 2000 variable features highlighted in red and the top 10 labeled"}
+![Variable feature selection plot](fig/ep4_variable-plot.png){alt="Variable feature plot showing mean expression versus standardized variance for all genes, with the top 2000 variable features highlighted in red and the top 10 labeled"}
 
 In this plot, each point is a gene. The x-axis shows mean expression across
 cells and the y-axis shows standardized variance. The red points are the 2,000
@@ -568,7 +581,7 @@ p4 <- ggplot(data.frame(x = lyz_norm), aes(x)) +
 :::::::::::::::::::::::: solution
 
 
-![ACTB and LYZ raw vs. normalized expression](fig/norm_housekeeping.png){alt="Four histograms in a 2x2 grid. Top row: ACTB raw counts show a right-skewed distribution peaking near zero; ACTB normalized shows a unimodal bell shape centered around 3.5. Bottom row: LYZ raw counts show a massive zero spike with a flat tail to 500; LYZ normalized reveals a bimodal pattern with peaks near 0.5 and 4.5"}
+![ACTB and LYZ raw vs. normalized expression](fig/ep4_challenge2.png){alt="Four histograms in a 2x2 grid. Top row: ACTB raw counts show a right-skewed distribution peaking near zero; ACTB normalized shows a unimodal bell shape centered around 3.5. Bottom row: LYZ raw counts show a massive zero spike with a flat tail to 500; LYZ normalized reveals a bimodal pattern with peaks near 0.5 and 4.5"}
 
 
 **ACTB (housekeeping gene):**

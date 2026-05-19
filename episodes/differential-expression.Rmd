@@ -25,6 +25,19 @@ exercises: 20
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+::::::::::::::::::::::::::::::::::::::: prereq
+
+## Prerequisites
+
+This episode requires an RStudio session on the Negishi cluster. Launch
+**RStudio (bioconductor)** under **Bioinformatics Apps** on
+[Open OnDemand](https://gateway.negishi.rcac.purdue.edu) as described in the
+[Setup](../learners/setup.md#starting-rstudio-on-open-ondemand) instructions.
+You will also need the `ifnb_annotated.rds` object saved at the end of the
+previous episode.
+
+:::::::::::::::::::::::::::::::::::::::
+
 ## Setup
 
 ```{r setup, message=FALSE, warning=FALSE, eval=FALSE}
@@ -65,7 +78,7 @@ DimPlot(ifnb, reduction = "umap", label = TRUE, repel = TRUE, split.by = "stim")
 
 ## Expected output
 
-![Split UMAP showing CTRL and STIM panels with cells colored and labeled by cell type. Nine cell types (CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, Eryth) appear in both panels with identical spatial arrangement, confirming the integrated structure.](fig/ep8_umap_split.png)
+![Split UMAP showing CTRL and STIM panels with cells colored and labeled by cell type.](fig/ep8_umap_split.png){alt="UMAP split by CTRL and STIM conditions with nine cell types colored and labeled, showing identical spatial arrangement in both panels confirming successful integration."}
 
 You should see two UMAP panels (CTRL and STIM) with the same cell type
 structure in both. Cell types are labeled and colored consistently across
@@ -121,7 +134,7 @@ cat("Significant genes (padj < 0.05):", sum(mono.wilcox$p_val_adj < 0.05), "\n")
 
 ## Expected output
 
-```output
+```{output}
         p_val avg_log2FC pct.1 pct.2 p_val_adj
 IFIT1       0   7.118    0.965 0.034         0
 IFIT3       0   6.737    0.971 0.057         0
@@ -235,7 +248,7 @@ bulk
 
 ## Expected output
 
-```output
+```{output}
 An object of class Seurat 
 14053 features across 54 samples within 1 assay 
 Active assay: RNA (14053 features, 0 variable features)
@@ -335,7 +348,7 @@ ggplot(mono.wilcox, aes(x = avg_log2FC, y = -log10(p_val_adj), color = significa
     theme_minimal()
 ```
 
-![Volcano plot for CD14 monocytes STIM vs CTRL. Red points (upregulated) cluster in the upper right with log2FC up to 9, blue points (downregulated) in the upper left, and grey (NS) points near the bottom center. Dashed lines mark the significance and fold-change cutoffs.](fig/ep8_volcano.png)
+![Volcano plot for CD14 monocytes STIM vs CTRL.](fig/ep8_volcano.png){alt="Volcano plot showing upregulated genes in red in the upper right, downregulated genes in blue in the upper left, and non-significant genes in grey near the bottom, with dashed cutoff lines for significance and fold change."}
 
 How to read the volcano plot:
 
@@ -355,7 +368,7 @@ FeaturePlot(ifnb,
             cols = c("grey85", "firebrick"))
 ```
 
-![FeaturePlot of IFIT1 split by CTRL and STIM. The CTRL panel is mostly grey with rare red dots. The STIM panel shows strong red expression across all clusters, with particularly intense signal in monocyte clusters on the right side of the UMAP.](fig/ep8_featureplot_ifit1.png)
+![FeaturePlot of IFIT1 split by CTRL and STIM.](fig/ep8_featureplot_ifit1.png){alt="Feature plot of IFIT1 expression split by condition showing near-absent expression in control cells and strong expression across all cell types in stimulated cells, especially monocytes."}
 
 ```{r de-violin, eval=FALSE, fig.alt="Violin plots showing IFIT1, CXCL10, and MX1 expression across cell types, split by control and stimulated conditions. All three genes are dramatically upregulated in the stimulated condition across multiple cell types."}
 VlnPlot(ifnb,
@@ -365,7 +378,7 @@ VlnPlot(ifnb,
         ncol = 3)
 ```
 
-![Three violin plot panels for IFIT1, CXCL10, and MX1 across nine cell types, split by condition. Teal (stimulated) violins are broad and tall for all three genes across most cell types. CXCL10 expression is strongest in CD14 Mono and FCGR3A Mono. Control violins are thin lines near zero.](fig/ep8_violin_de.png)
+![Violin plots for IFIT1, CXCL10, and MX1 across cell types, split by condition.](fig/ep8_violin_de.png){alt="Three violin plot panels showing IFIT1, CXCL10, and MX1 dramatically upregulated in stimulated cells across all cell types, with control violins near zero and stimulated violins broad and tall."}
 
 ### Dot plot across cell types
 
@@ -382,7 +395,7 @@ DotPlot(ifnb,
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-![Dot plot showing the top 10 DE genes (IFIT1, IFIT3, TNFSF10, RSAD2, IFIT2, MX1, CXCL10, LY6E, CXCL11, CCL8) across all cell types split by CTRL and STIM. Dot size indicates percent expressed, color from blue (low) to red (high) shows average expression. STIM columns consistently show larger, redder dots for all genes across cell types.](fig/ep8_dotplot_de.png)
+![Dot plot of top 10 DE genes across cell types split by condition.](fig/ep8_dotplot_de.png){alt="Dot plot showing top 10 DE genes across all cell types split by CTRL and STIM, with dot size indicating percent expressed and color indicating average expression, showing consistently larger and redder dots in stimulated cells."}
 
 ## Functional Enrichment
 
@@ -471,7 +484,7 @@ dotplot(go_results, showCategory = 15) +
 ## Expected output
 
 
-![GO Biological Process dot plot for STIM vs CTRL CD14 monocytes showing 15 terms. The top 3 by gene ratio are response to virus (largest dot, approximately 50 genes), defense response to virus, and viral process. Response to type I interferon and interferon-mediated signaling pathway appear near the bottom. Dot color ranges from red (low p.adjust) to blue (higher p.adjust).](fig/ep8_go_dotplot.png)
+![GO Biological Process dot plot for STIM vs CTRL CD14 monocytes.](fig/ep8_go_dotplot.png){alt="GO enrichment dot plot showing 15 biological process terms with response to virus, defense response to virus, and viral process as the top three by gene ratio, with dot color from red to blue indicating adjusted p-value."}
 
 
 The top enriched GO terms should include:
@@ -668,7 +681,7 @@ Which method gives more conservative results? Why?
 
 :::::::::::::::::::::::: solution
 
-![Scatter plot comparing -log10(p-value) from Wilcoxon (x-axis) and Pseudobulk (y-axis) for shared genes. A red dashed diagonal marks equal significance. Points are broadly scattered, with a dense cluster along the x-axis near y equals 0 (genes significant only in Wilcoxon) and many points above the diagonal (genes more significant in pseudobulk).](fig/ep8_pval_comparison.png)
+![Scatter plot comparing p-values from Wilcoxon and pseudobulk DE tests.](fig/ep8_pval_comparison.png){alt="Scatter plot of negative log10 p-values from Wilcoxon versus pseudobulk for shared genes, with a red dashed diagonal showing equal significance and points broadly scattered indicating different significance rankings between methods."}
 
 You should find that:
 
@@ -746,7 +759,7 @@ dotplot(go_top200, showCategory = 10) +
 
 :::::::::::::::::::::::: solution
 
-![GO BP dot plot for the top 200 upregulated genes in STIM CD14 monocytes showing 10 terms. Response to virus and defense response to virus have the largest gene ratios (approximately 0.28 to 0.30) and deepest red color. Viral process, viral life cycle, and regulation of viral process follow. Dot sizes range from about 15 to over 50 genes.](fig/ep8_go_top200.png)
+![GO BP dot plot for the top 200 upregulated genes in STIM CD14 monocytes.](fig/ep8_go_top200.png){alt="GO enrichment dot plot for top 200 upregulated genes showing 10 biological process terms with response to virus and defense response to virus having the largest gene ratios and deepest red color indicating lowest adjusted p-values."}
 
 The top 5 biological processes should include terms like:
 

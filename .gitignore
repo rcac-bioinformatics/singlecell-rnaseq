@@ -58,3 +58,8 @@ schedule.md
 AUDIT_LOG.md
 corrections.md
 episodes/output/
+episodes/coaching/
+episodes/cue_sheets/
+convert_coaching.py
+.venv/
+episodes/fig/old_plots/
