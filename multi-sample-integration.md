@@ -176,7 +176,7 @@ DimPlot(ifnb, reduction = "umap", group.by = "stim")
 ```
 
 
-![](fig/umap-plot-7.png)
+![UMAP plot of IFNB dataset before integration. CTRL (salmon) and STIM (teal) cells form largely separate clusters. Several clusters are dominated by one condition, indicating batch-driven rather than cell-type-driven clustering.](fig/umap-plot-7.png)
 
 You should see a clear separation between control (CTRL) and stimulated (STIM)
 cells. Instead of clustering by cell type (T cells with T cells, monocytes
@@ -231,7 +231,7 @@ Visualize the integrated result:
 ``` r
 DimPlot(ifnb, reduction = "umap", group.by = "stim")
 ```
-![](fig/umap-plot-8.png)
+![UMAP plot after CCA integration. CTRL and STIM cells are now intermingled within each cluster, with teal (STIM) dominating the overlay. Cell types co-cluster regardless of condition.](fig/umap-plot-8.png)
 
 The control and stimulated cells should now be intermingled within each
 cluster. Cell types from both conditions co-cluster, which is what we want.
@@ -242,7 +242,7 @@ Let's verify with a split view:
 ``` r
 DimPlot(ifnb, reduction = "umap", split.by = "stim")
 ```
-![](fig/umap-plot-9.png)
+![Two side-by-side UMAP panels split by condition (CTRL and STIM) after integration. Both panels show 14 clusters numbered 0 through 13, with the same spatial arrangement in each panel, confirming successful integration.](fig/umap-plot-9.png)
 
 Both panels should show the same overall structure, with the same clusters
 present in both conditions. This confirms that integration successfully
@@ -348,7 +348,7 @@ ifnb$celltype <- Idents(ifnb)
 ``` r
 DimPlot(ifnb, reduction = "umap", label = TRUE, repel = TRUE) + NoLegend()
 ```
-![](fig/umap-plot-10.png)
+![UMAP plot with cells colored and labeled by annotated cell type. Nine cell types are visible: CD14 Mono (large cluster, right), CD4 T (large, upper left), CD8 T (upper right), B (center left), NK (left), FCGR3A Mono (lower right), DC (small, center), Mk (small, center right), and Eryth (small, bottom).](fig/umap-plot-10.png)
 
 
 ### Conserved markers
@@ -483,7 +483,7 @@ FeaturePlot(ifnb,
             cols = c("grey85", "firebrick"))
 ```
 
-![](fig/dimplot_ifnb_de1.png)
+![Four-row FeaturePlot split by CTRL and STIM for ISG15, IFIT1, TNFSF10, and RSAD2. CTRL panels show mostly grey cells with sparse expression. STIM panels show strong red expression across monocyte and other clusters for all four genes.](fig/dimplot_ifnb_de1.png)
 
 
 
@@ -496,9 +496,9 @@ VlnPlot(ifnb,
         pt.size = 0)
 ```
 
-![](fig/vlnplot_ifnb_de1.png)
+![Four violin plots for IFIT1, IFIT3, TNFSF10, and RSAD2 in CD14 monocytes. Each panel shows two violins: a thin line at zero for control and a broad teal shape peaking around expression level 3 to 4 for stimulated, confirming strong IFN-beta induction.](fig/vlnplot_ifnb_de1.png)
 
-IFIT1 and IFIT13 are strongly induced in the stimulated condition across
+IFIT1 and IFIT3 are strongly induced in the stimulated condition across
 multiple cell types, with particularly strong expression in monocytes. This
 demonstrates that integration corrected the batch effect (cell types co-cluster)
 while preserving the biological effect of IFN-beta stimulation (ISGs are still
@@ -536,7 +536,7 @@ Condition CD14 Mono  CD4 T  CD8 T     NK      B FCGR3A Mono     DC     Mk  Eryth
      STIM     0.496  0.568  0.523  0.565  0.518       0.470  0.553  0.554  0.542
 ```
 
-![](fig/dimplot_challenge-ifnb1.png)
+![Split UMAP with CTRL and STIM panels, cells labeled by cell type. Both panels show identical cluster arrangement with CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, and Eryth labels, confirming balanced condition mixing within each cell type.](fig/dimplot_challenge-ifnb1.png)
 
 Most cell types fall in the **0.43--0.57** range, confirming that integration
 successfully mixed cells from both conditions. The split UMAP shows the same
@@ -594,7 +594,7 @@ FeaturePlot(ifnb,
 
 ## Solution
 
-![](fig/dimplot_challenge2-ifnb1.png)
+![Four-row FeaturePlot split by CTRL and STIM showing CCL8, CXCL11, CXCL10, and HESX1. CTRL panels are almost entirely grey. STIM panels show strong red expression concentrated in the monocyte clusters for all four chemokine and ISG genes.](fig/dimplot_challenge2-ifnb1.png)
 
 
 

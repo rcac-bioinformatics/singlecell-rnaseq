@@ -64,9 +64,9 @@ DimPlot(pbmc, reduction = "umap", label = TRUE, label.size = 5) + NoLegend()
 
 ## Expected output
 
-![](fig/umap-plot-3.png)
+![Clustered UMAP from previous episode](fig/umap-plot-3.png){alt="UMAP plot with 18 clusters labeled 0 through 17 at resolution 0.5, matching the clustering results from the previous episode."}
 
-You should see the UMAP 18 clusters labeled by number (0 to 17), matching the clustering results from the previous episode.
+You should see the UMAP with 18 clusters labeled by number (0 to 17), matching the clustering results from the previous episode.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -216,7 +216,7 @@ top3 <- pbmc.markers %>%
 
 DoHeatmap(pbmc, features = top3$gene) + NoLegend()
 ```
-![](fig/top3-heatmap.png)
+![Heatmap of top 3 markers per cluster](fig/top3-heatmap.png){alt="Heatmap showing expression of the top 3 marker genes per cluster across all 18 clusters. Each cluster shows a distinct block of upregulated genes, confirming distinct transcriptional identities."}
 
 
 Each cluster should show a distinct block of highly expressed genes (bright
@@ -235,7 +235,7 @@ DotPlot(pbmc, features = unique(top3$gene)) + coord_flip() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-![](fig/top3-dotplot.png)
+![Dot plot of top marker genes](fig/top3-dotplot.png){alt="Dot plot showing expression of top 3 marker genes across all 18 clusters. Dot size indicates the percentage of cells expressing each gene; dot shading indicates average expression level."}
 
 
 ## Manual Annotation with Known Markers
@@ -264,7 +264,7 @@ FeaturePlot(pbmc,
             ncol = 4)
 ```
 
-![](fig/known-marker-featureplot.png)
+![FeaturePlot of 8 canonical PBMC markers](fig/known-marker-featureplot.png){alt="Grid of 8 UMAP panels showing expression of CD3D, IL7R, CD8A, MS4A1, LYZ, FCGR3A, GNLY, and FCER1A. Each marker highlights a distinct UMAP region: CD3D and IL7R in the upper-left T cell area, CD8A in a small cluster on the right, MS4A1 in B cells on the right, LYZ in monocytes at the lower-left, FCGR3A in a small cluster at the lower-right, GNLY in NK cells at the upper-center, and FCER1A in a small dendritic cell group."}
 
 And as violin plots to see expression across clusters:
 
@@ -277,7 +277,7 @@ VlnPlot(pbmc,
         pt.size = 0)
 ```
 
-![](fig/known-marker-vlnplot.png)
+![Violin plots of 8 PBMC markers across clusters](fig/known-marker-vlnplot.png){alt="Violin plots of CD3D, IL7R, CD8A, MS4A1, LYZ, FCGR3A, GNLY, and PPBP across all 18 clusters. Each marker shows high expression in the clusters corresponding to its known cell type and low expression elsewhere."}
 
 
 Based on these plots and the `FindAllMarkers` results, we can build a mapping
@@ -339,7 +339,7 @@ Visualize the final annotated UMAP:
 DimPlot(pbmc, reduction = "umap", label = TRUE, repel = TRUE) + NoLegend()
 ```
 
-![](fig/umap-plot-4.png)
+![Annotated UMAP with cell type labels](fig/umap-plot-4.png){alt="UMAP plot with cells labeled by manually assigned cell type names: CD4 T, CD14 Mono, NK, B, CD8 T, FCGR3A+ Mono, DC, pDC, and Platelet."}
 
 
 Store the annotation in the metadata so it persists after saving:
@@ -428,7 +428,7 @@ DimPlot(pbmc, group.by = "singler_labels", reduction = "umap",
         label = TRUE, repel = TRUE) + NoLegend()
 ```
 
-![](fig/umap-plot-5.png)
+![SingleR annotated UMAP](fig/umap-plot-5.png){alt="UMAP plot with cells colored by SingleR automated annotation labels from the Monaco Immune reference, showing CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils."}
 
 ### Comparing manual and automated annotations
 
@@ -485,10 +485,10 @@ The table reveals a mix of strong agreement and instructive disagreements:
   our manual annotation was too broad.
 - **CD8 T mislabeled as B cells**: this is the largest disagreement. All 1,006
   cells we labeled "CD8 T" are called "B cells" by SingleR. This likely means
-  our manual annotation of cluster 8 as CD8 T is wrong and should be
-  reconsidered -- the MS4A1 expression in that cluster (visible in the
-  VlnPlot) supports SingleR's call. **Go back and verify CD8A expression in
-  this cluster.**
+  our manual annotation of cluster 4 as CD8 T is wrong and should be
+  reconsidered -- check the MS4A1 and CD8A expression in that cluster
+  (visible in the VlnPlot) to determine whether SingleR's B cell call is
+  more appropriate. **Go back and verify marker expression in this cluster.**
 - **NK split with T cells**: SingleR calls 607 of our NK cells as "NK cells"
   but labels 662 as "T cells." This likely reflects NKT cells or cytotoxic
   CD8+ T cells that share expression of GNLY and NKG7 with NK cells. Our
@@ -523,7 +523,7 @@ p1 + p2
 ```
 
 
-![](fig/umap-plot-6.png) 
+![Manual vs SingleR annotation side by side](fig/umap-plot-6.png){alt="Two UMAP plots side by side. Left panel shows manual annotation with CD4 T, CD14 Mono, NK, B, CD8 T, FCGR3A+ Mono, DC, pDC, and Platelet labels. Right panel shows SingleR annotation with CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils. Most cell groups receive consistent labels between the two methods."}
 
 When the two methods **agree**, you can be very confident in the label. When
 they **disagree**, check the marker gene expression for the disputed cluster
@@ -695,7 +695,7 @@ others. Here are the key patterns:
 
 **1. Strong agreement: Monocytes, B cells, NK cells.** Monaco "Monocytes"
 map almost entirely to HPCA "Monocyte" (3,669 of 3,717). Monaco "B cells"
-map to HPCA "B_cell" (1,575 of 1,623). Monaco "NK cells" map to HPCA
+map to HPCA "B_cell" (1,575 of 1,624). Monaco "NK cells" map to HPCA
 "NK_cell" (649 of 666). These cell types have distinctive profiles that
 both references recognize.
 

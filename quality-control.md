@@ -117,8 +117,8 @@ Active assay: RNA (29155 features, 0 variable features)
  1 layer present: counts
 ```
 
-After the initial filters, we have approximately 23,700 genes and 11,700 cells.
-The gene count dropped from 36,601 because many genes were detected in fewer
+After the initial filters, we have 29,155 genes and 11,721 cells.
+The gene count dropped from 38,606 because many genes were detected in fewer
 than 3 cells and were removed.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -311,8 +311,8 @@ What to look for in this plot:
 - **Top-right outliers**: cells with both very high UMI counts and very high
   gene counts. These are potential doublets -- two cells captured in one
   droplet, producing double the RNA content.
-- **High mitochondrial cells**: points colored in yellow/bright colors in the
-  viridis scale. These often sit below the main diagonal because the cell is
+- **High mitochondrial cells**: points colored in darker shades on the
+  grey-to-red gradient. These often sit below the main cloud because the cell is
   losing cytoplasmic RNA while retaining mitochondrial RNA.
 
 :::::::::::::::::::::::::::::::::::::::: callout
@@ -495,7 +495,7 @@ blends two cell types.
 
 **How doublets appear in QC metrics:** Doublets tend to have high `nCount_RNA`
 and high `nFeature_RNA` because they contain RNA from two cells. Our upper
-threshold on `nFeature_RNA < 5000` catches some of the most extreme doublets,
+threshold on `nFeature_RNA < 7000` catches some of the most extreme doublets,
 but it cannot identify doublets between similar cell types (e.g., two T cells)
 because their combined profile looks like a normal high-quality T cell.
 
@@ -559,8 +559,8 @@ pbmc_custom <- subset(pbmc,
 cat("Cells with custom thresholds:", ncol(pbmc_custom), "\n")
 ```
 
-This retains 7,579 cells compared to ~11,000 with the default thresholds --
-a loss of roughly 26% of the data. The trade-offs are:
+This retains 7,579 cells compared to 9,874 with the default thresholds --
+a loss of roughly 23% of the data. The trade-offs are:
 
 - `nFeature_RNA > 300` (vs. 200): slightly more aggressive removal of
   low-complexity cells, but may also remove some small cell types like
@@ -574,7 +574,7 @@ a loss of roughly 26% of the data. The trade-offs are:
   elevated mitochondrial content.
 
 The key point is that **more aggressive filtering is not always better**. Every
-cell you remove is data you lose. Dropping from ~10,000 to 7,579 cells means
+cell you remove is data you lose. Dropping from 9,874 to 7,579 cells means
 losing nearly a quarter of the dataset, which could reduce statistical power
 and under-represent cell types that naturally have higher gene counts or
 mitochondrial content. The goal is to remove cells that would distort the

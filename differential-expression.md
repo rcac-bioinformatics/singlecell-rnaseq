@@ -68,7 +68,7 @@ DimPlot(ifnb, reduction = "umap", label = TRUE, repel = TRUE, split.by = "stim")
 
 ## Expected output
 
-![](fig/ep8_umap_split.png)
+![Split UMAP showing CTRL and STIM panels with cells colored and labeled by cell type. Nine cell types (CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, Eryth) appear in both panels with identical spatial arrangement, confirming the integrated structure.](fig/ep8_umap_split.png)
 
 You should see two UMAP panels (CTRL and STIM) with the same cell type
 structure in both. Cell types are labeled and colored consistently across
@@ -303,15 +303,16 @@ SSB        0   2.470712     1     1         0
 Significant genes (p_val_adj < 0.05): 1455 
 ```
 
-The pseudobulk analysis typically identifies **fewer significant genes** than
-the per-cell Wilcoxon test (often 100-400 instead of 765). The top genes
-should still be ISGs and chemokines, but the p-values are larger because the
-effective sample size is 3 pseudo-replicates per condition, not thousands of
-cells.
+The pseudobulk analysis identifies **1455 significant genes** -- more than
+the Wilcoxon test (765). This may seem surprising: we said pseudobulk is more
+conservative, so why does it find more? Because we used **pseudo-replicates**,
+not true biological replicates. The 3 random splits within each condition have
+very low within-group variance, giving DESeq2 high statistical power.
 
-Note: because we used pseudo-replicates rather than true biological replicates,
-these p-values are still somewhat optimistic. With real donor-level replicates,
-the gene count would likely be even lower.
+With genuine biological replicates (different donors with real between-donor
+variability), the pseudobulk gene count would typically be **much lower** than
+the per-cell test. The high count here is an artifact of pseudo-replication and
+should not be interpreted as pseudobulk being more sensitive in general.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -346,7 +347,7 @@ ggplot(mono.wilcox, aes(x = avg_log2FC, y = -log10(p_val_adj), color = significa
     theme_minimal()
 ```
 
-![](fig/ep8_volcano.png)
+![Volcano plot for CD14 monocytes STIM vs CTRL. Red points (upregulated) cluster in the upper right with log2FC up to 9, blue points (downregulated) in the upper left, and grey (NS) points near the bottom center. Dashed lines mark the significance and fold-change cutoffs.](fig/ep8_volcano.png)
 
 How to read the volcano plot:
 
@@ -367,7 +368,7 @@ FeaturePlot(ifnb,
             cols = c("grey85", "firebrick"))
 ```
 
-![](fig/ep8_featureplot_ifit1.png)
+![FeaturePlot of IFIT1 split by CTRL and STIM. The CTRL panel is mostly grey with rare red dots. The STIM panel shows strong red expression across all clusters, with particularly intense signal in monocyte clusters on the right side of the UMAP.](fig/ep8_featureplot_ifit1.png)
 
 
 ``` r
@@ -378,7 +379,7 @@ VlnPlot(ifnb,
         ncol = 3)
 ```
 
-![](fig/ep8_violin_de.png)
+![Three violin plot panels for IFIT1, CXCL10, and MX1 across nine cell types, split by condition. Teal (stimulated) violins are broad and tall for all three genes across most cell types. CXCL10 expression is strongest in CD14 Mono and FCGR3A Mono. Control violins are thin lines near zero.](fig/ep8_violin_de.png)
 
 ### Dot plot across cell types
 
@@ -396,7 +397,7 @@ DotPlot(ifnb,
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-![](fig/ep8_dotplot_de.png)
+![Dot plot showing the top 10 DE genes (IFIT1, IFIT3, TNFSF10, RSAD2, IFIT2, MX1, CXCL10, LY6E, CXCL11, CCL8) across all cell types split by CTRL and STIM. Dot size indicates percent expressed, color from blue (low) to red (high) shows average expression. STIM columns consistently show larger, redder dots for all genes across cell types.](fig/ep8_dotplot_de.png)
 
 ## Functional Enrichment
 
@@ -489,18 +490,18 @@ dotplot(go_results, showCategory = 15) +
 ## Expected output
 
 
-![](fig/ep8_go_dotplot.png)
+![GO Biological Process dot plot for STIM vs CTRL CD14 monocytes showing 15 terms. The top 3 by gene ratio are response to virus (largest dot, approximately 50 genes), defense response to virus, and viral process. Response to type I interferon and interferon-mediated signaling pathway appear near the bottom. Dot color ranges from red (low p.adjust) to blue (higher p.adjust).](fig/ep8_go_dotplot.png)
 
 
 The top enriched GO terms should include:
 
-- **defense response to virus**
-- **type I interferon signaling pathway**
 - **response to virus**
-- **innate immune response**
-- **negative regulation of viral genome replication**
-- **cytokine-mediated signaling pathway**
-- **response to interferon-beta**
+- **defense response to virus**
+- **viral process**
+- **viral life cycle**
+- **regulation of innate immune response**
+- **regulation of viral process**
+- **viral genome replication**
 
 These terms are entirely consistent with IFN-beta stimulation. IFN-beta is a
 type I interferon that activates antiviral defense programs, and the GO
@@ -693,28 +694,33 @@ Which method gives more conservative results? Why?
 
 :::::::::::::::::::::::: solution
 
-![](fig/ep8_pval_comparison.png)
+![Scatter plot comparing -log10(p-value) from Wilcoxon (x-axis) and Pseudobulk (y-axis) for shared genes. A red dashed diagonal marks equal significance. Points are broadly scattered, with a dense cluster along the x-axis near y equals 0 (genes significant only in Wilcoxon) and many points above the diagonal (genes more significant in pseudobulk).](fig/ep8_pval_comparison.png)
 
 You should find that:
 
 - **Wilcoxon** identifies 765 significant genes
-- **Pseudobulk** identifies 1455 with pseudo-replicates)
+- **Pseudobulk** identifies 1455 (with pseudo-replicates)
 
-The scatter plot shows that most points fall **below** the diagonal (the red
-dashed line), meaning pseudobulk p-values are consistently **larger** (less
-significant) than Wilcoxon p-values for the same genes.
+Pseudobulk finds **more** significant genes here, which may seem to contradict
+the usual advice that pseudobulk is more conservative. The reason: our
+pseudo-replicates (random cell splits) have very low within-group variance, so
+DESeq2 gets very high power. With **real** biological replicates (different
+donors), the between-donor variability would inflate variance estimates and
+the gene count would drop substantially.
 
-This is expected and correct. The Wilcoxon test has inflated significance
-because it treats each cell as an independent observation. With ~1,600
-monocytes per condition, even tiny expression differences become
-"significant." The pseudobulk test aggregates cells into 3 pseudo-replicates
-per condition, giving a more realistic (though still imperfect) sample size
-and more conservative p-values.
+The scatter plot shows a complex pattern:
 
-The genes that are significant in **both** methods are the most trustworthy --
-these are genes with large, robust effects that survive the more stringent
-pseudobulk test. The genes significant only in Wilcoxon but not in pseudobulk
-are likely false positives driven by pseudoreplication.
+- A **dense band along the x-axis** (Wilcoxon significant, pseudobulk not) --
+  genes with small effects that Wilcoxon detects via per-cell power but
+  pseudobulk misses.
+- Many points **above the diagonal** -- genes where pseudobulk yields smaller
+  p-values, because DESeq2's count-based model is more powerful when
+  within-group variance is low.
+- Some points **below the diagonal** -- genes where Wilcoxon is more significant.
+
+With true biological replicates, you would expect most points to shift below
+the diagonal and the overall pseudobulk gene count to drop well below the
+Wilcoxon count.
 
 **Rule of thumb:** Use Wilcoxon for quick exploration and hypothesis
 generation. Use pseudobulk for any result you plan to report or publish. And
@@ -767,17 +773,17 @@ dotplot(go_top200, showCategory = 10) +
 
 :::::::::::::::::::::::: solution
 
-![](fig/ep8_go_top200.png)
+![GO BP dot plot for the top 200 upregulated genes in STIM CD14 monocytes showing 10 terms. Response to virus and defense response to virus have the largest gene ratios (approximately 0.28 to 0.30) and deepest red color. Viral process, viral life cycle, and regulation of viral process follow. Dot sizes range from about 15 to over 50 genes.](fig/ep8_go_top200.png)
 
 The top 5 biological processes should include terms like:
 
 | Rank | GO Term | Interpretation |
 |:----:|:--------|:--------------|
-| 1 | defense response to virus | Direct antiviral effector programs activated by IFN-beta |
-| 2 | type I interferon signaling pathway | The canonical pathway triggered by IFN-beta binding to IFNAR |
-| 3 | response to virus | Broad viral response including both detection and effector mechanisms |
-| 4 | chemokine-mediated signaling pathway | Reflects the dominance of CCL8, CXCL10, CXCL11 in the top DE genes |
-| 5 | innate immune response | General innate immunity activation, of which IFN signaling is a central component |
+| 1 | response to virus | Broad viral response including both detection and effector mechanisms |
+| 2 | defense response to virus | Direct antiviral effector programs activated by IFN-beta |
+| 3 | viral process | Genes involved in the viral life cycle, many of which are ISGs that restrict it |
+| 4 | viral life cycle | Overlap with viral process; reflects IFIT, OAS, and MX family genes |
+| 5 | regulation of viral process | Regulatory genes that modulate antiviral defense (e.g., TRIM, IRF family) |
 
 These results make complete biological sense. IFN-beta (interferon beta) is a
 **type I interferon** that signals through the IFNAR receptor complex,

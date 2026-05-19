@@ -239,7 +239,7 @@ p2 <- ggplot(data.frame(x = as.numeric(lyz_norm)), aes(x = x)) +
 
 p1 + p2
 ```
-![LYZ raw vs. normalized expression](fig/norm_compare_LYZ.png){alt="Two histograms comparing raw UMI counts and log-normalized expression for the LYZ gene, showing how normalization reduces the right skew"}
+![LYZ raw vs. normalized expression](fig/norm_compare_LYZ.png){alt="Two histograms for LYZ. Raw counts show a zero-dominated right-skewed distribution. Log-normalized values reveal a bimodal pattern with peaks near 0.5 and 4.5, separating non-monocytes from LYZ-expressing monocytes"}
 
 
 The raw count distribution is heavily right-skewed with a large spike at zero
@@ -293,9 +293,10 @@ head(VariableFeatures(pbmc), 10)
  [6] "JCHAIN"          "GP1BB"           "SOX5"            "ENSG00000225885" "EREG"     
 ```
 
-The top variable features include known immune cell markers: S100A9 and LYZ
-(monocytes), GNLY and NKG7 (NK cells), IGKC (B cells), and CST3 (dendritic
-cells). This makes sense -- these genes are highly expressed in specific cell
+The top variable features include PPBP and PF4 (platelet markers), GP1BB
+(also platelets), JCHAIN (B/plasma cells), and PTGDS (dendritic cells).
+Several lincRNAs and an Ensembl ID also appear due to sparse but extreme
+expression in a few cells. These genes are highly expressed in specific cell
 types but absent in others, producing high cell-to-cell variance.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -337,7 +338,7 @@ pbmc <- ScaleData(pbmc)
 ```
 
 By default, `ScaleData()` only scales the variable features (the 2,000 genes
-selected above), not all ~23,000 genes. This is faster and sufficient for PCA,
+selected above), not all ~29,000 genes. This is faster and sufficient for PCA,
 which only uses variable features. If you later need scaled values for all
 genes (e.g., for a heatmap of a non-variable gene), you can re-run
 `ScaleData()` with `features = rownames(pbmc)`.
@@ -587,7 +588,7 @@ p4 <- ggplot(data.frame(x = lyz_norm), aes(x)) +
 :::::::::::::::::::::::: solution
 
 
-![ACTB and CD3D raw vs. normalized expression](fig/norm_housekeeping.png){alt="Four histograms comparing raw and normalized expression for ACTB (housekeeping) and CD3D (cell-type marker), showing that normalization compresses the housekeeping gene distribution while preserving the bimodal pattern of the marker gene"}
+![ACTB and LYZ raw vs. normalized expression](fig/norm_housekeeping.png){alt="Four histograms in a 2x2 grid. Top row: ACTB raw counts show a right-skewed distribution peaking near zero; ACTB normalized shows a unimodal bell shape centered around 3.5. Bottom row: LYZ raw counts show a massive zero spike with a flat tail to 500; LYZ normalized reveals a bimodal pattern with peaks near 0.5 and 4.5"}
 
 
 **ACTB (housekeeping gene):**
