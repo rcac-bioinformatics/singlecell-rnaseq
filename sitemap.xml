@@ -16,6 +16,9 @@
     <loc>https://singlecell-rnaseq.github.io/NA/cell-type-annotation.html</loc>
   </url>
   <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/citation.html</loc>
+  </url>
+  <url>
     <loc>https://singlecell-rnaseq.github.io/NA/differential-expression.html</loc>
   </url>
   <url>
@@ -41,6 +44,9 @@
   </url>
   <url>
     <loc>https://singlecell-rnaseq.github.io/NA/instructor/cell-type-annotation.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/instructor/citation.html</loc>
   </url>
   <url>
     <loc>https://singlecell-rnaseq.github.io/NA/instructor/differential-expression.html</loc>
