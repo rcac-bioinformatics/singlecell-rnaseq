@@ -1,0 +1,15 @@
+[nice] learners/setup.md:141 lists the FASTQs as R1/R2 only; the staged copy (and the Episode 2 listing
+at raw-data-processing.Rmd:100-105) also has the I1 files. List them so learners are not surprised.
+Apply: git apply updates-patches/06-setup-i1-listing.patch
+
+--- a/learners/setup.md
++++ b/learners/setup.md
+@@ -138,7 +138,7 @@
+ 
+ This will copy:
+ 
+-- **FASTQ files**: `fastq/pbmc_10k_v3_S1_L00{1,2}_R{1,2}_001.fastq.gz`
++- **FASTQ files**: `fastq/pbmc_10k_v3_S1_L00{1,2}_{I1,R1,R2}_001.fastq.gz`
+ - **10x Reference**: `reference/refdata-gex-GRCh38-2024-A/`
+ - **Pre-computed count matrix**: `filtered_feature_bc_matrix/` (for episodes 3+)
+ - **Pre-computed R objects**: `rds/` (optional, for jumping into later episodes)

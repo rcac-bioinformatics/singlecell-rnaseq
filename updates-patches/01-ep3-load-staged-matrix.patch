@@ -1,0 +1,66 @@
+[blocker] Episode 3 reads Episode 2's Cell Ranger output, which will not exist when Episode 3 starts.
+quality-control.Rmd:58-73. Load the staged copy of the same matrix instead (learners already rsync it in
+setup), keep the Cell Ranger path as an optional callout, and move setwd() into set-paths so the chunk
+matches Episodes 4 to 8. Expected outputs are unchanged if the staged matrix is the Cell Ranger 10 run
+(the kit's 02-compare step checks barcodes md5 against it).
+Apply: git apply updates-patches/01-ep3-load-staged-matrix.patch
+
+--- a/episodes/quality-control.Rmd
++++ b/episodes/quality-control.Rmd
+@@ -46,30 +46,45 @@
+ ## Loading Data into Seurat
+ 
+ The starting point for this episode is the **filtered count matrix** produced
+-by Cell Ranger in the previous episode. This matrix lives in the
+-`filtered_feature_bc_matrix/` directory and consists of three files:
+-`barcodes.tsv.gz`, `features.tsv.gz`, and `matrix.mtx.gz`. Seurat's
+-`Read10X()` function reads all three files and assembles them into a sparse
+-matrix in R.
+-
+-First, set up the path to the Cell Ranger output so that all file references
+-in this episode use the same base directory:
++by Cell Ranger. This matrix lives in a `filtered_feature_bc_matrix/` directory
++and consists of three files: `barcodes.tsv.gz`, `features.tsv.gz`, and
++`matrix.mtx.gz`. Seurat's `Read10X()` function reads all three files and
++assembles them into a sparse matrix in R.
++
++Your Cell Ranger job from the previous episode takes several hours, so we use
++the copy of the same matrix that you copied from the workshop data directory
++during setup (`scrna_workshop/filtered_feature_bc_matrix/`). It was produced
++by the `run_cellranger.sh` script from the previous episode.
++
++First, set up the paths so that all file references in this episode use the
++same base directory:
+ 
+ ```{r set-paths, eval=FALSE}
+ data_dir <- paste0(
+     "/scratch/negishi/", Sys.getenv("USER"),
+-    "/scrna_workshop/cellranger_output/pbmc10k/outs/filtered_feature_bc_matrix/"
++    "/scrna_workshop/filtered_feature_bc_matrix/"
+ )
+ work_dir <- paste0(
+     "/scratch/negishi/", Sys.getenv("USER"),
+     "/scrna_workshop/"
+ )
+-```
++setwd(work_dir)
++```
++
++:::::::::::::::::::::::::::::::::::::::: callout
++
++## Using your own Cell Ranger output
++
++If your Cell Ranger job has finished, you can load your own matrix instead by
++setting `data_dir` to
++`/scratch/negishi/<username>/scrna_workshop/cellranger_output/pbmc10k/outs/filtered_feature_bc_matrix/`.
++The results in this episode are the same.
++
++:::::::::::::::::::::::::::::::::::::::
+ 
+ Now load the count matrix:
+ 
+ ```{r load-data, eval=FALSE}
+-setwd(work_dir)
+ pbmc.data <- Read10X(data.dir = data_dir)
+ ```
+ 

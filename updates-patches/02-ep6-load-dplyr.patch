@@ -1,0 +1,17 @@
+[blocker] Episode 6 uses %>% with dplyr::group_by/slice_max (cell-type-annotation.Rmd:182-183, 218-219)
+but never loads dplyr or magrittr. In a fresh R session with the episode's own setup chunk, %>% is not
+found (verified locally, Seurat 5.5.1: exists("%>%") is FALSE after library(Seurat, ggplot2, patchwork,
+SingleR, celldex)). It only works if a previous episode's session is still open. Episode 8 already loads
+dplyr.
+Apply: git apply updates-patches/02-ep6-load-dplyr.patch
+
+--- a/episodes/cell-type-annotation.Rmd
++++ b/episodes/cell-type-annotation.Rmd
+@@ -46,6 +46,7 @@
+ library(patchwork)
+ library(SingleR)
+ library(celldex)
++library(dplyr)
+ ```
+ 
+ ## Loading the Clustered Data

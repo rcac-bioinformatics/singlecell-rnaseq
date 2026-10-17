@@ -1,0 +1,79 @@
+[should-fix] No episode tells a learner who fell behind how to use the staged rds/ copies. setup.md:144
+says rds/ is "for jumping into later episodes", but readRDS(paste0(work_dir, "<name>.rds")) reads
+scrna_workshop/<name>.rds while the rsync puts the copies in scrna_workshop/rds/<name>.rds, so a cold
+start fails with "cannot open compressed file". Add a short callout before each load-data chunk of
+Episodes 4, 5, 6 and 8 (Episode 7 starts from SeuratData).
+Apply: git apply updates-patches/05-cold-start-callouts.patch
+
+--- a/episodes/cell-type-annotation.Rmd
++++ b/episodes/cell-type-annotation.Rmd
+@@ -62,6 +62,15 @@
+ )
+ setwd(work_dir)
+ ```
++
++:::::::::::::::::::::::::::::::::::::::: callout
++
++## Starting here without the previous episode?
++
++Copy the saved object from the workshop data first:
++`file.copy(paste0(work_dir, "rds/pbmc_clustered.rds"), work_dir)`
++
++:::::::::::::::::::::::::::::::::::::::
+ 
+ ```{r load-data, eval=FALSE}
+ pbmc <- readRDS(paste0(work_dir, "pbmc_clustered.rds"))
+--- a/episodes/differential-expression.Rmd
++++ b/episodes/differential-expression.Rmd
+@@ -64,6 +64,15 @@
+ )
+ setwd(work_dir)
+ ```
++
++:::::::::::::::::::::::::::::::::::::::: callout
++
++## Starting here without the previous episode?
++
++Copy the saved object from the workshop data first:
++`file.copy(paste0(work_dir, "rds/ifnb_annotated.rds"), work_dir)`
++
++:::::::::::::::::::::::::::::::::::::::
+ 
+ ```{r load-data, eval=FALSE}
+ ifnb <- readRDS(paste0(work_dir, "ifnb_annotated.rds"))
+--- a/episodes/dimensionality-reduction-clustering.Rmd
++++ b/episodes/dimensionality-reduction-clustering.Rmd
+@@ -62,6 +62,15 @@
+ )
+ setwd(work_dir)
+ ```
++
++:::::::::::::::::::::::::::::::::::::::: callout
++
++## Starting here without the previous episode?
++
++Copy the saved object from the workshop data first:
++`file.copy(paste0(work_dir, "rds/pbmc_normalized.rds"), work_dir)`
++
++:::::::::::::::::::::::::::::::::::::::
+ 
+ ```{r load-data, eval=FALSE}
+ pbmc <- readRDS(paste0(work_dir, "pbmc_normalized.rds"))
+--- a/episodes/normalization-and-features.Rmd
++++ b/episodes/normalization-and-features.Rmd
+@@ -59,6 +59,15 @@
+ )
+ setwd(work_dir)
+ ```
++
++:::::::::::::::::::::::::::::::::::::::: callout
++
++## Starting here without the previous episode?
++
++Copy the saved object from the workshop data first:
++`file.copy(paste0(work_dir, "rds/pbmc_filtered.rds"), work_dir)`
++
++:::::::::::::::::::::::::::::::::::::::
+ 
+ ```{r load-data, eval=FALSE}
+ pbmc <- readRDS(paste0(work_dir, "pbmc_filtered.rds"))
