@@ -63,3 +63,12 @@ episodes/cue_sheets/
 convert_coaching.py
 .venv/
 episodes/fig/old_plots/
+
+# maintenance and Negishi test kit (layout matches rnaseq-analysis)
+maintenance/prompts/
+negishi-run/generated/
+negishi-run/staged-data/
+negishi-run/records/
+negishi-run/*.tar.gz
+!negishi-run/docs/
+__pycache__/
