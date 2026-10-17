@@ -46,6 +46,7 @@ library(ggplot2)
 library(patchwork)
 library(SingleR)
 library(celldex)
+library(dplyr)
 ```
 
 ## Loading the Clustered Data

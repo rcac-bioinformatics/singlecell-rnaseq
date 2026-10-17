@@ -561,18 +561,21 @@ support reproducibility, sharing, and downstream use.
 ### Save the annotated Seurat object
 
 ```{r save-rds, eval=FALSE}
-saveRDS(ifnb, file = paste0(work_dir, "ifnb_annotated.rds"))
+saveRDS(ifnb, file = paste0(work_dir, "ifnb_de.rds"))
 ```
 
 ### Export the count matrix and metadata
 
 For the PBMC 10k dataset from earlier episodes, you can export the raw counts
-and metadata as CSV files:
+and metadata as CSV files. First load the annotated object saved in the cell
+type annotation episode:
 
 ```{r export-csv, eval=FALSE}
+pbmc <- readRDS(paste0(work_dir, "pbmc_annotated.rds"))
+
 # Export raw count matrix (warning: can be large for big datasets)
 counts_matrix <- GetAssayData(pbmc, layer = "counts")
-writeMM(counts_matrix, file = "counts.mtx")
+Matrix::writeMM(counts_matrix, file = "counts.mtx")
 
 # Export metadata
 write.csv(pbmc@meta.data, file = "metadata.csv", quote = FALSE)
@@ -582,11 +585,12 @@ write.csv(data.frame(gene = rownames(pbmc)), file = "features.csv",
           row.names = FALSE, quote = FALSE)
 ```
 
-For smaller datasets, you can export as a dense CSV:
+A dense CSV stores every zero, so keep it to small datasets or a subset of
+cells. Here, the first 500 cells:
 
 ```{r export-dense, eval=FALSE}
-write.csv(as.matrix(GetAssayData(pbmc, layer = "counts")),
-          file = "counts_dense.csv")
+write.csv(as.matrix(GetAssayData(pbmc, layer = "counts")[, 1:500]),
+          file = "counts_dense_500cells.csv")
 ```
 
 ### Format conversion for Python users
