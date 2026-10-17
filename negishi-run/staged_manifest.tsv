@@ -1,0 +1,28 @@
+# Expected content of the staged learner copy ($STAGED). Template written 2026-10-16 (round 1) from learners/setup.md,
+# episode 2 and the 10x sources; sizes and md5 are "-" until frozen on Negishi with make_staged_manifest.py (round 3).
+# The 3M barcode whitelist is deliberately absent: learners extract it in episode 2.
+path	type	bytes	md5	need	source
+fastq	dir	-	-	required	setup.md
+fastq/pbmc_10k_v3_S1_L001_I1_001.fastq.gz	file	-	-	optional	10x:fastqs (sources.tsv)
+fastq/pbmc_10k_v3_S1_L001_R1_001.fastq.gz	file	-	-	required	10x:fastqs (sources.tsv)
+fastq/pbmc_10k_v3_S1_L001_R2_001.fastq.gz	file	-	-	required	10x:fastqs (sources.tsv)
+fastq/pbmc_10k_v3_S1_L002_I1_001.fastq.gz	file	-	-	optional	10x:fastqs (sources.tsv)
+fastq/pbmc_10k_v3_S1_L002_R1_001.fastq.gz	file	-	-	required	10x:fastqs (sources.tsv)
+fastq/pbmc_10k_v3_S1_L002_R2_001.fastq.gz	file	-	-	required	10x:fastqs (sources.tsv)
+reference	dir	-	-	required	setup.md
+reference/refdata-gex-GRCh38-2024-A	tree	-	-	required	10x:refdata (sources.tsv)
+reference/refdata-gex-GRCh38-2024-A/reference.json	file	-	-	required	10x:refdata (sources.tsv)
+reference/refdata-gex-GRCh38-2024-A/fasta/genome.fa	file	-	-	required	10x:refdata (sources.tsv)
+reference/refdata-gex-GRCh38-2024-A/fasta/genome.fa.fai	file	-	-	required	10x:refdata (sources.tsv)
+reference/refdata-gex-GRCh38-2024-A/genes/genes.gtf.gz	file	-	-	required	10x:refdata (sources.tsv)
+reference/refdata-gex-GRCh38-2024-A/star	dir	-	-	required	10x:refdata (sources.tsv)
+filtered_feature_bc_matrix	dir	-	-	required	kit run 02-cellranger, publish_staged.sh --matrix-from-run
+filtered_feature_bc_matrix/barcodes.tsv.gz	file	-	-	required	kit run 02-cellranger, publish_staged.sh --matrix-from-run
+filtered_feature_bc_matrix/features.tsv.gz	file	-	-	required	kit run 02-cellranger, publish_staged.sh --matrix-from-run
+filtered_feature_bc_matrix/matrix.mtx.gz	file	-	-	required	kit run 02-cellranger, publish_staged.sh --matrix-from-run
+rds	dir	-	-	required	kit R chain, publish_rds.sh
+rds/pbmc_filtered.rds	file	-	-	required	kit R chain, publish_rds.sh
+rds/pbmc_normalized.rds	file	-	-	required	kit R chain, publish_rds.sh
+rds/pbmc_clustered.rds	file	-	-	required	kit R chain, publish_rds.sh
+rds/pbmc_annotated.rds	file	-	-	required	kit R chain, publish_rds.sh
+rds/ifnb_annotated.rds	file	-	-	required	kit R chain, publish_rds.sh

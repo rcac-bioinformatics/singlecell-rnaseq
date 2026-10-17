@@ -1,0 +1,9 @@
+# Where the staged learner copy comes from. Used by stage_fetch.sh (10x rows) and named by publish_staged.sh / publish_rds.sh (kit rows).
+# bytes and s3_etag are what cf.10xgenomics.com reported on 2026-10-16 (HEAD request from the laptop). 10x publishes no md5 for these
+# archives; the S3 multipart ETag (md5 of the md5s of 8 MiB parts, then "-<parts>") is checked instead by py/s3etag.py, and stage_fetch.sh
+# records the md5 of every archive and extracted file in staging/provenance.tsv.
+id	url	bytes	s3_etag	part_mib	provides	note
+fastqs	https://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_fastqs.tar	51657605120	5e6a93bb4818ed6eaab38aed146d5210-6159	8	fastq/	tar of pbmc_10k_v3_fastqs/*.fastq.gz (I1, R1, R2 for L001 and L002); last modified 2018-11-15
+refdata	https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2024-A.tar.gz	11481868421	de62332c29385ae21e616351f78d01e0-1369	8	reference/refdata-gex-GRCh38-2024-A/	10x GRCh38 2024-A reference; last modified 2024-03-08
+matrix	kit:02-cellranger	-	-	-	filtered_feature_bc_matrix/	not fetchable: the 10x public matrix is Cell Ranger 3.0 with 33,538 genes; the lesson needs the episode 2 script's Cell Ranger 10 output (38,606 genes)
+rds	kit:R-chain	-	-	-	rds/	not fetchable: produced by the continuous R chain (handoff copies), published by publish_rds.sh

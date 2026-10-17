@@ -1,0 +1,13 @@
+# R packages the episodes need that the code alone does not show, or that need a decision beyond "present".
+# build_kit.py merges these rows with the packages derived from the code (library(), ::, install(), test.use)
+# into generated/r_packages.tsv; preflight FAILs on a missing package with blocking=yes, WARNs otherwise.
+# warn_if_version_le: preflight WARNs when the installed version is at or below this version ("-" = no check).
+package	episodes	blocking	warn_if_version_le	reason
+presto	06	yes	-	FindAllMarkers in find-markers (cell-type-annotation.Rmd:94) took 708 s of the episode's 45 min slot without it (local pre-screen 2026-10-16); GitHub only: immunogenomics/presto
+metap	07	yes	-	FindConservedMarkers in conserved (multi-sample-integration.Rmd:354) stops with "Please install the metap package"
+multtest	07	yes	-	Bioconductor dependency of metap
+sceasy	08	no	0.0.7	optional export (step 08-sceasy); 0.0.7 stops on Seurat v5 objects (GetAssayData slot= is defunct in SeuratObject 5); record the version the OOD image has
+reticulate	08	no	-	used by sceasy only
+glmGamPoi	04	no	-	episode 4 installs it (install-glmgampoi) and SCTransform v2 uses it (challenge 1)
+BiocManager	04	no	-	only the install-glmgampoi chunk (an optional callout) calls it
+BiocVersion	all	no	-	records the Bioconductor release; no episode calls it
