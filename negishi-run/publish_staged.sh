@@ -4,9 +4,14 @@
 # Usage:
 #   bash publish_staged.sh --from STAGING_DIR --part fastq|reference [--dry-run]
 #   bash publish_staged.sh --matrix-from-run RUN_ID [--dry-run]
+#   bash publish_staged.sh --matrix-from-path DIR [--dry-run]
 # --from             a staging tree written by stage_fetch.sh
 # --matrix-from-run  the filtered_feature_bc_matrix/ that run's 02-cellranger produced (the step and
 #                    02-compare must have passed); the 10x public matrix is not a substitute
+# --matrix-from-path an existing filtered_feature_bc_matrix/ outside $STAGED (an earlier run of the
+#                    episode 2 script); its gene and barcode counts must equal the episode 3
+#                    output block (anchors.tsv ep3_read_genes, ep3_read_cells). 02-compare later
+#                    checks a fresh Cell Ranger run against it.
 # Always prints, before touching anything: every file as add / replace / same (md5 compared when
 # sizes agree), and the exact commands it will run. Then it asks you to type the destination
 # directory; anything else cancels. --dry-run stops after the listing.
@@ -19,14 +24,15 @@ export KIT_DIR
 # shellcheck source=negishi-run/lib.sh
 source "$KIT_DIR/lib.sh"
 
-FROM=""; PART=""; RUN_ID=""; DRY=0
+FROM=""; PART=""; RUN_ID=""; MPATH=""; DRY=0
 while [ $# -gt 0 ]; do
   case $1 in
     --from) FROM=$2; shift 2;;
     --part) PART=$2; shift 2;;
     --matrix-from-run) RUN_ID=$2; shift 2;;
+    --matrix-from-path) MPATH=$2; shift 2;;
     --dry-run) DRY=1; shift;;
-    -h|--help) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0;;
+    -h|--help) sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 0;;
     *) kit_die "unknown option $1";;
   esac
 done
@@ -36,8 +42,16 @@ if [ -n "$RUN_ID" ]; then
   kit_step_passed 02-cellranger || kit_die "02-cellranger has not passed in $RUN_ID"
   kit_is_done 02-compare || kit_die "02-compare has not passed in $RUN_ID; check its SUMMARY.md (episode 2 anchors) first"
   SRC="$W/cellranger_output/pbmc10k/outs/filtered_feature_bc_matrix"; DEST="$STAGED/filtered_feature_bc_matrix"
+elif [ -n "$MPATH" ]; then
+  SRC=${MPATH%/}; DEST="$STAGED/filtered_feature_bc_matrix"
+  for f in barcodes.tsv.gz features.tsv.gz matrix.mtx.gz; do [ -s "$SRC/$f" ] || kit_die "$SRC/$f missing"; done
+  want_g=$(awk -F'\t' '$3 == "ep3_read_genes" {print $4}' "$KIT_DIR/anchors.tsv")
+  want_c=$(awk -F'\t' '$3 == "ep3_read_cells" {print $4}' "$KIT_DIR/anchors.tsv")
+  got_g=$(zcat "$SRC/features.tsv.gz" | wc -l); got_c=$(zcat "$SRC/barcodes.tsv.gz" | wc -l)
+  printf 'matrix %s: %s genes (episode 3 says %s), %s barcodes (episode 3 says %s)\n' "$SRC" "$got_g" "$want_g" "$got_c" "$want_c"
+  { [ "$got_g" = "$want_g" ] && [ "$got_c" = "$want_c" ]; } || kit_die "counts differ from the episode 3 output block; not publishing"
 else
-  { [ -n "$FROM" ] && [ -n "$PART" ]; } || kit_die "give --from DIR --part fastq|reference, or --matrix-from-run RUN_ID"
+  { [ -n "$FROM" ] && [ -n "$PART" ]; } || kit_die "give --from DIR --part fastq|reference, --matrix-from-run RUN_ID or --matrix-from-path DIR"
   case $PART in
     fastq) SRC="$FROM/fastq"; DEST="$STAGED/fastq";;
     reference) SRC="$FROM/reference/refdata-gex-GRCh38-2024-A"; DEST="$STAGED/reference/refdata-gex-GRCh38-2024-A";;
