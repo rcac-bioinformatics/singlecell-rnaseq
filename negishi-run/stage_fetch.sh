@@ -13,7 +13,8 @@
 # The filtered matrix and the five RDS files are not on 10x: see publish_staged.sh --matrix-from-run
 # and publish_rds.sh.
 set -euo pipefail
-KIT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# under sbatch the script runs from a spool copy, so --submit passes the kit directory as KIT_SELF_DIR
+KIT_DIR=${KIT_SELF_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 export KIT_DIR
 # shellcheck source=negishi-run/lib.sh
 source "$KIT_DIR/lib.sh"
@@ -35,7 +36,7 @@ if [ $SUBMIT = 1 ]; then
   mkdir -p "$KIT_SCRATCH_BASE/staging"
   a=(); for x in "${ARGS[@]}"; do [ "$x" = --submit ] || a+=("$x"); done
   sbatch --account="$KIT_ACCOUNT" --partition="$KIT_PARTITION" --nodes=1 --ntasks=4 --time=12:00:00 --job-name=kit-stage-fetch \
-    -o "$KIT_SCRATCH_BASE/staging/stage_fetch.%j.out" --export=ALL "$0" "${a[@]}"
+    -o "$KIT_SCRATCH_BASE/staging/stage_fetch.%j.out" --export="ALL,KIT_SELF_DIR=$KIT_DIR" "$KIT_DIR/stage_fetch.sh" "${a[@]}"
   exit 0
 fi
 DL="$(dirname "$TO")/downloads"

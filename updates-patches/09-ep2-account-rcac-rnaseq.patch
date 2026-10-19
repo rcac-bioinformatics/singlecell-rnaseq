@@ -1,0 +1,38 @@
+--- a/episodes/raw-data-processing.Rmd	2026-10-19 14:21:29.842502957 -0500
++++ b/episodes/raw-data-processing.Rmd	2026-10-19 14:21:29.842502957 -0500
+@@ -253,7 +253,7 @@
+ #SBATCH --ntasks=64
+ #SBATCH --time=1-00:00:00
+ #SBATCH --job-name=cellranger
+-#SBATCH --account=workshop
++#SBATCH --account=rcac-rnaseq
+ #SBATCH --partition=cpu
+ #SBATCH --output=cellranger_%j.out
+ #SBATCH --error=cellranger_%j.err
+@@ -320,7 +320,7 @@
+ #SBATCH --ntasks=16
+ #SBATCH --time=1-00:00:00
+ #SBATCH --job-name=cellranger
+-#SBATCH --account=workshop
++#SBATCH --account=rcac-rnaseq
+ #SBATCH --partition=cpu
+ 
+ ml --force purge
+@@ -472,7 +472,7 @@
+ #SBATCH --ntasks=64
+ #SBATCH --time=1-00:00:00
+ #SBATCH --job-name=star_index
+-#SBATCH --account=workshop
++#SBATCH --account=rcac-rnaseq
+ #SBATCH --partition=cpu
+ #SBATCH --output=star_index_%j.out
+ #SBATCH --error=star_index_%j.err
+@@ -517,7 +517,7 @@
+ #SBATCH --ntasks=64
+ #SBATCH --time=1-00:00:00
+ #SBATCH --job-name=starsolo
+-#SBATCH --account=workshop
++#SBATCH --account=rcac-rnaseq
+ #SBATCH --partition=cpu
+ #SBATCH --output=starsolo_%j.out
+ #SBATCH --error=starsolo_%j.err

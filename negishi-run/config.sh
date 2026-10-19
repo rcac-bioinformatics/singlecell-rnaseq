@@ -3,8 +3,10 @@
 # Edit here, not in the scripts; any value can also be overridden from the environment.
 # Values marked FILL-IN are placeholders: preflight FAILs while they still contain "FILL-IN".
 
-# SLURM settings used by the episode 2 scripts (keep identical to the lesson; build_kit.py checks)
-KIT_ACCOUNT=${KIT_ACCOUNT:-workshop}
+# Account for every job the kit submits itself (stage_fetch, 02-compare, the egress srun). R jobs use
+# OOD_ACCOUNT. The episode 2 scripts are submitted with the account their own #SBATCH header names
+# (build_kit.py LESSON_ACCOUNT checks it), never overridden.
+KIT_ACCOUNT=${KIT_ACCOUNT:-rcac-rnaseq}
 KIT_PARTITION=${KIT_PARTITION:-cpu}
 # QoS for kit jobs: empty means none is passed (the lesson's scripts set none)
 KIT_QOS=${KIT_QOS:-}
