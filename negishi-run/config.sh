@@ -21,14 +21,14 @@ STAGED_PERM=${STAGED_PERM:-group}
 # after module load).
 KIT_R_MODE=${KIT_R_MODE:-image}
 # image mode: the Open OnDemand RStudio (bioconductor) image, run with --cleanenv as the app does
-OOD_SIF=${OOD_SIF:-FILL-IN/path/to/rstudio_bioconductor.sif}
+OOD_SIF=${OOD_SIF:-/apps/biocontainers/images/r-bioconductor_3.23-R-4.6.1.sif}
 # host package library the OOD app binds into the image (empty if the image is self-contained)
 OOD_HOST_LIB=${OOD_HOST_LIB:-}
 OOD_HOST_LIB_MOUNT=${OOD_HOST_LIB_MOUNT:-/opt/R/host-site-library}
 # module mode: the module string that gives the same R as the OOD app (loaded after biocontainers)
 R_MODULE=${R_MODULE:-FILL-IN/r-bioconductor-module}
 # Account the OOD form uses (learners/setup.md says "provided by instructor"); R jobs run under it
-OOD_ACCOUNT=${OOD_ACCOUNT:-FILL-IN-ood-account}
+OOD_ACCOUNT=${OOD_ACCOUNT:-rcac-rnaseq}
 # OOD form resources (learners/setup.md): cores and wall time for the R jobs
 OOD_CORES=${OOD_CORES:-16}
 OOD_TIME=${OOD_TIME:-8:00:00}
