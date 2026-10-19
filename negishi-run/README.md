@@ -106,9 +106,10 @@ Start with `SUMMARY.md`. It covers:
 
 | Path | Source |
 |---|---|
+| `README.txt` | `staged-top/README.txt`: what each folder is for, which episode uses it, where it came from |
 | `fastq/` | 6 FASTQs (the I1 files are optional) from 10x (`sources.tsv`) |
 | `reference/refdata-gex-GRCh38-2024-A/` | from 10x (`sources.tsv`) |
-| `filtered_feature_bc_matrix/` | the kit's own Cell Ranger run |
+| `filtered_feature_bc_matrix/` | the kit's own Cell Ranger run, or an earlier run of the episode 2 script whose counts equal the episode 3 output block |
 | `rds/` | 5 files from the kit's continuous R chain |
 
 The 3M whitelist is not staged; learners extract it in episode 2. Sizes and md5 stay `-` until frozen on Negishi.
@@ -119,8 +120,22 @@ The 3M whitelist is not staged; learners extract it in episode 2. Sizes and md5 
 | Fetch what is missing from 10x into a staging tree on scratch (52 GB for the FASTQs; use `--submit`) | `bash stage_fetch.sh [--only fastqs\|refdata] [--submit] [--dry-run]` |
 | Publish a staging tree | `bash publish_staged.sh --from $KIT_SCRATCH_BASE/staging/scrna_workshop --part fastq\|reference [--dry-run]` |
 | Publish the filtered matrix from a run whose `02-cellranger` and `02-compare` passed | `bash publish_staged.sh --matrix-from-run RUN_ID [--dry-run]` |
+| Publish an existing matrix (outside `$STAGED`) whose counts equal the episode 3 output block | `bash publish_staged.sh --matrix-from-path DIR [--dry-run]` |
+| Publish the top-level README (refused while it has `FILL-IN`) | `bash publish_staged.sh --part readme [--dry-run]` |
 | Publish the five RDS files from a run's continuous pass, with a side-by-side summary | `bash publish_rds.sh --run RUN_ID [--dry-run]` |
 | Freeze the manifest from a verified copy; bring the output back for round 3 | `python3 make_staged_manifest.py /depot/workshop/data/scrna_workshop` |
+
+### Building a new staged directory
+
+Order used for the 2026-10-29 delivery, after the old directory was moved aside. Arun runs the Depot `mv` and `mkdir`; everything after that goes through the publish scripts.
+
+1. `bash stage_fetch.sh --submit` (FASTQs and refdata from 10x, verified, into scratch).
+2. `bash publish_staged.sh --matrix-from-path <old copy>/.../filtered_feature_bc_matrix` (does not wait for step 1).
+3. When the fetch job ends: `publish_staged.sh --from $KIT_SCRATCH_BASE/staging/scrna_workshop --part fastq`, then `--part reference`.
+4. Kit run: `01_learner_setup.sh`, `submit_all.sh --only shell` and `--only r`.
+5. `publish_rds.sh --run RUN_ID` once r03 to r08 pass, then `submit_all.sh --only cold`.
+6. Fill the `FILL-IN` lines of `staged-top/README.txt`, rsync the kit, `publish_staged.sh --part readme`.
+7. `check_staged.sh` (full, with md5), then `make_staged_manifest.py` to freeze the manifest.
 
 How the fetch and publish scripts behave:
 
@@ -136,7 +151,7 @@ Learners need read access through the `workshop` Unix group; preflight checks th
 
 ## What is not stored in git
 
-`generated/` (rebuild with `python3 negishi-run/build_kit.py`), `staged-data/`, `records/` (static reports and returned tarballs), and `*.tar.gz`. `updates-patches/` at the repo root is also gitignored.
+`generated/` (rebuild with `python3 negishi-run/build_kit.py`), `staged-data/`, `records/` (static reports and returned tarballs), and `*.tar.gz`. `updates-patches/` at the repo root is tracked.
 
 ## What could not be verified before the first Negishi run
 

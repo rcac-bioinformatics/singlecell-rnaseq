@@ -2,6 +2,7 @@
 # episode 2 and the 10x sources; sizes and md5 are "-" until frozen on Negishi with make_staged_manifest.py (round 3).
 # The 3M barcode whitelist is deliberately absent: learners extract it in episode 2.
 path	type	bytes	md5	need	source
+README.txt	file	-	-	required	kit:staged-top/README.txt (publish_staged.sh --part readme)
 fastq	dir	-	-	required	setup.md
 fastq/pbmc_10k_v3_S1_L001_I1_001.fastq.gz	file	-	-	optional	10x:fastqs (sources.tsv)
 fastq/pbmc_10k_v3_S1_L001_R1_001.fastq.gz	file	-	-	required	10x:fastqs (sources.tsv)

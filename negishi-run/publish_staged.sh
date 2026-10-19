@@ -3,9 +3,12 @@
 # One of the two kit scripts allowed to write there (the other is publish_rds.sh).
 # Usage:
 #   bash publish_staged.sh --from STAGING_DIR --part fastq|reference [--dry-run]
+#   bash publish_staged.sh --part readme [--dry-run]
 #   bash publish_staged.sh --matrix-from-run RUN_ID [--dry-run]
 #   bash publish_staged.sh --matrix-from-path DIR [--dry-run]
 # --from             a staging tree written by stage_fetch.sh
+# --part readme      staged-top/README.txt from this kit into the top of $STAGED (refused while it
+#                    still contains FILL-IN)
 # --matrix-from-run  the filtered_feature_bc_matrix/ that run's 02-cellranger produced (the step and
 #                    02-compare must have passed); the 10x public matrix is not a substitute
 # --matrix-from-path an existing filtered_feature_bc_matrix/ outside $STAGED (an earlier run of the
@@ -32,7 +35,7 @@ while [ $# -gt 0 ]; do
     --matrix-from-run) RUN_ID=$2; shift 2;;
     --matrix-from-path) MPATH=$2; shift 2;;
     --dry-run) DRY=1; shift;;
-    -h|--help) sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 0;;
+    -h|--help) sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'; exit 0;;
     *) kit_die "unknown option $1";;
   esac
 done
@@ -50,6 +53,9 @@ elif [ -n "$MPATH" ]; then
   got_g=$(zcat "$SRC/features.tsv.gz" | wc -l); got_c=$(zcat "$SRC/barcodes.tsv.gz" | wc -l)
   printf 'matrix %s: %s genes (episode 3 says %s), %s barcodes (episode 3 says %s)\n' "$SRC" "$got_g" "$want_g" "$got_c" "$want_c"
   { [ "$got_g" = "$want_g" ] && [ "$got_c" = "$want_c" ]; } || kit_die "counts differ from the episode 3 output block; not publishing"
+elif [ "$PART" = readme ]; then
+  SRC="$KIT_DIR/staged-top"; DEST="$STAGED"
+  ! grep -n 'FILL-IN' "$SRC/README.txt" || kit_die "$SRC/README.txt still has FILL-IN lines (above); fill them first"
 else
   { [ -n "$FROM" ] && [ -n "$PART" ]; } || kit_die "give --from DIR --part fastq|reference, --matrix-from-run RUN_ID or --matrix-from-path DIR"
   case $PART in
@@ -77,7 +83,8 @@ while IFS=$'\t' read -r act rel _; do
   [ "$act" = replace ] && printf '  mkdir -p "%s" && cp -p "%s" "%s"   # backup\n' "$(dirname "$BK/$rel")" "$DEST/$rel" "$BK/$rel"
   printf '  mkdir -p "%s" && cp -p "%s" "%s" && chmod %s "%s"\n' "$(dirname "$DEST/$rel")" "$SRC/$rel" "$DEST/$rel" "$PF" "$DEST/$rel"
 done < "$PLAN"
-printf '  find "%s" -type d -exec chmod %s {} +\n' "$DEST" "$PD"
+DMAX=(); [ "$PART" = readme ] && DMAX=(-maxdepth 0)   # the README touches only the top directory
+printf '  find "%s" %s-type d -exec chmod %s {} +\n' "$DEST" "${DMAX[*]:+${DMAX[*]} }" "$PD"
 if [ $DRY = 1 ]; then printf '\ndry run: nothing written\n'; rm -f "$PLAN"; exit 0; fi
 if [ "$nadd" = 0 ] && [ "$nrep" = 0 ]; then printf '\nnothing to publish\n'; rm -f "$PLAN"; exit 0; fi
 printf '\nTo publish, type the destination directory exactly (%s): ' "$DEST"
@@ -91,7 +98,7 @@ while IFS=$'\t' read -r act rel _; do
   cp -p "$SRC/$rel" "$DEST/$rel"
   chmod "$PF" "$DEST/$rel"
 done < "$PLAN"
-find "$DEST" -type d -exec chmod "$PD" {} +
+find "$DEST" "${DMAX[@]}" -type d -exec chmod "$PD" {} +
 printf '%s\tpublish_staged\t%s\t%s\t%d added\t%d replaced\tbackup %s\n' "$(kit_ts)" "$SRC" "$DEST" "$nadd" "$nrep" "$BK" >> "$KIT_SCRATCH_BASE/publish.log"
 rm -f "$PLAN"
 kit_log "published; log $KIT_SCRATCH_BASE/publish.log; replaced files backed up in $BK"
