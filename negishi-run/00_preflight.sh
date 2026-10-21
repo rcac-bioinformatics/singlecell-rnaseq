@@ -80,7 +80,7 @@ else row FAIL "whitelist container" "$bid/cumulusprod_cellranger:10.0.0.sif not 
 
 # ---------------------------------------------------------------- SLURM
 section "SLURM accounts, partition, queue"
-for acct in "$KIT_ACCOUNT" "$OOD_ACCOUNT"; do
+for acct in $(printf '%s\n' "$KIT_ACCOUNT" "$OOD_ACCOUNT" | sort -u); do
   case $acct in *FILL-IN*) continue;; esac
   assoc=$(sacctmgr -nP show assoc where user="$(id -un)" account="$acct" format=account,partition,qos 2>/dev/null | head -3 | tr '\n' ' ')
   if [ -n "$assoc" ]; then row PASS "member of $acct" "$assoc"; else row FAIL "member of $acct" "no association for $(id -un)"; fi

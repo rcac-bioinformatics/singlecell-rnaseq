@@ -24,8 +24,9 @@ STAGED_PERM=${STAGED_PERM:-group}
 KIT_R_MODE=${KIT_R_MODE:-image}
 # image mode: the Open OnDemand RStudio (bioconductor) image, run with --cleanenv as the app does
 OOD_SIF=${OOD_SIF:-/apps/biocontainers/images/r-bioconductor_3.23-R-4.6.1.sif}
-# host package library the OOD app binds into the image (empty if the image is self-contained)
-OOD_HOST_LIB=${OOD_HOST_LIB:-}
+# host package library the OOD app binds into the image (empty if the image is self-contained); the app runs
+#   apptainer exec -B <OOD_HOST_LIB>:/opt/R/host-site-library <OOD_SIF>
+OOD_HOST_LIB=${OOD_HOST_LIB:-/apps/biocontainers/extras/r-package-site-library/3.23-R-4.6.1}
 OOD_HOST_LIB_MOUNT=${OOD_HOST_LIB_MOUNT:-/opt/R/host-site-library}
 # module mode: the module string that gives the same R as the OOD app (loaded after biocontainers)
 R_MODULE=${R_MODULE:-FILL-IN/r-bioconductor-module}
