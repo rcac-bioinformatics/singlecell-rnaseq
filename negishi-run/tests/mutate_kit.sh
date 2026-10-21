@@ -24,15 +24,19 @@ PY
 }
 E=episodes
 run "learner script gets --mem" $E/raw-data-processing.Rmd "#SBATCH --job-name=cellranger
-#SBATCH --account=workshop
+#SBATCH --account=rcac-rnaseq
 #SBATCH --partition=cpu" "#SBATCH --job-name=cellranger
-#SBATCH --account=workshop
+#SBATCH --account=rcac-rnaseq
 #SBATCH --mem=100G
 #SBATCH --partition=cpu" "sets --mem"
 run "learner script loses its partition" $E/raw-data-processing.Rmd "#SBATCH --job-name=star_index
-#SBATCH --account=workshop
+#SBATCH --account=rcac-rnaseq
 #SBATCH --partition=cpu" "#SBATCH --job-name=star_index
-#SBATCH --account=workshop" "--partition=MISSING"
+#SBATCH --account=rcac-rnaseq" "--partition=MISSING"
+run "cellranger module unpinned" $E/raw-data-processing.Rmd "ml cellranger/10.0.0" "ml cellranger" "EXPECTED_MODULES"
+run "learner script back on the workshop account" $E/raw-data-processing.Rmd "#SBATCH --job-name=star_index
+#SBATCH --account=rcac-rnaseq" "#SBATCH --job-name=star_index
+#SBATCH --account=workshop" "--account=workshop (expected rcac-rnaseq)"
 run "heredoc renamed" $E/raw-data-processing.Rmd "> \${RCAC_SCRATCH}/scrna_workshop/run_starsolo.sh" "> \${RCAC_SCRATCH}/scrna_workshop/starsolo.sh" "matched 0"
 run "staged path changed in setup.md" learners/setup.md "rsync -avP /depot/workshop/data/scrna_workshop/" "rsync -avP /depot/workshop/data/scrna-workshop/" "matched 0"
 run "chunk with a kit extra renamed" $E/quality-control.Rmd '```{r filter, eval=FALSE}' '```{r filter-cells, eval=FALSE}' "R chunk 'filter'"

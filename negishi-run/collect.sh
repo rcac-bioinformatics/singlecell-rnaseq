@@ -43,7 +43,7 @@ latest=$(find "$KIT_SCRATCH_BASE/state" -maxdepth 1 -name 'preflight-*.txt' 2>/d
 if command -v module >/dev/null 2>&1 || [ -n "${LMOD_PKG:-}" ]; then
   for mv in $EXPECTED_MODULES; do
     tool=${mv%%/*}
-    printf '%s\t%s\n' "$tool" "$(bash -lc "module load biocontainers >/dev/null 2>&1; module load $tool >/dev/null 2>&1; module -t list 2>&1 | grep -E '^$tool/' | head -1" 2>/dev/null || echo '?')"
+    printf '%s\t%s\n' "$tool" "$(bash -lc "module load biocontainers >/dev/null 2>&1; module load $mv >/dev/null 2>&1; module -t list 2>&1 | grep -E '^$tool/' | head -1" 2>/dev/null || echo '?')"
   done > "$RUN/records/module_versions.tsv"
 fi
 (cd "$KIT_DIR/.." && sha256sum -c "$KIT_GEN/episodes.sha256" > "$C/checks/episode_checksums.txt" 2>&1) || true

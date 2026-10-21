@@ -1,6 +1,6 @@
 # Negishi test kit (scRNA-seq lesson)
 
-Runs every episode of the lesson on Negishi as a new learner would, in the real environment: episode 2 with `ml biocontainers` and the `workshop` account, episodes 3 to 8 in the Open OnDemand RStudio (bioconductor) R. It brings back one tarball with every output, figure, timing, warning, and anchor number the lesson needs. The structure, naming, and run loop follow the rnaseq-analysis kit (delivered 2026-10-06). A few safeguards come from the variant-calling kit: frozen anchors, `build_kit.py --check` before submitting, the bind-variable guard, the sacct summary, timestamped tarballs, checksummed fetches, and laptop self-tests.
+Runs every episode of the lesson on Negishi as a new learner would, in the real environment: episode 2 with `ml biocontainers` and the `rcac-rnaseq` account, episodes 3 to 8 in the Open OnDemand RStudio (bioconductor) R. It brings back one tarball with every output, figure, timing, warning, and anchor number the lesson needs. The structure, naming, and run loop follow the rnaseq-analysis kit (delivered 2026-10-06). A few safeguards come from the variant-calling kit: frozen anchors, `build_kit.py --check` before submitting, the bind-variable guard, the sacct summary, timestamped tarballs, checksummed fetches, and laptop self-tests.
 
 `build_kit.py` generates every learner command from the episodes. R chunks are taken by label, shell blocks by a content anchor, and the build fails if an anchor stops matching. `docs/ADAPTATIONS.md` lists every place where running unattended differs from a learner. The staged data on Depot is only read. Each run works in a fresh copy under `$KIT_SCRATCH_BASE` (default `/scratch/negishi/$USER/scrna-kit`). Only `publish_staged.sh` and `publish_rds.sh` write to `/depot/workshop/data/scrna_workshop/`, and only after a listing and a typed confirmation.
 
@@ -168,7 +168,7 @@ What depends on Negishi, and what covers it:
 | Not verifiable off-cluster | What covers it |
 |---|---|
 | Module defaults (cellranger 10.0.0, star), `BIOC_IMAGE_DIR` and the 10.0.0 SIF used for the whitelist | preflight |
-| `workshop` and OOD account membership, partition limits, memory per core | preflight: sacctmgr, scontrol, sinfo, `sbatch --test-only` on every script |
+| `rcac-rnaseq` account membership, partition limits, memory per core | preflight: sacctmgr, scontrol, sinfo, `sbatch --test-only` on every script |
 | Staged data complete and group-readable | preflight runs `check_staged.sh --quick`; full check with `check_staged.sh` |
 | OOD image (or module), R and Bioconductor versions, every package the code uses | preflight, one row per package from `generated/r_packages.tsv` (the episode code plus `package_requirements.tsv`: presto blocks episode 6, metap and multtest block episode 7, sceasy 0.0.7 or older is a WARN for Seurat v5), and step env-egress |
 | Compute-node egress per call (ExperimentHub, SeuratData repository, GitHub, KEGG, Bioconductor, CRAN) | preflight (curl) and env-egress (each episode call in R, with proxy and cache paths) |

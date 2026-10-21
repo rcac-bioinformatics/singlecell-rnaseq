@@ -124,7 +124,7 @@ def header_of(text):
 
 
 # the account the episode 2 #SBATCH headers must name; the kit's own jobs use config.sh KIT_ACCOUNT
-LESSON_ACCOUNT = "workshop"
+LESSON_ACCOUNT = "rcac-rnaseq"   # patch 09, 2026-10-21
 _cfg_sh = (KIT / "config.sh").read_text()
 KIT_ACCOUNT = re.search(r'^KIT_ACCOUNT=\$\{KIT_ACCOUNT:-([^}]+)\}', _cfg_sh, re.M).group(1)
 OOD_ACCOUNT = re.search(r'^OOD_ACCOUNT=\$\{OOD_ACCOUNT:-([^}]+)\}', _cfg_sh, re.M).group(1)
@@ -144,6 +144,16 @@ for name, (b, fname, body) in sorted(SCRIPTS.items()) + [("cellranger_array_temp
     # the three scripts the kit submits must be valid as written; the array is a template (updates.md)
     if problems and name in SCRIPTS:
         die("%s (%s:%d): %s" % (name, rel("02"), b.start, "; ".join(problems)))
+# the tool modules the episode 2 scripts load must be the ones config.sh EXPECTED_MODULES names
+# (preflight and collect.sh load exactly those strings)
+_ep_mods = set()
+for name, (b, fname, body) in SCRIPTS.items():
+    for line in body.splitlines():
+        if re.match(r'\s*ml\s', line) and "purge" not in line:
+            _ep_mods.update(t for t in line.split()[1:] if t != "biocontainers")
+_cfg_mods = set(re.search(r'^EXPECTED_MODULES="([^"]*)"', _cfg_sh, re.M).group(1).split())
+if _ep_mods != _cfg_mods:
+    die("episode 2 loads modules %s but config.sh EXPECTED_MODULES is %s" % (" ".join(sorted(_ep_mods)), " ".join(sorted(_cfg_mods))))
 H_TIME = {name: header_of(body)["time"] for name, (b, f, body) in SCRIPTS.items()}
 H_NTASKS = {name: int(header_of(body)["ntasks"]) for name, (b, f, body) in SCRIPTS.items()}
 

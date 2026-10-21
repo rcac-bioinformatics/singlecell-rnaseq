@@ -41,7 +41,7 @@ KIT_SCRATCH_BASE=${KIT_SCRATCH_BASE:-/scratch/negishi/$(id -un)/scrna-kit}
 
 # Expected module defaults. The episodes load the default version (ml cellranger, ml star);
 # episode 2 also hardcodes cellranger 10.0.0 in the whitelist extraction. Empty version = record only.
-EXPECTED_MODULES="cellranger/10.0.0 star/"
+EXPECTED_MODULES="cellranger/10.0.0 star"
 # R and Bioconductor the OOD app should provide (empty = record only)
 EXPECTED_R_VERSION=${EXPECTED_R_VERSION:-}
 EXPECTED_BIOC_VERSION=${EXPECTED_BIOC_VERSION:-}

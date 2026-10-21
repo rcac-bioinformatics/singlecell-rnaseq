@@ -62,16 +62,16 @@ if [ "$KIT_R_MODE" = image ]; then case "$OOD_SIF" in *FILL-IN*) row FAIL "OOD_S
 if [ "$KIT_R_MODE" = module ]; then case "$R_MODULE" in *FILL-IN*) row FAIL "R_MODULE" "placeholder; set it in config.sh";; esac; fi
 
 # ---------------------------------------------------------------- modules and the episode 2 container
-section "Modules (ml biocontainers, then the tool; the episodes load the default version)"
+section "Modules (ml biocontainers, then the module string episode 2 loads; EXPECTED_MODULES)"
 declare -A VCMD=( [cellranger]="cellranger --version" [star]="STAR --version" )
 for mv in $EXPECTED_MODULES; do
-  tool=${mv%%/*}; want=${mv#*/}
-  res=$(timeout 180 bash -c "module load biocontainers >/dev/null 2>&1; module load $tool >/dev/null 2>&1 || exit 3; \
+  tool=${mv%%/*}; want=""; case $mv in */*) want=${mv#*/};; esac
+  res=$(timeout 180 bash -c "module load biocontainers >/dev/null 2>&1; module load $mv >/dev/null 2>&1 || exit 3; \
         module -t list 2>&1 | grep -E '^$tool/' | head -1; ${VCMD[$tool]:-true} 2>&1 | grep -v -i warning | head -2 | tr '\n' ' '" 2>&1) || {
     row FAIL "module $tool" "did not load"; continue; }
   loaded=$(printf '%s\n' "$res" | head -1)
   if [ -z "$want" ] || [ "$loaded" = "$mv" ]; then row PASS "module $tool" "$loaded; $(printf '%s\n' "$res" | sed -n 2p)"
-  else row FAIL "module $tool" "default is '$loaded', expected $mv (episode 2 hardcodes cellranger 10.0.0 in the whitelist step)"; fi
+  else row FAIL "module $tool" "loaded '$loaded', expected $mv"; fi
 done
 bid=$(bash -c 'module load biocontainers >/dev/null 2>&1; printf %s "${BIOC_IMAGE_DIR:-}"' 2>/dev/null || true)
 if [ -z "$bid" ]; then row FAIL "BIOC_IMAGE_DIR" "unset after module load biocontainers (episode 2 whitelist step uses it)"
