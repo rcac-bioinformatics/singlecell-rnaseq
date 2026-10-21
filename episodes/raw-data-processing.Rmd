@@ -253,7 +253,7 @@ cat << 'EOF' > ${RCAC_SCRATCH}/scrna_workshop/run_cellranger.sh
 #SBATCH --ntasks=64
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name=cellranger
-#SBATCH --account=workshop
+#SBATCH --account=rcac-rnaseq
 #SBATCH --partition=cpu
 #SBATCH --output=cellranger_%j.out
 #SBATCH --error=cellranger_%j.err
@@ -261,7 +261,7 @@ cat << 'EOF' > ${RCAC_SCRATCH}/scrna_workshop/run_cellranger.sh
 # Load modules
 ml --force purge
 ml biocontainers
-ml cellranger
+ml cellranger/10.0.0
 
 # Move to the output directory
 cd ${RCAC_SCRATCH}/scrna_workshop/cellranger_output
@@ -320,11 +320,11 @@ replace the sample names with the prefixes of your own FASTQ files.
 #SBATCH --ntasks=16
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name=cellranger
-#SBATCH --account=workshop
+#SBATCH --account=rcac-rnaseq
 #SBATCH --partition=cpu
 
 ml --force purge
-ml biocontainers cellranger
+ml biocontainers cellranger/10.0.0
 
 SAMPLES=(WT_rep1 WT_rep2 KO_rep1 KO_rep2)
 SAMPLE=${SAMPLES[$SLURM_ARRAY_TASK_ID]}
@@ -472,7 +472,7 @@ cat << 'EOF' > ${RCAC_SCRATCH}/scrna_workshop/build_star_index.sh
 #SBATCH --ntasks=64
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name=star_index
-#SBATCH --account=workshop
+#SBATCH --account=rcac-rnaseq
 #SBATCH --partition=cpu
 #SBATCH --output=star_index_%j.out
 #SBATCH --error=star_index_%j.err
@@ -517,7 +517,7 @@ cat << 'EOF' > ${RCAC_SCRATCH}/scrna_workshop/run_starsolo.sh
 #SBATCH --ntasks=64
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name=starsolo
-#SBATCH --account=workshop
+#SBATCH --account=rcac-rnaseq
 #SBATCH --partition=cpu
 #SBATCH --output=starsolo_%j.out
 #SBATCH --error=starsolo_%j.err
