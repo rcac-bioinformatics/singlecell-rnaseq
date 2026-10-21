@@ -177,7 +177,6 @@ R_EPS = ["03", "04", "05", "06", "07", "08"]
 OPTIONAL_CTX = ("challenge", "solution", "spoiler", "callout", "discussion")
 R_SKIP = {
     ("03", "challenge1"): "fill-in-the-blank template (contains ???); solution1 runs the filled-in code",
-    ("08", "convert-anndata"): "sceasy export runs in its own step (08-sceasy), so a missing Python anndata cannot fail episode 8",
 }
 for (ep, lab), why in R_SKIP.items():
     chunk(ep, lab)  # must exist
@@ -245,14 +244,6 @@ def plan_rows(ep, labels=None, extra_before=None):
 
 for ep in R_EPS:
     PLANS[ep] = plan_rows(ep)
-# 08-sceasy: episode 8's setup, paths and export-csv (which loads pbmc), the Python reticulate finds,
-# then the sceasy export. If export-csv no longer creates pbmc, the step shows it.
-if "pbmc <- readRDS" not in chunk("08", "export-csv").text:
-    die("08 export-csv no longer loads pbmc; 08-sceasy needs another source for pbmc")
-SCEASY_PRE = 'kit_py_config()\n'
-PLANS["08-sceasy"] = (plan_rows("08", labels={"setup", "set-paths", "export-csv"}) +
-                      [("08", "kit-sceasy-pre", "extras/08/kit-sceasy-pre.R", "extra", "0", "0", "-")] +
-                      plan_rows("08", labels={"convert-anndata"}))
 
 # ---------------------------------------------------------------- figures and expected outputs
 FIG_RE_NAME = re.compile(r'fig/([\w.-]+\.png)$')
@@ -304,8 +295,6 @@ def r_packages(by_ep=None):
                 pk.add("MAST")
             if "FindConservedMarkers" in code:
                 pk.update(["metap", "multtest"])  # Seurat suggests them; FindConservedMarkers stops without metap
-            if "convertFormat" in code:
-                pk.add("reticulate")
             if re.search(r'OrgDb\s*=\s*org\.Hs\.eg\.db', code):
                 pk.add("org.Hs.eg.db")
         if by_ep is not None:
@@ -366,7 +355,6 @@ for ep in ("03", "04", "05", "06"):
     prev = "r" + ep
 step("r07", "rjob", [], "07 continuous (%s; starts from SeuratData)" % ORDER[6])
 step("r08", "rjob", ["r07"], "08 continuous (%s)" % ORDER[7])
-step("08-sceasy", "rjob", ["r06", "r08"], "08 sceasy export alone (may fail without blocking)", dep_type="afterany")
 for ep in ("03", "04", "05", "06", "08"):
     step("c" + ep, "rjob", [], "%s cold start from the staged copies (%s)" % (ep, ORDER[int(ep) - 1]))
 
@@ -434,12 +422,6 @@ def render_job(d):
                       'cp "$log" "$RUN/logs/R-env-egress.log"; cp "$log" "$RUN/records/console/R-env-egress.log"',
                       'if [ $rc -eq 0 ]; then kit_job_end env-egress PASS; else kit_job_end env-egress WARN; fi',
                       '# egress failures are findings, not a failed step: dependents do not wait on this step']
-        elif n == "08-sceasy":
-            lines += ['log="$RUN/logs/R-08-sceasy.${SLURM_JOB_ID:-$$}.log"',
-                      'rc=0; kit_r "$KIT_R_MODE" 08-sceasy "$KIT_USER_OVERRIDE" "$log" "$KIT_DIR/R/run_blocks.R" "$KIT_GEN/rplans/08-sceasy.tsv" || rc=$?',
-                      'cp "$log" "$RUN/logs/R-08-sceasy.log"; cp "$log" "$RUN/records/console/R-08-sceasy.log"',
-                      'if [ $rc -eq 0 ]; then kit_job_end 08-sceasy PASS; else kit_job_end 08-sceasy WARN; fi',
-                      '# a failure here is reported (WARN) and never cancels anything']
         else:
             pass_ = "continuous" if n.startswith("r") else "cold"
             lines += ['kit_r_episode "$KIT_R_MODE" %s %s' % (pass_, n[1:])]
@@ -491,7 +473,6 @@ def build():
         put("rplans/%s.tsv" % name, tsv([hdr] + rows))
     for (ep, lab), code in sorted(EXTRAS.items()):
         put("extras/%s/%s.R" % (ep, lab), code)
-    put("extras/08/kit-sceasy-pre.R", SCEASY_PRE)
 
     for d in STEPS:
         if d["kind"] in ("kitjob", "rjob"):

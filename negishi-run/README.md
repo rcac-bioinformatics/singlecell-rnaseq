@@ -39,7 +39,7 @@ What runs after submission (generated/steps.tsv):
 | Steps | What | Expected |
 |---|---|---|
 | `02-cellranger`, `02-starindex` then `02-starsolo`, `02-compare` | the learner's own `run_cellranger.sh`, `build_star_index.sh`, `run_starsolo.sh` (64 cores each), then the episode's comparison blocks and the metrics | Cell Ranger about 7 h (the episode's callout), STAR index and STARsolo about 1.5 h together, plus queue waits |
-| `r03` to `r06`, `r07`, `r08`, `08-sceasy` | continuous pass: episodes 3 to 8 as written, each a fresh R session; 03 reads the staged matrix the learner copied in setup (patch 01) | 1 to 15 min per episode (local pre-screen); episode 6 longer without presto |
+| `r03` to `r06`, `r07`, `r08` | continuous pass: episodes 3 to 8 as written, each a fresh R session; 03 reads the staged matrix the learner copied in setup (patch 01) | 1 to 15 min per episode (local pre-screen); episode 6 longer without presto |
 | `c03` to `c06`, `c08` | cold pass: each episode in its own directory, seeded from the staged `filtered_feature_bc_matrix/` and `rds/` | in parallel, at once |
 | `env-egress` | R and Bioconductor versions, `packageVersion()` of every package the code uses, then each network call (Monaco, HPCA, ifnb, enrichGO, enrichKEGG) with proxy and cache paths | 10 to 20 min |
 
@@ -170,7 +170,7 @@ What depends on Negishi, and what covers it:
 | Module defaults (cellranger 10.0.0, star), `BIOC_IMAGE_DIR` and the 10.0.0 SIF used for the whitelist | preflight |
 | `rcac-rnaseq` account membership, partition limits, memory per core | preflight: sacctmgr, scontrol, sinfo, `sbatch --test-only` on every script |
 | Staged data complete and group-readable | preflight runs `check_staged.sh --quick`; full check with `check_staged.sh` |
-| OOD image (or module), R and Bioconductor versions, every package the code uses | preflight, one row per package from `generated/r_packages.tsv` (the episode code plus `package_requirements.tsv`: presto blocks episode 6, metap and multtest block episode 7, sceasy 0.0.7 or older is a WARN for Seurat v5), and step env-egress |
+| OOD image (or module), R and Bioconductor versions, every package the code uses | preflight, one row per package from `generated/r_packages.tsv` (the episode code plus `package_requirements.tsv`: presto blocks episode 6, metap and multtest block episode 7, anndataR blocks episode 8), and step env-egress |
 | Compute-node egress per call (ExperimentHub, SeuratData repository, GitHub, KEGG, Bioconductor, CRAN) | preflight (curl) and env-egress (each episode call in R, with proxy and cache paths) |
 | The OOD form, launch time, the interactive session | `docs/ood_manual_check.md` |
 | Real runtimes, memory, queue waits | the run itself (sacct and VmHWM per chunk in SUMMARY.md) |

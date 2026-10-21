@@ -160,7 +160,7 @@ if pf:
 # ---------------------------------------------------------------- measured values (episode 2 metrics, anchors)
 measured = {}  # (pass, measure) -> value
 for f in sorted((REC / "anchors").glob("*.tsv")) if (REC / "anchors").exists() else []:
-    m = re.match(r'^([rc]\d\d|08-sceasy)\.tsv$', f.name)
+    m = re.match(r'^([rc]\d\d)\.tsv$', f.name)
     if not m:
         continue
     pas = "cold" if f.name.startswith("c") else "continuous"

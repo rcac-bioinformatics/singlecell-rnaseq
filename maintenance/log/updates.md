@@ -99,13 +99,6 @@ Episode 4 (normalization-and-features)
 
 Run: `negishi-run/run_R_chain.sh --r current`, continuous pass, episodes 3 to 8 plus `env` and `sceasy`. It ran in Docker `arnstrm2/r-bioconductor:3.23-R-4.6.1` (R 4.6.1, Bioconductor 3.23), with the missing packages in a scratch library. Records are in `~/temp/scrna-kit-local/negishi/kit/scrna-kit/runs/local-2026-10-16/` (laptop only). Input: the 10x public `pbmc_10k_v3` filtered matrix (Cell Ranger 3.0.0, 33,538 genes). The staged matrix comes from Cell Ranger 10 (38,606 genes), so the episode 3 to 6 numbers differ from the lesson by design. Episodes 7 and 8 use the same ifnb data as the lesson. The decision rule: local errors are findings; local warnings are provisional until Negishi confirms them.
 
-- `[should-fix]` sceasy cannot convert a Seurat v5 object. When the kit's `08-sceasy` step gives the chunk the `pbmc` object (`:597`), `sceasy::convertFormat()` 0.0.7 stops with: `The 'slot' argument of 'GetAssayData()' was deprecated in SeuratObject 5.0.0 and is now defunct. Please use the 'layer' argument instead.` Python and anndata were present (anndata 0.10.9), so the cause is sceasy itself. Fix options:
-  1. convert the assay first (`pbmc[["RNA"]] <- as(pbmc[["RNA"]], "Assay")`, then `convertFormat`);
-  2. replace sceasy with an exporter that supports Seurat v5;
-  3. keep the section as reading only.
-
-  Confirm on Negishi with the OOD image's sceasy version.
-  2026-10-21: Negishi has sceasy 0.0.7 in the host library, which is also the newest version (GitHub master DESCRIPTION 0.0.7; `seurat2anndata` still calls `GetAssayData(slot = ...)`), so no other version fixes it. Option 1 does not work either: in the local R 4.6.1 / SeuratObject 5.4.0 image, `as(pbmc[["RNA"]], "Assay")` followed by `convertFormat()` stops with the same error. anndataR 1.2.2 (Bioconductor 3.23) `write_h5ad()` wrote a Seurat v5 object (counts, data, scale.data layers, metadata, PCA and UMAP) and Python anndata 0.10.9 read it back; it needs no Python to write. Proposed fix: `updates-patches/11-ep8-anndatar.patch` (replaces the chunk, keeps the `convert-anndata` label, adds a "Why not sceasy?" callout; `validate_lesson()` clean on a patched copy). anndataR must then be installed in `/apps/biocontainers/extras/r-package-site-library/3.23-R-4.6.1`; preflight will check it once the patch is applied.
 - `[check]` `FindConservedMarkers()` (`multi-sample-integration.Rmd:354`) stops unless the `metap` package is installed ("Please install the metap package to use FindConservedMarkers"). The local image lacked it, which made `r07` fail. `metap` and `multtest` are now in the kit's derived package list, so preflight checks the OOD image for them. If the image lacks them, `learners/setup.md` and the instructor-notes package checklist must add them.
 - `[should-fix]` Episode 6 `find-markers` (`cell-type-annotation.Rmd:94`) took 708 s of the 776 s episode locally. Seurat printed "For a (much!) faster implementation of the Wilcoxon Rank Sum Test ... please install the presto package". presto is on GitHub only (immunogenomics/presto). Check whether the OOD image has it. Without it, `FindAllMarkers` takes about 12 minutes of a 45-minute live slot. Either way, the episode should warn that this step takes a while.
 - `[should-fix]` (provisional) Warnings learners will see, verbatim:
@@ -149,6 +142,17 @@ Versions: R 4.6.1, Bioconductor 3.23, Seurat 5.5.1, SeuratObject 5.4.0, SingleR 
 Non-blocking improvements worth doing before the next delivery cycle (the tentative 2026-11-12 repeat, and the Spring 2027 workshop in Goal 1b).
 
 ## Done
+
+### 2026-10-21: patch 11 applied to episode 8 (branch prep-2026-10-29); applied, pending Negishi confirmation
+
+- `[should-fix]` sceasy cannot convert a Seurat v5 object. When the kit's `08-sceasy` step gives the chunk the `pbmc` object (`:597`), `sceasy::convertFormat()` 0.0.7 stops with: `The 'slot' argument of 'GetAssayData()' was deprecated in SeuratObject 5.0.0 and is now defunct. Please use the 'layer' argument instead.` Python and anndata were present (anndata 0.10.9), so the cause is sceasy itself. Fix options:
+  1. convert the assay first (`pbmc[["RNA"]] <- as(pbmc[["RNA"]], "Assay")`, then `convertFormat`);
+  2. replace sceasy with an exporter that supports Seurat v5;
+  3. keep the section as reading only.
+
+  Confirm on Negishi with the OOD image's sceasy version.
+  2026-10-21: Negishi has sceasy 0.0.7 in the host library, which is also the newest version (GitHub master DESCRIPTION 0.0.7; `seurat2anndata` still calls `GetAssayData(slot = ...)`), so no other version fixes it. Option 1 does not work either: in the local R 4.6.1 / SeuratObject 5.4.0 image, `as(pbmc[["RNA"]], "Assay")` followed by `convertFormat()` stops with the same error. anndataR 1.2.2 (Bioconductor 3.23) `write_h5ad()` wrote a Seurat v5 object (counts, data, scale.data layers, metadata, PCA and UMAP) and Python anndata 0.10.9 read it back; it needs no Python to write. Proposed fix: `updates-patches/11-ep8-anndatar.patch` (replaces the chunk, keeps the `convert-anndata` label, adds a "Why not sceasy?" callout; `validate_lesson()` clean on a patched copy). anndataR must then be installed in `/apps/biocontainers/extras/r-package-site-library/3.23-R-4.6.1`; preflight will check it once the patch is applied.
+  2026-10-21: applied (`updates-patches/11-ep8-anndatar.patch`), pending Negishi confirmation. On the local pre-screen `pbmc_annotated.rds`, the episode chunk wrote `pbmc_annotated.h5ad` in 4 s; anndata 0.13.4 reads it (10,686 x 20,292, obs incl. `manual_annotation` and `singler_labels`, PCA, UMAP, nn/snn graphs), anndata 0.10.9 cannot (`nullable-string-array` encoding), which the episode now says. The kit runs the chunk in `r08` and `c08`; the separate `08-sceasy` step is gone. anndataR is a blocking package for episode 8 in preflight; it must be installed in the OOD host site library. `instructors/instructor-notes.md` still lists sceasy in the package checklist (see the `[nice]` entry above).
 
 ### 2026-10-21: patches 08 and 09 applied to episode 2 (branch prep-2026-10-29); applied, pending Negishi confirmation
 

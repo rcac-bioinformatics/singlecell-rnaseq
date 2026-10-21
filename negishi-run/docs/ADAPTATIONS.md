@@ -47,7 +47,6 @@ Challenge, solution and callout chunks run in order. A failure in one of them is
 | Chunk | Kit | Why |
 |---|---|---|
 | episode 3 `challenge1` | not run | Fill-in-the-blank template with literal `???`; `solution1` runs the filled-in code. |
-| episode 8 `convert-anndata` | not run in `r08`/`c08`; run in step `08-sceasy` | sceasy needs reticulate and Python anndata, and may fail without blocking episode 8. `08-sceasy` runs episode 8's `setup`, `set-paths` and `export-csv` (which loads `pbmc_annotated.rds`, patch 03), records `reticulate::py_config()`, then runs the chunk verbatim. |
 | plain ```` ```r ```` fences (Seurat v5 vs v4 syntax in episode 3, SCTransform in episode 4, the sub-clustering list item in episode 6, the sessionInfo tip in episode 8) | not run | Display-only examples, not knitr chunks. |
 | episode 4 `install-glmgampoi` | run as written | Learners run it; it needs Bioconductor egress and installs into the fresh `R_LIBS_USER`. |
 
@@ -69,7 +68,6 @@ Rows marked `extra` in `generated/rplans/*.tsv` run after a named chunk, in a ch
 - `kit_marker_check()` records which manual label has the highest mean expression of each canonical marker, and the cluster-by-label table;
 - `kit_table()` records the SingleR vs manual cross-table;
 - `kit_top_genes()` records the top 20 DE genes;
-- `kit_py_config()` records the Python that reticulate finds.
 
 The step `env-egress` is not episode code. It runs `R/env_egress.R` in the same R environment, with a fresh `HOME` and user library. It records:
 

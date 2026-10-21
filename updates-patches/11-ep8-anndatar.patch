@@ -1,6 +1,6 @@
---- a/episodes/differential-expression.Rmd	2026-10-21 13:33:15.374900727 -0500
-+++ b/episodes/differential-expression.Rmd	2026-10-21 13:33:15.382900736 -0500
-@@ -595,18 +595,30 @@
+--- a/episodes/differential-expression.Rmd	2026-10-21 13:56:35.386729037 -0500
++++ b/episodes/differential-expression.Rmd	2026-10-21 13:56:35.390729060 -0500
+@@ -595,18 +595,32 @@
  
  ### Format conversion for Python users
  
@@ -24,7 +24,9 @@
  
 +The counts, normalized data, cell metadata and the PCA and UMAP embeddings
 +are all carried over. Warnings that matrix column names "cannot be written"
-+are expected: AnnData stores embeddings without column names.
++are expected: AnnData stores embeddings without column names. To read the file
++in Python, collaborators need a recent `anndata` (0.13 reads it; 0.10 does
++not).
 +
 +::::::::::::::::::::::::::::::::::::: callout
 +

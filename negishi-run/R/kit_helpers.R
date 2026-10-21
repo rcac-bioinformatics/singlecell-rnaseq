@@ -49,11 +49,3 @@ kit_top_genes <- function(df, name, n = 20) {
   o <- order(-up$avg_log2FC)
   kit_anchor(paste0(name, "_by_log2fc"), paste(head(rownames(up)[o], n), collapse = ","))
 }
-
-kit_py_config <- function() {
-  f <- file.path(.rec(), "env", paste0(.step(), "-python.txt"))
-  out <- c(
-    tryCatch(utils::capture.output(print(reticulate::py_config())), error = function(e) paste("py_config error:", conditionMessage(e))),
-    tryCatch(paste("anndata", reticulate::import("anndata")$`__version__`), error = function(e) paste("import anndata error:", conditionMessage(e))))
-  writeLines(out, f)
-}

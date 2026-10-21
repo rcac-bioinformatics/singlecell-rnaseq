@@ -4,7 +4,7 @@
 # where the R the learners get is the R on PATH: use --r current. submit_all.sh runs the same
 # episodes as batch jobs instead.
 # Usage:
-#   bash run_R_chain.sh --run RUN_ID --pass continuous|cold [--episodes 03,04,...|env|sceasy]
+#   bash run_R_chain.sh --run RUN_ID --pass continuous|cold [--episodes 03,04,...|env]
 #                       [--r image|module|current]
 # --pass continuous  the RDS chain as a learner runs it, in the run's learner copy; 03 reads
 #                    the matrix its set-paths names (generated/ep3_matrix_path.txt). A failed
@@ -12,7 +12,7 @@
 # --pass cold        each episode in its own fresh directory, seeded from $STAGED (rds/ and the
 #                    filtered matrix); all run even if one fails.
 # --episodes         default: all of 03 04 05 06 07 08 (cold: 03 04 05 06 08); "env" runs the
-#                    environment and egress check, "sceasy" the episode 8 sceasy export.
+#                    environment and egress check.
 # --r                default KIT_R_MODE from config.sh (image).
 set -euo pipefail
 KIT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -33,7 +33,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 [ -n "$RUN_ID" ] || kit_die "--run RUN_ID is required"
-case $PASS in continuous|cold) ;; *) [ "$EPS" = env ] || [ "$EPS" = sceasy ] || kit_die "--pass continuous|cold is required";; esac
+case $PASS in continuous|cold) ;; *) [ "$EPS" = env ] || kit_die "--pass continuous|cold is required";; esac
 case $MODE in image|module|current) ;; *) kit_die "--r must be image, module or current";; esac
 case "$RUN_ID" in /*) RUN=$RUN_ID;; *) RUN="$KIT_SCRATCH_BASE/runs/$RUN_ID";; esac
 export RUN
@@ -53,12 +53,6 @@ for ep in $EPS; do
       else kit_job_end env-egress WARN; fi
       cp "$log" "$RUN/logs/R-env-egress.log"; cp "$log" "$RUN/records/console/R-env-egress.log"
       tail -12 "$log" >&2;;
-    sceasy)
-      log="$RUN/logs/R-08-sceasy.$$.log"
-      kit_marker 08-sceasy RUNNING
-      if kit_r "$MODE" 08-sceasy "$KIT_USER_OVERRIDE" "$log" "$KIT_DIR/R/run_blocks.R" "$KIT_GEN/rplans/08-sceasy.tsv"; then
-        kit_job_end 08-sceasy PASS; else kit_job_end 08-sceasy WARN; fi
-      cp "$log" "$RUN/logs/R-08-sceasy.log"; cp "$log" "$RUN/records/console/R-08-sceasy.log";;
     0[3-8])
       if [ "$PASS" = continuous ] && [ "$ep" = 03 ] && grep -q '^cellranger_output/' "$KIT_GEN/ep3_matrix_path.txt" && ! kit_step_passed 02-cellranger; then
         kit_log "warning: 02-cellranger is not done in this run; episode 03 as written will not find its matrix"

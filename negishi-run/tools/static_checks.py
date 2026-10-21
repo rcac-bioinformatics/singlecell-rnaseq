@@ -317,7 +317,7 @@ for ep in ORDER:
 # ---------------------------------------------------------------- versions
 section("Versions asserted in prose and code")
 VER = re.compile(r'(Cell ?Ranger|cellranger|STAR(?:solo)?|Seurat(?:Object)?|R |Bioconductor|BiocManager|SingleR|celldex|'
-                 r'clusterProfiler|DESeq2|sceasy|refdata-gex|GRCh38|Chromium|v[23] chemistry|r-bioconductor|Apptainer|singularity)'
+                 r'clusterProfiler|DESeq2|anndataR|refdata-gex|GRCh38|Chromium|v[23] chemistry|r-bioconductor|Apptainer|singularity)'
                  r'[^\n]{0,40}?\b(v?\d+\.\d+(?:\.\d+)?[a-z]?|20\d\d-[A-Z]|v\d)\b')
 files = [EP / (e + ".Rmd") for e in ORDER] + [ROOT / "learners" / "setup.md", ROOT / "instructors" / "instructor-notes.md"]
 for f in files:

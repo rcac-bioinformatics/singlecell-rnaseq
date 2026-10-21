@@ -135,8 +135,7 @@ RCHK='pk <- readLines(Sys.getenv("KIT_PK")); ok <- vapply(pk, requireNamespace, 
 cat("R", as.character(getRversion()), "Bioc", tryCatch(as.character(packageVersion("BiocVersion")), error = function(e) "?"), "\n")
 cat("HOSTLIB", any(grepl("host-site-library", .libPaths())), "\n")
 cat("LOADED", sum(ok), "of", length(ok), "\n"); cat("MISSING", paste(pk[!ok], collapse = ","), "\n")
-for (p in pk[ok]) cat("VERSION", p, as.character(packageVersion(p)), "\n")
-cat("PYTHON", tryCatch(reticulate::py_config()$python, error = function(e) "none"), "\n")'
+for (p in pk[ok]) cat("VERSION", p, as.character(packageVersion(p)), "\n")'
 r1=""
 if [ "$KIT_R_MODE" = image ]; then
   if [ -r "$OOD_SIF" ] && [ -n "$APP" ]; then
@@ -180,7 +179,6 @@ if [ -n "$r1" ]; then
       row PASS "package $pkg" "$ver (episode $eps${blocking:+, blocking=$blocking})"
     fi
   done < "$KIT_GEN/r_packages.tsv"
-  row INFO "python for sceasy" "$(printf '%s\n' "$r1" | grep '^PYTHON' | cut -c8-)"
   printf '%s: %s; R/Bioc: %s; missing: %s\n' "$(date +%F)" "${ld#LOADED }" "${rv#R }" "${ms:-none}" > "$STATE/pkgcheck.txt"
 fi
 

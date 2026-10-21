@@ -6,7 +6,7 @@
 # Steps and dependencies come from generated/steps.tsv (built from the episodes). A step that is
 # already done in this run (marker, or outputs for the learner's own scripts) is skipped unless
 # --force; --from STEP skips everything before STEP in the table. Job IDs go to $RUN/jobs.tsv.
-# --only shell: episode 2; r: env-egress, the continuous R chain and 08-sceasy; cold: the cold pass.
+# --only shell: episode 2; r: env-egress and the continuous R chain; cold: the cold pass.
 # --dry-run submits nothing: it prints each sbatch command, checks every script with bash -n, and
 # asks SLURM to validate the job headers with sbatch --test-only.
 # Kit jobs use KIT_ACCOUNT; R jobs use OOD_ACCOUNT, OOD_CORES and OOD_TIME (config.sh), as the
@@ -66,7 +66,7 @@ in_scope() {
   case $ONLY in
     all) return 0;;
     shell) case $1 in 02-*) return 0;; esac;;
-    r) case $1 in env-egress|r0*|08-sceasy) return 0;; esac;;
+    r) case $1 in env-egress|r0*) return 0;; esac;;
     cold) case $1 in c0*) return 0;; esac;;
   esac
   return 1
