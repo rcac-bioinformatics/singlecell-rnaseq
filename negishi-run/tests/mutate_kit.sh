@@ -37,6 +37,7 @@ run "cellranger module unpinned" $E/raw-data-processing.Rmd "ml cellranger/10.0.
 run "learner script back on the workshop account" $E/raw-data-processing.Rmd "#SBATCH --job-name=star_index
 #SBATCH --account=rcac-rnaseq" "#SBATCH --job-name=star_index
 #SBATCH --account=workshop" "--account=workshop (expected rcac-rnaseq)"
+run "episode 8 reads an RDS no episode saves" $E/differential-expression.Rmd 'readRDS(paste0(work_dir, "pbmc_annotated.rds"))' 'readRDS(paste0(work_dir, "pbmc_annotate.rds"))' "which no earlier episode saves"
 run "heredoc renamed" $E/raw-data-processing.Rmd "> \${RCAC_SCRATCH}/scrna_workshop/run_starsolo.sh" "> \${RCAC_SCRATCH}/scrna_workshop/starsolo.sh" "matched 0"
 run "staged path changed in setup.md" learners/setup.md "rsync -avP /depot/workshop/data/scrna_workshop/" "rsync -avP /depot/workshop/data/scrna-workshop/" "matched 0"
 run "chunk with a kit extra renamed" $E/quality-control.Rmd '```{r filter, eval=FALSE}' '```{r filter-cells, eval=FALSE}' "R chunk 'filter'"

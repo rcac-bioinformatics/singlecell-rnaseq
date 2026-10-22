@@ -199,7 +199,7 @@ EXTRAS = {
     ("05", "multi-resolution"): 'for (r in c("0.2", "0.5", "0.8", "1.2")) kit_anchor(paste0("ep5_clusters_res", r), length(unique(pbmc[[paste0("RNA_snn_res.", r)]][, 1])))',
     ("05", "save"): 'kit_handoff("pbmc_clustered.rds")',
     ("06", "store-labels"): 'kit_marker_check(pbmc, "manual_annotation", "ep6")',
-    ("06", "compare"): 'kit_table(table(Manual = pbmc$manual_annotation, SingleR = pbmc$singler_labels), "ep6_singler_vs_manual")',
+    ("06", "compare"): 'kit_table(table(Manual = pbmc$manual_annotation, SingleR = pbmc$singler_labels), "ep6_singler_vs_manual"); kit_table(table(cluster = pbmc$RNA_snn_res.0.5, SingleR = pbmc$singler_labels), "ep6_cluster_vs_singler")',
     ("06", "save"): 'kit_handoff("pbmc_annotated.rds"); kit_anchor("ep6_cells", ncol(pbmc)); kit_anchor("ep6_n_labels", nlevels(Idents(pbmc)))',
     ("07", "load-ifnb"): 'kit_anchor("ep7_ifnb_cells", ncol(ifnb)); kit_anchor("ep7_ifnb_genes", nrow(ifnb))',
     ("07", "check-stim"): 'kit_anchor("ep7_ctrl_cells", sum(ifnb$stim == "CTRL")); kit_anchor("ep7_stim_cells", sum(ifnb$stim == "STIM"))',
@@ -349,12 +349,31 @@ step("02-starsolo", "learner", ["02-starindex"], "02 STARsolo (run_starsolo.sh)"
 step("02-compare", "kitjob", ["02-cellranger", "02-starsolo"], "02 compare outputs, metrics, barcodes vs staged",
      dep_type="afterany", ntasks=1, time="1:00:00")
 step("env-egress", "rjob", [], "R environment, package versions, per-call egress from a compute node")
-prev = "02-cellranger" if EP3_NEEDS_CR else None
-for ep in ("03", "04", "05", "06"):
-    step("r" + ep, "rjob", [prev] if prev else [], "%s continuous (%s)" % (ep, ORDER[int(ep) - 1]))
-    prev = "r" + ep
-step("r07", "rjob", [], "07 continuous (%s; starts from SeuratData)" % ORDER[6])
-step("r08", "rjob", ["r07"], "08 continuous (%s)" % ORDER[7])
+
+
+def rds_io(ep):
+    """(reads, saves): the .rds names episode ep's R chunks pass to readRDS() / saveRDS(), comments excluded."""
+    reads, saves = set(), set()
+    for c in EPS[ep].r_chunks():
+        code = "\n".join(l for l in c.text.splitlines() if not l.lstrip().startswith("#"))
+        reads |= set(re.findall(r'readRDS\([^;]*?"(?:[^"]*/)?([\w.-]+\.rds)"', code))
+        saves |= set(re.findall(r'saveRDS\([^;]*?"(?:[^"]*/)?([\w.-]+\.rds)"', code))
+    return reads, saves
+
+
+# Each continuous step waits for the steps that save the RDS files its episode reads (episode 8
+# reads episode 6's pbmc_annotated.rds as well as episode 7's ifnb_annotated.rds).
+RDS_IO = {ep: rds_io(ep) for ep in R_EPS}
+for ep in R_EPS:
+    deps = ["02-cellranger"] if ep == "03" and EP3_NEEDS_CR else []
+    for f in sorted(RDS_IO[ep][0]):
+        src = [e for e in R_EPS if e < ep and f in RDS_IO[e][1]]
+        if src:
+            deps.append("r" + src[-1])
+        elif f not in RDS_IO[ep][1]:
+            die("%s reads %s, which no earlier episode saves" % (rel(ep), f))
+    note = "; starts from SeuratData" if ep == "07" else ""
+    step("r" + ep, "rjob", sorted(set(deps)), "%s continuous (%s%s)" % (ep, ORDER[int(ep) - 1], note))
 for ep in ("03", "04", "05", "06", "08"):
     step("c" + ep, "rjob", [], "%s cold start from the staged copies (%s)" % (ep, ORDER[int(ep) - 1]))
 

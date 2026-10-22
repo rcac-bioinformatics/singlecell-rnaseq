@@ -91,7 +91,11 @@ rows = []
 for s in steps:
     j = jobs.get(s["step"], {})
     a = sacct.get(j.get("jobid", ""), {})
-    rows.append(dict(step=s["step"], kind=s["kind"], status=marker(s["step"]), jobid=j.get("jobid", "-"),
+    status = marker(s["step"])
+    if s["kind"] == "learner" and a.get("state"):
+        # the episode's own job scripts write no kit marker; sacct is their record
+        status = "PASS" if a["state"] == "COMPLETED" else "FAIL"
+    rows.append(dict(step=s["step"], kind=s["kind"], status=status, jobid=j.get("jobid", "-"),
                      state=a.get("state", "-"), wait_min=("%.0f" % (float(a["wait_s"]) / 60)) if a.get("wait_s") else "-",
                      elapsed_min=("%.1f" % (float(a["elapsed_s"]) / 60)) if a.get("elapsed_s") else "-",
                      maxrss_gib=a.get("maxrss_gib", "-") or "-", cpus=a.get("cpus", "-"), desc=s["description"]))

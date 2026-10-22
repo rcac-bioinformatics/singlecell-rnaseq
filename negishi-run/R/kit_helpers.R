@@ -32,9 +32,19 @@ kit_marker_check <- function(obj, group, prefix) {
     mu <- tapply(as.numeric(m[gene, ]), g, mean)
     kit_anchor(sprintf("%s_marker_%s", prefix, gene), names(mu)[which.max(mu)])
   }
-  # labels per cluster, so round 3 can check the hardcoded mapping against the clusters
-  tab <- table(cluster = obj$seurat_clusters, label = g)
-  kit_table(tab, paste0(prefix, "_cluster_vs_label"))
+  # labels per cluster, so round 3 can check the hardcoded mapping against the clusters. The
+  # episodes relabel the resolution 0.5 clusters; seurat_clusters holds the last FindClusters call
+  # (resolution 1.2 after episode 5's multi-resolution chunk).
+  cl <- if ("RNA_snn_res.0.5" %in% colnames(obj[[]])) obj$RNA_snn_res.0.5 else obj$seurat_clusters
+  kit_table(table(cluster = cl, label = g), paste0(prefix, "_cluster_vs_label"))
+  # mean log-normalised expression of a wider marker panel per cluster, to rebuild the mapping
+  panel <- c("CD3D", "IL7R", "CCR7", "CD8A", "CD8B", "MS4A1", "CD79A", "LYZ", "CD14", "S100A9",
+             "FCGR3A", "MS4A7", "GNLY", "NKG7", "KLRD1", "FCER1A", "CST3", "CLEC10A", "LILRA4",
+             "IL3RA", "PPBP", "PF4", "CD34", "HBB")
+  panel <- panel[panel %in% rownames(obj)]
+  pm <- SeuratObject::LayerData(obj, assay = "RNA", layer = "data")[panel, , drop = FALSE]
+  means <- t(sapply(split(seq_along(cl), cl), function(i) Matrix::rowMeans(pm[, i, drop = FALSE])))
+  kit_table(round(means, 2), paste0(prefix, "_cluster_marker_means"))
 }
 
 kit_table <- function(tab, name) {
