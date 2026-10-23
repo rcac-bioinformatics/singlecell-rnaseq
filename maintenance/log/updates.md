@@ -210,6 +210,7 @@ Non-blocking improvements worth doing before the next delivery cycle (the tentat
   - **Live schedule:** episode 2 drops to 35 min (9:20 to 9:55), the break moves to 9:55 to 10:10, and episode 3 gets 55 min (10:10 to 11:05). Q&A at 16:05 includes the follow-up submission. The front matter `teaching`/`exercises` are unchanged, because they describe the full lesson, not the live day.
   - **Kit:** the three `--test-only` blocks run in `02-prep`; the kit's real submissions are unchanged.
   - **Kit:** `submit_all.sh --step STEP` reruns exactly one step, even if it is done (test added), so `--step 02-prep` checks the new login-node commands without resubmitting the 64-core jobs.
+  - Confirmed on Negishi 2026-10-23 (`submit_all.sh --run 2026-10-21 --step 02-prep`, PASS, nothing submitted). All three `--test-only` blocks printed `sbatch: Job ... to start at ... a using 64 processors on nodes a180 in partition cpu`, the format of the episode's expected output. The written scripts match the episode text.
 - `[should-fix]` `learners/setup.md` OOD table (patch 20; supersedes the open entry above):
   - Values: account `rcac-rnaseq`, 8 cores, 8 h, `R 4.6.1 / Bioconductor 3.23 (recommended)`, and a new row "Load extra RCAC site library (advanced): checked".
   - A paragraph on memory (2 GB per core) and why the box must stay checked.
