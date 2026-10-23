@@ -25,6 +25,72 @@
     <loc>https://singlecell-rnaseq.github.io/NA/dimensionality-reduction-clustering.html</loc>
   </url>
   <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep1_bulk-vs-single-cell.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep1_gem-formation.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep1_reads-to-matrix.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep1_umi-dedup.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep2_cell-calling.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep2_slurm-lifecycle.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep3_doublets.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep3_dying-cell.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep3_qc-thresholds.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep3_seurat-object-tracker.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep4_lognormalize.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep4_scaling.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep4_variable-features.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep5_graph-clustering.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep5_pca-axes.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep5_umap-pitfalls.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep6_find-all-markers.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep6_rename-idents.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep6_singler.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep7_integration-anchors.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep8_go-enrichment.html</loc>
+  </url>
+  <url>
+    <loc>https://singlecell-rnaseq.github.io/NA/files/animations/ep8_pseudobulk.html</loc>
+  </url>
+  <url>
     <loc>https://singlecell-rnaseq.github.io/NA/images.html</loc>
   </url>
   <url>

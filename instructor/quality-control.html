@@ -574,7 +574,9 @@ after scaling)</li>
 storing QC metrics, cluster assignments, and any other per-cell
 annotations.</li>
 </ul><figure><img src="../fig/seurat_object.png" alt="Diagram of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns" class="figure mx-auto d-block"><div class="figcaption">Structure of the Seurat v5 object</div>
-</figure><p>You can inspect the metadata that Seurat automatically computed
+</figure><p><a href="../files/animations/ep3_seurat-object-tracker.html">Animation:
+The Seurat object through the day</a></p>
+<p>You can inspect the metadata that Seurat automatically computed
 during object creation:</p>
 <div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -800,6 +802,8 @@ certainly compromised.</p>
 </div>
 </div>
 </div>
+<p><a href="../files/animations/ep3_dying-cell.html">Animation: What a
+dying cell looks like in QC</a></p>
 </div>
 </section><section><h2 class="section-heading" id="setting-thresholds">Setting Thresholds<a class="anchor" aria-label="anchor" href="#setting-thresholds"></a></h2>
 <hr class="half-width"><p>Now we apply filters to remove low-quality cells. There are no
@@ -842,6 +846,8 @@ dashed lines mark the thresholds:</p>
 </figure><p>Cells above or below the red lines will be removed. The small point
 size (<code>pt.size = 0.1</code>) lets you see how many individual cells
 fall outside the thresholds.</p>
+<p><a href="../files/animations/ep3_qc-thresholds.html">Animation: Choose
+the thresholds, watch the cells</a></p>
 <p>Let’s record how many cells we have before filtering:</p>
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -991,6 +997,8 @@ your own analyses.</p>
 </div>
 </div>
 </div>
+<p><a href="../files/animations/ep3_doublets.html">Animation: Why some
+doublets hide</a></p>
 <div id="challenge-1-propose-your-own-thresholds" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>

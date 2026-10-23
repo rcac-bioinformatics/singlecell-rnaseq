@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Labels are assigned by position</title>
+<!--
+Labels are assigned by position (Episode 6, RenameIdents)
+
+Steps and captions
+ 1. RenameIdents pairs the first label with the first level, the second with the second, and so on.
+    Levels 0 to 17 on the left, the 18 lesson labels on the right, lines connect position by position.
+ 2. The comment next to each label records the markers that justify it.
+    A dot plot sketch next to cluster 4 shows MS4A1 high.
+ 3. If the counts differ, the guard stops you. Fix new.cluster.ids before continuing.
+    A run with 17 clusters, 18 labels, and a red stop sign.
+ 4. Same count, different order, no error, wrong labels. Always check the markers first.
+    Cluster 4 is a monocyte cluster in this run and receives B. Dashed lines show where each label should have gone.
+
+Not as briefed: the brief asks for "the lesson's error text" but the text was not supplied.
+The stop sign shows my own wording, set in the ERR_LINE_1 and ERR_LINE_2 constants below. Replace them with the lesson text.
+Illustrative: the dot plot in step 2 (three genes, three clusters; only MS4A1 high in cluster 4 comes from the brief),
+and the new cluster order in step 4 (a seeded shuffle, mulberry32 seed 42, with a CD14 Mono cluster forced into position 4).
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=3 opens at step 3. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke-opacity var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: labels are assigned by position"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GRID = '#e2e8f0', UP = '#b22222';
+var ERR_LINE_1 = '18 labels,';
+var ERR_LINE_2 = '17 clusters';
+var N = 4;
+var CAPTIONS = [
+  'RenameIdents pairs the first label with the first level, the second with the second, and so on.',
+  'The comment next to each label records the markers that justify it.',
+  'If the counts differ, the guard stops you. Fix new.cluster.ids before continuing.',
+  'Same count, different order, no error, wrong labels. Always check the markers first.'
+];
+var COL = { 'CD4 T': '#2b6cb0', 'CD8 T': '#63b3ed', 'B': '#2f855a', 'CD14 Mono': '#dd6b20', 'FCGR3A Mono': '#f6ad55', 'NK': '#805ad5', 'DC': '#d53f8c', 'Platelet': '#718096', 'pDC': '#b794f4', 'HSPC': '#a0aec0' };
+var DARKTXT = { 'CD8 T': 1, 'FCGR3A Mono': 1, 'pDC': 1, 'HSPC': 1 };
+var LABELS = [['CD4 T', 'CD4 T'], ['CD14 Mono', 'CD14 Mono'], ['CD14 Mono', 'CD14 Mono'], ['CD4 T', 'CD4 T'], ['B', 'B'], ['CD8 T', 'CD8 T'], ['CD8 T', 'CD8 T'], ['NK', 'NK'], ['B', 'B'], ['FCGR3A Mono', 'FCGR3A+ Mono'], ['CD8 T', 'CD8 T'], ['CD14 Mono', 'CD14 Mono'], ['DC', 'DC'], ['Platelet', 'Platelet'], ['B', 'B'], ['pDC', 'pDC'], ['CD14 Mono', 'CD14 Mono'], ['HSPC', 'HSPC']];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, sx, sy) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + (sx === undefined ? 1 : sx) + ',' + (sy === undefined ? 1 : sy) + ')';
+}
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 350) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function setDd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+var rnd = mulberry32(42);
+
+/* ---------- frame ---------- */
+txt('Labels are assigned by position', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 6', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: GRID, 'stroke-width': 2 }, svg);
+
+/* ---------- new run order for step 4 ---------- */
+var types = LABELS.map(function (l) { return l[0]; });
+var newOrder = types.slice();
+for (var i = newOrder.length - 1; i > 0; i--) { var j = Math.floor(rnd() * (i + 1)); var t = newOrder[i]; newOrder[i] = newOrder[j]; newOrder[j] = t; }
+if (newOrder[4] !== 'CD14 Mono') {
+  var mi = newOrder.indexOf('CD14 Mono'); newOrder[mi] = newOrder[4]; newOrder[4] = 'CD14 Mono';
+}
+/* where each cluster's label should have gone: k-th occurrence of a type pairs with k-th occurrence in the label vector */
+var target = [], seen = {};
+newOrder.forEach(function (ty, ci) {
+  seen[ty] = (seen[ty] || 0);
+  var idx = -1, c = 0;
+  for (var q = 0; q < types.length; q++) { if (types[q] === ty) { if (c === seen[ty]) { idx = q; break; } c++; } }
+  seen[ty]++; target.push(idx);
+});
+
+/* ---------- columns ---------- */
+function Y(i) { return 140 + i * 32; }
+var LX = 340, LW = 80, RX = 900, RW = 240;
+var hdrBase = txt('levels', { x: LX + LW / 2, y: 104, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK, class: 't' }, svg);
+var hdrNew = txt('levels, new run', { x: LX + LW / 2, y: 104, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK, class: 't' }, svg);
+var hdrOld = svg.lastChild;
+txt('new.cluster.ids', { x: RX + RW / 2, y: 104, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, svg);
+
+var gLines = el('g', {}, svg), gInt = el('g', {}, svg), gCols = el('g', {}, svg);
+var lines = [], intl = [], lchip = [], rchip = [], tiles = [];
+for (var k = 0; k < 18; k++) {
+  /* intended line (step 4) */
+  var il = el('line', { class: 't', x1: LX + LW + 8, y1: Y(k), x2: RX - 8, y2: Y(target[k]), stroke: COL[newOrder[k]], 'stroke-width': 3, 'stroke-dasharray': '9 6' }, gInt);
+  intl.push(il);
+  /* positional line */
+  var pl = el('line', { class: 't', x1: LX + LW + 8, y1: Y(k), x2: RX - 8, y2: Y(k), stroke: INK, 'stroke-width': 3 }, gLines);
+  lines.push(pl);
+}
+for (var k2 = 0; k2 < 18; k2++) {
+  var gl = el('g', { class: 't' }, gCols);
+  el('rect', { x: LX, y: Y(k2) - 15, width: LW, height: 30, fill: '#fff', stroke: INK, 'stroke-width': 2.5 }, gl);
+  txt(String(k2), { x: LX + LW / 2, y: Y(k2) + 9, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gl);
+  lchip.push(gl);
+  var ty = LABELS[k2][0];
+  var gr = el('g', { class: 't' }, gCols);
+  var rr = el('rect', { x: RX, y: Y(k2) - 15, width: RW, height: 30, fill: COL[ty], stroke: INK, 'stroke-width': 2.5 }, gr);
+  txt(LABELS[k2][1], { x: RX + RW / 2, y: Y(k2) + 9, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: DARKTXT[ty] ? INK : '#fff' }, gr);
+  rchip.push({ g: gr, r: rr });
+  var tl = el('rect', { class: 't', x: LX - 40, y: Y(k2) - 13, width: 26, height: 26, fill: COL[newOrder[k2]], stroke: INK, 'stroke-width': 2 }, gCols);
+  tiles.push(tl);
+}
+/* highlight rects */
+var hiR = el('rect', { class: 't', x: RX - 5, y: Y(4) - 20, width: RW + 10, height: 40, fill: 'none', stroke: GOLD, 'stroke-width': 6 }, svg);
+var hiL = el('rect', { class: 't', x: LX - 5, y: Y(4) - 20, width: LW + 10, height: 40, fill: 'none', stroke: GOLD, 'stroke-width': 6 }, svg);
+var hiRed = el('rect', { class: 't', x: RX - 5, y: Y(16) - 20, width: RW + 10, height: 40, fill: 'none', stroke: UP, 'stroke-width': 6 }, svg);
+var hiRed4 = el('rect', { class: 't', x: RX - 5, y: Y(4) - 20, width: RW + 10, height: 40, fill: 'none', stroke: UP, 'stroke-width': 6 }, svg);
+hiRed.setAttribute('y', Y(17) - 20);
+
+/* ---------- step 2 dot plot ---------- */
+var gDot = el('g', { class: 't' }, svg);
+var PX = 1215;
+el('line', { x1: PX - 20, y1: Y(4), x2: PX + 20, y2: Y(4), stroke: GOLD, 'stroke-width': 6 }, gDot);
+el('line', { x1: RX + RW + 6, y1: Y(4), x2: PX - 20, y2: Y(4), stroke: GOLD, 'stroke-width': 6 }, gDot);
+txt('markers by cluster', { x: 1390, y: 190, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gDot);
+var GN = ['MS4A1', 'CD3D', 'LYZ'], GX = [1310, 1410, 1510];
+GN.forEach(function (g, i) { txt(g, { x: GX[i], y: 240, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gDot); });
+var RWS = [[0, 300, [0, 1, 0]], [1, 380, [0, 0, 1]], [4, 460, [1, 0, 0]]];
+el('rect', { x: PX + 14, y: 460 - 36, width: 340, height: 72, fill: 'none', stroke: GOLD, 'stroke-width': 5 }, gDot);
+RWS.forEach(function (r) {
+  txt(String(r[0]), { x: PX + 8, y: r[1] + 9, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gDot);
+  r[2].forEach(function (hi, i) {
+    el('circle', { cx: GX[i], cy: r[1], r: hi ? 22 : 7, fill: hi ? '#2b6cb0' : '#cbd5e0', stroke: INK, 'stroke-width': 2 }, gDot);
+  });
+});
+txt('MS4A1 high in cluster 4', { x: 1390, y: 548, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gDot);
+txt('illustrative sketch', { x: 1390, y: 590, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gDot);
+
+/* ---------- step 3 stop sign ---------- */
+var gStop = el('g', { class: 't' }, svg);
+var pts = [];
+for (var a = 0; a < 8; a++) { var an = (a * 45 + 22.5) * Math.PI / 180; pts.push((1390 + 100 * Math.cos(an)).toFixed(1) + ',' + (300 + 100 * Math.sin(an)).toFixed(1)); }
+el('polygon', { points: pts.join(' '), fill: UP, stroke: INK, 'stroke-width': 4 }, gStop);
+txt('STOP', { x: 1390, y: 318, 'font-size': 52, 'font-weight': 700, 'text-anchor': 'middle', fill: '#fff' }, gStop);
+txt(ERR_LINE_1, { x: 1390, y: 462, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gStop);
+txt(ERR_LINE_2, { x: 1390, y: 502, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gStop);
+txt('last label has no level', { x: 1390, y: 560, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gStop);
+
+/* ---------- step 4 callout ---------- */
+var gCall = el('g', { class: 't' }, svg);
+el('line', { x1: RX + RW + 6, y1: Y(4), x2: 1220, y2: Y(4), stroke: UP, 'stroke-width': 4 }, gCall);
+txt('Cluster 4 is now', { x: 1230, y: Y(4) - 36, 'font-size': 30, 'font-weight': 700, fill: INK }, gCall);
+txt('monocytes but gets', { x: 1230, y: Y(4) + 2, 'font-size': 30, 'font-weight': 700, fill: INK }, gCall);
+txt('the label B', { x: 1230, y: Y(4) + 40, 'font-size': 30, 'font-weight': 700, fill: INK }, gCall);
+txt('no error', { x: 1230, y: Y(4) + 90, 'font-size': 30, 'font-weight': 700, fill: UP }, gCall);
+txt('square = true cell type', { x: 1230, y: 600, 'font-size': 26, fill: INK }, gCall);
+txt('dashed = correct label', { x: 1230, y: 640, 'font-size': 26, fill: INK }, gCall);
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+
+/* ---------- state rendering ---------- */
+function render(s) {
+  for (var k = 0; k < 18; k++) {
+    var gone = (s === 3 && k === 17);
+    setDd(lines[k], gone ? 0 : (s === 1 ? 150 + k * 90 : 0));
+    op(lines[k], gone ? 0 : 1);
+    op(lchip[k], gone ? 0 : 1);
+    var mism = types[k] !== newOrder[k];
+    sh(intl[k], s === 4 && mism, 500 + k * 40);
+    sh(tiles[k], s === 4, 400);
+    op(intl[k], s === 4 && mism ? 0.75 : 0);
+    var rc = rchip[k];
+    if (s === 4 && mism) { rc.r.setAttribute('stroke', INK); }
+  }
+  op(hdrOld, s === 4 ? 1 : 0); op(hdrBase, s === 4 ? 0 : 1);
+  sh(hiR, s === 2, 500); sh(hiL, s === 2, 500);
+  sh(hiRed, s === 3, 600);
+  sh(hiRed4, s === 4, 900);
+  sh(gDot, s === 2, 600);
+  sh(gStop, s === 3, 600);
+  sh(gCall, s === 4, 900);
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

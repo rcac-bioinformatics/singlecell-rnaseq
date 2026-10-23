@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What a dying cell looks like in QC</title>
+<!--
+What a dying cell looks like in QC (Episode 3, callout "What do dying cells look like?", quality-control.Rmd 334-353)
+
+Steps and captions
+ 1. A healthy PBMC: about 3 to 8 percent of its UMIs are mitochondrial.
+    Readout: nCount_RNA 9800, nFeature_RNA 3200, percent.mt 5.5 percent.
+ 2. A damaged or dying cell has a leaky membrane.
+    Three gaps (dashed segments) open in the membrane.
+ 3. Cytoplasmic mRNA escapes. Mitochondrial mRNA stays inside the mitochondria.
+    Half of the cytoplasmic marks leave and fade. Readout: nCount_RNA 5600, nFeature_RNA 2100, percent.mt 9.8 percent.
+ 4. What remains is mostly mitochondrial. percent.mt rises while nFeature_RNA and nCount_RNA fall.
+    Readout: nCount_RNA 2400, nFeature_RNA 900, percent.mt 22 percent.
+ 5. The percent.mt threshold removes it. The low gene count would also have flagged it.
+    Legend shows the percent.mt < 15 threshold. The point is marked removed.
+ 6. Three metrics, one cause. This is why percent.mt is a reliable quality indicator.
+    Summary panel: High percent.mt, Low nFeature_RNA, Low nCount_RNA.
+
+Scatter background: 300 points along y = 7800 * (1 - exp(-x / 18575)), which saturates near 7500 genes at 60000 counts.
+Colour scale for percent.mt: #e2e8f0 (low) to #b22222 (high), 10 flat swatches, saturating at 22.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=4 opens at step 4. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+ All random placement (marks, scatter points) uses mulberry32 with seed 42, so every run looks the same.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:7px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: what a dying cell looks like in QC"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREY = '#cbd5e0', FIRE = '#b22222', PALE = '#e2e8f0', AXGREY = '#a0aec0';
+var N = 6;
+var CAPTIONS = [
+  'A healthy PBMC: about 3 to 8 percent of its UMIs are mitochondrial.',
+  'A damaged or dying cell has a leaky membrane.',
+  'Cytoplasmic mRNA escapes. Mitochondrial mRNA stays inside the mitochondria.',
+  'What remains is mostly mitochondrial. percent.mt rises while nFeature_RNA and nCount_RNA fall.',
+  'The percent.mt threshold removes it. The low gene count would also have flagged it.',
+  'Three metrics, one cause. This is why percent.mt is a reliable quality indicator.'
+];
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var rng = mulberry32(42);
+function gauss() {
+  var u = 1 - rng(), v = rng();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function op(e, v) { e.style.opacity = v; }
+function tfp(e, x, y, r) {
+  e.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) rotate(' + (r || 0).toFixed(1) + 'deg)';
+}
+function lerpCol(t) {
+  t = Math.max(0, Math.min(1, t));
+  var a = [226, 232, 240], b = [178, 34, 34], c = [];
+  for (var i = 0; i < 3; i++) { c.push(Math.round(a[i] + (b[i] - a[i]) * t)); }
+  return 'rgb(' + c.join(',') + ')';
+}
+var PM_MAX = 22;
+function pmCol(pm) { return lerpCol(pm / PM_MAX); }
+
+/* ---------- fixed frame ---------- */
+txt('What a dying cell looks like in QC', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 3', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: '#e2e8f0', 'stroke-width': 2 }, svg);
+
+var gLeft = el('g', { class: 't' }, svg);
+var gRight = el('g', { class: 't' }, svg);
+
+/* ================= LEFT: the cell ================= */
+var CELL = { cx: 410, cy: 390, rx: 340, ry: 240 };
+function ept(tdeg) { var t = tdeg * Math.PI / 180; return [CELL.cx + CELL.rx * Math.cos(t), CELL.cy + CELL.ry * Math.sin(t)]; }
+
+el('ellipse', { cx: CELL.cx, cy: CELL.cy, rx: CELL.rx, ry: CELL.ry, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gLeft);
+
+/* gaps */
+var GAP_T = [-135, -55, 40];
+var gGaps = el('g', { class: 't' }, gLeft);
+var GAPS = GAP_T.map(function (td) {
+  var d = '';
+  for (var i = 0; i <= 12; i++) { var p = ept(td - 8 + (16 * i / 12)); d += (i ? ' L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1); }
+  el('path', { d: d, fill: 'none', stroke: '#ffffff', 'stroke-width': 9 }, gGaps);
+  el('path', { d: d, fill: 'none', stroke: INK, 'stroke-width': 3, 'stroke-dasharray': '9 9' }, gGaps);
+  return ept(td);
+});
+
+/* mitochondria */
+var MITO = [{ x: 290, y: 320, lx: 290, ly: 244 }, { x: 510, y: 470, lx: 510, ly: 556 }];
+var MARKW = 34, MARKH = 10;
+function mark(parent, fill, extra) {
+  var g = el('g', extra || {}, parent);
+  var r = el('rect', { x: -MARKW / 2, y: -MARKH / 2, width: MARKW, height: MARKH, rx: 5, ry: 5, class: 't' }, g);
+  r.style.fill = fill;
+  return { g: g, r: r };
+}
+MITO.forEach(function (m) {
+  el('ellipse', { cx: m.x, cy: m.y, rx: 100, ry: 58, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gLeft);
+  txt('mitochondrion', { x: m.lx, y: m.ly, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gLeft);
+  [[-42, -16], [42, -16], [-42, 18], [42, 18]].forEach(function (o) {
+    var mk = mark(gLeft, FIRE);
+    tfp(mk.g, m.x + o[0], m.y + o[1], (rng() - 0.5) * 36);
+  });
+});
+
+/* cytoplasmic marks: seeded rejection sampling */
+function inMito(x, y) {
+  for (var i = 0; i < MITO.length; i++) {
+    var dx = (x - MITO[i].x) / 136, dy = (y - MITO[i].y) / 84;
+    if (dx * dx + dy * dy < 1) { return true; }
+  }
+  return false;
+}
+var RES = [[205, 215, 375, 250], [425, 528, 595, 562]];
+function inRes(x, y) {
+  for (var i = 0; i < RES.length; i++) { if (x > RES[i][0] - 20 && x < RES[i][2] + 20 && y > RES[i][1] - 20 && y < RES[i][3] + 20) { return true; } }
+  return false;
+}
+var pts = [], tries = 0;
+while (pts.length < 24 && tries < 20000) {
+  tries++;
+  var px = CELL.cx + (rng() * 2 - 1) * CELL.rx * 0.88, py = CELL.cy + (rng() * 2 - 1) * CELL.ry * 0.88;
+  var ex = (px - CELL.cx) / (CELL.rx * 0.88), ey = (py - CELL.cy) / (CELL.ry * 0.88);
+  if (ex * ex + ey * ey > 1) { continue; }
+  if (inMito(px, py) || inRes(px, py)) { continue; }
+  var ok = true;
+  for (var j = 0; j < pts.length; j++) { var ddx = px - pts[j].x, ddy = py - pts[j].y; if (ddx * ddx + ddy * ddy < 48 * 48) { ok = false; break; } }
+  if (ok) { pts.push({ x: px, y: py, r: (rng() - 0.5) * 140 }); }
+}
+var GOUT = 95;
+pts.forEach(function (p, i) {
+  var best = 0, bd = 1e9;
+  GAPS.forEach(function (g, k) { var d = Math.hypot(g[0] - p.x, g[1] - p.y); if (d < bd) { bd = d; best = k; } });
+  var g = GAPS[best], dx = (g[0] - p.x) / bd, dy = (g[1] - p.y) / bd;
+  var dd = GOUT - 15 + 45 * rng(), lat = (rng() - 0.5) * 60;
+  p.ox = g[0] + dx * dd - dy * lat; p.oy = g[1] + dy * dd + dx * lat; p.dist = bd; p.id = i;
+  p.orot = (rng() - 0.5) * 160;
+});
+var order = pts.slice().sort(function (a, b) { return a.dist - b.dist; });
+order.forEach(function (p, rank) { p.leave = rank < 12 ? 3 : (rank < 22 ? 4 : 99); p.d = (rank % 5) * 50; });
+pts.forEach(function (p) {
+  var mk = mark(gLeft, INK, { class: 't' });
+  p.g = mk.g; p.r_ = mk.r;
+  p.g.style.setProperty('--dur', '700ms'); p.g.style.setProperty('--dd', p.d + 'ms');
+  tfp(p.g, p.x, p.y, p.r);
+});
+
+/* legend under the cell */
+var gLegA = el('g', {}, gLeft);
+var l1 = mark(gLegA, INK); tfp(l1.g, 66, 662, 0);
+txt('cytoplasmic mRNA', { x: 94, y: 671, 'font-size': 26, fill: INK }, gLegA);
+var l2 = mark(gLegA, FIRE); tfp(l2.g, 366, 662, 0);
+txt('mitochondrial mRNA', { x: 394, y: 671, 'font-size': 26, fill: INK }, gLegA);
+var gLegB = el('g', { class: 't' }, gLeft);
+var l3 = mark(gLegB, GREY); tfp(l3.g, 66, 700, 0);
+txt('escaped mRNA', { x: 94, y: 709, 'font-size': 26, fill: INK }, gLegB);
+
+/* ================= RIGHT: readout + scatter ================= */
+var PX0 = 930, PX1 = 1510, PY0 = 620, PY1 = 250;
+function sx(x) { return PX0 + x / 60000 * (PX1 - PX0); }
+function sy(y) { return PY0 - y / 8000 * (PY0 - PY1); }
+function curve(x) { return 7800 * (1 - Math.exp(-x / 18575)); }
+
+/* readout box */
+var gBox = el('g', {}, gRight);
+el('rect', { x: 800, y: 96, width: 760, height: 104, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gBox);
+el('rect', { x: 803, y: 99, width: 14, height: 98, fill: GOLD }, gBox);
+var COLX = [942, 1182, 1436];
+var LABS = ['nCount_RNA', 'nFeature_RNA', 'percent.mt'];
+LABS.forEach(function (s, i) { txt(s, { class: 'mono', x: COLX[i], y: 134, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gBox); });
+var RD = [['9800', '3200', '5.5 percent'], ['5600', '2100', '9.8 percent'], ['2400', '900', '22 percent']];
+var rdG = RD.map(function (vals) {
+  var g = el('g', { class: 't' }, gBox);
+  vals.forEach(function (v, i) { txt(v, { x: COLX[i], y: 184, 'font-size': 36, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, g); });
+  return g;
+});
+
+/* axes */
+var gAx = el('g', {}, gRight);
+el('line', { x1: PX0, y1: PY1, x2: PX0, y2: PY0, stroke: INK, 'stroke-width': 3 }, gAx);
+el('line', { x1: PX0, y1: PY0, x2: PX1, y2: PY0, stroke: INK, 'stroke-width': 3 }, gAx);
+[0, 20000, 40000, 60000].forEach(function (v) {
+  el('line', { x1: sx(v), y1: PY0, x2: sx(v), y2: PY0 + 9, stroke: INK, 'stroke-width': 3 }, gAx);
+  txt(String(v), { x: sx(v), y: PY0 + 38, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gAx);
+});
+[0, 2000, 4000, 6000, 8000].forEach(function (v) {
+  el('line', { x1: PX0 - 9, y1: sy(v), x2: PX0, y2: sy(v), stroke: INK, 'stroke-width': 3 }, gAx);
+  txt(String(v), { x: PX0 - 16, y: sy(v) + 9, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gAx);
+});
+txt('nCount_RNA', { class: 'mono', x: (PX0 + PX1) / 2, y: PY0 + 76, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gAx);
+txt('nFeature_RNA', { class: 'mono', x: 0, y: 0, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK, transform: 'translate(826,' + ((PY0 + PY1) / 2) + ') rotate(-90)' }, gAx);
+
+/* background points */
+var gBg = el('g', {}, gRight);
+for (var b = 0; b < 300; b++) {
+  var x = Math.exp(Math.log(11000) + 0.75 * gauss());
+  x = Math.max(800, Math.min(59000, x));
+  var y = curve(x) * (1 + 0.08 * gauss());
+  var pm = 2.5 + 2.2 * Math.abs(gauss());
+  if (x < 6000 && rng() < 0.15) { pm = 12 + 10 * rng(); y *= 0.78; }
+  pm = Math.min(PM_MAX, pm);
+  y = Math.max(150, Math.min(7900, y));
+  el('circle', { cx: sx(x).toFixed(1), cy: sy(y).toFixed(1), r: 6, fill: pmCol(pm), stroke: AXGREY, 'stroke-width': 1 }, gBg);
+}
+
+/* colour bar */
+var gCB = el('g', {}, gRight);
+txt('percent.mt', { class: 'mono', x: 1235, y: 466, 'font-size': 26, fill: INK }, gCB);
+for (var s = 0; s < 10; s++) {
+  el('rect', { x: 1235 + s * 24, y: 478, width: 24, height: 22, fill: lerpCol(s / 9) }, gCB);
+}
+el('rect', { x: 1235, y: 478, width: 240, height: 22, fill: 'none', stroke: INK, 'stroke-width': 2 }, gCB);
+txt('low', { x: 1235, y: 531, 'font-size': 26, fill: INK }, gCB);
+txt('high', { x: 1475, y: 531, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gCB);
+
+/* threshold legend (step 5) */
+var gThr = el('g', { class: 't' }, gRight);
+el('rect', { x: 1150, y: 552, width: 380, height: 58, fill: '#ffffff', stroke: INK, 'stroke-width': 2 }, gThr);
+el('line', { x1: 1166, y1: 581, x2: 1216, y2: 581, stroke: INK, 'stroke-width': 3, 'stroke-dasharray': '9 7' }, gThr);
+txt('percent.mt < 15', { class: 'mono', x: 1230, y: 590, 'font-size': 26, fill: INK }, gThr);
+
+/* trail ghosts */
+var STATE = [{ x: 9800, y: 3200, pm: 5.5 }, { x: 5600, y: 2100, pm: 9.8 }, { x: 2400, y: 900, pm: 22 }];
+var gGh = [];
+for (var q = 0; q < 2; q++) {
+  var gh = el('circle', { class: 't', cx: sx(STATE[q].x), cy: sy(STATE[q].y), r: 16, fill: 'none', stroke: AXGREY, 'stroke-width': 3, 'stroke-dasharray': '6 5' }, gRight);
+  gGh.push(gh);
+}
+
+/* highlighted point */
+var gHi = el('g', { class: 't' }, gRight);
+var gHiBody = el('g', { class: 't' }, gHi);
+el('circle', { cx: 0, cy: 0, r: 27, fill: 'none', stroke: GOLD, 'stroke-width': 4 }, gHiBody);
+var hiDot = el('circle', { class: 't', cx: 0, cy: 0, r: 16, stroke: INK, 'stroke-width': 3 }, gHiBody);
+hiDot.style.fill = pmCol(5.5);
+var hiLab = txt('this cell', { class: 't halo', x: 0, y: -50, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gHi);
+var gX = el('g', { class: 't' }, gHi);
+el('line', { x1: -19, y1: -19, x2: 19, y2: 19, stroke: FIRE, 'stroke-width': 6, 'stroke-linecap': 'round' }, gX);
+el('line', { x1: 19, y1: -19, x2: -19, y2: 19, stroke: FIRE, 'stroke-width': 6, 'stroke-linecap': 'round' }, gX);
+var hiRem = txt('removed', { class: 't halo', x: 36, y: 10, 'font-size': 28, 'font-weight': 700, fill: FIRE }, gHi);
+
+/* ================= summary panel (step 6) ================= */
+var gPanel = el('g', { class: 't' }, svg);
+gPanel.style.setProperty('--dur', '600ms'); gPanel.style.setProperty('--dd', '300ms');
+el('rect', { x: 360, y: 130, width: 880, height: 570, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gPanel);
+el('rect', { x: 363, y: 133, width: 874, height: 12, fill: GOLD }, gPanel);
+txt('Signatures of a dying cell', { x: 400, y: 214, 'font-size': 36, 'font-weight': 700, fill: INK }, gPanel);
+var ROWS = [
+  { t: 'High percent.mt', up: true, y: 330 },
+  { t: 'Low nFeature_RNA', up: false, y: 450 },
+  { t: 'Low nCount_RNA', up: false, y: 570 }
+];
+var rowG = ROWS.map(function (r, i) {
+  var g = el('g', { class: 't' }, gPanel);
+  g.style.setProperty('--dur', '600ms'); g.style.setProperty('--dd', (i * 120) + 'ms');
+  var ax = 450, y = r.y, c = r.up ? FIRE : INK;
+  var pts_ = r.up
+    ? [[ax, y - 38], [ax + 28, y - 4], [ax + 11, y - 4], [ax + 11, y + 34], [ax - 11, y + 34], [ax - 11, y - 4], [ax - 28, y - 4]]
+    : [[ax, y + 38], [ax + 28, y + 4], [ax + 11, y + 4], [ax + 11, y - 34], [ax - 11, y - 34], [ax - 11, y + 4], [ax - 28, y + 4]];
+  el('polygon', { points: pts_.map(function (p) { return p[0] + ',' + p[1]; }).join(' '), fill: c }, g);
+  txt(r.t, { class: 'mono', x: 520, y: y + 15, 'font-size': 44, 'font-weight': 700, fill: INK }, g);
+  return g;
+});
+txt('One cause: a leaky membrane', { x: 400, y: 664, 'font-size': 30, fill: INK }, gPanel);
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+/* ---------- state rendering ---------- */
+function stateIndex(s) { return s <= 2 ? 0 : (s === 3 ? 1 : 2); }
+function render(s) {
+  var dim = s === 6 ? 0.08 : 1;
+  op(gLeft, dim); op(gRight, dim);
+  op(gPanel, s === 6 ? 1 : 0);
+  gPanel.style.pointerEvents = 'none';
+  rowG.forEach(function (g) { op(g, s === 6 ? 1 : 0); });
+
+  op(gGaps, s >= 2 ? 1 : 0);
+  pts.forEach(function (p) {
+    var out = s >= p.leave;
+    if (out) { tfp(p.g, p.ox, p.oy, p.orot); p.r_.style.fill = GREY; op(p.g, 0.4); }
+    else { tfp(p.g, p.x, p.y, p.r); p.r_.style.fill = INK; op(p.g, 1); }
+  });
+  op(gLegB, s >= 3 ? 1 : 0);
+
+  var si = stateIndex(s);
+  rdG.forEach(function (g, i) { op(g, i === si ? 1 : 0); });
+  var st = STATE[si];
+  tfp(gHi, sx(st.x), sy(st.y), 0);
+  hiDot.style.fill = s === 5 ? GREY : pmCol(st.pm);
+  op(gHiBody, s === 5 ? 0.4 : 1);
+  op(hiLab, s <= 3 ? 1 : 0);
+  tfp(hiLab, s === 3 ? 38 : -30, -8, 0);
+  op(gX, s === 5 ? 1 : 0);
+  op(hiRem, s === 5 ? 1 : 0);
+  op(gGh[0], (s >= 3 && s <= 5) ? 1 : 0);
+  op(gGh[1], (s >= 4 && s <= 5) ? 1 : 0);
+  op(gThr, s >= 5 ? 1 : 0);
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+void getComputedStyle(gLeft).opacity;
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

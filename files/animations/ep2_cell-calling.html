@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raw matrix to filtered matrix</title>
+<!--
+Raw matrix to filtered matrix (Episode 2, cell calling)
+
+Steps and captions
+ 1. Rank every barcode by its UMI count. Most barcodes are empty droplets with a little ambient RNA.
+    Log-log plot, rank 1 to 1,000,000 against UMIs 1 to 100,000. Plateau near 10,000 UMIs, cliff near rank 10,000, long low tail.
+ 2. Barcodes above the cliff are called cells.
+    The area under the plateau and cliff is shaded as cells.
+ 3. EmptyDrops compares low-count barcodes to the ambient profile and rescues real cells with little RNA.
+    Dots in a band after the cliff are tested; some turn into cells.
+ 4. Raw keeps every barcode. Filtered keeps the 11809 called cells. Episode 3 loads filtered.
+    raw_feature_bc_matrix 38606 x about 700000, filtered_feature_bc_matrix 38606 x 11809. Widths are not to scale.
+ 5. STARsolo replicates the same cell calling, within one percent.
+    STARsolo --soloCellFilter EmptyDrops_CR gave 11682 cells, against 11809 called by Cell Ranger. Bars start at zero.
+
+The curve is drawn by hand from a handful of anchor points. It is illustrative, not the PBMC 10k data.
+The cell boundary is at rank 11809. The rescued dots in step 3 are placed by hand.
+Note: 11809 against 11682 is a difference of 1.1 percent. The step 5 caption is as supplied.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=4 opens at step 4. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke-opacity var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: raw matrix to filtered matrix"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREY = '#cbd5e0', GRID = '#e2e8f0', GREYS = '#a0aec0', CELL = '#2b6cb0';
+var N = 5;
+var CAPTIONS = [
+  'Rank every barcode by its UMI count. Most barcodes are empty droplets with a little ambient RNA.',
+  'Barcodes above the cliff are called cells.',
+  'EmptyDrops compares low-count barcodes to the ambient profile and rescues real cells with little RNA.',
+  'Raw keeps every barcode. Filtered keeps the 11809 called cells. Episode 3 loads filtered.',
+  'STARsolo replicates the same cell calling, within one percent.'
+];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, sx, sy) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + (sx === undefined ? 1 : sx) + ',' + (sy === undefined ? 1 : sy) + ')';
+}
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 350) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function setDur(e, ms) { e.style.setProperty('--dur', ms + 'ms'); }
+function setDd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+
+/* ---------- frame ---------- */
+txt('Raw matrix to filtered matrix', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 2', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: GRID, 'stroke-width': 2 }, svg);
+
+/* ---------- knee plot ---------- */
+var PX0 = 180, PW = 1320, PY0 = 110, PH = 520, PYB = PY0 + PH;
+function X(lr) { return PX0 + lr / 6 * PW; }
+function Y(ly) { return PYB - ly / 5 * PH; }
+var KN = [[0, 4.55], [0.5, 4.45], [1, 4.38], [2, 4.25], [3, 4.1], [3.7, 3.98], [3.95, 3.85], [4.0, 3.75], [4.07, 3.15], [4.15, 2.6], [4.3, 2.2], [4.6, 1.8], [5.0, 1.4], [5.4, 1.0], [5.7, 0.5], [5.85, 0]];
+function curveY(lr) {
+  for (var i = 1; i < KN.length; i++) {
+    if (lr <= KN[i][0]) { var a = KN[i - 1], b = KN[i]; return a[1] + (b[1] - a[1]) * (lr - a[0]) / (b[0] - a[0]); }
+  }
+  return 0;
+}
+var LCELL = Math.log10(11809);
+
+var gPlot = el('g', { class: 't' }, svg);
+[1, 2, 3, 4, 5].forEach(function (v) { el('line', { x1: PX0, y1: Y(v), x2: PX0 + PW, y2: Y(v), stroke: GRID, 'stroke-width': 2 }, gPlot); });
+for (var v = 1; v <= 5; v++) { }
+el('line', { x1: PX0, y1: PY0, x2: PX0, y2: PYB, stroke: INK, 'stroke-width': 3 }, gPlot);
+el('line', { x1: PX0, y1: PYB, x2: PX0 + PW, y2: PYB, stroke: INK, 'stroke-width': 3 }, gPlot);
+[0, 1, 2, 3, 4, 5, 6].forEach(function (v) {
+  el('line', { x1: X(v), y1: PYB, x2: X(v), y2: PYB + 9, stroke: INK, 'stroke-width': 3 }, gPlot);
+  txt(String(Math.pow(10, v)), { x: X(v), y: PYB + 40, 'font-size': 26, 'text-anchor': v === 6 ? 'end' : 'middle', fill: INK }, gPlot);
+});
+[0, 1, 2, 3, 4, 5].forEach(function (v) {
+  el('line', { x1: PX0 - 9, y1: Y(v), x2: PX0, y2: Y(v), stroke: INK, 'stroke-width': 3 }, gPlot);
+  txt(String(Math.pow(10, v)), { x: PX0 - 16, y: Y(v) + 9, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gPlot);
+});
+txt('barcode rank (log scale)', { x: PX0 + PW / 2, y: 716, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gPlot);
+txt('UMIs per barcode (log scale)', { x: 0, y: 0, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK, transform: 'translate(52,' + (PY0 + PH / 2) + ') rotate(-90)' }, gPlot);
+
+/* shading for step 2 */
+var pts = [], lr;
+for (lr = 0; lr <= LCELL; lr += 0.02) { pts.push(X(lr).toFixed(1) + ',' + Y(curveY(lr)).toFixed(1)); }
+pts.push(X(LCELL).toFixed(1) + ',' + Y(curveY(LCELL)).toFixed(1));
+pts.push(X(LCELL).toFixed(1) + ',' + PYB); pts.push(X(0) + ',' + PYB);
+var gShade = el('g', { class: 't' }, gPlot);
+el('polygon', { points: pts.join(' '), fill: CELL, 'fill-opacity': 0.22 }, gShade);
+el('line', { x1: X(LCELL), y1: PY0, x2: X(LCELL), y2: PYB, stroke: INK, 'stroke-width': 3, 'stroke-dasharray': '10 8' }, gShade);
+txt('cells', { x: X(2.5), y: Y(2.2), 'font-size': 44, 'font-weight': 700, 'text-anchor': 'middle', fill: CELL }, gShade);
+
+/* band for step 3 */
+var gBand = el('g', { class: 't' }, gPlot);
+el('rect', { x: X(LCELL), y: PY0, width: X(5.0) - X(LCELL), height: PH, fill: GOLD, 'fill-opacity': 0.4 }, gBand);
+txt('tested against the ambient profile', { x: X(LCELL) + 10, y: PY0 + 30, 'font-size': 28, 'font-weight': 700, fill: INK }, gBand);
+
+/* curve */
+var cp = [];
+for (lr = 0; lr <= 5.85; lr += 0.02) { cp.push((lr === 0 ? 'M' : 'L') + X(lr).toFixed(1) + ' ' + Y(curveY(lr)).toFixed(1)); }
+var curve = el('path', { d: cp.join(' '), fill: 'none', stroke: INK, 'stroke-width': 4.5, 'stroke-linejoin': 'round', pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 0 }, gPlot);
+
+/* dots in band */
+var dots = [], DN = 14;
+for (var d = 0; d < DN; d++) {
+  var l = 4.10 + d * (4.95 - 4.10) / (DN - 1);
+  var c = el('circle', { class: 't', cx: X(l).toFixed(1), cy: Y(curveY(l)).toFixed(1), r: 8, fill: GREYS, stroke: INK, 'stroke-width': 2 }, gPlot);
+  c._rescue = ([0, 1, 2, 3, 5, 7].indexOf(d) >= 0);
+  setDur(c, 600);
+  dots.push(c);
+}
+var gLeg = el('g', { class: 't' }, gPlot);
+el('circle', { cx: 1290, cy: 200, r: 9, fill: GREYS, stroke: INK, 'stroke-width': 2 }, gLeg);
+txt('empty droplet', { x: 1310, y: 210, 'font-size': 26, fill: INK }, gLeg);
+el('circle', { cx: 1290, cy: 244, r: 9, fill: CELL, stroke: INK, 'stroke-width': 2 }, gLeg);
+txt('rescued cell', { x: 1310, y: 254, 'font-size': 26, fill: INK }, gLeg);
+
+/* annotations for step 1 */
+var gAnn = el('g', { class: 't' }, gPlot);
+txt('plateau near 10000 UMIs', { x: X(2.0), y: Y(4.25) - 28, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gAnn);
+txt('cliff', { x: X(3.97), y: Y(3.1), 'font-size': 28, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gAnn);
+txt('long low tail:', { x: PX0 + PW, y: 300, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gAnn);
+txt('empty droplets, ambient RNA', { x: PX0 + PW, y: 338, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gAnn);
+
+/* ---------- matrices (step 4) ---------- */
+var gMat = el('g', { class: 't' }, svg);
+txt('raw_feature_bc_matrix', { class: 'mono', x: 160, y: 150, 'font-size': 32, 'font-weight': 700, fill: INK }, gMat);
+txt('38606 x about 700000', { class: 'mono', x: 160, y: 192, 'font-size': 28, fill: INK }, gMat);
+el('rect', { x: 160, y: 214, width: 1000, height: 90, fill: GRID, stroke: INK, 'stroke-width': 3 }, gMat);
+txt('every barcode', { x: 660, y: 270, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gMat);
+txt('widths not to scale', { x: 1180, y: 266, 'font-size': 26, fill: INK }, gMat);
+el('line', { x1: 240, y1: 314, x2: 240, y2: 396, stroke: INK, 'stroke-width': 4 }, gMat);
+el('polygon', { points: '240,418 226,392 254,392', fill: INK }, gMat);
+txt('keep the called cells', { x: 270, y: 376, 'font-size': 28, 'font-weight': 700, fill: INK }, gMat);
+txt('filtered_feature_bc_matrix', { class: 'mono', x: 160, y: 468, 'font-size': 32, 'font-weight': 700, fill: INK }, gMat);
+txt('38606 x 11809', { class: 'mono', x: 160, y: 510, 'font-size': 28, fill: INK }, gMat);
+el('rect', { x: 160, y: 532, width: 170, height: 90, fill: GOLD, stroke: INK, 'stroke-width': 3 }, gMat);
+txt('Episode 3 loads this one', { x: 360, y: 588, 'font-size': 32, 'font-weight': 700, fill: INK }, gMat);
+
+/* ---------- STARsolo note (step 5) ---------- */
+var gStar = el('g', { class: 't' }, svg);
+el('rect', { x: 160, y: 130, width: 1280, height: 84, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gStar);
+txt('STARsolo --soloCellFilter EmptyDrops_CR', { class: 'mono', x: 190, y: 184, 'font-size': 34, 'font-weight': 700, fill: INK }, gStar);
+function row(y, label, n) {
+  txt(label, { x: 160, y: y + 40, 'font-size': 32, 'font-weight': 700, fill: INK }, gStar);
+  el('rect', { x: 440, y: y, width: n / 11809 * 900, height: 56, fill: CELL, stroke: INK, 'stroke-width': 3 }, gStar);
+  txt(String(n), { class: 'mono', x: 440 + n / 11809 * 900 + 16, y: y + 40, 'font-size': 32, 'font-weight': 700, fill: INK }, gStar);
+}
+row(290, 'Cell Ranger', 11809);
+row(390, 'STARsolo', 11682);
+txt('cells called', { x: 440, y: 500, 'font-size': 28, fill: INK }, gStar);
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+
+/* ---------- state rendering ---------- */
+function render(s) {
+  sh(gPlot, s <= 3, 350);
+  op(gAnn, s === 1 ? 1 : 0);
+  op(gShade, s >= 2 ? 1 : 0);
+  op(gBand, s === 3 ? 1 : 0);
+  op(gLeg, s === 3 ? 1 : 0);
+  dots.forEach(function (d, i) {
+    setDd(d, s === 3 ? 400 : 0);
+    op(d, s === 3 ? 1 : 0);
+    d.style.fill = (s === 3 && d._rescue) ? CELL : GREYS;
+    if (s === 3 && d._rescue) { setDd(d, 1400 + i * 120); }
+  });
+  /* opacity of the dots must not wait for the colour delay */
+  sh(gMat, s === 4, 350);
+  sh(gStar, s === 5, 350);
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why UMI counts are integers</title>
+<!--
+Why UMI counts are integers (Episode 1, The Count Matrix, introduction.Rmd 191-202)
+
+Steps and captions
+ 1. A cell contains three LYZ mRNA molecules.
+ 2. Every primer in this GEM carries the same cell barcode and a different UMI.
+ 3. PCR amplifies each molecule many times. The copies keep their UMI.
+ 4. Sequencing returns 18 reads for LYZ from this cell.
+ 5. Counting reads would report 18. That number depends on PCR, not on the cell.
+ 6. Grouping by UMI collapses the copies. LYZ = 3, the number of original molecules.
+ 7. That 3 is one entry in the count matrix. About 95 percent of entries are 0.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=4 opens at step 4. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+ Random jitter of the read pile uses mulberry32 with seed 42, so every run looks the same.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease,opacity var(--dop,var(--dur)) ease var(--dlo,0ms),fill var(--dop,var(--dur)) ease var(--dlo,0ms);transform-origin:0 0}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: why UMI counts are integers"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREY = '#cbd5e0', RED = '#b22222', GREEN = '#2f855a', BAR = '#2b6cb0', INSERT = '#a0aec0';
+var N = 7;
+var CAPTIONS = [
+  'A cell contains three LYZ mRNA molecules.',
+  'Every primer in this GEM carries the same cell barcode and a different UMI.',
+  'PCR amplifies each molecule many times. The copies keep their UMI.',
+  'Sequencing returns 18 reads for LYZ from this cell.',
+  'Counting reads would report 18. That number depends on PCR, not on the cell.',
+  'Grouping by UMI collapses the copies. LYZ = 3, the number of original molecules.',
+  'That 3 is one entry in the count matrix. About 95 percent of entries are 0.'
+];
+var UMIS = [{ s: 'AAGC', c: '#dd6b20' }, { s: 'TGCA', c: '#805ad5' }, { s: 'CCTA', c: '#d53f8c' }];
+var ROWY = [240, 350, 460];
+var BARCODE = 'ACGT...TTGA';
+
+var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var rng = mulberry32(42);
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, r, s) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + (r || 0) + 'deg) scale(' + (s === undefined ? 1 : s) + ')';
+}
+function about(e, cx, cy, s) { tf(e, cx * (1 - s), cy * (1 - s), 0, s); }
+function op(e, v) { e.style.opacity = v; }
+function arrow(x1, y, x2, parent) {
+  var g = el('g', { class: 't' }, parent);
+  el('line', { x1: x1, y1: y, x2: x2 - 14, y2: y, stroke: INK, 'stroke-width': 3 }, g);
+  el('polygon', { points: x2 + ',' + y + ' ' + (x2 - 20) + ',' + (y - 11) + ' ' + (x2 - 20) + ',' + (y + 11), fill: INK }, g);
+  return g;
+}
+function squiggle(x0, len, y) {
+  var d = 'M' + x0 + ',' + y;
+  for (var x = 4; x <= len; x += 4) { d += ' L' + (x0 + x) + ',' + (y + 9 * Math.sin(2 * Math.PI * x / 40)).toFixed(1); }
+  return d;
+}
+
+/* ---------- fixed frame ---------- */
+txt('Why UMI counts are integers', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 1', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: '#e2e8f0', 'stroke-width': 2 }, svg);
+
+/* ---------- cell, molecules, tags (steps 1 to 3) ---------- */
+var gCell = el('g', { class: 't' }, svg);
+el('rect', { x: 40, y: 130, width: 660, height: 430, rx: 110, ry: 110, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gCell);
+txt('Cell', { x: 100, y: 166, 'font-size': 28, 'font-weight': 600, fill: INK }, gCell);
+
+var hdrs = el('g', { class: 't' }, gCell);
+txt('barcode, 16 nt', { x: 62, y: 205, 'font-size': 26, fill: INK }, hdrs);
+txt('UMI, 12 nt', { x: 286, y: 205, 'font-size': 26, fill: INK }, hdrs);
+
+var gMol = el('g', { class: 't' }, gCell);
+ROWY.forEach(function (y) {
+  el('path', { d: squiggle(412, 260, y), fill: 'none', stroke: INK, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, gMol);
+});
+txt('LYZ mRNA', { x: 542, y: 535, 'font-size': 28, 'font-weight': 600, 'text-anchor': 'middle', fill: INK }, gMol);
+
+var tagGs = ROWY.map(function (y, r) {
+  var g = el('g', { class: 't' }, gCell);
+  el('rect', { x: 60, y: y - 22, width: 218, height: 44, fill: BAR }, g);
+  txt(BARCODE, { class: 'mono', x: 169, y: y + 9, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: '#ffffff' }, g);
+  el('rect', { x: 282, y: y - 22, width: 130, height: 44, fill: UMIS[r].c }, g);
+  txt(UMIS[r].s, { class: 'mono', x: 347, y: y + 9, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: '#ffffff' }, g);
+  return g;
+});
+
+/* ---------- scene: copies, reads, counter (steps 3 to 6) ---------- */
+var gScene = el('g', { class: 't' }, svg);
+
+var gPCR = el('g', { class: 't' }, gScene);
+arrow(714, 350, 784, gPCR);
+txt('PCR', { x: 749, y: 330, 'font-size': 28, 'font-weight': 600, 'text-anchor': 'middle', fill: INK }, gPCR);
+el('path', { d: 'M975,210 H990 V490 H975', fill: 'none', stroke: INK, 'stroke-width': 3 }, gPCR);
+txt('x 100 in reality', { x: 1008, y: 360, 'font-size': 30, 'font-weight': 600, fill: INK }, gPCR);
+
+/* pile slots: a seeded shuffle so UMIs are mixed */
+var perm = []; for (var q = 0; q < 18; q++) { perm.push(q); }
+for (var a = 17; a > 0; a--) { var b = Math.floor(rng() * (a + 1)); var tmp = perm[a]; perm[a] = perm[b]; perm[b] = tmp; }
+
+var reads = [];
+for (var k = 0; k < 18; k++) {
+  var r = Math.floor(k / 6), i = k % 6, slot = perm[k], u = UMIS[r];
+  var g = el('g', { class: 't' }, gScene);
+  var copy = el('g', { class: 't' }, g);
+  el('rect', { x: -85, y: -7, width: 56, height: 14, fill: BAR }, copy);
+  el('rect', { x: -29, y: -7, width: 30, height: 14, fill: u.c }, copy);
+  el('rect', { x: 1, y: -7, width: 84, height: 14, fill: INSERT }, copy);
+  var rd = el('g', { class: 't' }, g);
+  var rect = el('rect', { class: 't', x: -75, y: -18, width: 150, height: 36, rx: 6, ry: 6 }, rd);
+  rect.style.fill = u.c;
+  var lbl = txt(u.s, { class: 't mono', x: 0, y: 9, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle' }, rd);
+  lbl.style.fill = '#ffffff';
+  reads.push({
+    g: g, copy: copy, read: rd, rect: rect, lbl: lbl, c: u.c, rep: i === 0,
+    p0: { x: 380, y: ROWY[r] },
+    p3: { x: 885, y: ROWY[r] + (i - 2.5) * 16 },
+    p4: { x: 370 + 170 * (slot % 3) + (rng() - 0.5) * 16, y: 285 + 46 * Math.floor(slot / 3) + (rng() - 0.5) * 8, r: (rng() - 0.5) * 10 },
+    p6: { x: 350 + 190 * r, y: 285 + 46 * i }
+  });
+}
+
+var pileLabel = txt('18 reads', { x: 540, y: 594, 'font-size': 34, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gScene);
+pileLabel.setAttribute('class', 't');
+var groupLabels = el('g', { class: 't' }, gScene);
+[350, 540, 730].forEach(function (x) {
+  txt('1 molecule', { x: x, y: 590, 'font-size': 28, 'font-weight': 600, 'text-anchor': 'middle', fill: INK }, groupLabels);
+});
+
+var cArrow = arrow(830, 415, 945, gScene);
+var cBox = el('g', { class: 't' }, gScene);
+el('rect', { x: 960, y: 335, width: 460, height: 160, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, cBox);
+var hdr5 = txt('Without UMIs', { class: 't', x: 1190, y: 305, 'font-size': 36, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gScene);
+var hdr6 = txt('With UMIs', { class: 't', x: 1190, y: 305, 'font-size': 36, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gScene);
+var val5 = txt('LYZ = 18', { class: 't mono', x: 1190, y: 440, 'font-size': 84, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gScene);
+var val6 = txt('LYZ = 3', { class: 't mono', x: 1190, y: 440, 'font-size': 84, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gScene);
+var cross = el('g', { class: 't' }, gScene);
+el('line', { x1: 1457, y1: 387, x2: 1513, y2: 443, stroke: RED, 'stroke-width': 10, 'stroke-linecap': 'round' }, cross);
+el('line', { x1: 1513, y1: 387, x2: 1457, y2: 443, stroke: RED, 'stroke-width': 10, 'stroke-linecap': 'round' }, cross);
+var tick = el('g', { class: 't' }, gScene);
+el('path', { d: 'M1455,418 L1477,442 L1519,390', fill: 'none', stroke: GREEN, 'stroke-width': 10, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, tick);
+
+/* ---------- count matrix fragment (step 7) ---------- */
+var gMat = el('g', { class: 't' }, svg);
+txt('Count matrix (genes x cells)', { x: 800, y: 180, 'font-size': 34, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gMat);
+var GENES = ['LYZ', 'CD3D', 'MS4A1', 'GNLY'];
+var BCS = [BARCODE, 'AAAC...CACT', 'CATG...GGAT', 'GTCA...ATCC'];
+txt('gene', { x: 455, y: 232, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gMat);
+BCS.forEach(function (bc, c) {
+  txt(bc, { class: 'mono', x: 580 + 210 * c, y: 232, 'font-size': 26, 'font-weight': c === 0 ? 700 : 400, 'text-anchor': 'middle', fill: INK }, gMat);
+});
+GENES.forEach(function (gene, rr) {
+  var cy = 292 + 92 * rr;
+  txt(gene, { class: 'mono', x: 455, y: cy + 11, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gMat);
+  for (var c = 0; c < 4; c++) {
+    var hot = (rr === 0 && c === 0);
+    el('rect', { x: 480 + 210 * c, y: 250 + 92 * rr, width: 200, height: 84, rx: 6, ry: 6, fill: hot ? GOLD : '#f7fafc', stroke: hot ? INK : GREY, 'stroke-width': hot ? 3 : 2 }, gMat);
+    txt(hot ? '3' : '0', { class: 'mono', x: 580 + 210 * c, y: cy + 15, 'font-size': 44, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gMat);
+  }
+});
+var HOT = { x: 580, y: 292 };
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) {
+    var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap);
+    ts.textContent = ln;
+  });
+  cap.setAttribute('data-lines', lines.length);
+}
+
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+/* ---------- state rendering ---------- */
+function render(s) {
+  op(gCell, s <= 3 ? 1 : 0);
+  tf(gMol, s === 1 ? -172 : 0, 0, 0, 1);
+  tagGs.forEach(function (g) { op(g, s >= 2 ? 1 : 0); tf(g, s >= 2 ? 0 : -60, 0, 0, 1); });
+  op(hdrs, s >= 2 ? 1 : 0);
+
+  op(gScene, s <= 6 ? 1 : 0);
+  if (s <= 6) { tf(gScene, 0, 0, 0, 1); } else { about(gScene, HOT.x, HOT.y, 0.3); }
+  op(gMat, s === 7 ? 1 : 0);
+  if (s === 7) { tf(gMat, 0, 0, 0, 1); } else { about(gMat, HOT.x, HOT.y, 2.4); }
+
+  op(gPCR, s === 3 ? 1 : 0);
+  reads.forEach(function (rd) {
+    var grey = s >= 6 && !rd.rep;
+    if (s <= 2) {
+      tf(rd.g, rd.p0.x, rd.p0.y, 0, 1); op(rd.g, 0); op(rd.copy, 1); op(rd.read, 0);
+    } else if (s === 3) {
+      tf(rd.g, rd.p3.x, rd.p3.y, 0, 1); op(rd.g, 1); op(rd.copy, 1); op(rd.read, 0);
+    } else if (s <= 5) {
+      tf(rd.g, rd.p4.x, rd.p4.y, rd.p4.r, 1); op(rd.g, 1); op(rd.copy, 0); op(rd.read, 1);
+    } else {
+      tf(rd.g, rd.p6.x, rd.p6.y, 0, 1); op(rd.g, rd.rep ? 1 : 0.4); op(rd.copy, 0); op(rd.read, 1);
+    }
+    rd.rect.style.fill = grey ? GREY : rd.c;
+    rd.lbl.style.fill = grey ? INK : '#ffffff';
+    if (grey && !reduce) { rd.g.style.setProperty('--dop', '500ms'); rd.g.style.setProperty('--dlo', '300ms'); }
+    else { rd.g.style.removeProperty('--dop'); rd.g.style.removeProperty('--dlo'); }
+  });
+  op(pileLabel, (s === 4 || s === 5) ? 1 : 0);
+  op(groupLabels, s >= 6 ? 1 : 0);
+
+  var showCounter = (s === 5 || s === 6) ? 1 : 0;
+  op(cArrow, showCounter); op(cBox, showCounter);
+  op(hdr5, s === 5 ? 1 : 0); op(hdr6, s === 6 ? 1 : 0);
+  op(val5, s === 5 ? 1 : 0); op(val6, s === 6 ? 1 : 0);
+  op(cross, s === 5 ? 1 : 0); op(tick, s === 6 ? 1 : 0);
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+void getComputedStyle(gScene).opacity;
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

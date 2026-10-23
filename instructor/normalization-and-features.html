@@ -500,6 +500,8 @@ of 1 + x) to compress the dynamic range</li>
 </ol><p>The formula for a single gene <em>g</em> in cell <em>c</em> is:</p>
 <p><strong>normalized(g, c) = log(1 + count(g, c) / total_counts(c) x
 10000)</strong></p>
+<p><a href="../files/animations/ep4_lognormalize.html">Animation:
+Normalization corrects sequencing depth</a></p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -713,7 +715,9 @@ expected given their expression level).</td>
 <td><code>2000</code></td>
 <td>Number of variable features to select. 2,000 is the standard default
 for most scRNA-seq analyses.</td>
-</tr></tbody></table><p>Let’s see which genes were selected:</p>
+</tr></tbody></table><p><a href="../files/animations/ep4_variable-features.html">Animation:
+Which genes vary more than expected</a></p>
+<p>Let’s see which genes were selected:</p>
 <div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -771,6 +775,8 @@ highly expressed genes simply because they have larger absolute values,
 not because they carry more biological information. Scaling puts all
 genes on equal footing so that PCA identifies the axes of true
 biological variation rather than expression magnitude.</p>
+<p><a href="../files/animations/ep4_scaling.html">Animation: ScaleData puts
+genes on one footing</a></p>
 <div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>

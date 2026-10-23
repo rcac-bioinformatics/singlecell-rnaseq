@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What happens when you submit</title>
+<!--
+What happens when you submit (Episode 2, SLURM job lifecycle)
+
+Steps and captions
+ 1. The script asks for 1 node, 64 cores, 24 hours on account rcac-rnaseq.
+    run_cellranger.sh with its #SBATCH lines.
+ 2. --test-only validates the request and estimates a start time. Nothing is submitted.
+    The script goes to a checker, which returns "would start at ... on node a324". The queue stays empty.
+ 3. sbatch submits. The job waits as PD until cores are free.
+    The job enters the queue with state PD.
+ 4. The account runs three 64-core jobs at once. Twenty learners' jobs take about a day and a half.
+    192 cores as three 64-core slots. Three jobs run (R), the other 17 of 20 wait (PD).
+ 5. When it finishes, pbmc10k/outs/ holds the matrix and web_summary.html.
+    One job shows CD and the output files appear.
+ 6. If a job dies, remove _lock and resubmit to resume from the last finished stage.
+    A job shows TO, the _lock file is removed, the job is resubmitted and the later stages run.
+
+Check before teaching
+ - The account is rcac-rnaseq, as in episode 2 since patch 09 (2026-10-21; it was "workshop" before).
+ - The #SBATCH lines are my reconstruction of the requested resources (account, nodes, ntasks, time), not the lesson's file.
+   There is no --mem line, as RCAC memory follows core count.
+ - "would start at ..." keeps the ellipsis from the brief because no time was supplied.
+ - The stage names in step 6 are generic (stage 1 to 4) and illustrative.
+ - Derived: 20 jobs minus 3 running leaves 17 waiting. Twenty jobs on three slots in about 36 hours implies roughly 5 hours
+   of actual run time per job, well under the 24 hours requested.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=4 opens at step 4. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke-opacity var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: what happens when you submit"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GRID = '#e2e8f0', UP = '#b22222', BG = '#cbd5e0';
+var ACCOUNT = 'rcac-rnaseq';
+var N = 6;
+var CAPTIONS = [
+  'The script asks for 1 node, 64 cores, 24 hours on account ' + ACCOUNT + '.',
+  '--test-only validates the request and estimates a start time. Nothing is submitted.',
+  'sbatch submits. The job waits as PD until cores are free.',
+  'The account runs three 64-core jobs at once. Twenty learners\' jobs take about a day and a half.',
+  'When it finishes, pbmc10k/outs/ holds the matrix and web_summary.html.',
+  'If a job dies, remove _lock and resubmit to resume from the last finished stage.'
+];
+var STC = { PD: [GOLD, INK], R: ['#2f855a', '#fff'], CD: ['#2b6cb0', '#fff'], TO: [UP, '#fff'] };
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function mono(str, x, y, size, parent, extra) { var a = { class: 'mono', x: x, y: y, 'font-size': size, fill: INK }; for (var k in (extra || {})) { a[k] = extra[k]; } return txt(str, a, parent); }
+function tf(e, x, y, sx, sy) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + (sx === undefined ? 1 : sx) + ',' + (sy === undefined ? 1 : sy) + ')';
+}
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 350) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function setDd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+function G(parent) { return el('g', { class: 't' }, parent || svg); }
+
+/* ---------- frame ---------- */
+txt('What happens when you submit', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 2', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: GRID, 'stroke-width': 2 }, svg);
+
+/* ---------- script document (steps 1 to 3) ---------- */
+var gDoc = G();
+el('rect', { x: 0, y: 0, width: 560, height: 310, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gDoc);
+el('rect', { x: 0, y: 0, width: 560, height: 66, fill: GRID, stroke: INK, 'stroke-width': 3 }, gDoc);
+mono('run_cellranger.sh', 24, 46, 32, gDoc, { 'font-weight': 700 });
+var LINES = ['#SBATCH --account=' + ACCOUNT, '#SBATCH --nodes=1', '#SBATCH --ntasks=64', '#SBATCH --time=24:00:00'];
+var ANN = ['account', '1 node', '64 cores', '24 hours'];
+var gAnn = G();
+LINES.forEach(function (l, i) {
+  mono(l, 24, 124 + i * 54, 28, gDoc);
+});
+var annEls = ANN.map(function (a, i) {
+  var t = txt(a, { x: 1100, y: 294 + i * 54, 'font-size': 30, 'font-weight': 700, fill: INK, class: 't' }, svg);
+  return t;
+});
+
+/* ---------- step 2: checker ---------- */
+var gCmd2 = G(), gCmd3 = G();
+mono('sbatch --test-only run_cellranger.sh', 60, 116, 32, gCmd2, { 'font-weight': 700 });
+mono('sbatch run_cellranger.sh', 60, 116, 32, gCmd3, { 'font-weight': 700 });
+el('line', { x1: 624, y1: 300, x2: 1215, y2: 300, stroke: INK, 'stroke-width': 4 }, gCmd3);
+el('polygon', { points: '1240,300 1216,287 1216,313', fill: INK }, gCmd3);
+txt('submitted', { x: 930, y: 276, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gCmd3);
+var gCheck = G();
+el('line', { x1: 624, y1: 300, x2: 740, y2: 300, stroke: INK, 'stroke-width': 4 }, gCheck);
+el('polygon', { points: '756,300 736,288 736,312', fill: INK }, gCheck);
+el('rect', { x: 760, y: 200, width: 300, height: 200, fill: '#fff', stroke: INK, 'stroke-width': 4 }, gCheck);
+txt('scheduler', { x: 910, y: 290, 'font-size': 34, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gCheck);
+txt('check', { x: 910, y: 334, 'font-size': 34, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gCheck);
+var gRes = G();
+el('line', { x1: 910, y1: 404, x2: 910, y2: 452, stroke: INK, 'stroke-width': 4 }, gRes);
+el('polygon', { points: '910,468 898,448 922,448', fill: INK }, gRes);
+el('rect', { x: 640, y: 472, width: 540, height: 130, fill: '#f7fafc', stroke: INK, 'stroke-width': 4 }, gRes);
+mono('would start at ...', 666, 524, 32, gRes, { 'font-weight': 700 });
+mono('on node a324', 666, 574, 32, gRes, { 'font-weight': 700 });
+
+/* ---------- queue column (steps 2 and 3) ---------- */
+var gQ = G();
+txt('queue', { x: 1380, y: 186, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gQ);
+el('rect', { x: 1250, y: 206, width: 260, height: 420, fill: 'none', stroke: INK, 'stroke-width': 3, 'stroke-dasharray': '12 8' }, gQ);
+var qEmpty = txt('no entry', { class: 't', x: 1380, y: 420, 'font-size': 30, 'text-anchor': 'middle', fill: INK }, svg);
+var chip3 = G();
+el('rect', { x: 0, y: 0, width: 230, height: 62, fill: '#fff', stroke: INK, 'stroke-width': 3 }, chip3);
+txt('my job', { x: 16, y: 42, 'font-size': 28, 'font-weight': 700, fill: INK }, chip3);
+el('rect', { x: 150, y: 12, width: 66, height: 38, fill: GOLD, stroke: INK, 'stroke-width': 2 }, chip3);
+txt('PD', { x: 183, y: 40, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, chip3);
+
+/* ---------- slots (steps 4 to 6) ---------- */
+var gSlots = G();
+txt('192 cores = 3 slots of 64', { x: 130, y: 124, 'font-size': 32, 'font-weight': 700, fill: INK }, gSlots);
+var slotChips = [];
+for (var i = 0; i < 3; i++) {
+  var sx = 130 + i * 400;
+  el('rect', { x: sx, y: 148, width: 350, height: 130, fill: '#fff', stroke: INK, 'stroke-width': 3 }, gSlots);
+  txt('64 cores', { x: sx + 20, y: 188, 'font-size': 28, 'font-weight': 700, fill: INK }, gSlots);
+  var cr = el('rect', { class: 't', x: sx + 20, y: 208, width: 130, height: 56, fill: STC.R[0], stroke: INK, 'stroke-width': 3 }, gSlots);
+  var ct = txt('R', { class: 't', x: sx + 85, y: 247, 'font-size': 34, 'font-weight': 700, 'text-anchor': 'middle', fill: '#fff' }, gSlots);
+  slotChips.push({ r: cr, t: ct });
+}
+/* queue grid (step 4) */
+var gGrid = G();
+txt('waiting', { x: 130, y: 346, 'font-size': 32, 'font-weight': 700, fill: INK }, gGrid);
+for (var k = 0; k < 17; k++) {
+  el('rect', { x: 130 + (k % 9) * 84, y: 370 + Math.floor(k / 9) * 66, width: 72, height: 52, fill: GOLD, stroke: INK, 'stroke-width': 3 }, gGrid);
+  txt('PD', { x: 130 + (k % 9) * 84 + 36, y: 370 + Math.floor(k / 9) * 66 + 36, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gGrid);
+}
+txt('20 jobs: 3 running (R), 17 waiting (PD)', { x: 130, y: 560, 'font-size': 32, 'font-weight': 700, fill: INK }, gGrid);
+
+/* output (step 5) */
+var gOut = G();
+el('line', { x1: 195, y1: 284, x2: 195, y2: 336, stroke: INK, 'stroke-width': 4 }, gOut);
+el('polygon', { points: '195,352 183,332 207,332', fill: INK }, gOut);
+mono('pbmc10k/outs/', 130, 410, 36, gOut, { 'font-weight': 700 });
+var f1 = G(gOut), f2 = G(gOut);
+[[f1, 'filtered_feature_bc_matrix/', 470], [f2, 'web_summary.html', 540]].forEach(function (f) {
+  el('rect', { x: 150, y: f[2] - 34, width: 34, height: 44, fill: '#2b6cb0', stroke: INK, 'stroke-width': 2 }, f[0]);
+  mono(f[1], 206, f[2], 32, f[0]);
+});
+
+/* recovery (step 6) */
+var gRec = G();
+mono('pbmc10k/', 130, 370, 36, gRec, { 'font-weight': 700 });
+var lockG = G(gRec);
+el('rect', { x: 150, y: 396, width: 34, height: 44, fill: GOLD, stroke: INK, 'stroke-width': 2 }, lockG);
+mono('_lock', 206, 430, 34, lockG, { 'font-weight': 700 });
+var rmG = G(gRec);
+el('rect', { x: 130, y: 470, width: 470, height: 56, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, rmG);
+mono('rm pbmc10k/_lock', 148, 508, 30, rmG, { 'font-weight': 700 });
+var reG = G(gRec);
+el('rect', { x: 130, y: 546, width: 470, height: 56, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, reG);
+mono('sbatch run_cellranger.sh', 148, 584, 30, reG, { 'font-weight': 700 });
+txt('pipeline stages', { x: 700, y: 370, 'font-size': 32, 'font-weight': 700, fill: INK }, gRec);
+var stg = [];
+for (var s = 0; s < 4; s++) {
+  var r = el('rect', { class: 't', x: 700 + s * 200, y: 400, width: 170, height: 76, fill: s < 2 ? '#2b6cb0' : '#fff', stroke: s === 2 ? UP : INK, 'stroke-width': 4, 'stroke-dasharray': s === 2 ? '10 7' : '0' }, gRec);
+  var t = txt('stage ' + (s + 1), { class: 't', x: 785 + s * 200, y: 448, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: s < 2 ? '#fff' : INK }, gRec);
+  stg.push({ r: r, t: t });
+}
+txt('finished', { x: 885, y: 520, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gRec);
+txt('resumes here', { x: 1085, y: 520, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gRec);
+txt('(stages are illustrative)', { x: 700, y: 600, 'font-size': 26, fill: INK }, gRec);
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+
+/* ---------- state rendering ---------- */
+function setChip(i, st) {
+  slotChips[i].r.style.fill = STC[st][0]; slotChips[i].t.style.fill = STC[st][1]; slotChips[i].t.textContent = st;
+}
+function render(s) {
+  /* document */
+  sh(gDoc, s <= 3, 350);
+  tf(gDoc, s === 1 ? 500 : 60, s === 1 ? 170 : 150, 1, 1);
+  annEls.forEach(function (a, i) { setDd(a, s === 1 ? 700 + i * 350 : 0); op(a, s === 1 ? 1 : 0); });
+  sh(gCmd2, s === 2, 350); sh(gCmd3, s === 3, 350);
+  sh(gCheck, s === 2, 450); sh(gRes, s === 2, 1100);
+  sh(gQ, s === 2 || s === 3, 450);
+  op(qEmpty, s === 2 ? 1 : 0); setDd(qEmpty, s === 2 ? 1300 : 0);
+  setDd(chip3, s === 3 ? 700 : 0);
+  tf(chip3, s === 3 ? 1265 : 640, s === 3 ? 236 : 320, 1, 1); op(chip3, s === 3 ? 1 : 0);
+  /* slots */
+  sh(gSlots, s >= 4, 350);
+  var st = s === 4 ? ['R', 'R', 'R'] : (s === 5 ? ['CD', 'R', 'R'] : ['R', 'R', 'TO']);
+  st.forEach(function (x, i) { setChip(i, x); });
+  sh(gGrid, s === 4, 800);
+  sh(gOut, s === 5, 700); sh(f1, s === 5, 1200); sh(f2, s === 5, 1700);
+  sh(gRec, s === 6, 500);
+  setDd(lockG, s === 6 ? 2600 : 0); op(lockG, s === 6 ? 0.25 : 1);
+  /* recovery sequence: rm command, lock fades, resubmit, stages resume */
+  sh(rmG, s === 6, 1800); sh(reG, s === 6, 3000);
+  stg.forEach(function (g, i) {
+    var done = s === 6 && i >= 2;
+    setDd(g.r, done ? 3900 + (i - 2) * 500 : 0); setDd(g.t, done ? 3900 + (i - 2) * 500 : 0);
+    g.r.style.fill = (i < 2 || done) ? '#2b6cb0' : '#fff';
+    g.t.style.fill = (i < 2 || done) ? '#fff' : INK;
+    g.r.setAttribute('stroke', (i === 2 && !done) ? UP : INK);
+    g.r.setAttribute('stroke-dasharray', (i === 2 && !done) ? '10 7' : '0');
+  });
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

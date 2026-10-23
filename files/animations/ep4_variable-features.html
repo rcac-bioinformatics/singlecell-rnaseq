@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which genes vary more than expected</title>
+<!--
+Which genes vary more than expected (Episode 4, variable features)
+
+Steps and captions
+ 1. Variance rises with mean expression. High expression alone is not interesting.
+    2000 seeded genes, mean (log) against variance (log).
+ 2. vst fits the expected variance at each expression level.
+    A smooth curve through the cloud.
+ 3. Standardized variance is how far a gene sits above the trend.
+    Points move to standardized variance; the cloud flattens around 1.
+ 4. The top 2000 are the variable features. Cell-type markers rise to the top.
+    Top 2000 of 29155 in firebrick, labels PPBP, PF4, JCHAIN, LYZ, GNLY.
+ 5. ACTB is highly expressed but on the trend. It is not variable.
+ 6. SCTransform ranks genes differently; the big sets overlap more than the top 20.
+    Schematic circles. Overlap is not to scale.
+
+Illustrative: all gene values are simulated with mulberry32 seed 42. The 2000 dots are a stylised sample
+standing in for 29155 genes, so 137 dots (2000/29155 of the sample) are highlighted. The five marker genes
+and ACTB are placed by hand. The trend curve is a simple mean-variance formula, not a fitted loess.
+The overlap circles in step 6 carry no real overlap numbers.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=4 opens at step 4. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke-opacity var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: which genes vary more than expected"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREYS = '#a0aec0', GRID = '#e2e8f0', FIRE = '#b22222', SLATE = '#4a5568', CELL = '#2b6cb0';
+var N = 6;
+var CAPTIONS = [
+  'Variance rises with mean expression. High expression alone is not interesting.',
+  'vst fits the expected variance at each expression level.',
+  'Standardized variance is how far a gene sits above the trend.',
+  'The top 2000 are the variable features. Cell-type markers rise to the top.',
+  'ACTB is highly expressed but on the trend. It is not variable.',
+  'SCTransform ranks genes differently; the big sets overlap more than the top 20.'
+];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, sx, sy) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + (sx === undefined ? 1 : sx) + ',' + (sy === undefined ? 1 : sy) + ')';
+}
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 350) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function setDur(e, ms) { e.style.setProperty('--dur', ms + 'ms'); }
+function setDd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+var rnd = mulberry32(42);
+function gauss() { var u = 1 - rnd(), v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+/* ---------- frame ---------- */
+txt('Which genes vary more than expected', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 4', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: GRID, 'stroke-width': 2 }, svg);
+
+/* ---------- data ---------- */
+var PX0 = 190, PW = 1310, PY0 = 120, PH = 500, PYB = PY0 + PH;
+function X(lm) { return PX0 + (lm + 3) / 5 * PW; }
+function Yr(lv) { return PYB - (lv + 3) / 7 * PH; }
+function Ys(ls) { return PYB - (Math.max(-0.95, Math.min(1.95, ls)) + 1) / 3 * PH; }
+function expVar(lm) { var m = Math.pow(10, lm); return Math.log10(m + 0.15 * m * m); }
+
+var genes = [];
+for (var i = 0; i < 2000; i++) {
+  var lm = -1.6 + 0.95 * gauss();
+  while (lm < -2.9 || lm > 1.75) { lm = -1.6 + 0.95 * gauss(); }
+  var ls = 0.12 * gauss() + (rnd() < 0.12 ? 0.3 + rnd() * 0.65 : 0);
+  genes.push({ lm: lm, ls: ls, name: '' });
+}
+/* by hand: ACTB first, then the five markers */
+var HAND = [['ACTB', 1.9, 0.03], ['PPBP', 1.2, 1.15], ['PF4', 0.6, 1.0], ['JCHAIN', -1.2, 1.15], ['LYZ', 1.75, 0.85], ['GNLY', -0.3, 0.95]];
+HAND.forEach(function (h, k) { genes[k] = { lm: h[1], ls: h[2], name: h[0] }; });
+genes.forEach(function (g) { g.lv = expVar(g.lm) + g.ls; });
+var K = Math.round(2000 * 2000 / 29155);
+var order = genes.map(function (g, i) { return i; }).sort(function (a, b) { return genes[b].ls - genes[a].ls; });
+order.forEach(function (gi, rank) { genes[gi].top = rank < K; });
+var THR = genes[order[K - 1]].ls;
+
+/* ---------- plot ---------- */
+var gPlot = el('g', { class: 't' }, svg);
+var gRaw = el('g', { class: 't' }, gPlot), gStd = el('g', { class: 't' }, gPlot);
+[0, 1, 2, 3, 4, 5, 6].forEach(function (v) {
+  el('line', { x1: PX0, y1: Yr(v - 3), x2: PX0 + PW, y2: Yr(v - 3), stroke: GRID, 'stroke-width': 2 }, gRaw);
+});
+[-1, 0, 1, 2].forEach(function (v) {
+  el('line', { x1: PX0, y1: Ys(v), x2: PX0 + PW, y2: Ys(v), stroke: GRID, 'stroke-width': 2 }, gStd);
+});
+el('line', { x1: PX0, y1: PY0, x2: PX0, y2: PYB, stroke: INK, 'stroke-width': 3 }, gPlot);
+el('line', { x1: PX0, y1: PYB, x2: PX0 + PW, y2: PYB, stroke: INK, 'stroke-width': 3 }, gPlot);
+var xl = ['0.001', '0.01', '0.1', '1', '10', '100'];
+[-3, -2, -1, 0, 1, 2].forEach(function (v, k) {
+  el('line', { x1: X(v), y1: PYB, x2: X(v), y2: PYB + 9, stroke: INK, 'stroke-width': 3 }, gPlot);
+  txt(xl[k], { x: X(v), y: PYB + 38, 'font-size': 26, 'text-anchor': k === 5 ? 'end' : 'middle', fill: INK }, gPlot);
+});
+txt('mean expression (log scale)', { x: PX0 + PW / 2, y: 706, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gPlot);
+var yl = ['0.001', '0.01', '0.1', '1', '10', '100', '1000', '10000'];
+[-3, -2, -1, 0, 1, 2, 3, 4].forEach(function (v, k) {
+  if (v % 1 === 0 && (v % 2 !== 0 || v === 0 || v === 4 || v === -2 || v === 2)) {
+    txt(yl[k], { x: PX0 - 14, y: Yr(v) + 9, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gRaw);
+  }
+});
+txt('variance (log scale)', { x: 0, y: 0, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK, transform: 'translate(52,' + (PY0 + PH / 2) + ') rotate(-90)' }, gRaw);
+[[-1, '0.1'], [0, '1'], [1, '10'], [2, '100']].forEach(function (a) {
+  txt(a[1], { x: PX0 - 14, y: Ys(a[0]) + 9, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gStd);
+});
+txt('standardized variance (log scale)', { x: 0, y: 0, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK, transform: 'translate(52,' + (PY0 + PH / 2) + ') rotate(-90)' }, gStd);
+txt('stylised: 2000 dots stand in for 29155 genes', { x: PX0 + PW, y: 100, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gPlot);
+
+/* expected variance curve */
+var cp = [];
+for (var lmx = -3; lmx <= 2.0001; lmx += 0.05) { cp.push((cp.length ? 'L' : 'M') + X(lmx).toFixed(1) + ' ' + Yr(expVar(lmx)).toFixed(1)); }
+var gCurve = el('g', { class: 't' }, gPlot);
+el('path', { d: cp.join(' '), fill: 'none', stroke: INK, 'stroke-width': 5, 'stroke-linecap': 'round' }, gCurve);
+txt('expected variance', { x: X(0.35), y: Yr(expVar(0.35)) + 50, 'font-size': 28, 'font-weight': 700, fill: INK }, gCurve);
+var gTrend = el('g', { class: 't' }, gPlot);
+el('line', { x1: PX0, y1: Ys(0), x2: PX0 + PW, y2: Ys(0), stroke: INK, 'stroke-width': 4, 'stroke-dasharray': '14 9' }, gTrend);
+txt('the trend = 1', { x: PX0 + 14, y: Ys(0) - 12, 'font-size': 28, 'font-weight': 700, fill: INK, 'paint-order': 'stroke', stroke: '#fff', 'stroke-width': 8, 'stroke-linejoin': 'round' }, gTrend);
+
+/* dots (non-top first so highlighted dots draw on top) */
+var drawOrder = genes.map(function (g, i) { return i; }).sort(function (a, b) { return (genes[a].top ? 1 : 0) - (genes[b].top ? 1 : 0); });
+var gDots = el('g', {}, gPlot);
+drawOrder.forEach(function (gi) {
+  var g = genes[gi];
+  g.c = el('circle', { class: 't', cx: 0, cy: 0, r: 4.5, fill: SLATE }, gDots);
+  setDur(g.c, 900);
+});
+
+
+/* labels */
+var gLab = el('g', { class: 't' }, gPlot);
+[1, 2, 3, 4, 5].forEach(function (k) {
+  var g = genes[k];
+  txt(g.name, { x: X(g.lm), y: Ys(g.ls) - 20, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: FIRE }, gLab);
+});
+var gThr = el('g', { class: 't' }, gPlot);
+el('line', { x1: PX0, y1: Ys(THR), x2: PX0 + PW, y2: Ys(THR), stroke: FIRE, 'stroke-width': 3, 'stroke-dasharray': '10 8' }, gThr);
+txt('top 2000 of 29155 genes', { x: PX0 + 14, y: Ys(THR) + 34, 'font-size': 28, 'font-weight': 700, fill: FIRE, 'paint-order': 'stroke', stroke: '#fff', 'stroke-width': 8, 'stroke-linejoin': 'round' }, gThr);
+
+gPlot.appendChild(gTrend); gPlot.appendChild(gThr);
+var gAct = el('g', { class: 't' }, gPlot);
+el('line', { x1: X(1.9), y1: Ys(0.03) + 16, x2: X(1.9), y2: 556, stroke: INK, 'stroke-width': 3 }, gAct);
+txt('ACTB', { x: X(1.9) - 16, y: 548, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gAct);
+txt('high mean, on the trend', { x: X(1.9) - 16, y: 584, 'font-size': 28, 'text-anchor': 'end', fill: INK }, gAct);
+
+/* ---------- step 6 ---------- */
+var gSet = el('g', { class: 't' }, svg);
+txt('SCTransform selects 3000 features, by a different model', { x: 800, y: 140, 'font-size': 34, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gSet);
+txt('top 20 of each', { x: 390, y: 250, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gSet);
+el('circle', { cx: 330, cy: 420, r: 90, fill: CELL, 'fill-opacity': 0.3, stroke: INK, 'stroke-width': 3 }, gSet);
+el('circle', { cx: 450, cy: 420, r: 90, fill: GOLD, 'fill-opacity': 0.55, stroke: INK, 'stroke-width': 3 }, gSet);
+txt('vst', { x: 290, y: 600, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gSet);
+txt('SCTransform', { x: 480, y: 600, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gSet);
+txt('the full sets', { x: 1100, y: 250, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gSet);
+el('circle', { cx: 1020, cy: 420, r: 120, fill: CELL, 'fill-opacity': 0.3, stroke: INK, 'stroke-width': 3 }, gSet);
+el('circle', { cx: 1170, cy: 420, r: 148, fill: GOLD, 'fill-opacity': 0.55, stroke: INK, 'stroke-width': 3 }, gSet);
+txt('vst, 2000', { x: 960, y: 600, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gSet);
+txt('SCTransform, 3000', { x: 1230, y: 600, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gSet);
+txt('schematic, overlap not to scale', { x: 800, y: 700, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gSet);
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+
+/* ---------- state rendering ---------- */
+function render(s) {
+  sh(gPlot, s <= 5, 350);
+  sh(gSet, s === 6, 350);
+  op(gRaw, s <= 2 ? 1 : 0); op(gStd, s >= 3 ? 1 : 0);
+  op(gCurve, s <= 2 ? (s === 2 ? 1 : 0) : 0);
+  op(gTrend, s >= 3 ? 1 : 0);
+  sh(gLab, s === 4, 700);
+  sh(gThr, s === 4, 700);
+  sh(gAct, s === 5, 700);
+  genes.forEach(function (g) {
+    var std = s >= 3, c = g.c, x = X(g.lm), y = std ? Ys(g.ls) : Yr(g.lv);
+    var k = 1, f = SLATE, o = 0.6;
+    if (s === 4) { f = g.top ? FIRE : GREYS; o = g.top ? 0.95 : 0.4; k = g.top ? 1.25 : 1; }
+    if (s === 5) { f = g.top ? FIRE : GREYS; o = 0.25; }
+    if (g === genes[0]) {
+      c.setAttribute('stroke', INK); c.setAttribute('stroke-width', s === 5 ? 2 : 0);
+      if (s === 5) { f = GOLD; o = 1; k = 2.6; }
+    }
+    if (g.name && g.name !== 'ACTB' && s === 4) { k = 1.9; }
+    tf(c, x, y, k, k);
+    c.style.fill = f; op(c, o);
+  });
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

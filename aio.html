@@ -452,6 +452,8 @@ grape hiding at the bottom of the blender. Bulk RNA-seq gives you the
 smoothie. <strong>Single-cell RNA-seq (scRNA-seq)</strong> gives you the
 fruit bowl: every piece of fruit is kept separate, so you can count,
 sort, and inspect them one by one.</p>
+<p><a href="files/animations/ep1_bulk-vs-single-cell.html">Animation:
+Bulk averages, single-cell counts</a></p>
 <p>scRNA-seq works by isolating individual cells, capturing their mRNA,
 and sequencing each cell’s transcriptome independently. Instead of one
 expression profile per sample, you get thousands of individual
@@ -573,6 +575,8 @@ is pooled together. The cDNA is amplified by PCR, fragmented, and
 prepared into a sequencing library. Even though the cDNA from all cells
 is now mixed in one tube, the cell barcodes embedded in each molecule
 let us computationally sort the reads back to their cell of origin.</p>
+<p><a href="files/animations/ep1_gem-formation.html">Animation: Inside a
+10x Chromium GEM</a></p>
 <p><strong>4. Sequencing.</strong> The library is sequenced on an
 Illumina sequencer, producing paired-end reads plus an index read. The
 read structure is:</p>
@@ -596,6 +600,8 @@ on the same sequencing lane.</li>
 components: it uses the index read to assign reads to samples, the cell
 barcode to assign reads to cells, the UMI to count unique molecules, and
 Read 2 to identify the gene of origin.</p>
+<p><a href="files/animations/ep1_reads-to-matrix.html">Animation: What
+the aligner does with each read</a></p>
 <div id="other-single-cell-platforms" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -662,6 +668,8 @@ expressed. With UMIs, all 100 reads share the same UMI sequence and are
 collapsed into a single count. This means UMI counts are proportional to
 the actual number of mRNA molecules in the cell, not to PCR
 amplification efficiency.</p>
+<p><a href="files/animations/ep1_umi-dedup.html">Animation: Why UMI
+counts are integers</a></p>
 <p>For the PBMC 10k v3 dataset we will use in this workshop, the count
 matrix contains 11,809 cell barcodes and 38,606 genes. After removing
 genes detected in fewer than 3 cells and low-quality cells, we will work
@@ -1157,6 +1165,8 @@ episode work on your own output.</p>
 </div>
 </div>
 </div>
+<p><a href="files/animations/ep2_slurm-lifecycle.html">Animation: What
+happens when you submit</a></p>
 <div id="if-your-cell-ranger-job-dies" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -1340,6 +1350,8 @@ most important output. It contains the UMI count matrix with only
 cell-containing barcodes (empty droplets have been removed by Cell
 Ranger’s cell calling algorithm). This is the file we will load into
 Seurat in the next episode.</p>
+<p><a href="files/animations/ep2_cell-calling.html">Animation: Raw
+matrix to filtered matrix</a></p>
 <p>The three files inside use the <strong>MatrixMarket</strong> sparse
 format:</p>
 <ul>
@@ -2414,7 +2426,9 @@ storing QC metrics, cluster assignments, and any other per-cell
 annotations.</li>
 </ul>
 <figure><img src="fig/seurat_object.png" alt="Diagram of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns" class="figure mx-auto d-block"><div class="figcaption">Structure of the Seurat v5 object</div>
-</figure><p>You can inspect the metadata that Seurat automatically computed
+</figure><p><a href="files/animations/ep3_seurat-object-tracker.html">Animation:
+The Seurat object through the day</a></p>
+<p>You can inspect the metadata that Seurat automatically computed
 during object creation:</p>
 <div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2667,6 +2681,8 @@ certainly compromised.</p>
 </div>
 </div>
 </div>
+<p><a href="files/animations/ep3_dying-cell.html">Animation: What a
+dying cell looks like in QC</a></p>
 </div>
 </section><section><h2 class="section-heading" id="setting-thresholds">Setting Thresholds<a class="anchor" aria-label="anchor" href="#setting-thresholds"></a>
 </h2>
@@ -2713,6 +2729,8 @@ dashed lines mark the thresholds:</p>
 </figure><p>Cells above or below the red lines will be removed. The small point
 size (<code>pt.size = 0.1</code>) lets you see how many individual cells
 fall outside the thresholds.</p>
+<p><a href="files/animations/ep3_qc-thresholds.html">Animation: Choose
+the thresholds, watch the cells</a></p>
 <p>Let’s record how many cells we have before filtering:</p>
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2866,6 +2884,8 @@ your own analyses.</p>
 </div>
 </div>
 </div>
+<p><a href="files/animations/ep3_doublets.html">Animation: Why some
+doublets hide</a></p>
 <div id="challenge-1-propose-your-own-thresholds" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
@@ -3203,6 +3223,8 @@ of 1 + x) to compress the dynamic range</li>
 <p>The formula for a single gene <em>g</em> in cell <em>c</em> is:</p>
 <p><strong>normalized(g, c) = log(1 + count(g, c) / total_counts(c) x
 10000)</strong></p>
+<p><a href="files/animations/ep4_lognormalize.html">Animation:
+Normalization corrects sequencing depth</a></p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -3451,6 +3473,8 @@ for most scRNA-seq analyses.</td>
 </tr>
 </tbody>
 </table>
+<p><a href="files/animations/ep4_variable-features.html">Animation:
+Which genes vary more than expected</a></p>
 <p>Let’s see which genes were selected:</p>
 <div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -3511,6 +3535,8 @@ highly expressed genes simply because they have larger absolute values,
 not because they carry more biological information. Scaling puts all
 genes on equal footing so that PCA identifies the axes of true
 biological variation rather than expression magnitude.</p>
+<p><a href="files/animations/ep4_scaling.html">Animation: ScaleData puts
+genes on one footing</a></p>
 <div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -4081,6 +4107,8 @@ to PC1</li>
 <li>The first 10–20 PCs typically capture the major biological structure
 (cell types), while later PCs are dominated by noise</li>
 </ul>
+<p><a href="files/animations/ep5_pca-axes.html">Animation: PCA
+compresses correlated genes</a></p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -4340,6 +4368,8 @@ impressions from UMAP alone.</p>
 </div>
 </div>
 </div>
+<p><a href="files/animations/ep5_umap-pitfalls.html">Animation: What
+UMAP does not tell you</a></p>
 <div id="t-sne-as-an-alternative" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -4454,6 +4484,8 @@ package).</td>
 </tr>
 </tbody>
 </table>
+<p><a href="files/animations/ep5_graph-clustering.html">Animation:
+FindNeighbors and FindClusters</a></p>
 <div id="accordionSpoiler2" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
@@ -5011,7 +5043,7 @@ episode?</h3>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
 <div class="accordion-body">
 <figure><img src="fig/ep6_load-data.png" alt="UMAP plot with 18 clusters labeled 0 through 17 at resolution 0.5, matching the clustering results from the previous episode." class="figure mx-auto d-block"><div class="figcaption">Clustered UMAP from previous episode</div>
 </figure><p>You should see the UMAP with 18 clusters labeled by number (0 to 17),
@@ -5081,7 +5113,7 @@ differences.</td>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5122,7 +5154,7 @@ look at the key columns:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5190,6 +5222,8 @@ filtering (typically &lt; 0.05).</td>
 <code>pct.1</code> (expressed in most cells of the cluster), low
 <code>pct.2</code> (not expressed in other clusters), and a significant
 <code>p_val_adj</code>.</p>
+<p><a href="files/animations/ep6_find-all-markers.html">Animation: How
+FindAllMarkers scores a gene</a></p>
 <div class="section level3">
 <h3 id="top-markers-per-cluster">Top markers per cluster<a class="anchor" aria-label="anchor" href="#top-markers-per-cluster"></a>
 </h3>
@@ -5209,7 +5243,7 @@ change:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
   <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
+<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5395,6 +5429,8 @@ the number of labels.</p>
 </div>
 </div>
 </div>
+<p><a href="files/animations/ep6_rename-idents.html">Animation: Labels
+are assigned by position</a></p>
 <div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -5474,6 +5510,8 @@ expected cell type. <strong>SingleR</strong> offers an automated
 alternative: it compares the expression profile of each cell to a
 labeled reference dataset and assigns the label of the most similar
 reference sample.</p>
+<p><a href="files/animations/ep6_singler.html">Animation: How SingleR
+labels a cell</a></p>
 <div class="section level3">
 <h3 id="download-the-reference">Download the reference<a class="anchor" aria-label="anchor" href="#download-the-reference"></a>
 </h3>
@@ -5493,7 +5531,7 @@ for PBMC annotation.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
   <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5602,7 +5640,7 @@ SingleR labels:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler6" aria-expanded="false" aria-controls="collapseSpoiler6">
   <h3 class="accordion-header" id="headingSpoiler6">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler6" class="accordion-collapse collapse" aria-labelledby="headingSpoiler6" data-bs-parent="#accordionSpoiler6">
+<div id="collapseSpoiler6" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler6" aria-labelledby="headingSpoiler6">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5796,7 +5834,7 @@ in this dataset?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <figure><img src="fig/ep6_challenge1.png" alt="Violin plots of CD3D, SELL, CCR7, CD69, and IL7R across the ten annotated cell types. CD3D and IL7R are high in CD4 T and CD8 T cells and near zero elsewhere. SELL is expressed in most groups. CCR7 is expressed mainly in CD4 T cells. CD69 is high in CD4 T, CD8 T, B, NK and HSPC cells alike." class="figure mx-auto d-block"><div class="figcaption">Violin plots of T cell subtype markers</div>
 </figure><p>Percent of cells in each group with any expression of the marker:</p>
@@ -5930,7 +5968,7 @@ references disagree? Why might they disagree?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -6289,6 +6327,8 @@ CCA space</li>
 <li>Using the anchors to compute a <strong>correction vector</strong>
 that aligns matching cell types across conditions</li>
 </ol>
+<p><a href="files/animations/ep7_integration-anchors.html">Animation:
+Why integrate, and what CCA integration does</a></p>
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -7536,6 +7576,8 @@ have a single sample per condition and have no other option.</p>
 </div>
 </div>
 </div>
+<p><a href="files/animations/ep8_pseudobulk.html">Animation: Cells are
+not replicates</a></p>
 </section><section><h2 class="section-heading" id="pseudobulk-analysis">Pseudobulk Analysis<a class="anchor" aria-label="anchor" href="#pseudobulk-analysis"></a>
 </h2>
 <hr class="half-width">
@@ -7822,6 +7864,8 @@ split by condition.</div>
 gene. <strong>Gene Ontology (GO) enrichment analysis</strong> asks: are
 the DE genes enriched for specific biological processes? This connects
 individual gene changes to broader biological themes.</p>
+<p><a href="files/animations/ep8_go-enrichment.html">Animation: What
+enrichGO tests</a></p>
 <div class="section level3">
 <h3 id="converting-gene-symbols-to-entrez-ids">Converting gene symbols to Entrez IDs<a class="anchor" aria-label="anchor" href="#converting-gene-symbols-to-entrez-ids"></a>
 </h3>

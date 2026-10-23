@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cells are not replicates</title>
+<!--
+Cells are not replicates (Episode 8, Differential expression)
+
+Steps and captions
+ 1. One control donor and one stimulated donor, about 2000 monocytes each.
+    Two tubes labelled CTRL and STIM, each with a cloud of 60 monocyte circles.
+ 2. A per-cell test treats each cell as an observation. n looks like 4000.
+    Every cell gets a tick mark. Stats box: Wilcoxon, per cell, n = 4000. p-value bar for IFIT1: p = 0 (underflow).
+ 3. The cells share one donor, one library prep, one sequencing run. The real n is 2.
+    A bracket groups each cloud to its tube. Stats box: n = 2. The p-value bar dims.
+ 4. Pseudobulk sums the counts per sample and cell type. With one donor per condition there is nothing to test.
+    Each cloud collapses into one bar, labelled sum of UMIs. Stats box: pseudobulk, n = 1 per condition. Red note: too few for DESeq2 (needs 3).
+ 5. With three donors per condition, pseudobulk gives three replicates and a real variance estimate.
+    Three tubes per condition (donor 1, 2, 3), each collapses to a bar. Bars differ in height. Stats box: n = 3 per condition.
+ 6. The workshop splits one sample into three pseudo-replicates. Their variance is far smaller than between real donors.
+    One cloud per condition is split at random into rep1, rep2, rep3 by colour. Bars are nearly identical.
+    The bars use the same scale as step 5. Stats box: pseudo-replicates, n = 3, variance too small.
+ 7. That is why pseudobulk found more genes here (1539 vs 825). With real donors it usually finds fewer.
+    Counter panel: Wilcoxon 825 significant genes, pseudobulk with pseudo-replicates 1539.
+ 8. Use per-cell tests to explore. Use pseudobulk with biological replicates for anything you report.
+    Rule card: Explore with Wilcoxon. Report with pseudobulk on real replicates.
+
+Bar heights and clouds are drawn for teaching and are not data. Bars in steps 5 and 6 share one scale.
+Randomness: mulberry32 with seed 42, so every run is identical.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=5 opens at step 5. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke var(--dur) ease var(--dd,0ms),stroke-width var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: cells are not replicates"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREY = '#a0aec0', RED = '#b22222';
+var CTRL = '#e07b54', STIM = '#2a9d8f', MONO = '#dd6b20';
+var REPC = ['#b794f4', '#ceb888', '#718096'];
+var N = 8;
+var CAPTIONS = [
+  'One control donor and one stimulated donor, about 2000 monocytes each.',
+  'A per-cell test treats each cell as an observation. n looks like 4000.',
+  'The cells share one donor, one library prep, one sequencing run. The real n is 2.',
+  'Pseudobulk sums the counts per sample and cell type. With one donor per condition there is nothing to test.',
+  'With three donors per condition, pseudobulk gives three replicates and a real variance estimate.',
+  'The workshop splits one sample into three pseudo-replicates. Their variance is far smaller than between real donors.',
+  'That is why pseudobulk found more genes here (1539 vs 825). With real donors it usually finds fewer.',
+  'Use per-cell tests to explore. Use pseudobulk with biological replicates for anything you report.'
+];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tfm(e, a, b, s, sy) { e.style.transform = 'translate(' + a + 'px,' + b + 'px) scale(' + s + ',' + (sy === undefined ? s : sy) + ')'; }
+function sh(e, on, delay, level) { e.style.setProperty('--dd', (on ? (delay || 0) : 0) + 'ms'); e.style.opacity = on ? (level === undefined ? 1 : level) : 0; }
+function dd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+function dur(e, ms) { e.style.setProperty('--dur', ms + 'ms'); }
+/* set a transform without animating it */
+function jump(e, a, b, s) {
+  var old = e.style.transition;
+  e.style.transition = 'none';
+  tfm(e, a, b, s);
+  void e.getBoundingClientRect();
+  e.style.transition = old;
+}
+
+/* ---------- seeded data ---------- */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var rng = mulberry32(42);
+function gauss() { var u = 1 - rng(), v = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+function blob(cx, cy, sd, n, minD) {
+  var out = [], tries = 0;
+  while (out.length < n) {
+    var x = cx + sd * gauss(), y = cy + sd * gauss();
+    tries++;
+    var md = tries < 5000 ? minD : minD * 0.7;
+    var ok = true;
+    for (var i = 0; i < out.length; i++) {
+      var dx = out[i].x - x, dy = out[i].y - y;
+      if (dx * dx + dy * dy < md * md) { ok = false; break; }
+    }
+    if (ok) { out.push({ x: x, y: y }); }
+  }
+  return out;
+}
+
+/* ---------- geometry ---------- */
+var CX = [225, 605];                 /* column centres: CTRL, STIM */
+var COND = [CTRL, STIM], CNAME = ['CTRL', 'STIM'];
+var CLOUD_Y = 420, BASE = 640, HMAX = 270;
+var DX = [-120, 0, 120];
+var H4 = [150, 205];                                   /* step 4: one bar per condition */
+var H5 = [[105, 190, 150], [150, 258, 195]];            /* step 5: real donors, differ */
+var H6 = [[147, 152, 149], [201, 206, 203]];            /* step 6: pseudo-replicates, nearly equal, same scale */
+
+/* ---------- frame ---------- */
+txt('Cells are not replicates', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 8', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: '#e2e8f0', 'stroke-width': 2 }, svg);
+
+/* ---------- left panel ---------- */
+var gL = el('g', { class: 't' }, svg);
+dur(gL, 600);
+var condLbl = [0, 1].map(function (c) {
+  return txt(CNAME[c], { class: 'mono', x: CX[c], y: 140, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'middle', fill: COND[c] }, gL);
+});
+
+function tube(parent, c, x, s) {
+  var g = el('g', { class: 't' }, parent);
+  dur(g, 600);
+  g._x = x; g._s = s;
+  el('path', { d: 'M-35,56 L-35,86 Q-35,106 0,106 Q35,106 35,86 L35,56 Z', fill: COND[c], 'fill-opacity': 0.4 }, g);
+  el('path', { d: 'M-35,0 L-35,86 Q-35,106 0,106 Q35,106 35,86 L35,0', fill: 'none', stroke: INK, 'stroke-width': 3.5 / s, 'stroke-linejoin': 'round' }, g);
+  el('rect', { x: -45, y: -7, width: 90, height: 14, rx: 4, ry: 4, fill: '#ffffff', stroke: INK, 'stroke-width': 3.5 / s }, g);
+  tfm(g, x, 158, s);
+  return g;
+}
+var bigTubes = [0, 1].map(function (c) { return tube(gL, c, CX[c], 1); });
+var smallTubes = [], donorLbl = [];
+[0, 1].forEach(function (c) {
+  DX.forEach(function (d, k) {
+    smallTubes.push(tube(gL, c, CX[c] + d, 0.62));
+    var t = txt('donor ' + (k + 1), { class: 't', x: CX[c] + d, y: 258, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gL);
+    t.style.opacity = 0; dur(t, 500);
+    donorLbl.push(t);
+  });
+});
+smallTubes.forEach(function (g) { g.style.opacity = 0; });
+
+/* baseline for bars */
+var baseLine = el('line', { class: 't', x1: 50, y1: BASE, x2: 780, y2: BASE, stroke: INK, 'stroke-width': 3 }, gL);
+baseLine.style.opacity = 0; dur(baseLine, 500);
+
+/* bracket (step 3) */
+var gBr = [0, 1].map(function (c) {
+  var g = el('g', { class: 't' }, gL);
+  dur(g, 600);
+  el('ellipse', { cx: CX[c], cy: CLOUD_Y, rx: 138, ry: 128, fill: 'none', stroke: INK, 'stroke-width': 3, 'stroke-dasharray': '12 9' }, g);
+  el('line', { x1: CX[c], y1: 266, x2: CX[c], y2: CLOUD_Y - 128, stroke: INK, 'stroke-width': 3 }, g);
+  txt('one donor', { class: 'mono halo', x: CX[c] + 22, y: 288, 'font-size': 26, 'font-weight': 700, fill: INK }, g);
+  g.style.opacity = 0;
+  return g;
+});
+
+/* big clouds */
+var clouds = [], cellEls = [], tickEls = [];
+[0, 1].forEach(function (c) {
+  var pts = blob(CX[c], CLOUD_Y, 44, 60, 21);
+  /* random split into three groups of 20 for step 6 */
+  var idx = pts.map(function (p, i) { return i; });
+  for (var i = idx.length - 1; i > 0; i--) { var j = Math.floor(rng() * (i + 1)); var tmp = idx[i]; idx[i] = idx[j]; idx[j] = tmp; }
+  var rep = []; idx.forEach(function (pi, n) { rep[pi] = Math.floor(n / 20); });
+  var gT = el('g', {}, gL);
+  pts.forEach(function (p, n) {
+    var tk = el('line', { class: 't', x1: p.x.toFixed(1), y1: (p.y - 13).toFixed(1), x2: p.x.toFixed(1), y2: (p.y - 25).toFixed(1), stroke: INK, 'stroke-width': 3, 'stroke-linecap': 'round' }, gT);
+    tk.style.opacity = 0; dur(tk, 300);
+    tickEls.push({ e: tk, n: n + c * 60 });
+  });
+  var gC = el('g', {}, gL);
+  pts.forEach(function (p, n) {
+    var e = el('circle', { class: 't', cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: 8, fill: MONO, stroke: COND[c], 'stroke-width': 3 }, gC);
+    dur(e, 900);
+    cellEls.push({ e: e, p: p, c: c, rep: rep[n], n: n });
+  });
+});
+
+/* small donor clouds (step 5) */
+var smallCells = [];
+[0, 1].forEach(function (c) {
+  DX.forEach(function (d, k) {
+    var pts = blob(CX[c] + d, 318, 17, 12, 17);
+    pts.forEach(function (p, n) {
+      var e = el('circle', { class: 't', cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: 7, fill: MONO, stroke: COND[c], 'stroke-width': 2.5 }, gL);
+      e.style.opacity = 0; dur(e, 800);
+      smallCells.push({ e: e, p: p, c: c, k: k, n: n });
+    });
+  });
+});
+
+/* bars */
+function mkBar(parent, x, w, fill, c) {
+  var g = el('g', { class: 't' }, parent);
+  dur(g, 900);
+  var r = el('rect', { class: 't', x: -w / 2, y: -HMAX, width: w, height: HMAX, fill: fill, stroke: INK, 'stroke-width': 3, 'vector-effect': 'non-scaling-stroke' }, g);
+  dur(r, 900);
+  tfm(g, x, BASE, 1, 0.001);
+  g.style.opacity = 0;
+  return { g: g, r: r, x: x, c: c };
+}
+var bars4 = [0, 1].map(function (c) { return mkBar(gL, CX[c], 112, COND[c], c); });
+var barsB = [];
+[0, 1].forEach(function (c) { DX.forEach(function (d, k) { var b = mkBar(gL, CX[c] + d, 76, COND[c], c); b.k = k; barsB.push(b); }); });
+var lblSum = [0, 1].map(function (c) {
+  var t = txt('sum of UMIs', { class: 't mono', x: CX[c], y: 680, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gL);
+  t.style.opacity = 0; dur(t, 500); return t;
+});
+var lblRep = [];
+[0, 1].forEach(function (c) {
+  DX.forEach(function (d, k) {
+    var t = txt('rep' + (k + 1), { class: 't mono', x: CX[c] + d, y: 680, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gL);
+    t.style.opacity = 0; dur(t, 500); lblRep.push(t);
+  });
+});
+
+/* ---------- centre statistics box ---------- */
+var gMid = el('g', { class: 't' }, svg);
+dur(gMid, 500);
+el('rect', { x: 810, y: 240, width: 360, height: 230, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gMid);
+var STATS = [
+  null,
+  { t: 'Wilcoxon, per cell', v: 'n = 4000', vs: 64 },
+  { t: 'real replicates', v: 'n = 2', vs: 64 },
+  { t: 'pseudobulk', v: 'n = 1 per condition', vs: 28 },
+  { t: 'pseudobulk', v: 'n = 3 per condition', vs: 28 },
+  { t: 'pseudo-replicates', v: 'n = 3', vs: 56, x: 'variance too small' }
+];
+var statEls = STATS.map(function (s) {
+  if (!s) { return null; }
+  var g = el('g', { class: 't' }, svg);
+  dur(g, 450);
+  txt(s.t, { class: 'mono', x: 990, y: 296, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, g);
+  txt(s.v, { class: 'mono', x: 990, y: s.x ? 376 : 392, 'font-size': s.vs, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, g);
+  if (s.x) { txt(s.x, { x: 990, y: 436, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: RED }, g); }
+  g.style.opacity = 0;
+  return g;
+});
+var gNote = el('g', { class: 't' }, svg);
+dur(gNote, 500);
+txt('too few for DESeq2', { x: 990, y: 520, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: RED }, gNote);
+txt('(needs 3)', { x: 990, y: 560, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: RED }, gNote);
+gNote.style.opacity = 0; gMid.style.opacity = 0;
+
+/* ---------- right p-value bar ---------- */
+var gP = el('g', { class: 't' }, svg);
+dur(gP, 500);
+txt('IFIT1 p-value', { class: 'mono', x: 1190, y: 282, 'font-size': 30, 'font-weight': 700, fill: INK }, gP);
+el('rect', { x: 1190, y: 306, width: 360, height: 40, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gP);
+var pFill = el('rect', { class: 't', x: 1190, y: 306, width: 360, height: 40, fill: GOLD, stroke: INK, 'stroke-width': 3 }, gP);
+txt('p = 0 (underflow)', { class: 'mono', x: 1190, y: 392, 'font-size': 28, 'font-weight': 700, fill: INK }, gP);
+txt('longer bar = smaller p', { x: 1190, y: 438, 'font-size': 26, fill: INK }, gP);
+gP.style.opacity = 0;
+
+/* ---------- step 7 counter panel ---------- */
+var gCnt = el('g', { class: 't' }, svg);
+dur(gCnt, 600);
+function card(x, head, num, barW, barCol, foot) {
+  el('rect', { x: x, y: 130, width: 640, height: 520, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gCnt);
+  txt(head, { x: x + 32, y: 188, 'font-size': 32, 'font-weight': 700, fill: INK }, gCnt);
+  txt(num, { class: 'mono', x: x + 32, y: 340, 'font-size': 130, 'font-weight': 700, fill: INK }, gCnt);
+  txt('significant genes', { x: x + 32, y: 400, 'font-size': 32, fill: INK }, gCnt);
+  el('rect', { x: x + 32, y: 440, width: barW, height: 44, fill: barCol, stroke: INK, 'stroke-width': 3 }, gCnt);
+  txt(foot, { x: x + 32, y: 560, 'font-size': 28, fill: INK }, gCnt);
+}
+card(110, 'Wilcoxon, per cell', '825', Math.round(576 * 825 / 1539), GREY, 'each cell counted as a replicate');
+card(850, 'pseudobulk, pseudo-replicates', '1539', 576, GOLD, 'one sample split into three');
+gCnt.style.opacity = 0;
+
+/* ---------- step 8 rule card ---------- */
+var gRule = el('g', { class: 't' }, svg);
+dur(gRule, 600);
+el('rect', { x: 140, y: 180, width: 1320, height: 170, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gRule);
+el('rect', { x: 140, y: 180, width: 26, height: 170, fill: GREY }, gRule);
+txt('Explore with Wilcoxon.', { x: 210, y: 292, 'font-size': 56, 'font-weight': 700, fill: INK }, gRule);
+el('rect', { x: 140, y: 400, width: 1320, height: 170, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gRule);
+el('rect', { x: 140, y: 400, width: 26, height: 170, fill: GOLD }, gRule);
+txt('Report with pseudobulk on real replicates.', { x: 210, y: 512, 'font-size': 52, 'font-weight': 700, fill: INK }, gRule);
+gRule.style.opacity = 0;
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+/* ---------- state rendering ---------- */
+var prevStep = 0, phaseTimer = null, firstRender = true;
+function collapseT(e, p, c0, tx, ty, s) { tfm(e, tx - s * c0.x, ty - s * c0.y, s); }
+
+function setBars(s, phaseB) {
+  /* step 4 bars */
+  bars4.forEach(function (b, c) {
+    var on = s === 4;
+    b.g.style.setProperty('--dd', (on ? 600 : 0) + 'ms');
+    tfm(b.g, b.x, BASE, 1, on ? H4[c] / HMAX : 0.001);
+    b.g.style.opacity = on ? 1 : 0;
+    sh(lblSum[c], on, 1300);
+  });
+  /* step 5 and 6 bars */
+  barsB.forEach(function (b, i) {
+    var c = b.c, k = b.k, on = (s === 5 && phaseB) || s === 6;
+    var h = s === 6 ? H6[c][k] : H5[c][k];
+    b.g.style.setProperty('--dd', (s === 5 ? 200 + k * 120 : (s === 6 ? 300 : 0)) + 'ms');
+    tfm(b.g, b.x, BASE, 1, on ? h / HMAX : 0.001);
+    b.g.style.opacity = on ? 1 : 0;
+    b.r.style.fill = s === 6 ? REPC[k] : COND[c];
+    sh(lblRep[i], s === 6, 900);
+  });
+}
+
+function render(s) {
+  clearTimeout(phaseTimer);
+  var left = s <= 6;
+  var phaseA = false;
+  sh(gL, left, 0);
+  sh(gMid, s >= 2 && s <= 6, 200);
+  sh(gP, s === 2 || s === 3, 200, s === 3 ? 0.28 : 1);
+  sh(gCnt, s === 7, 300);
+  sh(gRule, s === 8, 300);
+
+  /* tubes */
+  bigTubes.forEach(function (g) { sh(g, s <= 4 || s === 6, 0); });
+  smallTubes.forEach(function (g, i) { sh(g, s === 5, 150); });
+  donorLbl.forEach(function (t) { sh(t, s === 5, 250); });
+  gBr.forEach(function (g) { sh(g, s === 3, 300); });
+  sh(baseLine, s >= 4 && s <= 6, 300);
+
+  /* stats */
+  statEls.forEach(function (g, i) { if (g) { sh(g, i === s - 1, 350); } });
+  sh(gNote, s === 4, 1300);
+
+  /* p-value fill */
+  /* ticks */
+  tickEls.forEach(function (t) { sh(t.e, s === 2, 250 + (t.n % 60) * 6); });
+
+  /* big clouds */
+  cellEls.forEach(function (o, i) {
+    var e = o.e, c = o.c, cc = { x: CX[c], y: CLOUD_Y };
+    var vis = s <= 3 || s === 6;
+    var delay = 0;
+    if (s === 4) { collapseT(e, o.p, cc, CX[c], BASE - H4[c] / 2, 0.3); delay = (o.n % 60) * 9; }
+    else if (s === 5) { collapseT(e, o.p, cc, CX[c], BASE - H4[c] / 2, 0.3); }
+    else if (s === 6) {
+      if (prevStep !== 6 && prevStep !== 7 && prevStep !== 0) { jump(e, 0, 0, 1); jump(e, CX[c] - 0.6 * cc.x, 335 - 0.6 * cc.y, 0.6); }
+      tfm(e, CX[c] - 0.6 * cc.x, 335 - 0.6 * cc.y, 0.6);
+      delay = 400;
+    } else if (s <= 3) { tfm(e, 0, 0, 1); delay = s === 3 ? 0 : 0; }
+    dd(e, delay);
+    e.style.opacity = vis ? 1 : 0;
+    e.style.fill = s === 6 ? REPC[o.rep] : MONO;
+  });
+
+  /* small donor clouds and step 5 phases */
+  var smallOn = s === 5;
+  if (s === 5 && !firstRender) {
+    phaseA = true;
+    smallCells.forEach(function (o) {
+      jump(o.e, 0, 0, 1);
+      dd(o.e, 350);
+      o.e.style.opacity = 1;
+    });
+    setBars(5, false);
+    phaseTimer = setTimeout(function () {
+      smallCells.forEach(function (o) {
+        var bx = CX[o.c] + DX[o.k], h = H5[o.c][o.k];
+        collapseT(o.e, o.p, { x: CX[o.c] + DX[o.k], y: 318 }, bx, BASE - h / 2, 0.3);
+        dd(o.e, o.n * 20);
+        o.e.style.opacity = 0;
+      });
+      setBars(5, true);
+    }, 1400);
+  } else {
+    smallCells.forEach(function (o) {
+      var bx = CX[o.c] + DX[o.k], h = H5[o.c][o.k];
+      if (s === 5) { collapseT(o.e, o.p, { x: bx, y: 318 }, bx, BASE - h / 2, 0.3); }
+      dd(o.e, 0);
+      o.e.style.opacity = 0;
+    });
+    setBars(s, true);
+  }
+  prevStep = s;
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+window.__ep8 = { big: cellEls.length, small: smallCells.length, ticks: tickEls.length, reps: [0, 1, 2].map(function (r) { return cellEls.filter(function (o) { return o.c === 0 && o.rep === r; }).length; }) };
+
+svg.classList.add('notrans');
+render(cur); updateUI();
+firstRender = false;
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>
