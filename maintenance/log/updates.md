@@ -206,6 +206,13 @@ Non-blocking improvements worth doing before the next delivery cycle (the tentat
 - `[should-fix]` `learners/setup.md` local install list (patch 20): it named `tidyverse` and omitted packages the episodes need (clustree, metap, multtest, glmGamPoi, DESeq2, presto, anndataR). It now follows `negishi-run/generated/r_packages.tsv`.
 - `[should-fix]` episode 4 challenge 1 (patch 20): SCTransform v2 on the whole object peaks at 14.1 GiB (Negishi 2026-10-23), against about 14.9 GiB at 8 cores. The challenge now says it is self-paced, needs about 15 GB and 8 or more cores, and shows how to restart R and reload `pbmc_normalized.rds` (saved just above).
 - `[nice]` episode 2 keypoint said STARsolo is "approximately 9x faster", against "roughly 7x" in the runtime callout since patch 16. Fixed in patch 20.
+- `[nice]` `instructors/instructor-notes.md` pre-workshop checklist (patch 21, `updates-patches/21-instructor-checklist-anndatar-warnings.patch`):
+  - It listed sceasy. It now lists anndataR and the other packages the episodes need (presto, metap, multtest, glmGamPoi, DESeq2), saying they come from the image or the extra site library.
+  - It checked the `workshop` account; it now checks `rcac-rnaseq` with `sbatch --test-only`, and adds the episode 2 pre-run.
+  - `ml cellranger` is now pinned to 10.0.0.
+  - "Request at least 16 GB" now says 8 cores.
+  - The STAR index advice to add `--mem=40G` contradicted the lesson's no-`--mem` rule; it now explains memory by core count (34 GB peak).
+- `[nice]` episode 8 `convert-anndata` text (patch 21): Negishi prints three anndataR warnings, but the text explained only the two "cannot be written" ones. It now also explains `Skipping Layer "scale.data" with unexpected dimensions`: the layer holds 2,000 variable genes, not all 29,155.
 
 ### 2026-10-22: patches 05, 06 and 16 to 19 applied (branch prep-2026-10-29); applied
 

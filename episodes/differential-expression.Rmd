@@ -623,8 +623,11 @@ write_h5ad(pbmc, "pbmc_annotated.h5ad", mode = "w")  # "w" overwrites an earlier
 ```
 
 The counts, normalized data, cell metadata and the PCA and UMAP embeddings
-are all carried over. Warnings that matrix column names "cannot be written"
-are expected: AnnData stores embeddings without column names. To read the file
+are all carried over. Three warnings are expected. One says the `scale.data`
+layer is skipped "with unexpected dimensions": it holds only the 2,000
+variable genes, an AnnData layer must cover every gene, and scaled values are
+easy to recompute in Python. Two say that matrix column names "cannot be
+written": AnnData stores embeddings without column names. To read the file
 in Python, collaborators need a recent `anndata` (0.13 reads it; 0.10 does
 not).
 

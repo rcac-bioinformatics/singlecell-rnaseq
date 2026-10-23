@@ -1,0 +1,96 @@
+diff --git a/episodes/differential-expression.Rmd b/episodes/differential-expression.Rmd
+index c8726a0..39c5ef0 100644
+--- a/episodes/differential-expression.Rmd
++++ b/episodes/differential-expression.Rmd
+@@ -623,8 +623,11 @@ write_h5ad(pbmc, "pbmc_annotated.h5ad", mode = "w")  # "w" overwrites an earlier
+ ```
+ 
+ The counts, normalized data, cell metadata and the PCA and UMAP embeddings
+-are all carried over. Warnings that matrix column names "cannot be written"
+-are expected: AnnData stores embeddings without column names. To read the file
++are all carried over. Three warnings are expected. One says the `scale.data`
++layer is skipped "with unexpected dimensions": it holds only the 2,000
++variable genes, an AnnData layer must cover every gene, and scaled values are
++easy to recompute in Python. Two say that matrix column names "cannot be
++written": AnnData stores embeddings without column names. To read the file
+ in Python, collaborators need a recent `anndata` (0.13 reads it; 0.10 does
+ not).
+ 
+diff --git a/instructors/instructor-notes.md b/instructors/instructor-notes.md
+index 6c0fde7..ba6e8b7 100644
+--- a/instructors/instructor-notes.md
++++ b/instructors/instructor-notes.md
+@@ -79,8 +79,9 @@ Seurat operations (especially `ScaleData`, `RunPCA`, `FindAllMarkers`, and
+ `SCTransform`) require substantial memory. Running these on a login node will
+ either fail with an out-of-memory error or get killed by the resource monitor.
+ 
+-**Solution:** Always use a compute node allocation or RStudio Server through
+-Open OnDemand. Request at least 16 GB of memory for R sessions.
++**Solution:** Always use a compute node allocation or RStudio (bioconductor)
++through Open OnDemand, with 8 or more cores (about 16 GB; see "Delivery on
++Negishi" above).
+ 
+ ### STAR index building OOM
+ 
+@@ -88,9 +89,10 @@ Building a STAR genome index for the human genome requires approximately 32 GB
+ of RAM. If the SLURM job requests less memory, STAR will crash with a
+ segmentation fault or `std::bad_alloc` error.
+ 
+-**Solution:** Ensure the `build_star_index.sh` script requests `--mem=40G` or
+-higher. The pre-built index in the workshop data directory avoids this step
+-entirely.
++**Solution:** Negishi allocates about 2 GB of memory per core, so the core count
++sets the memory; do not add `--mem`. The episode's script asks for 64 cores
++(about 128 GB), and the index build peaked at 34 GB on Negishi. A learner who
++lowered `--ntasks` below about 18 cores will hit this.
+ 
+ ### Cell Ranger license not found
+ 
+@@ -118,15 +120,19 @@ upgrade or use the cluster installation.
+ - [ ] **Data staging:** Verify workshop data is accessible at
+   `/depot/workshop/data/scrna_workshop/` and contains `fastq/`, `reference/`,
+   and `filtered_feature_bc_matrix/` directories
+-- [ ] **Module availability:** Confirm that `ml biocontainers; ml cellranger`
+-  and `ml biocontainers; ml star` load without errors on Negishi
+-- [ ] **R packages:** Install all required R packages on training accounts and
+-  verify they load:
++- [ ] **Module availability:** Confirm that `ml biocontainers; ml cellranger/10.0.0`
++  and `ml biocontainers; ml star` load without errors on Negishi (episode 2
++  pins Cell Ranger 10.0.0; the Negishi default is newer)
++- [ ] **R packages:** In an RStudio (bioconductor) session with the workshop
++  settings (setup.md, Step 3), confirm these load. They come from the image
++  or from the extra RCAC site library; `negishi-run/00_preflight.sh` checks
++  them all:
+   - `Seurat`, `ggplot2`, `patchwork`, `dplyr`
+-  - `clustree`, `SingleR`, `celldex`
+-  - `SeuratData` (and run `InstallData("ifnb")`)
+-  - `clusterProfiler`, `org.Hs.eg.db`
+-  - `sceasy` (optional, for Episode 8 export)
++  - `clustree`, `glmGamPoi`
++  - `SingleR`, `celldex`, `presto` (presto makes `FindAllMarkers` fast)
++  - `SeuratData` (and run `InstallData("ifnb")`), `metap`, `multtest`
++  - `DESeq2`, `clusterProfiler`, `org.Hs.eg.db`, `anndataR` (Episode 8
++    export; it replaced sceasy, which cannot convert Seurat v5 objects)
+ - [ ] **Pre-computed objects:** Generate and stage all intermediate `.rds` files
+   so learners who fall behind can catch up:
+   - `pbmc_filtered.rds` (end of Episode 3)
+@@ -136,10 +142,15 @@ upgrade or use the cluster installation.
+   - `ifnb_annotated.rds` (end of Episode 7, used in Episode 8)
+ - [ ] **Build test:** Run `sandpaper::build_lesson()` and confirm it renders
+   without errors
+-- [ ] **RStudio Server:** Verify Open OnDemand RStudio Server app is available
+-  and launches R with the correct version and package library
+-- [ ] **SLURM queue:** Confirm the `workshop` account/queue is active and
+-  accepting jobs. Submit a test job to check wait times.
++- [ ] **RStudio (bioconductor):** Verify the Open OnDemand app launches R 4.6.1 /
++  Bioconductor 3.23 under `rcac-rnaseq` with 8 cores and the extra RCAC site
++  library checked
++- [ ] **SLURM account:** Confirm `rcac-rnaseq` is active, has its 192 cores, and
++  that learners are members. `sbatch --test-only run_cellranger.sh` should
++  print an estimated start, not an account error.
++- [ ] **Pre-run for episode 2:** Submit `run_cellranger.sh`, `build_star_index.sh`
++  and `run_starsolo.sh` under your own account at least a day ahead, so the
++  outputs are ready to show
+ - [ ] **Network access:** Confirm compute nodes can reach Bioconductor and CRAN
+   mirrors (needed for `celldex` reference downloads in Episode 6)
+ 
