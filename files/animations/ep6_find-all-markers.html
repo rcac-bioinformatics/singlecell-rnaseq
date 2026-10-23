@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How FindAllMarkers scores a gene</title>
+<!--
+How FindAllMarkers scores a gene (Episode 6, Cluster markers)
+
+Steps and captions
+ 1. Take cluster 0. Everything else is the comparison group.
+    Cluster 0 coloured, the other five clusters grey ("rest").
+ 2. CD3D is detected in 92 percent of cluster 0 and 33 percent of the rest. avg_log2FC 1.5.
+    Expressing cells are ringed. Strip: pct.1 0.92, pct.2 0.33. Row: CD3D, 1.52, 0.92, 0.33, 0 (lesson output).
+ 3. IL7R is similar but stronger. Both are good markers for cluster 0.
+    Strip: pct.1 0.94, pct.2 0.34. Row: IL7R, 2.07, 0.94, 0.34, 0 (lesson output).
+ 4. ACTB is everywhere. High pct.1 is not enough; pct.2 must be low.
+    Strip: pct.1 0.99, pct.2 0.99. Row: ACTB, 0.05, 0.99, 0.99, 1, shown greyed. Illustrative values.
+ 5. Now cluster 1 against the rest. The comparison group changes every time.
+    Cluster 1 coloured, the other five grey. The table starts again for cluster 1.
+ 6. S100A8 is in every monocyte and in half of the rest. The fold change carries the signal.
+    Strip: pct.1 1.00, pct.2 0.549. Row: S100A8, 4.09, 1.00, 0.549, 0. Illustrative except as given in the brief.
+ 7. Repeat for 18 clusters. This is why FindAllMarkers takes about five minutes.
+    A loop runs through clusters 0 to 17 (about 4 seconds). The map has six clusters, so it cycles through them.
+    A block of rows is added to the output for each cluster.
+ 8. The three arguments only decide which genes get tested. They do not change the statistics.
+    Card: only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25.
+
+Cluster colours follow the cell type palette and carry no cell type claim. The map points are seeded (mulberry32, seed 42).
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=4 opens at step 4. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke-opacity var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: how FindAllMarkers scores a gene"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREY = '#cbd5e0', GRID = '#e2e8f0', GREYS = '#a0aec0';
+var N = 8;
+var CAPTIONS = [
+  'Take cluster 0. Everything else is the comparison group.',
+  'CD3D is detected in 92 percent of cluster 0 and 33 percent of the rest. avg_log2FC 1.5.',
+  'IL7R is similar but stronger. Both are good markers for cluster 0.',
+  'ACTB is everywhere. High pct.1 is not enough; pct.2 must be low.',
+  'Now cluster 1 against the rest. The comparison group changes every time.',
+  'S100A8 is in every monocyte and in half of the rest. The fold change carries the signal.',
+  'Repeat for 18 clusters. This is why FindAllMarkers takes about five minutes.',
+  'The three arguments only decide which genes get tested. They do not change the statistics.'
+];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, sx, sy) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + (sx === undefined ? 1 : sx) + ',' + (sy === undefined ? 1 : sy) + ')';
+}
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 350) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function setDur(e, ms) { e.style.setProperty('--dur', ms + 'ms'); }
+var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- seeded map ---------- */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var rng = mulberry32(42);
+function gauss() { var u = 1 - rng(), v = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+function tg() { var g; do { g = gauss(); } while (Math.abs(g) > 2.2); return g; }
+var COLORS = ['#2b6cb0', '#dd6b20', '#2f855a', '#805ad5', '#f6ad55', '#63b3ed'];
+var CL = [[190, 170, 55, 90], [480, 150, 48, 80], [170, 390, 42, 60], [370, 400, 38, 50], [600, 290, 34, 40], [560, 455, 26, 30]];
+var cells = [];
+CL.forEach(function (c, k) {
+  for (var i = 0; i < c[3]; i++) { cells.push({ k: k, x: c[0] + tg() * c[2], y: c[1] + tg() * c[2] }); }
+});
+/* expression flags: exact counts, seeded order */
+var perm = cells.map(function (c, i) { return i; });
+for (var i = perm.length - 1; i > 0; i--) { var j = Math.floor(rng() * (i + 1)); var t = perm[i]; perm[i] = perm[j]; perm[j] = t; }
+function flags(f, p1, p2) {
+  var nIn = cells.filter(function (c) { return c.k === f; }).length, nRest = cells.length - nIn;
+  var wantIn = Math.round(p1 * nIn), wantRest = Math.round(p2 * nRest), a = 0, b = 0, out = new Array(cells.length);
+  perm.forEach(function (idx) {
+    if (cells[idx].k === f) { out[idx] = a < wantIn; a++; } else { out[idx] = b < wantRest; b++; }
+  });
+  return out;
+}
+var GENES = {
+  CD3D: { f: 0, p1: 0.92, p2: 0.33, l1: '0.92', l2: '0.33' },
+  IL7R: { f: 0, p1: 0.94, p2: 0.34, l1: '0.94', l2: '0.34' },
+  ACTB: { f: 0, p1: 0.99, p2: 0.99, l1: '0.99', l2: '0.99' },
+  S100A8: { f: 1, p1: 1, p2: 0.549, l1: '1.00', l2: '0.549' }
+};
+Object.keys(GENES).forEach(function (g) { GENES[g].fl = flags(GENES[g].f, GENES[g].p1, GENES[g].p2); });
+
+/* ---------- frame ---------- */
+txt('How FindAllMarkers scores a gene', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 6', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: GRID, 'stroke-width': 2 }, svg);
+
+/* ---------- map ---------- */
+var gMap = el('g', {}, svg);
+tf(gMap, 40, 110);
+el('rect', { x: 0, y: 0, width: 700, height: 520, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gMap);
+var dots = cells.map(function (c) { var d = el('circle', { class: 't', cx: 0, cy: 0, r: 6, fill: GREY, 'fill-opacity': 0.6 }, gMap); tf(d, c.x, c.y); setDur(d, 700); return d; });
+var rings = cells.map(function (c) { var r = el('circle', { class: 't', cx: c.x, cy: c.y, r: 10, fill: 'none', stroke: INK, 'stroke-width': 2.2 }, gMap); op(r, 0); setDur(r, 500); return r; });
+CL.forEach(function (c, k) {
+  txt(String(k), { class: 'halo', x: c[0], y: c[1] - c[2] * 2.1 - 6 < 30 ? c[1] + c[2] * 2.1 + 26 : c[1] - c[2] * 2.1 - 6, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gMap);
+});
+/* legend */
+var gLeg = el('g', {}, svg);
+var legSw = el('circle', { class: 't', cx: 62, cy: 672, r: 11, fill: COLORS[0] }, gLeg);
+var legTx = txt('cluster 0', { x: 84, y: 682, 'font-size': 28, 'font-weight': 700, fill: INK }, gLeg);
+el('circle', { cx: 300, cy: 672, r: 11, fill: GREY, 'fill-opacity': 0.6 }, gLeg);
+var legRest = txt('rest', { class: 't', x: 322, y: 682, 'font-size': 28, 'font-weight': 700, fill: INK }, gLeg);
+var legAll = txt('', { x: 40, y: 682, 'font-size': 28, fill: INK }, gLeg);
+
+/* ---------- table ---------- */
+var gTab = el('g', { class: 't' }, svg);
+var tabTitle = txt('markers of cluster 0', { x: 820, y: 142, 'font-size': 32, 'font-weight': 700, fill: INK }, gTab);
+var HX = [['gene', 820, 'start'], ['avg_log2FC', 1120, 'end'], ['pct.1', 1235, 'end'], ['pct.2', 1350, 'end'], ['p_val_adj', 1540, 'end']];
+HX.forEach(function (h) { txt(h[0], { class: 'mono', x: h[1], y: 196, 'font-size': 26, 'font-weight': 700, 'text-anchor': h[2], fill: INK }, gTab); });
+el('line', { x1: 810, y1: 212, x2: 1550, y2: 212, stroke: INK, 'stroke-width': 3 }, gTab);
+var ROWY = [246, 298, 350];
+var hi = el('rect', { class: 't', x: 806, y: 0, width: 748, height: 48, fill: GOLD, 'fill-opacity': 0.4 }, svg);
+var ROWS = [
+  { g: 'CD3D', v: ['1.52', '0.92', '0.33', '0'], i: 0, grey: false },
+  { g: 'IL7R', v: ['2.07', '0.94', '0.34', '0'], i: 1, grey: false },
+  { g: 'ACTB', v: ['0.05', '0.99', '0.99', '1'], i: 2, grey: true },
+  { g: 'S100A8', v: ['4.09', '1.00', '0.549', '0'], i: 0, grey: false }
+];
+ROWS.forEach(function (r) {
+  r.e = el('g', { class: 't' }, svg);
+  var f = r.grey ? GREYS : INK, y = ROWY[r.i] + 9;
+  txt(r.g, { class: 'mono', x: 820, y: y, 'font-size': 28, 'font-weight': 700, fill: f }, r.e);
+  [1120, 1235, 1350, 1540].forEach(function (x, n) { txt(r.v[n], { class: 'mono', x: x, y: y, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'end', fill: f }, r.e); });
+  op(r.e, 0);
+});
+svg.insertBefore(hi, ROWS[0].e);
+
+/* ---------- strip ---------- */
+var gStrip = el('g', { class: 't' }, svg);
+var stripGene = txt('', { class: 'mono', x: 820, y: 492, 'font-size': 34, 'font-weight': 700, fill: INK }, gStrip);
+txt('fraction of cells expressing', { x: 1540, y: 492, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gStrip);
+function barRow(cy, lab) {
+  txt(lab, { class: 'mono', x: 820, y: cy + 10, 'font-size': 28, 'font-weight': 700, fill: INK }, gStrip);
+  el('rect', { x: 930, y: cy - 24, width: 520, height: 48, fill: '#ffffff', stroke: INK, 'stroke-width': 2.5 }, gStrip);
+  var f = el('rect', { class: 't', x: 0, y: -24, width: 520, height: 48, fill: GREYS }, gStrip);
+  setDur(f, 800);
+  var v = txt('', { class: 'mono', x: 1466, y: cy + 10, 'font-size': 28, 'font-weight': 700, fill: INK }, gStrip);
+  return { f: f, v: v };
+}
+var bar1 = barRow(552, 'pct.1'), bar2 = barRow(630, 'pct.2');
+tf(bar1.f, 930, 552, 0.0001, 1); tf(bar2.f, 930, 630, 0.0001, 1);
+var CAT = txt('', { x: 930, y: 686, 'font-size': 26, fill: INK }, gStrip);
+CAT.textContent = '';
+
+/* ---------- loop output (step 7) ---------- */
+var gLoop = el('g', { class: 't' }, svg);
+txt('Output: one block of rows per cluster', { x: 820, y: 142, 'font-size': 30, 'font-weight': 700, fill: INK }, gLoop);
+var chips = [];
+for (var q = 0; q < 18; q++) {
+  var cx = q < 9 ? 820 : 1190, cy = 176 + (q % 9) * 54;
+  var cg = el('g', { class: 't' }, gLoop);
+  el('rect', { x: cx, y: cy, width: 350, height: 46, fill: '#f7fafc', stroke: INK, 'stroke-width': 2 }, cg);
+  txt('cluster ' + q, { class: 'mono', x: cx + 12, y: cy + 33, 'font-size': 26, 'font-weight': 700, fill: INK }, cg);
+  [0, 1, 2].forEach(function (n) { el('rect', { x: cx + 190 + n * 52, y: cy + 14, width: 42, height: 18, fill: GREY }, cg); });
+  op(cg, 0); setDur(cg, 250);
+  chips.push(cg);
+}
+
+/* ---------- filter card (step 8) ---------- */
+var gCard = el('g', { class: 't' }, svg);
+el('rect', { x: 820, y: 140, width: 720, height: 470, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gCard);
+el('rect', { x: 820, y: 140, width: 14, height: 470, fill: GOLD }, gCard);
+txt('Arguments that limit which genes are tested', { x: 862, y: 196, 'font-size': 30, 'font-weight': 700, fill: INK }, gCard);
+[['only.pos = TRUE', 'genes higher in the cluster only'], ['min.pct = 0.25', 'detected in 25 percent of either group'], ['logfc.threshold = 0.25', 'at least 0.25 log2 fold change']].forEach(function (a, n) {
+  var y = 290 + n * 105;
+  txt(a[0], { class: 'mono', x: 862, y: y, 'font-size': 36, 'font-weight': 700, fill: INK }, gCard);
+  txt(a[1], { x: 862, y: y + 44, 'font-size': 28, fill: INK }, gCard);
+});
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+
+/* ---------- state ---------- */
+var loopTimer = null, loopK = 17;
+function highlight(k, all) {
+  cells.forEach(function (c, i) {
+    var on = all || c.k === k;
+    dots[i].style.fill = on ? COLORS[c.k] : GREY;
+    dots[i].style.fillOpacity = on ? 0.9 : 0.6;
+  });
+}
+function setGene(name, s) {
+  var g = GENES[name];
+  cells.forEach(function (c, i) { op(rings[i], g.fl[i] ? 1 : 0); });
+  stripGene.textContent = 'gene: ' + name;
+  bar1.f.style.fill = COLORS[g.f];
+  tf(bar1.f, 930, 552, g.p1, 1); tf(bar2.f, 930, 630, g.p2, 1);
+  bar1.v.textContent = g.l1; bar2.v.textContent = g.l2;
+}
+function setLoop(k) {
+  loopK = k;
+  highlight(k % 6, false);
+  legSw.style.fill = COLORS[k % 6];
+  legTx.textContent = 'cluster ' + k;
+  chips.forEach(function (c, n) { op(c, n <= k ? 1 : 0); });
+}
+function stopLoop() { clearInterval(loopTimer); loopTimer = null; }
+function startLoop() {
+  stopLoop();
+  if (REDUCE) { setLoop(17); return; }
+  var k = -1;
+  chips.forEach(function (c) { op(c, 0); });
+  loopTimer = setInterval(function () {
+    k++; setLoop(k);
+    if (k >= 17) { stopLoop(); }
+  }, 230);
+}
+function render(s) {
+  var rowSets = { 2: [0], 3: [0, 1], 4: [0, 1, 2], 6: [3] };
+  var geneAt = { 2: 'CD3D', 3: 'IL7R', 4: 'ACTB', 6: 'S100A8' };
+  var hl = (s === 5 || s === 6) ? 1 : 0;
+  if (s !== 7) { stopLoop(); }
+  /* map */
+  if (s === 8) { highlight(0, true); } else if (s !== 7) { highlight(hl, false); }
+  if (s !== 7) {
+    legSw.style.fill = COLORS[hl]; legTx.textContent = 'cluster ' + hl;
+  }
+  op(legSw, s === 8 ? 0 : 1); op(legTx, s === 8 ? 0 : 1); op(legRest, (s === 7 || s === 8) ? 0 : 1);
+  var sib = legRest.previousSibling; if (sib) { sib.style.opacity = (s === 7 || s === 8) ? 0 : 1; }
+  /* rings and strip */
+  if (geneAt[s]) { setGene(geneAt[s], s); }
+  else { cells.forEach(function (c, i) { op(rings[i], 0); }); }
+  sh(gStrip, !!geneAt[s], 450);
+  /* table */
+  sh(gTab, s <= 6, 350);
+  tabTitle.textContent = 'markers of cluster ' + hl;
+  ROWS.forEach(function (r, n) {
+    var on = !!(rowSets[s] && rowSets[s].indexOf(n) >= 0);
+    sh(r.e, on, 600);
+  });
+  var cur = { 2: 0, 3: 1, 4: 2, 6: 0 }[s];
+  op(hi, cur === undefined ? 0 : 1);
+  if (cur !== undefined) { tf(hi, 0, ROWY[cur] - 25); }
+  /* step 7 and 8 panels */
+  sh(gLoop, s === 7, 350);
+  sh(gCard, s === 8, 350);
+  if (s === 7) {
+    chips.forEach(function (c) { op(c, 0); });
+    setTimeout(function () { if (cur7()) { startLoop(); } }, firstLoad ? 300 : 700);
+  }
+  firstLoad = false;
+}
+var firstLoad = true;
+function cur7() { return svg.getAttribute('data-step') === '7'; }
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; updateUI(); render(cur);
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+updateUI(); render(cur);
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+window.__ep6 = {
+  counts: function (name) {
+    var g = GENES[name], a = 0, b = 0, nIn = 0, nRest = 0;
+    cells.forEach(function (c, i) { if (c.k === g.f) { nIn++; if (g.fl[i]) { a++; } } else { nRest++; if (g.fl[i]) { b++; } } });
+    return [a / nIn, b / nRest, nIn, nRest];
+  }
+};
+})();
+</script>
+</body>
+</html>

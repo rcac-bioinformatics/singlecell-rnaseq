@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why some doublets hide</title>
+<!--
+Why some doublets hide (Episode 3, QC)
+
+Steps and captions
+ 1. Two cells in one GEM get the same cell barcode.
+    One GEM, one bead, a monocyte and a T cell.
+ 2. The result is one barcode with a mixed profile and about twice the RNA.
+    RNA from both cells pools on the bead. Bars: LYZ (monocyte) and CD3D (T) both high; total UMIs about double a typical cell.
+ 3. A doublet of different cell types often sits at the top right and is removed by the upper thresholds.
+    Scatter of nCount_RNA against nFeature_RNA. The barcode sits above the nFeature_RNA < 7000 line.
+ 4. Two T cells make a profile that looks like a large T cell.
+    A second GEM with two T cells. CD3D high, LYZ zero, total UMIs near the top of the normal range.
+ 5. Thresholds cannot see it. This is what scDblFinder and DoubletFinder are for.
+    The two T cell barcode sits inside the main cloud. The first doublet is shown faded as removed.
+ 6. At standard loading, QC thresholds and annotation catch most of the damage.
+    Note card: about 0.8 percent doublets per 1,000 cells recovered, so about 8 to 9 percent for the 11,809 cells here; dedicated tools matter at high loading or with multiplexing.
+
+The scatter cloud is simulated (mulberry32, seed 42) with a median nCount_RNA of 10357 and a median nFeature_RNA of 3378.
+The two doublet points are placed by hand and are illustrative, as are the bar heights.
+Only the nFeature_RNA < 7000 line is drawn on the scatter.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=4 opens at step 4. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke-opacity var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: why some doublets hide"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREY = '#cbd5e0', GRID = '#e2e8f0', GREYS = '#a0aec0', RED = '#b22222';
+var MONO = '#dd6b20', TCOL = '#2b6cb0';
+var N = 6;
+var CAPTIONS = [
+  'Two cells in one GEM get the same cell barcode.',
+  'The result is one barcode with a mixed profile and about twice the RNA.',
+  'A doublet of different cell types often sits at the top right and is removed by the upper thresholds.',
+  'Two T cells make a profile that looks like a large T cell.',
+  'Thresholds cannot see it. This is what scDblFinder and DoubletFinder are for.',
+  'At standard loading, QC thresholds and annotation catch most of the damage.'
+];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, sx, sy) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + (sx === undefined ? 1 : sx) + ',' + (sy === undefined ? 1 : sy) + ')';
+}
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 350) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function setDur(e, ms) { e.style.setProperty('--dur', ms + 'ms'); }
+function setDd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var rng = mulberry32(42);
+function gauss() { var u = 1 - rng(), v = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+/* ---------- frame ---------- */
+txt('Why some doublets hide', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 3', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: GRID, 'stroke-width': 2 }, svg);
+
+/* ---------- GEMs ---------- */
+var BEAD = [400, 470], C1 = [285, 340], C2 = [515, 340];
+function makeGem(title, c1Mono) {
+  var G = { g: el('g', { class: 't' }, svg) };
+  txt(title, { x: 400, y: 150, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, G.g);
+  el('circle', { cx: 400, cy: 410, r: 240, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, G.g);
+  el('circle', { cx: BEAD[0], cy: BEAD[1], r: 46, fill: GOLD, stroke: INK, 'stroke-width': 3 }, G.g);
+  txt('bead', { x: BEAD[0], y: BEAD[1] + 9, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, G.g);
+  txt('one barcode', { class: 'mono', x: 400, y: 586, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, G.g);
+  var cols = [c1Mono ? MONO : TCOL, TCOL], cs = [C1, C2], names = [c1Mono ? 'monocyte' : 'T cell', 'T cell'];
+  G.dots = [];
+  [0, 1].forEach(function (n) {
+    el('circle', { cx: cs[n][0], cy: cs[n][1], r: 74, fill: cols[n], stroke: INK, 'stroke-width': 3 }, G.g);
+    txt(names[n], { x: cs[n][0], y: cs[n][1] + 9, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: '#ffffff' }, G.g);
+    for (var i = 0; i < 12; i++) {
+      var ang = (n === 0 ? 180 : 0) + (i - 5.5) * 8.5, r = 76 + (i % 2) * 14, a = ang * Math.PI / 180;
+      var d = el('circle', { class: 't', cx: 0, cy: 0, r: 6.5, fill: cols[n], stroke: '#ffffff', 'stroke-width': 1.5 }, G.g);
+      setDur(d, 900);
+      d._home = cs[n]; d._ring = [BEAD[0] + r * Math.cos(a), BEAD[1] + r * Math.sin(a)]; d._i = i;
+      G.dots.push(d);
+    }
+  });
+  return G;
+}
+var gemA = makeGem('one GEM', true), gemB = makeGem('a second GEM', false);
+
+/* ---------- bar chart (steps 2 and 4) ---------- */
+var BASE = 600, U = 150;
+var gChart = el('g', { class: 't' }, svg);
+el('line', { x1: 880, y1: 190, x2: 880, y2: BASE, stroke: INK, 'stroke-width': 3 }, gChart);
+el('line', { x1: 880, y1: BASE, x2: 1550, y2: BASE, stroke: INK, 'stroke-width': 3 }, gChart);
+txt('UMIs (relative)', { x: 0, y: 0, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK, transform: 'translate(840,' + ((190 + BASE) / 2) + ') rotate(-90)' }, gChart);
+txt('genes', { x: 1000, y: 700, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gChart);
+txt('total', { x: 1370, y: 700, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gChart);
+el('line', { x1: 1190, y1: 250, x2: 1190, y2: 700, stroke: GRID, 'stroke-width': 2 }, gChart);
+function bar(x, w, fill, name, nx, nw) {
+  var g = el('g', { class: 't' }, gChart);
+  setDur(g, 800);
+  el('rect', { x: 0, y: -U, width: w, height: U, fill: fill, stroke: INK, 'stroke-width': 3, 'vector-effect': 'non-scaling-stroke' }, g);
+  txt(name, { class: nw ? '' : 'mono', x: x + w / 2, y: 646, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gChart);
+  g._x = x; tf(g, x, BASE, 1, 0.0001);
+  return g;
+}
+var bLYZ = bar(920, 90, MONO, 'LYZ', 0, 0), bCD3D = bar(1050, 90, TCOL, 'CD3D', 0, 0);
+var bTyp = bar(1235, 90, GREYS, 'typical cell', 0, 1), bThis = bar(1415, 90, GOLD, 'this barcode', 0, 1);
+var zeroLab = txt('0', { class: 't mono', x: 965, y: BASE - 12, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gChart);
+var about2 = txt('about 2x', { class: 't', x: 1460, y: BASE - 2 * U - 14, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gChart);
+var gTop = el('g', { class: 't' }, gChart);
+var TOPY = BASE - 2.4 * U;
+el('line', { x1: 1210, y1: TOPY, x2: 1550, y2: TOPY, stroke: INK, 'stroke-width': 3, 'stroke-dasharray': '12 8' }, gTop);
+txt('top of normal range', { x: 1550, y: TOPY - 12, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gTop);
+
+/* ---------- scatter (steps 3 and 5) ---------- */
+var gSc = el('g', { class: 't' }, svg);
+var AX = 940, AW = 580, SY0 = 600, SYH = 450, L2K = Math.log10(2000), L60 = Math.log10(60000);
+function sx(c) { return AX + (Math.log10(c) - L2K) / (L60 - L2K) * AW; }
+function sy(f) { return SY0 - f / 10000 * SYH; }
+el('line', { x1: AX, y1: 150, x2: AX, y2: SY0, stroke: INK, 'stroke-width': 3 }, gSc);
+el('line', { x1: AX, y1: SY0, x2: AX + AW + 20, y2: SY0, stroke: INK, 'stroke-width': 3 }, gSc);
+[3000, 10000, 30000].forEach(function (c) {
+  el('line', { x1: sx(c), y1: SY0, x2: sx(c), y2: SY0 + 9, stroke: INK, 'stroke-width': 3 }, gSc);
+  txt(String(c), { x: sx(c), y: SY0 + 40, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gSc);
+});
+[0, 5000, 10000].forEach(function (f) {
+  el('line', { x1: AX - 9, y1: sy(f), x2: AX, y2: sy(f), stroke: INK, 'stroke-width': 3 }, gSc);
+  txt(String(f), { x: AX - 16, y: sy(f) + 9, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gSc);
+});
+txt('nCount_RNA (log scale)', { class: 'mono', x: AX + AW / 2, y: 686, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gSc);
+txt('nFeature_RNA', { class: 'mono', x: 0, y: 0, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK, transform: 'translate(830,' + ((150 + SY0) / 2) + ') rotate(-90)' }, gSc);
+for (var i = 0; i < 480; i++) {
+  var g1; do { g1 = gauss(); } while (Math.abs(g1) > 2.4);
+  var C = 10357 * Math.pow(10, 0.18 * g1), g2; do { g2 = gauss(); } while (Math.abs(g2) > 2.2);
+  var F = Math.min(6850, 3378 * Math.sqrt(C / 10357) * Math.exp(0.12 * g2));
+  el('circle', { cx: sx(C), cy: sy(F), r: 4.5, fill: TCOL, 'fill-opacity': 0.5 }, gSc);
+}
+el('line', { x1: AX, y1: sy(7000), x2: AX + AW + 20, y2: sy(7000), stroke: RED, 'stroke-width': 3.5, 'stroke-dasharray': '14 9' }, gSc);
+txt('nFeature_RNA < 7000', { class: 'mono', x: AX + 14, y: sy(7000) - 14, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'start', fill: RED }, gSc);
+var pA = el('g', { class: 't' }, gSc), pB = el('g', { class: 't' }, gSc);
+var pAc = el('circle', { class: 't', cx: sx(21000), cy: sy(7900), r: 11, fill: GOLD, stroke: INK, 'stroke-width': 3 }, pA);
+var pAt = txt('mono + T', { class: 't halo', x: sx(21000), y: sy(7900) - 24, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, pA);
+el('circle', { cx: sx(17500), cy: sy(4400), r: 11, fill: GOLD, stroke: INK, 'stroke-width': 3 }, pB);
+el('line', { x1: sx(17500) + 12, y1: sy(4400), x2: 1402, y2: sy(4400), stroke: INK, 'stroke-width': 2.5 }, pB);
+txt('two T cells', { class: 'halo', x: 1408, y: sy(4400) + 9, 'font-size': 28, 'font-weight': 700, fill: INK }, pB);
+
+/* ---------- note card (step 6) ---------- */
+var gCard = el('g', { class: 't' }, svg);
+el('rect', { x: 240, y: 130, width: 1120, height: 530, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gCard);
+el('rect', { x: 240, y: 130, width: 14, height: 530, fill: GOLD }, gCard);
+txt('Doublet rate', { x: 290, y: 210, 'font-size': 44, 'font-weight': 700, fill: INK }, gCard);
+txt('about 8 to 9 percent', { x: 290, y: 320, 'font-size': 76, 'font-weight': 700, fill: INK }, gCard);
+var cardA = txt('', { x: 290, y: 400, 'font-size': 36, fill: INK }, gCard);
+var cardB = txt('', { x: 290, y: 530, 'font-size': 36, fill: INK }, gCard);
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+
+function fill(t, str, width, fs, lh) {
+  meas.setAttribute('font-size', fs);
+  var words = str.split(' '), lines = [], c = '';
+  words.forEach(function (w) {
+    var test = c ? c + ' ' + w : w; meas.textContent = test;
+    if (meas.getComputedTextLength() > width && c) { lines.push(c); c = w; } else { c = test; }
+  });
+  if (c) { lines.push(c); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 290, dy: n ? lh : 0 }, t); ts.textContent = ln; });
+  meas.setAttribute('font-size', 32);
+}
+fill(cardA, '10x expects about 0.8 percent per 1,000 cells recovered, so about 8 to 9 percent for the 11,809 cells here.', 1020, 36, 50);
+fill(cardB, 'Dedicated tools matter at high loading or with multiplexing.', 1020, 36, 50);
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+
+/* ---------- state rendering ---------- */
+function gemState(G, s, ringAlways) {
+  G.dots.forEach(function (d) {
+    var inRing = ringAlways || s >= 2;
+    var p = inRing ? d._ring : d._home;
+    setDd(d, inRing && !ringAlways ? 200 + d._i * 45 : 0);
+    tf(d, p[0], p[1]);
+  });
+}
+function render(s) {
+  sh(gemA.g, s >= 1 && s <= 3, 350);
+  sh(gemB.g, s >= 4 && s <= 5, 350);
+  gemState(gemA, s, false); gemState(gemB, s, true);
+  gemA.dots.concat(gemB.dots).forEach(function (d) { d.style.opacity = 1; });
+  gemA.dots.forEach(function (d) { op(d, s >= 2 ? 1 : 0); });
+  /* bar chart */
+  sh(gChart, s === 2 || s === 4, 350);
+  var v = s === 1 ? [0, 0, 0, 0] : (s <= 3 ? [0.8, 0.8, 1, 2] : [0.0001, 1.6, 1, 2]);
+  [[bLYZ, 0], [bCD3D, 1], [bTyp, 2], [bThis, 3]].forEach(function (a, n) {
+    setDd(a[0], (s === 2 || s === 4) ? 600 + n * 120 : 0);
+    tf(a[0], a[0]._x, BASE, 1, Math.max(v[a[1]], 0.0001));
+  });
+  op(zeroLab, s >= 4 ? 1 : 0); zeroLab.style.setProperty('--dd', '1400ms');
+  op(about2, s >= 2 ? 1 : 0); about2.style.setProperty('--dd', '1600ms');
+  op(gTop, s >= 4 ? 1 : 0); gTop.style.setProperty('--dd', '1200ms');
+  /* scatter */
+  sh(gSc, s === 3 || s === 5, 350);
+  sh(pA, s >= 3 && s <= 5, 700);
+  pAc.style.fill = s >= 5 ? GREY : GOLD; pAc.style.fillOpacity = s >= 5 ? 0.6 : 1; pAc.style.stroke = s >= 5 ? GREYS : INK;
+  pAt.style.fill = s >= 5 ? '#4a5568' : INK;
+  pAt.textContent = s >= 5 ? 'mono + T, removed' : 'mono + T';
+  sh(pB, s === 5, 700);
+  sh(gCard, s === 6, 350);
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

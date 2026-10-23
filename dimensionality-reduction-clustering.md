@@ -111,6 +111,8 @@ The key properties of PCA:
 - The first 10--20 PCs typically capture the major biological structure (cell
   types), while later PCs are dominated by noise
 
+[Animation: PCA compresses correlated genes](files/animations/ep5_pca-axes.html)
+
 
 ``` r
 pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
@@ -276,6 +278,8 @@ statistics) rather than relying on visual impressions from UMAP alone.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 
+[Animation: What UMAP does not tell you](files/animations/ep5_umap-pitfalls.html)
+
 :::::::::::::::::::::::::::::::::::::::::: callout
 
 ## t-SNE as an alternative
@@ -329,6 +333,8 @@ pbmc <- FindClusters(pbmc, resolution = 0.5)
 |-----------|-------|-------------|
 | `resolution` | `0.5` | Controls the number of clusters. Lower values (0.1--0.3) produce fewer, larger clusters. Higher values (1.0--2.0) produce more, smaller clusters. |
 | `algorithm` | `1` (default) | Community detection method. `1` = Louvain (default, fast and reliable). `4` = Leiden (more robust against poorly connected clusters, requires the `leidenalg` Python package). |
+
+[Animation: FindNeighbors and FindClusters](files/animations/ep5_graph-clustering.html)
 
 :::::::::::::::::::::::::::::::::::::::::: spoiler
 

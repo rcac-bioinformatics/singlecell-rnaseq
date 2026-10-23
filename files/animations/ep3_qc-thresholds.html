@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Choose the thresholds, watch the cells</title>
+<!--
+Choose the thresholds, watch the cells (Episode 3, QC). Interactive, not stepped.
+
+Three violins from 2000 seeded simulated cells (mulberry32, seed 42). The marginals are built from quantile knots so the summary
+statistics match the lesson exactly (median, quartiles and maximum), and the three values are tied together by a Gaussian copula
+(nFeature and nCount rise together, percent.mt falls as nFeature rises). A cell is kept only if it passes all four lines:
+  nFeature_RNA > lower line, nFeature_RNA < upper line, nCount_RNA < upper line, percent.mt < upper line.
+Counts are the simulated counts scaled by one constant so that the lesson defaults give exactly 11310 of 11721 cells.
+
+Scales: nFeature_RNA and percent.mt use a square-root axis, nCount_RNA uses a log axis, so every line can be reached and read.
+
+Interaction
+ Drag any of the four dashed red lines by its handle (44 px tall). The counter and the faded points update live.
+ Buttons or keys: 1 = Lesson defaults (200, 7000, 50000, 15). 2 = Challenge 1 (300, 4000, 10). 3 = percent.mt < 5.
+ The challenge presets also show the count from the 11310 filtered cells, as the episode's challenges run on the filtered object
+ (lesson answers 7579 and 3276); both presets are inside the defaults, so this is the defaults' kept cells scaled to 11310.
+ Presets animate the lines over 600 ms. R also restores the lesson defaults.
+ URL: ?preset=2 opens with a preset.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;touch-action:none;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.pt{fill:#2b6cb0;fill-opacity:.62}
+.pt.rm{fill:#cbd5e0;fill-opacity:.4}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:700}
+.btn:hover rect{fill:#f1f5f9}
+.btn.on rect{fill:#ceb888}
+.hd{cursor:ns-resize}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Interactive QC thresholds"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', RED = '#b22222', GOLD = '#ceb888', GRID = '#e2e8f0', GREYTXT = '#4a5568';
+var NSIM = 2000, TOTAL = 11721, DEFAULT_KEPT = 11310;
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+
+/* ---------- simulation ---------- */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var rng = mulberry32(42);
+function gauss() { var u = 1 - rng(), v = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+/* quantile knots [probability, value]; linear between knots. p = 0.25, 0.5, 0.75 and 1 carry the lesson statistics */
+var KNOTS = {
+  nFeature: [[0, 100], [0.004, 200], [0.03, 1300], [0.10, 2200], [0.25, 2895], [0.5, 3378], [0.60, 3620], [0.745, 4000], [0.75, 4270], [0.90, 5300], [0.97, 6300], [0.992, 7000], [1, 9540]],
+  nCount:   [[0, 1500], [0.02, 4500], [0.10, 6500], [0.25, 8047], [0.5, 10357], [0.75, 15166], [0.90, 22000], [0.97, 35000], [0.99, 50000], [1, 103741]],
+  mt:       [[0, 0.8], [0.05, 3.6], [0.25, 4.9], [0.275, 5.0], [0.5, 5.8], [0.75, 7.0], [0.90, 9.0], [0.955, 10.0], [0.982, 15.0], [0.995, 35], [1, 90]]
+};
+function quant(knots, u) {
+  for (var i = 1; i < knots.length; i++) {
+    if (u <= knots[i][0]) {
+      var a = knots[i - 1], b = knots[i];
+      return a[1] + (b[1] - a[1]) * (u - a[0]) / (b[0] - a[0]);
+    }
+  }
+  return knots[knots.length - 1][1];
+}
+var RHO_FC = 0.88, RHO_FM = -0.42;
+var z = [];
+for (var i = 0; i < NSIM; i++) {
+  var f = gauss(), c = RHO_FC * f + Math.sqrt(1 - RHO_FC * RHO_FC) * gauss(), m = RHO_FM * f + Math.sqrt(1 - RHO_FM * RHO_FM) * gauss();
+  z.push([f, c, m]);
+}
+function rankMap(col, knots) {
+  var idx = z.map(function (v, k) { return k; }).sort(function (a, b) { return z[a][col] - z[b][col]; });
+  var out = new Array(NSIM);
+  idx.forEach(function (k, r) { out[k] = quant(knots, r / (NSIM - 1)); });
+  return out;
+}
+var NF = rankMap(0, KNOTS.nFeature), NC = rankMap(1, KNOTS.nCount), MT = rankMap(2, KNOTS.mt);
+var DATA = [NF, NC, MT];
+
+/* ---------- scales ---------- */
+var H = 360, TOP = 216, BOT = TOP + H;
+var PANELS = [
+  { name: 'nFeature_RNA', axis: 'genes per cell (sqrt)', scale: 'sqrt', min: 0, max: 10000, ticks: [0, 1000, 2000, 4000, 6000, 10000], px: 40 },
+  { name: 'nCount_RNA', axis: 'UMIs per cell (log)', scale: 'log', min: 1000, max: 120000, ticks: [1000, 3000, 10000, 30000, 100000], px: 560 },
+  { name: 'percent.mt', axis: 'mitochondrial % (sqrt)', scale: 'sqrt', min: 0, max: 90, ticks: [0, 5, 15, 30, 60, 90], px: 1080 }
+];
+function posOf(p, v) {
+  if (p.scale === 'log') { return (Math.log(Math.max(v, p.min)) - Math.log(p.min)) / (Math.log(p.max) - Math.log(p.min)); }
+  return Math.sqrt(Math.max(v, 0) / p.max);
+}
+function yOf(p, v) { return BOT - Math.max(0, Math.min(1, posOf(p, v))) * H; }
+function valOf(p, y) {
+  var t = Math.max(0, Math.min(1, (BOT - y) / H));
+  if (p.scale === 'log') { return Math.exp(Math.log(p.min) + t * (Math.log(p.max) - Math.log(p.min))); }
+  return t * t * p.max;
+}
+
+/* lines: panel index, kind, value */
+var LINES = [
+  { p: 0, kind: 'min', fmt: '> ', round: 10 },
+  { p: 0, kind: 'max', fmt: '< ', round: 10 },
+  { p: 1, kind: 'max', fmt: '< ', round: 100 },
+  { p: 2, kind: 'max', fmt: '< ', round: 0.1 }
+];
+var PRESETS = [
+  { name: 'Lesson defaults', v: [200, 7000, 50000, 15] },
+  { name: 'Challenge 1 (300, 4000, 10)', v: [300, 4000, 50000, 10] },
+  { name: 'percent.mt < 5', v: [200, 7000, 50000, 5] }
+];
+var vals = PRESETS[0].v.slice();
+
+function keep(i, v) { return NF[i] > v[0] && NF[i] < v[1] && NC[i] < v[2] && MT[i] < v[3]; }
+function simKept(v) { var n = 0; for (var i = 0; i < NSIM; i++) { if (keep(i, v)) { n++; } } return n; }
+var KSCALE = DEFAULT_KEPT / simKept(PRESETS[0].v);
+function scaled(n) { return Math.min(TOTAL, Math.round(n * KSCALE)); }
+
+/* ---------- frame ---------- */
+txt('Choose the thresholds, watch the cells', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 3', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 722, x2: 1560, y2: 722, stroke: GRID, 'stroke-width': 2 }, svg);
+
+/* ---------- violins and points ---------- */
+var ptEls = [[], [], []];
+var rng2 = mulberry32(7);
+PANELS.forEach(function (p, pi) {
+  var ax = p.px + 140, cx = p.px + 305, HW = 135;
+  p.ax = ax; p.cx = cx; p.x1 = p.px + 470;
+  txt(p.name, { class: 'mono', x: cx, y: 196, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, svg);
+  /* grid and ticks */
+  p.ticks.forEach(function (t) {
+    var y = yOf(p, t);
+    el('line', { x1: ax, y1: y, x2: p.x1, y2: y, stroke: GRID, 'stroke-width': 2 }, svg);
+    el('line', { x1: ax - 8, y1: y, x2: ax, y2: y, stroke: INK, 'stroke-width': 3 }, svg);
+    txt(String(t), { x: ax - 14, y: y + 9, 'font-size': 26, 'text-anchor': 'end', fill: INK }, svg);
+  });
+  el('line', { x1: ax, y1: TOP, x2: ax, y2: BOT, stroke: INK, 'stroke-width': 3 }, svg);
+  txt(p.axis, { x: 0, y: 0, 'font-size': 26, 'text-anchor': 'middle', fill: INK, transform: 'translate(' + (p.px + 18) + ',' + ((TOP + BOT) / 2) + ') rotate(-90)' }, svg);
+  txt('width = density of cells', { x: cx, y: 618, 'font-size': 26, 'text-anchor': 'middle', fill: GREYTXT }, svg);
+  p.out = txt('', { class: 'mono', x: cx, y: 656, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, svg);
+  /* violin from a kernel density estimate in screen space */
+  var ys = DATA[pi].map(function (v) { return yOf(p, v); });
+  var lo = Math.min.apply(null, ys), hi = Math.max.apply(null, ys), bw = 9, step = 3, dens = [], mx = 0, y;
+  for (y = lo; y <= hi + 0.01; y += step) {
+    var s = 0;
+    for (var k = 0; k < NSIM; k++) { var d = (ys[k] - y) / bw; if (d > -4 && d < 4) { s += Math.exp(-0.5 * d * d); } }
+    dens.push([y, s]); if (s > mx) { mx = s; }
+  }
+  var L = [], R = [];
+  dens.forEach(function (d) { var w = Math.max(1.5, d[1] / mx * HW); L.push((cx - w).toFixed(1) + ',' + d[0].toFixed(1)); R.unshift((cx + w).toFixed(1) + ',' + d[0].toFixed(1)); });
+  p.dens = dens; p.mx = mx;
+  el('polygon', { points: L.concat(R).join(' '), fill: '#f1f5f9', stroke: INK, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, svg);
+  var gP = el('g', {}, svg);
+  for (var i2 = 0; i2 < NSIM; i2++) {
+    var yy = ys[i2], j = Math.min(dens.length - 1, Math.max(0, Math.round((yy - lo) / step)));
+    var w2 = Math.max(1.5, dens[j][1] / mx * HW) * 0.92;
+    var xx = cx + (rng2() * 2 - 1) * w2;
+    ptEls[pi].push(el('circle', { class: 'pt', cx: xx.toFixed(1), cy: yy.toFixed(1), r: 2.4 }, gP));
+  }
+});
+
+/* ---------- threshold lines and handles ---------- */
+var HW_ = 130, HH = 44;
+var lineEls = LINES.map(function (ln, li) {
+  var p = PANELS[ln.p];
+  var g = el('g', {}, svg);
+  var line = el('line', { x1: p.ax, x2: p.x1, stroke: RED, 'stroke-width': 3.5, 'stroke-dasharray': '14 9' }, g);
+  var hd = el('g', { class: 'hd', style: 'touch-action:none' }, g);
+  var hit = el('rect', { x: p.ax, width: p.x1 - p.ax, height: 28, fill: 'transparent' }, hd);
+  var r = el('rect', { x: p.x1 - HW_, width: HW_, height: HH, rx: 8, ry: 8, fill: RED, stroke: '#ffffff', 'stroke-width': 2 }, hd);
+  var t = el('text', { class: 'mono', x: p.x1 - HW_ / 2, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: '#ffffff', 'pointer-events': 'none' }, hd);
+  hd.addEventListener('pointerdown', function (e) {
+    if (anim) { return; }
+    drag = li; try { svg.setPointerCapture(e.pointerId); } catch (x) { /* ignore */ }
+    e.preventDefault();
+  });
+  return { g: g, line: line, hit: hit, r: r, t: t };
+});
+function fmtVal(ln, v) { return ln.fmt + String(+v.toFixed(ln.round < 1 ? 1 : 0)); }
+function layoutLines() {
+  LINES.forEach(function (ln, li) {
+    var p = PANELS[ln.p], y = yOf(p, vals[li]), e = lineEls[li];
+    e.line.setAttribute('y1', y); e.line.setAttribute('y2', y);
+    e.hit.setAttribute('y', y - 14);
+    e.r.setAttribute('y', y - HH / 2);
+    e.t.setAttribute('y', y + 9);
+    e.t.textContent = fmtVal(ln, vals[li]);
+  });
+}
+
+/* ---------- counter, caption, buttons ---------- */
+var counter2 = txt('', { x: 40, y: 750, 'font-size': 26, fill: GREYTXT }, svg);
+var counter = txt('', { x: 40, y: 698, 'font-size': 34, 'font-weight': 700, fill: INK }, svg);
+txt('simulation: 2000 points, scaled to the lesson', { x: 1560, y: 698, 'font-size': 26, 'text-anchor': 'end', fill: GREYTXT }, svg);
+var cap = txt('Drag the dashed red lines. Points outside a line fade. Press 1, 2 or 3 for the presets.', { x: 40, y: 810, 'font-size': 32, fill: INK }, svg);
+cap.setAttribute('data-lines', 1);
+var btns = [];
+[[40, 232], [288, 440], [744, 236]].forEach(function (b, i) {
+  var g = el('g', { class: 'btn' }, svg);
+  el('rect', { x: b[0], y: 86, width: b[1], height: 48, rx: 6, ry: 6 }, g);
+  txt(PRESETS[i].name, { x: b[0] + b[1] / 2, y: 119 }, g);
+  g.addEventListener('click', function () { applyPreset(i, true); });
+  btns.push(g);
+});
+txt('keys 1, 2, 3', { class: 'mono', x: 1000, y: 118, 'font-size': 26, fill: GREYTXT }, svg);
+
+/* ---------- state ---------- */
+var removed = new Array(NSIM), drag = -1, anim = null, current = 0;
+function update() {
+  var k = 0, i, pi;
+  for (i = 0; i < NSIM; i++) {
+    var rm = !keep(i, vals);
+    if (!rm) { k++; }
+    if (removed[i] !== rm) {
+      removed[i] = rm;
+      for (pi = 0; pi < 3; pi++) { var cl = ptEls[pi][i].classList; if (rm) { cl.add('rm'); } else { cl.remove('rm'); } }
+    }
+  }
+  var kept = scaled(k);
+  counter.textContent = 'Cells kept: ' + kept + ' of ' + TOTAL + ' (' + (kept / TOTAL * 100).toFixed(1) + ' percent)';
+  /* cells failing each panel's own lines */
+  var CH = [null, 7579, 3276], frac = k / simKept(PRESETS[0].v);
+  counter2.textContent = (match0() >= 1) ? ('From the 11310 filtered cells: ' + Math.round(frac * DEFAULT_KEPT) + ' kept (lesson answer: ' + CH[match0()] + ')') : '';
+  var f = [0, 0, 0];
+  for (i = 0; i < NSIM; i++) {
+    if (!(NF[i] > vals[0] && NF[i] < vals[1])) { f[0]++; }
+    if (!(NC[i] < vals[2])) { f[1]++; }
+    if (!(MT[i] < vals[3])) { f[2]++; }
+  }
+  PANELS.forEach(function (p, j) { p.out.textContent = 'outside lines: ' + scaled(f[j]); });
+  layoutLines();
+  var match = -1;
+  PRESETS.forEach(function (pr, j) { if (pr.v.every(function (v, q) { return Math.abs(v - vals[q]) < 1e-6; })) { match = j; } });
+  btns.forEach(function (b, j) { b.classList.toggle('on', j === match); });
+  svg.setAttribute('data-kept', kept);
+  svg.setAttribute('data-preset', match + 1);
+  svg.setAttribute('data-values', vals.join(','));
+}
+
+function match0() { var m = -1; PRESETS.forEach(function (pr, j) { if (pr.v.every(function (v, q) { return Math.abs(v - vals[q]) < 1e-6; })) { m = j; } }); return m; }
+function clampVal(li, v) {
+  var ln = LINES[li], p = PANELS[ln.p];
+  var lo = 0, hi = Infinity, gap = 10;
+  if (li === 0) { hi = valOf(p, yOf(p, vals[1]) + gap); lo = 20; }
+  if (li === 1) { lo = valOf(p, yOf(p, vals[0]) - gap); hi = 10000; }
+  if (li === 2) { lo = 1000; hi = 120000; }
+  if (li === 3) { lo = 0.5; hi = 90; }
+  v = Math.max(lo, Math.min(hi, v));
+  return +(Math.round(v / ln.round) * ln.round).toFixed(1);
+}
+function toLocal(e) {
+  var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+window.addEventListener('pointermove', function (e) {
+  if (drag < 0) { return; }
+  var q = toLocal(e), ln = LINES[drag];
+  vals[drag] = clampVal(drag, valOf(PANELS[ln.p], q.y));
+  update();
+});
+function endDrag() { drag = -1; }
+window.addEventListener('pointerup', endDrag);
+window.addEventListener('pointercancel', endDrag);
+
+function applyPreset(i, animate) {
+  var target = PRESETS[i].v.slice(), start = vals.slice();
+  current = i;
+  if (anim) { cancelAnimationFrame(anim.raf); anim = null; }
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!animate || reduce) { vals = target; update(); return; }
+  var t0 = null;
+  var ys0 = start.map(function (v, li) { return yOf(PANELS[LINES[li].p], v); });
+  var ys1 = target.map(function (v, li) { return yOf(PANELS[LINES[li].p], v); });
+  anim = { raf: 0 };
+  function frame(ts) {
+    if (t0 === null) { t0 = ts; }
+    var u = Math.min(1, (ts - t0) / 600), e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+    if (u >= 1) { vals = target; anim = null; update(); return; }
+    vals = ys0.map(function (y0, li) {
+      var y = y0 + (ys1[li] - y0) * e, ln = LINES[li];
+      return Math.round(valOf(PANELS[ln.p], y) / ln.round) * ln.round;
+    });
+    update();
+    anim.raf = requestAnimationFrame(frame);
+  }
+  anim.raf = requestAnimationFrame(frame);
+}
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  if (e.key === '1' || e.key === '2' || e.key === '3') { applyPreset(+e.key - 1, true); e.preventDefault(); }
+  else if (e.key === 'r' || e.key === 'R') { applyPreset(0, true); e.preventDefault(); }
+});
+
+/* test hook, read only */
+window.__ep3q = {
+  scale: KSCALE,
+  presets: PRESETS.map(function (pr) { var k = simKept(pr.v); return [k, scaled(k), +(scaled(k) / TOTAL * 100).toFixed(1)]; }),
+  stats: DATA.map(function (a) {
+    var s = a.slice().sort(function (x, y) { return x - y; });
+    function q(p) { var h = (s.length - 1) * p, lo = Math.floor(h); return s[lo] + (s[Math.min(lo + 1, s.length - 1)] - s[lo]) * (h - lo); }
+    return [q(0.25), q(0.5), q(0.75), s[s.length - 1]].map(function (x) { return +x.toFixed(1); });
+  })
+};
+
+var q0 = parseInt(new URLSearchParams(window.location.search).get('preset'), 10);
+applyPreset(q0 >= 1 && q0 <= 3 ? q0 - 1 : 0, false);
+})();
+</script>
+</body>
+</html>

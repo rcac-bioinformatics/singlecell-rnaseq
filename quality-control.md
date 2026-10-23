@@ -173,6 +173,8 @@ structure. The key components are:
 
 ![Structure of the Seurat v5 object](fig/seurat_object.png){alt="Diagram of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns"}
 
+[Animation: The Seurat object through the day](files/animations/ep3_seurat-object-tracker.html)
+
 You can inspect the metadata that Seurat automatically computed during object
 creation:
 
@@ -362,6 +364,8 @@ quality. A healthy PBMC typically has 3--8% mitochondrial content. Cells with
 
 :::::::::::::::::::::::::::::::::::::::
 
+[Animation: What a dying cell looks like in QC](files/animations/ep3_dying-cell.html)
+
 
 ## Setting Thresholds
 
@@ -403,6 +407,8 @@ p1 + p2 + p3 + plot_layout(ncol = 3)
 Cells above or below the red lines will be removed. The small point size
 (`pt.size = 0.1`) lets you see how many individual cells fall outside the
 thresholds.
+
+[Animation: Choose the thresholds, watch the cells](files/animations/ep3_qc-thresholds.html)
 
 Let's record how many cells we have before filtering:
 
@@ -547,6 +553,8 @@ episode 6, with both monocyte and B cell markers, is one). We will not run a ded
 but be aware of these tools for your own analyses.
 
 :::::::::::::::::::::::::::::::::::::::
+
+[Animation: Why some doublets hide](files/animations/ep3_doublets.html)
 
 
 ::::::::::::::::::::::::::::::::::::: challenge

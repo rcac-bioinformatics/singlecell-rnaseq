@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What enrichGO tests</title>
+<!--
+What enrichGO tests (Episode 8, GO enrichment)
+
+Steps and captions
+ 1. Start with 293 up-regulated genes, 263 of them with GO annotations, against all annotated genes.
+    A box "background, 18842 annotated genes" with a field of dots, and a circle "DE genes, 263 (of 293)".
+ 2. Each GO term is a set of genes.
+    A second circle "response to virus, 400 genes".
+ 3. Count the overlap.
+    The 55 shared dots highlight, label "55 shared".
+ 4. Compare with what random draws would give. 55 vs about 5.6 is enrichment.
+    Two bars: expected by chance about 5.6, observed 55.
+ 5. Repeat for every term, adjust for multiple testing, plot the top 15.
+    The episode 8 top 15 GO terms with their GeneRatio and adjusted p-value, ordered by GeneRatio as dotplot() draws them.
+ 6. enrichGO is over-representation. GSEA is a different test on the full ranking.
+    ORA uses a cutoff list; GSEA uses the full ranked list.
+
+Steps 1 to 4 use the real response to virus numbers (patch 30): 293 up-regulated genes (episode 8 output block), 263 of them
+GO-annotated (the GeneRatio denominator), a 400-gene term, 55 shared, and the 18842-gene background enrichGO used (BgRatio
+400/18842). Expected overlap 263 x 400 / 18842 = 5.58, shown as about 5.6. Same source as step 5 below.
+Stylised: the circle areas are not proportional to the set sizes. The dots inside the DE circle (263), the term circle (400)
+and the overlap (55) are drawn one per gene. The grey background dots are only a sample of the 18842, placed by seed 42.
+Step 5 is the real result (patch 29): the 15 terms are the episode 8 top 15 from the Negishi run (anchor ep8_go_top15, run
+2026-10-21, bundle scrna-kit-2026-10-21-20261023-1232). GeneRatio and p.adjust come from the same chunks rerun locally in
+arnstrm2/r-bioconductor:3.23-R-4.6.1 (Seurat 5.5.1, clusterProfiler 4.20.2, org.Hs.eg.db 3.23.1), which gives the identical
+15 terms in the identical order. 263 of the 293 genes are GO-annotated, hence the /263. Dot colour is -log10 p.adjust,
+scaled from 34.5 (red) to 13.0 (blue).
+Step 6 pictograms are schematic.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=3 opens at step 3. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke-opacity var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: what enrichGO tests"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GRID = '#e2e8f0', UP = '#b22222', DOWN = '#4682b4', GREYS = '#a0aec0', SLATE = '#4a5568', BG = '#cbd5e0';
+var N = 6;
+var CAPTIONS = [
+  'Start with 293 up-regulated genes, 263 of them with GO annotations, against all annotated genes.',
+  'Each GO term is a set of genes.',
+  'Count the overlap.',
+  'Compare with what random draws would give. 55 vs about 5.6 is enrichment.',
+  'Repeat for every term, adjust for multiple testing, plot the top 15.',
+  'enrichGO is over-representation. GSEA is a different test on the full ranking.'
+];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, sx, sy) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + (sx === undefined ? 1 : sx) + ',' + (sy === undefined ? 1 : sy) + ')';
+}
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 350) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function setDd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+var rnd = mulberry32(42);
+function lerpc(a, b, t) { return 'rgb(' + [0, 1, 2].map(function (i) { return Math.round(a[i] + (b[i] - a[i]) * t); }).join(',') + ')'; }
+
+/* ---------- frame ---------- */
+txt('What enrichGO tests', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 8', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: GRID, 'stroke-width': 2 }, svg);
+
+/* ---------- Venn-style diagram ---------- */
+var BX = 60, BY = 100, BW = 1080, BH = 600;
+var C1 = { x: 490, y: 400, r: 145 }, C2 = { x: 695, y: 400, r: 165 };
+function inC(c, x, y, m) { var dx = x - c.x, dy = y - c.y; return Math.sqrt(dx * dx + dy * dy) <= c.r - (m || 0); }
+var placed = [];
+function free(x, y, md) { for (var i = 0; i < placed.length; i++) { var dx = placed[i][0] - x, dy = placed[i][1] - y; if (dx * dx + dy * dy < md * md) { return false; } } return true; }
+function fill(n, type, test, box) {
+  var out = [], tries = 0;
+  while (out.length < n && tries < 200000) {
+    tries++;
+    var x = box[0] + rnd() * (box[2] - box[0]), y = box[1] + rnd() * (box[3] - box[1]);
+    if (!test(x, y)) { continue; }
+    if (!free(x, y, 11)) { continue; }
+    placed.push([x, y]); out.push({ x: x, y: y, type: type });
+  }
+  return out;
+}
+var dots = [];
+var inBoth = function (x, y) { return inC(C1, x, y, 7) && inC(C2, x, y, 7); };
+var nearC = function (x, y) { return inC({ x: C1.x, y: C1.y, r: C1.r + 8 }, x, y) || inC({ x: C2.x, y: C2.y, r: C2.r + 8 }, x, y); };
+dots = dots.concat(fill(55, 'ov', inBoth, [C2.x - C2.r, 240, C1.x + C1.r, 560]));
+dots = dots.concat(fill(208, 'de', function (x, y) { return inC(C1, x, y, 7) && !inC({ x: C2.x, y: C2.y, r: C2.r + 8 }, x, y); }, [C1.x - C1.r, 250, C1.x + C1.r, 550]));
+dots = dots.concat(fill(345, 'tm', function (x, y) { return inC(C2, x, y, 7) && !inC({ x: C1.x, y: C1.y, r: C1.r + 8 }, x, y); }, [C2.x - C2.r, 240, C2.x + C2.r, 560]));
+dots = dots.concat(fill(520, 'bg', function (x, y) { return !nearC(x, y); }, [BX + 20, BY + 70, BX + BW - 20, BY + BH - 50]));
+var counts = { ov: 0, de: 0, tm: 0, bg: 0 }; dots.forEach(function (d) { counts[d.type]++; });
+window.__counts = counts;
+
+var gDiag = el('g', { class: 't' }, svg);
+el('rect', { x: BX, y: BY, width: BW, height: BH, fill: '#fff', stroke: INK, 'stroke-width': 3 }, gDiag);
+txt('background, 18842 annotated genes', { x: BX + 22, y: BY + 44, 'font-size': 32, 'font-weight': 700, fill: INK }, gDiag);
+txt('background dots are stylised', { x: BX + 22, y: BY + BH - 20, 'font-size': 26, fill: INK }, gDiag);
+dots.forEach(function (d) {
+  d.c = el('circle', { class: 't', cx: 0, cy: 0, r: 4, fill: BG }, gDiag);
+  tf(d.c, d.x, d.y, 1, 1);
+});
+var gC1 = el('g', { class: 't' }, gDiag);
+el('circle', { cx: C1.x, cy: C1.y, r: C1.r, fill: 'none', stroke: UP, 'stroke-width': 5 }, gC1);
+txt('DE genes,', { x: C1.x - C1.r - 14, y: C1.y - 6, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'end', fill: UP }, gC1);
+txt('263 (of 293)', { x: C1.x - C1.r - 14, y: C1.y + 32, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'end', fill: UP }, gC1);
+var gC2 = el('g', { class: 't' }, gDiag);
+el('circle', { cx: C2.x, cy: C2.y, r: C2.r, fill: 'none', stroke: SLATE, 'stroke-width': 5 }, gC2);
+txt('response to virus,', { x: C2.x + C2.r + 14, y: C2.y - 6, 'font-size': 30, 'font-weight': 700, fill: SLATE }, gC2);
+txt('400 genes', { x: C2.x + C2.r + 14, y: C2.y + 32, 'font-size': 30, 'font-weight': 700, fill: SLATE }, gC2);
+var gOv = el('g', { class: 't' }, gDiag);
+var LXm = (C2.x - C2.r + C1.x + C1.r) / 2;
+el('line', { x1: LXm, y1: 545, x2: LXm, y2: 596, stroke: INK, 'stroke-width': 3 }, gOv);
+txt('55 shared', { x: LXm, y: 640, 'font-size': 38, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gOv);
+
+/* ---------- step 4 bars ---------- */
+var gBars = el('g', { class: 't' }, svg);
+var BX0 = 520, UPX = 16;
+txt('expected by chance', { x: BX0 - 20, y: 275, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gBars);
+txt('observed', { x: BX0 - 20, y: 435, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gBars);
+el('line', { x1: BX0, y1: 190, x2: BX0, y2: 520, stroke: INK, 'stroke-width': 3 }, gBars);
+var bExp = el('rect', { class: 't', x: 0, y: 0, width: 5.58 * UPX, height: 100, fill: GREYS, stroke: INK, 'stroke-width': 3 }, gBars);
+var bObs = el('rect', { class: 't', x: 0, y: 0, width: 55 * UPX, height: 100, fill: GOLD, stroke: INK, 'stroke-width': 3 }, gBars);
+var tExp = txt('about 5.6', { class: 't', x: BX0 + 5.58 * UPX + 18, y: 275, 'font-size': 38, 'font-weight': 700, fill: INK }, gBars);
+var tObs = txt('55', { class: 't', x: BX0 + 55 * UPX + 18, y: 435, 'font-size': 38, 'font-weight': 700, fill: INK }, gBars);
+txt('expected = 263 x 400 / 18842', { x: BX0, y: 580, 'font-size': 30, fill: INK }, gBars);
+
+/* ---------- step 5 dot plot ---------- */
+var gDP = el('g', { class: 't' }, svg);
+var TERMS = [
+  ['response to virus', 55 / 263, 0.00],
+  ['defense response to virus', 49 / 263, 0.03],
+  ['viral process', 43 / 263, 0.54],
+  ['regulation of innate immune response', 43 / 263, 0.71],
+  ['positive regulation of cytokine production', 36 / 263, 1.00],
+  ['viral life cycle', 35 / 263, 0.68],
+  ['positive regulation of innate immune response', 34 / 263, 0.94],
+  ['positive regulation of response to biotic stimulus', 34 / 263, 0.98],
+  ['regulation of viral process', 28 / 263, 0.60],
+  ['response to type II interferon', 26 / 263, 0.60],
+  ['viral genome replication', 24 / 263, 0.72],
+  ['negative regulation of viral process', 23 / 263, 0.60],
+  ['regulation of viral life cycle', 23 / 263, 0.78],
+  ['regulation of viral genome replication', 21 / 263, 0.74],
+  ['negative regulation of viral genome replication', 20 / 263, 0.60]
+];
+var DX0 = 780, DX1 = 1180;
+function GX(g) { return DX0 + (g - 0.06) / 0.18 * (DX1 - DX0); }
+var AY = 668;
+txt('top 15 terms', { x: 60, y: 112, 'font-size': 28, 'font-weight': 700, fill: INK }, gDP);
+el('line', { x1: DX0 - 20, y1: AY, x2: DX1 + 20, y2: AY, stroke: INK, 'stroke-width': 3 }, gDP);
+[0.10, 0.15, 0.20].forEach(function (g) {
+  el('line', { x1: GX(g), y1: 120, x2: GX(g), y2: AY, stroke: GRID, 'stroke-width': 2 }, gDP);
+  el('line', { x1: GX(g), y1: AY, x2: GX(g), y2: AY + 8, stroke: INK, 'stroke-width': 3 }, gDP);
+  txt(g.toFixed(2), { x: GX(g), y: AY + 36, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gDP);
+});
+txt('GeneRatio', { x: DX1 + 60, y: AY + 36, 'font-size': 26, 'font-weight': 700, fill: INK }, gDP);
+var rowEls = [];
+TERMS.forEach(function (t, i) {
+  var y = 134 + i * 37;
+  var g = el('g', { class: 't' }, gDP);
+  txt(t[0], { x: DX0 - 40, y: y + 9, 'font-size': 26, 'text-anchor': 'end', fill: INK, 'font-weight': t[0] === 'response to virus' ? 700 : 400 }, g);
+  el('circle', { cx: GX(t[1]), cy: y, r: 5 + t[1] * 60, fill: lerpc([178, 34, 34], [70, 130, 180], t[2]), stroke: INK, 'stroke-width': 2 }, g);
+  rowEls.push(g);
+});
+txt('adjusted p', { x: 1290, y: 190, 'font-size': 28, 'font-weight': 700, fill: INK }, gDP);
+for (var q = 0; q < 5; q++) { el('rect', { x: 1290 + q * 54, y: 208, width: 52, height: 34, fill: lerpc([178, 34, 34], [70, 130, 180], q / 4), stroke: INK, 'stroke-width': 2 }, gDP); }
+txt('small', { x: 1290, y: 280, 'font-size': 26, fill: INK }, gDP);
+txt('large', { x: 1290 + 5 * 54 - 2, y: 280, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gDP);
+txt('dot size = gene count', { x: 1290, y: 350, 'font-size': 26, fill: INK }, gDP);
+txt('episode 8 values;', { x: 1290, y: 420, 'font-size': 26, fill: INK }, gDP);
+txt('263 of the 293', { x: 1290, y: 452, 'font-size': 26, fill: INK }, gDP);
+txt('genes are annotated', { x: 1290, y: 484, 'font-size': 26, fill: INK }, gDP);
+
+/* ---------- step 6 cards ---------- */
+var gNote = el('g', { class: 't' }, svg);
+function card(x, title, sub, kind) {
+  el('rect', { x: x, y: 130, width: 640, height: 540, fill: '#fff', stroke: INK, 'stroke-width': 3 }, gNote);
+  txt(title, { x: x + 320, y: 190, 'font-size': 44, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gNote);
+  txt(sub, { x: x + 320, y: 240, 'font-size': 32, 'text-anchor': 'middle', fill: INK }, gNote);
+  for (var i = 0; i < 20; i++) {
+    var w = 380 - i * 15, y = 280 + i * 17;
+    var hot = kind === 'ora' ? i < 6 : true;
+    el('rect', { x: x + 130, y: y, width: w, height: 13, fill: hot ? (kind === 'ora' ? UP : '#2b6cb0') : BG, 'fill-opacity': hot ? 1 : 0.4 }, gNote);
+  }
+  if (kind === 'ora') {
+    el('line', { x1: x + 90, y1: 280 + 6 * 17 - 2, x2: x + 560, y2: 280 + 6 * 17 - 2, stroke: INK, 'stroke-width': 3, 'stroke-dasharray': '10 8' }, gNote);
+    txt('cutoff', { x: x + 556, y: 280 + 6 * 17 + 28, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gNote);
+  }
+}
+card(120, 'ORA (enrichGO)', 'uses a cutoff list', 'ora');
+card(840, 'GSEA', 'uses the full ranked list', 'gsea');
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+
+/* ---------- state rendering ---------- */
+function render(s) {
+  sh(gDiag, s <= 3, 350);
+  sh(gBars, s === 4, 350);
+  sh(gDP, s === 5, 350);
+  sh(gNote, s === 6, 350);
+  sh(gC1, true, 0); op(gC1, 1);
+  sh(gC2, s >= 2, 500); sh(gOv, s === 3, 900);
+  dots.forEach(function (d) {
+    var f = BG, o = 0.85, k = 1;
+    if (d.type === 'de' || d.type === 'ov') { f = UP; o = 1; }
+    if (d.type === 'tm' && s >= 2) { f = SLATE; o = 1; }
+    if (s === 3) {
+      if (d.type === 'ov') { f = GOLD; k = 1.7; o = 1; } else { o = 0.2; }
+    }
+    d.c.style.fill = f; op(d.c, o); tf(d.c, d.x, d.y, k, k);
+    d.c.setAttribute('stroke', s === 3 && d.type === 'ov' ? INK : 'none');
+    d.c.setAttribute('stroke-width', 1.5);
+  });
+  var on = s === 4;
+  setDd(bExp, on ? 500 : 0); tf(bExp, BX0, 225, on ? 1 : 0, 1); op(bExp, on ? 1 : 0);
+  setDd(bObs, on ? 1400 : 0); tf(bObs, BX0, 385, on ? 1 : 0, 1); op(bObs, on ? 1 : 0);
+  setDd(tExp, on ? 1100 : 0); op(tExp, on ? 1 : 0);
+  setDd(tObs, on ? 2000 : 0); op(tObs, on ? 1 : 0);
+  rowEls.forEach(function (g, i) { setDd(g, s === 5 ? 500 + i * 110 : 0); op(g, s === 5 ? 1 : 0); });
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

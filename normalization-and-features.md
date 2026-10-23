@@ -121,6 +121,8 @@ The formula for a single gene *g* in cell *c* is:
 
 **normalized(g, c) = log(1 + count(g, c) / total_counts(c) x 10000)**
 
+[Animation: Normalization corrects sequencing depth](files/animations/ep4_lognormalize.html)
+
 
 ``` r
 pbmc <- NormalizeData(pbmc,
@@ -299,6 +301,8 @@ pbmc <- FindVariableFeatures(pbmc,
 | `selection.method` | `"vst"` | Variance-stabilizing transformation. Fits a mean-variance relationship across genes using local regression, then selects genes with the highest standardized variance (i.e., genes that vary more than expected given their expression level). |
 | `nfeatures` | `2000` | Number of variable features to select. 2,000 is the standard default for most scRNA-seq analyses. |
 
+[Animation: Which genes vary more than expected](files/animations/ep4_variable-features.html)
+
 Let's see which genes were selected:
 
 
@@ -353,6 +357,8 @@ expressed genes simply because they have larger absolute values, not because
 they carry more biological information. Scaling puts all genes on equal footing
 so that PCA identifies the axes of true biological variation rather than
 expression magnitude.
+
+[Animation: ScaleData puts genes on one footing](files/animations/ep4_scaling.html)
 
 
 ``` r

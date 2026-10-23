@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Seurat object through the day</title>
+<!--
+The Seurat object through the day (Episodes 3 to 8)
+
+Every function either fills a layer, adds a metadata column, or adds a reduction.
+Each step shows the whole object as it stands after that step, so ?step=N works as an episode opener.
+The new element is gold for 900 ms, then settles to ink. The code line at the top is the function just run.
+The list at the right is the set of .rds save points so far.
+
+Steps and captions
+  1. CreateSeuratObject()   Episode 3. CreateSeuratObject fills the counts layer and two QC columns.
+  2. PercentageFeatureSet() percent.mt is one more column per cell.
+  3. subset()               Filtering removes cells, not columns. Saved as pbmc_filtered.rds.   (11721 to 11310 cells)
+  4. NormalizeData()        Episode 4. The data layer holds log-normalized values.
+  5. FindVariableFeatures() Variable features are a list on the assay, not a layer.             (2000 variable features)
+  6. ScaleData()            scale.data covers only the variable genes. Saved as pbmc_normalized.rds.
+  7. RunPCA()               Episode 5. PCA is a reduction, stored beside the assay.
+  8. RunUMAP()              UMAP is another reduction, computed from 15 PCs.
+  9. FindNeighbors() and FindClusters()
+                            Clusters are metadata columns, one per resolution. Saved as pbmc_clustered.rds.
+ 10. RenameIdents() and pbmc$manual_annotation
+                            Episode 6. Labels are columns too. Saved as pbmc_annotated.rds.   (manual_annotation, then singler_labels)
+ 11. ifnb appears           Episode 7. Splitting an assay makes one layer per sample.
+ 12. IntegrateLayers() and JoinLayers()
+                            Integration adds a reduction. JoinLayers merges the layers again. Saved as ifnb_annotated.rds.
+ 13. AggregateExpression()  Episode 8. Pseudobulk is a new, much smaller object.               (bulk, 78 columns: 13 cell types x 2 conditions x 3 pseudo-replicates)
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=7 opens at step 7. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),stroke var(--dur) ease var(--dd,0ms)}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: the Seurat object through the day"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GHOST = '#cbd5e0', GREYTXT = '#718096', FILL = '#e2e8f0', PILL = '#f7fafc';
+var N = 13;
+var CAPTIONS = [
+  'Episode 3. CreateSeuratObject fills the counts layer and two QC columns.',
+  'percent.mt is one more column per cell.',
+  'Filtering removes cells, not columns. Saved as pbmc_filtered.rds.',
+  'Episode 4. The data layer holds log-normalized values.',
+  'Variable features are a list on the assay, not a layer.',
+  'scale.data covers only the variable genes. Saved as pbmc_normalized.rds.',
+  'Episode 5. PCA is a reduction, stored beside the assay.',
+  'UMAP is another reduction, computed from 15 PCs.',
+  'Clusters are metadata columns, one per resolution. Saved as pbmc_clustered.rds.',
+  'Episode 6. Labels are columns too. Saved as pbmc_annotated.rds.',
+  'Episode 7. Splitting an assay makes one layer per sample.',
+  'Integration adds a reduction. JoinLayers merges the layers again.',
+  'Episode 8. Pseudobulk is a new, much smaller object.'
+];
+var CODES = [
+  'CreateSeuratObject()', 'PercentageFeatureSet()', 'subset()', 'NormalizeData()', 'FindVariableFeatures()',
+  'ScaleData()', 'RunPCA()', 'RunUMAP()', 'FindNeighbors() and FindClusters()',
+  'RenameIdents() and pbmc$manual_annotation', 'ifnb: one layer per sample', 'IntegrateLayers() and JoinLayers()', 'AggregateExpression()'
+];
+var EPISODE = [3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 7, 7, 8];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function dur(e, ms) { e.style.setProperty('--dur', ms + 'ms'); }
+function dd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+
+/* ---------- frame ---------- */
+txt('The Seurat object through the day', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+var epTag = txt('Episode 3', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: '#e2e8f0', 'stroke-width': 2 }, svg);
+
+/* code line */
+el('rect', { x: 40, y: 84, width: 1110, height: 52, fill: PILL, stroke: INK, 'stroke-width': 3 }, svg);
+var codeEls = CODES.map(function (c) {
+  var t = txt(c, { class: 't mono', x: 62, y: 121, 'font-size': 30, 'font-weight': 700, fill: INK }, svg);
+  t.style.opacity = 0; dur(t, 400); return t;
+});
+
+/* ---------- item registry: visibility by step, gold flash on arrival ---------- */
+var items = [];
+function reg(e, from, until, delay, fl) {
+  var it = { e: e, from: from, until: until || 99, delay: delay || 0, fl: fl || [] };
+  e.style.opacity = 0;
+  items.push(it);
+  return it;
+}
+function pill(parent, x, y, w, h, label, opts) {
+  opts = opts || {};
+  var g = el('g', { class: 't' }, parent);
+  dur(g, 500);
+  var r = el('rect', { class: 't', x: x, y: y, width: w, height: h, rx: opts.rx === undefined ? 6 : opts.rx, ry: opts.rx === undefined ? 6 : opts.rx, fill: opts.fill || PILL, stroke: INK, 'stroke-width': 3 }, g);
+  dur(r, 450);
+  var t = txt(label, { class: 'mono', x: x + 14, y: y + h / 2 + 9, 'font-size': opts.fs || 26, 'font-weight': 700, fill: INK }, g);
+  return { g: g, r: r, t: t, base: opts.fill || PILL };
+}
+function ghost(parent, x, y, w, h, label, fs) {
+  el('rect', { x: x, y: y, width: w, height: h, rx: 6, ry: 6, fill: 'none', stroke: GHOST, 'stroke-width': 3, 'stroke-dasharray': '10 8' }, parent);
+  txt(label, { class: 'mono', x: x + 16, y: y + 34, 'font-size': fs || 30, 'font-weight': 700, fill: GHOST }, parent);
+}
+function slot(parent, x, y, label, extra) {
+  var p = pill(parent, x, y, 400, 80, label, { fill: FILL });
+  p.t.setAttribute('y', y + 34); p.t.setAttribute('font-size', 30);
+  return p;
+}
+
+/* ---------- tabs ---------- */
+var tabs = {};
+['pbmc', 'ifnb', 'bulk'].forEach(function (n, i) {
+  var g = el('g', { class: 't' }, svg);
+  dur(g, 400);
+  var x = 40 + i * 150;
+  var r = el('rect', { class: 't', x: x, y: 146, width: 136, height: 40, rx: 6, ry: 6, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, g);
+  var t = txt(n, { class: 't mono', x: x + 68, y: 174, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, g);
+  tabs[n] = { g: g, r: r, t: t };
+  g.style.opacity = 0;
+});
+
+/* ---------- right panel: saved .rds files ---------- */
+txt('saved as .rds', { x: 1180, y: 112, 'font-size': 28, 'font-weight': 700, fill: INK }, svg);
+var SAVES = [
+  { f: 'pbmc_filtered.rds', s: 3 }, { f: 'pbmc_normalized.rds', s: 6 }, { f: 'pbmc_clustered.rds', s: 9 },
+  { f: 'pbmc_annotated.rds', s: 10 }, { f: 'ifnb_annotated.rds', s: 12 }
+];
+var gSave = el('g', {}, svg);
+txt('none yet', { class: 'mono', x: 1182, y: 160, 'font-size': 26, fill: GHOST }, gSave);
+var noSave = gSave.lastChild;
+SAVES.forEach(function (sv, i) {
+  var y = 134 + i * 64;
+  var g = el('g', { class: 't' }, gSave);
+  dur(g, 450);
+  var r = el('rect', { class: 't', x: 1172, y: y, width: 388, height: 52, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, g);
+  dur(r, 450);
+  el('path', { d: 'M1186,' + (y + 10) + ' L1206,' + (y + 10) + ' L1214,' + (y + 18) + ' L1214,' + (y + 42) + ' L1186,' + (y + 42) + ' Z', fill: '#ffffff', stroke: INK, 'stroke-width': 3, 'stroke-linejoin': 'round' }, g);
+  el('path', { d: 'M1206,' + (y + 10) + ' L1206,' + (y + 18) + ' L1214,' + (y + 18)  , fill: 'none', stroke: INK, 'stroke-width': 3 }, g);
+  txt(sv.f, { class: 'mono', x: 1228, y: y + 35, 'font-size': 26, 'font-weight': 700, fill: INK }, g);
+  reg(g, sv.s, 99, 400, [{ el: r, base: '#ffffff' }]);
+});
+el('rect', { x: 1172, y: 668, width: 28, height: 28, fill: GOLD, stroke: INK, 'stroke-width': 3 }, svg);
+txt('just added', { x: 1214, y: 692, 'font-size': 26, fill: INK }, svg);
+
+/* ---------- object boxes ---------- */
+var BX = 40, BY = 196, BW = 1110, BH = 506;
+function box(name) {
+  var g = el('g', { class: 't' }, svg);
+  dur(g, 600);
+  el('rect', { x: BX, y: BY, width: BW, height: BH, fill: '#ffffff', stroke: INK, 'stroke-width': 4 }, g);
+  txt(name, { class: 'mono', x: 64, y: 244, 'font-size': 38, 'font-weight': 700, fill: INK }, g);
+  g.style.opacity = 0;
+  return g;
+}
+/* pbmc */
+var gP = box('pbmc');
+txt('Assay RNA', { x: 64, y: 292, 'font-size': 28, 'font-weight': 700, fill: INK }, gP);
+txt('Reductions', { x: 530, y: 292, 'font-size': 28, 'font-weight': 700, fill: INK }, gP);
+txt('Metadata', { x: 820, y: 292, 'font-size': 28, 'font-weight': 700, fill: INK }, gP);
+txt('one row per cell', { x: 820, y: 322, 'font-size': 26, fill: GREYTXT }, gP);
+[['counts', 1], ['data', 4], ['scale.data', 6]].forEach(function (s, k) {
+  var y = 306 + k * 96;
+  ghost(gP, 64, y, 400, 80, s[0]);
+  var p = slot(gP, 64, y, s[0]);
+  if (s[0] === 'scale.data') {
+    var bp = pill(p.g, 80, y + 40, 262, 32, '2000 genes only', { fill: '#ffffff', fs: 26, rx: 16 });
+    bp.t.setAttribute('y', y + 63);
+    p.t.setAttribute('y', y + 31);
+    p.extra = bp;
+  }
+  reg(p.g, s[1], 99, 0, [{ el: p.r, base: FILL }]);
+});
+(function () {
+  var p = pill(gP, 64, 600, 380, 46, '2000 variable features', { fill: '#ffffff', rx: 23 });
+  reg(p.g, 5, 99, 0, [{ el: p.r, base: '#ffffff' }]);
+})();
+var noRed = txt('none yet', { class: 'mono', x: 546, y: 334, 'font-size': 26, fill: GHOST }, gP);
+reg(noRed, 1, 7, 0, []);
+[['pca', 7], ['umap', 8]].forEach(function (r, k) {
+  var p = pill(gP, 530, 306 + k * 54, 250, 44, r[0]);
+  reg(p.g, r[1], 99, 0, [{ el: p.r, base: PILL }]);
+});
+[['orig.ident', 1, 0], ['nCount_RNA', 1, 0], ['nFeature_RNA', 1, 0], ['percent.mt', 2, 0],
+ ['RNA_snn_res.0.5', 9, 0], ['seurat_clusters', 9, 0], ['manual_annotation', 10, 0], ['singler_labels', 10, 1000]].forEach(function (m, k) {
+  var p = pill(gP, 820, 338 + k * 44, 310, 38, m[0]);
+  reg(p.g, m[1], 99, m[2], [{ el: p.r, base: PILL }]);
+});
+/* cell count badges */
+[['11721 cells', 1, 3], ['11310 cells', 3, 11]].forEach(function (b) {
+  var p = pill(gP, 910, 212, 220, 46, b[0], { fill: '#ffffff', fs: 28, rx: 23 });
+  p.t.setAttribute('x', 1020); p.t.setAttribute('text-anchor', 'middle');
+  reg(p.g, b[1], b[2], 0, [{ el: p.r, base: '#ffffff' }]);
+});
+
+/* ifnb */
+var gI = box('ifnb');
+txt('Assay RNA', { x: 64, y: 292, 'font-size': 28, 'font-weight': 700, fill: INK }, gI);
+txt('Reductions', { x: 530, y: 292, 'font-size': 28, 'font-weight': 700, fill: INK }, gI);
+var ifnbSlots = {};
+[['counts.CTRL', 306], ['counts.STIM', 402], ['data.CTRL', 498], ['data.STIM', 594]].forEach(function (s) {
+  var p = slot(gI, 64, s[1], s[0]);
+  ifnbSlots[s[0]] = p;
+  reg(p.g, 11, 12, 0, [{ el: p.r, base: FILL }]);
+});
+[['counts', 306], ['data', 402]].forEach(function (s) {
+  var p = slot(gI, 64, s[1], s[0]);
+  reg(p.g, 12, 99, 500, [{ el: p.r, base: FILL }]);
+});
+var noRed2 = txt('none yet', { class: 'mono', x: 546, y: 334, 'font-size': 26, fill: GHOST }, gI);
+reg(noRed2, 11, 12, 0, []);
+(function () {
+  var p = pill(gI, 530, 306, 250, 44, 'integrated.cca');
+  reg(p.g, 12, 99, 0, [{ el: p.r, base: PILL }]);
+})();
+/* bulk */
+var gB = el('g', { class: 't' }, svg);
+dur(gB, 600);
+el('rect', { x: 720, y: 330, width: 430, height: 340, fill: '#ffffff', stroke: INK, 'stroke-width': 4 }, gB);
+txt('bulk', { class: 'mono', x: 744, y: 378, 'font-size': 38, 'font-weight': 700, fill: INK }, gB);
+(function () {
+  var p = pill(gB, 944, 346, 186, 46, '78 columns', { fill: '#ffffff', fs: 26, rx: 23 });
+  p.t.setAttribute('x', 1037); p.t.setAttribute('text-anchor', 'middle');
+  reg(p.g, 13, 99, 0, [{ el: p.r, base: '#ffffff' }]);
+  var cells = el('g', { class: 't' }, gB);
+  dur(cells, 500);
+  var rects = [];
+  for (var i = 0; i < 78; i++) {
+    var cx = 744 + (i % 13) * 30, cy = 420 + Math.floor(i / 13) * 30;
+    rects.push(el('rect', { class: 't', x: cx, y: cy, width: 24, height: 24, fill: FILL, stroke: INK, 'stroke-width': 2 }, cells));
+    dur(rects[i], 450);
+  }
+  reg(cells, 13, 99, 0, rects.map(function (r) { return { el: r, base: FILL }; }));
+})();
+gB.style.opacity = 0;
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+/* ---------- state rendering ---------- */
+var prevStep = 0, flashTimers = [];
+function render(s) {
+  flashTimers.forEach(clearTimeout); flashTimers = [];
+  /* object boxes and tabs */
+  gP.style.opacity = s <= 10 ? 1 : 0;
+  gI.style.opacity = s >= 11 ? (s === 13 ? 0.18 : 1) : 0;
+  gB.style.opacity = s === 13 ? 1 : 0;
+  [['pbmc', 1, s <= 10], ['ifnb', 11, s === 11 || s === 12], ['bulk', 13, s === 13]].forEach(function (t) {
+    var tab = tabs[t[0]], seen = s >= t[1], active = t[2];
+    tab.g.style.opacity = seen ? 1 : 0;
+    tab.r.style.fill = active ? INK : '#ffffff';
+    tab.t.style.fill = active ? '#ffffff' : INK;
+  });
+  epTag.textContent = 'Episode ' + EPISODE[s - 1];
+  codeEls.forEach(function (t, i) { t.style.opacity = i === s - 1 ? 1 : 0; dd(t, i === s - 1 ? 150 : 0); });
+  noSave.style.opacity = s >= 3 ? 0 : 1;
+
+  /* items */
+  items.forEach(function (it) {
+    var vis = s >= it.from && s < it.until;
+    var arriving = vis && s === it.from && prevStep < it.from;
+    dd(it.e, vis ? (arriving ? it.delay : 0) : 0);
+    it.e.style.opacity = vis ? 1 : 0;
+    it.fl.forEach(function (f) {
+      if (arriving) {
+        f.el.style.fill = GOLD;
+        flashTimers.push(setTimeout(function () { f.el.style.fill = f.base; }, it.delay + 900));
+      } else { f.el.style.fill = f.base; }
+    });
+  });
+  /* ifnb split layers slide together as they are joined */
+  var joined = s >= 12;
+  var moves = { 'counts.CTRL': 0, 'counts.STIM': -96, 'data.CTRL': -96, 'data.STIM': -192 };
+  for (var k in moves) {
+    var g = ifnbSlots[k].g;
+    g.style.transform = 'translate(0px,' + (joined ? moves[k] : 0) + 'px)';
+  }
+  prevStep = s;
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FindNeighbors and FindClusters</title>
+<!--
+FindNeighbors and FindClusters (Episode 5, Clustering)
+
+Steps and captions
+ 1. Start from the 15 PCs. Each cell is a point; the plot shows two of the 15 dimensions.
+    90 grey points in a PCA panel (PC1, PC2). Side panel: FindNeighbors(pbmc, dims = 1:15)
+ 2. For each cell, find its k nearest neighbours by Euclidean distance in PCA space.
+    One cell is highlighted and linked to its 5 nearest neighbours. Label: k.param = 20 in the lesson
+ 3. Repeat for every cell. This is the KNN graph.
+    All KNN edges appear, thin.
+ 4. Weight each edge by how many neighbours the two cells share. This is the SNN graph.
+    Edges between cells that share many neighbours thicken. Edges with few shared neighbours fade.
+ 5. Community detection finds groups densely connected inside, sparsely connected outside.
+    Side panel: FindClusters(pbmc, resolution = 0.5). Three colours, the two close blobs merge into one community.
+ 6. Resolution controls how finely the graph is cut. Low merges, high splits.
+    A resolution slider with four sub-steps. Right and Left move between the positions before the next step:
+    6a resolution 0.2, 2 communities. 6b 0.5, 3 communities. 6c 0.8, 4 communities. 6d 1.2, 5 communities.
+ 7. UMAP only draws the result. Clustering never looked at the UMAP.
+    A UMAP panel appears with the same colours. The PCA panel returns to resolution 0.5.
+ 8. On the workshop data, resolution 0.5 gives 18 clusters.
+    Text summary: KNN graph, SNN weights, Louvain communities, resolution 0.5 gave 18 clusters.
+
+The layout and the community assignments per resolution are drawn by hand for teaching.
+They are not computed by Louvain. The counter shows 6 / 8 during all four slider positions.
+Randomness: mulberry32 with seed 42, so every run is identical.
+
+Controls
+ Right arrow or Space: next state. Left arrow: previous state. R: restart. P: autoplay on or off.
+ URL: ?step=6 opens at step 6. ?step=6&sub=3 opens at the third slider position.
+ ?autoplay=1&dwell=3000 plays through every state with 3000 ms each.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke var(--dur) ease var(--dd,0ms),stroke-width var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: FindNeighbors and FindClusters"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREY = '#a0aec0', FADE = '#cbd5e0';
+var CAPTIONS = [
+  'Start from the 15 PCs. Each cell is a point; the plot shows two of the 15 dimensions.',
+  'For each cell, find its k nearest neighbours by Euclidean distance in PCA space.',
+  'Repeat for every cell. This is the KNN graph.',
+  'Weight each edge by how many neighbours the two cells share. This is the SNN graph.',
+  'Community detection finds groups densely connected inside, sparsely connected outside.',
+  'Resolution controls how finely the graph is cut. Low merges, high splits.',
+  'UMAP only draws the result. Clustering never looked at the UMAP.',
+  'On the workshop data, resolution 0.5 gives 18 clusters.'
+];
+var NSTEP = 8;
+/* states: steps 1 to 5, four slider positions in step 6, then steps 7 and 8 */
+var STATES = [];
+for (var q = 1; q <= NSTEP; q++) {
+  if (q === 6) { for (var u = 0; u < 4; u++) { STATES.push({ step: 6, sub: u }); } }
+  else { STATES.push({ step: q, sub: -1 }); }
+}
+function stateIndex(step, sub) {
+  for (var i = 0; i < STATES.length; i++) {
+    if (STATES[i].step === step && (step !== 6 || STATES[i].sub === sub)) { return i; }
+  }
+  return 0;
+}
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y) { e.style.transform = 'translate(' + x + 'px,' + y + 'px)'; }
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 0) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+
+/* ---------- seeded data ---------- */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var rng = mulberry32(42);
+function gauss() { var u = 1 - rng(), v = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+/* blob 0 is the largest (30), made of two sub-groups of 16 and 14 so it can split at resolution 1.2 */
+var SPEC = [
+  { n: 16, cx: 215, cy: 300, sd: 22, blob: 0, sub: 0 },
+  { n: 14, cx: 340, cy: 245, sd: 22, blob: 0, sub: 1 },
+  { n: 25, cx: 570, cy: 260, sd: 31, blob: 1, sub: 0 },
+  { n: 20, cx: 330, cy: 575, sd: 27, blob: 2, sub: 0 },
+  { n: 15, cx: 520, cy: 585, sd: 23, blob: 3, sub: 0 }
+];
+var PTS = [];
+SPEC.forEach(function (sp) {
+  var made = 0, tries = 0;
+  while (made < sp.n) {
+    var x = sp.cx + sp.sd * gauss(), y = sp.cy + sp.sd * gauss();
+    tries++;
+    var md = tries < 2000 ? 27 : 18;
+    if (x < 90 || x > 700 || y < 230 || y > 648) { continue; }
+    var ok = true;
+    for (var i = 0; i < PTS.length; i++) {
+      var dx = PTS[i].x - x, dy = PTS[i].y - y;
+      if (dx * dx + dy * dy < md * md) { ok = false; break; }
+    }
+    if (!ok) { continue; }
+    PTS.push({ x: x, y: y, blob: sp.blob, sub: sp.sub });
+    made++;
+  }
+});
+var NP = PTS.length;
+
+/* k = 5 nearest neighbours by Euclidean distance */
+var K = 5;
+var NN = PTS.map(function (p, i) {
+  var d = [];
+  for (var j = 0; j < NP; j++) { if (j !== i) { d.push({ j: j, d: Math.hypot(p.x - PTS[j].x, p.y - PTS[j].y) }); } }
+  d.sort(function (a, b) { return a.d - b.d || a.j - b.j; });
+  return d.slice(0, K).map(function (o) { return o.j; });
+});
+/* SNN weight: Jaccard index of the neighbour sets, each set includes the cell itself */
+function nset(i) { var s = {}; s[i] = 1; NN[i].forEach(function (j) { s[j] = 1; }); return s; }
+var NSET = PTS.map(function (p, i) { return nset(i); });
+function jaccard(i, j) {
+  var inter = 0, uni = 0, k;
+  for (k in NSET[i]) { if (NSET[j][k]) { inter++; } uni++; }
+  for (k in NSET[j]) { if (!NSET[i][k]) { uni++; } }
+  return inter / uni;
+}
+var PRUNE = 0.25;   /* display threshold for a faint edge, chosen for the picture */
+var seen = {}, EDGES = [];
+for (var a = 0; a < NP; a++) {
+  NN[a].forEach(function (b) {
+    var i = Math.min(a, b), j = Math.max(a, b), key = i + '-' + j;
+    if (!seen[key]) { seen[key] = 1; EDGES.push({ i: i, j: j, w: jaccard(i, j) }); }
+  });
+}
+/* highlighted cell: the point of blob 1 closest to the blob centre */
+var cen = [0, 0, 0, 0].map(function () { return { x: 0, y: 0, n: 0 }; });
+PTS.forEach(function (p) { var c = cen[p.blob]; c.x += p.x; c.y += p.y; c.n++; });
+cen.forEach(function (c) { c.x /= c.n; c.y /= c.n; });
+var HP = 0, best = -1;
+PTS.forEach(function (p, i) {
+  if (p.blob !== 1 || p.x > 585 || p.y < 255) { return; }
+  var inside = NN[i].every(function (j) { return PTS[j].blob === 1; });
+  if (!inside) { return; }
+  var md = 0; NN[i].forEach(function (j) { md += Math.hypot(p.x - PTS[j].x, p.y - PTS[j].y); });
+  if (md > best) { best = md; HP = i; }
+});
+var HPN = {}; NN[HP].forEach(function (j) { HPN[j] = 1; });
+EDGES.forEach(function (e) {
+  e.hp = (e.i === HP && HPN[e.j]) || (e.j === HP && HPN[e.i]) ? 1 : 0;
+});
+
+/* fake UMAP layout: each blob keeps its members but moves, rotates and scales */
+var UM = [
+  { x: 930, y: 480, s: 0.85, r: -30 },
+  { x: 1360, y: 390, s: 0.8, r: 20 },
+  { x: 1090, y: 590, s: 0.85, r: 70 },
+  { x: 1280, y: 615, s: 0.85, r: -15 }
+];
+PTS.forEach(function (p) {
+  var u = UM[p.blob], c = cen[p.blob], th = u.r * Math.PI / 180;
+  var ox = p.x - c.x, oy = p.y - c.y;
+  p.ux = u.x + u.s * (ox * Math.cos(th) - oy * Math.sin(th)) + (rng() - 0.5) * 8;
+  p.uy = u.y + u.s * (ox * Math.sin(th) + oy * Math.cos(th)) + (rng() - 0.5) * 8;
+});
+
+/* community colours by resolution (hand-set for teaching) */
+var COL = ['#2b6cb0', '#2f855a', '#dd6b20', '#805ad5', '#d53f8c'];
+var RES = ['0.2', '0.5', '0.8', '1.2'];
+var NCOM = [2, 3, 4, 5];
+function colourIdx(r, p) {
+  if (r === 0) { return p.blob <= 1 ? 0 : 2; }
+  if (r === 1) { return p.blob === 0 ? 0 : (p.blob === 1 ? 1 : 2); }
+  if (r === 2) { return p.blob; }
+  return (p.blob === 0 && p.sub === 1) ? 4 : p.blob;
+}
+
+/* ---------- frame ---------- */
+txt('FindNeighbors and FindClusters', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 5', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: '#e2e8f0', 'stroke-width': 2 }, svg);
+
+/* PCA panel */
+el('rect', { x: 40, y: 160, width: 700, height: 540, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, svg);
+txt('PCA space', { x: 60, y: 198, 'font-size': 28, 'font-weight': 700, fill: INK }, svg);
+txt('PC1', { class: 'mono', x: 390, y: 688, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, svg);
+txt('PC2', { class: 'mono', x: 0, y: 0, 'font-size': 26, 'text-anchor': 'middle', fill: INK, transform: 'translate(66,430) rotate(-90)' }, svg);
+
+var gEdges = el('g', {}, svg);
+var edgeEls = EDGES.map(function (e, n) {
+  var p = PTS[e.i], q2 = PTS[e.j];
+  var l = el('line', { class: 't', x1: p.x, y1: p.y, x2: q2.x, y2: q2.y, 'stroke-linecap': 'round' }, gEdges);
+  l.style.opacity = 0;
+  e.stag = Math.round(n / EDGES.length * 400);
+  return l;
+});
+var gPts = el('g', {}, svg);
+var ptEls = PTS.map(function (p) {
+  return el('circle', { class: 't', cx: p.x, cy: p.y, r: 9 }, gPts);
+});
+var ring = el('circle', { class: 't', cx: PTS[HP].x, cy: PTS[HP].y, r: 16, fill: 'none', stroke: GOLD, 'stroke-width': 4 }, svg);
+var hdx = PTS[HP].x > 470 ? -1 : 1, hdy = PTS[HP].y - cen[1].y;
+var lbl = txt('this cell', { class: 't halo', x: PTS[HP].x + (hdx >= 0 ? 26 : -26), y: PTS[HP].y + (hdy >= 0 ? 38 : -24), 'font-size': 26, 'font-weight': 700, 'text-anchor': hdx >= 0 ? 'start' : 'end', fill: INK }, svg);
+
+/* right area: code panel */
+el('rect', { x: 780, y: 160, width: 780, height: 72, fill: '#f7fafc', stroke: INK, 'stroke-width': 2 }, svg);
+var CODES = [
+  'FindNeighbors(pbmc, dims = 1:15)',
+  'FindClusters(pbmc, resolution = 0.5)',
+  'FindClusters(pbmc, resolution = 0.2)',
+  'FindClusters(pbmc, resolution = 0.8)',
+  'FindClusters(pbmc, resolution = 1.2)'
+];
+var codeEls = CODES.map(function (c) {
+  var t = txt(c, { class: 't mono', x: 806, y: 207, 'font-size': 30, 'font-weight': 700, fill: INK }, svg);
+  t.style.opacity = 0; setDur(t, 450); return t;
+});
+function setDur(e, ms) { e.style.setProperty('--dur', ms + 'ms'); }
+setDur(lbl, 500);
+
+/* right area: k notes (steps 2 to 4) and SNN legend (step 4) */
+var gK = el('g', { class: 't' }, svg);
+txt('k = 5 on screen', { class: 'mono', x: 800, y: 296, 'font-size': 28, 'font-weight': 700, fill: INK }, gK);
+txt('k.param = 20 in the lesson', { class: 'mono', x: 800, y: 340, 'font-size': 28, fill: INK }, gK);
+var gLeg = el('g', { class: 't' }, svg);
+el('line', { x1: 802, y1: 410, x2: 872, y2: 410, stroke: '#64748b', 'stroke-width': 8, 'stroke-linecap': 'round' }, gLeg);
+txt('many shared neighbours', { x: 896, y: 420, 'font-size': 28, fill: INK }, gLeg);
+el('line', { x1: 802, y1: 470, x2: 872, y2: 470, stroke: GREY, 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-opacity': 0.7 }, gLeg);
+txt('few shared neighbours', { x: 896, y: 480, 'font-size': 28, fill: INK }, gLeg);
+
+/* right area: communities readout and slider */
+var readEls = NCOM.map(function (n) {
+  var t = txt(n + ' communities', { class: 't', x: 1170, y: 392, 'font-size': 38, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, svg);
+  t.style.opacity = 0; setDur(t, 450); return t;
+});
+var gSlider = el('g', { class: 't' }, svg);
+txt('resolution', { class: 'mono', x: 800, y: 488, 'font-size': 26, 'font-weight': 700, fill: INK }, gSlider);
+var TX = [1010, 1170, 1330, 1490];
+el('line', { x1: TX[0], y1: 478, x2: TX[3], y2: 478, stroke: INK, 'stroke-width': 4, 'stroke-linecap': 'round' }, gSlider);
+TX.forEach(function (x, i) {
+  el('line', { x1: x, y1: 464, x2: x, y2: 492, stroke: INK, 'stroke-width': 3 }, gSlider);
+  txt(RES[i], { class: 'mono', x: x, y: 538, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gSlider);
+});
+var knob = el('g', { class: 't' }, gSlider);
+el('circle', { cx: 0, cy: 0, r: 18, fill: GOLD, stroke: INK, 'stroke-width': 4 }, knob);
+setDur(knob, 600);
+var gSliderBox = gSlider;
+
+/* right area: UMAP panel */
+var gUm = el('g', { class: 't' }, svg);
+el('rect', { x: 780, y: 260, width: 780, height: 440, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gUm);
+txt('UMAP', { x: 800, y: 298, 'font-size': 28, 'font-weight': 700, fill: INK }, gUm);
+txt('UMAP1', { class: 'mono', x: 1170, y: 688, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gUm);
+txt('UMAP2', { class: 'mono', x: 0, y: 0, 'font-size': 26, 'text-anchor': 'middle', fill: INK, transform: 'translate(812,500) rotate(-90)' }, gUm);
+var umEls = PTS.map(function (p) { return el('circle', { class: 't', cx: p.ux, cy: p.uy, r: 9, stroke: '#ffffff', 'stroke-width': 1.5 }, gUm); });
+setDur(gUm, 600);
+
+/* right area: summary */
+var gSum = el('g', { class: 't' }, svg);
+setDur(gSum, 600);
+var SUM = [
+  ['KNN graph', 'each cell linked to its nearest neighbours'],
+  ['SNN weights', 'edge weight from shared neighbours'],
+  ['Louvain communities', 'densely connected inside, sparse outside'],
+  ['resolution 0.5', '18 clusters on the PBMC data']
+];
+SUM.forEach(function (r, i) {
+  var top = 284 + i * 102;
+  if (i === 3) { el('rect', { x: 780, y: top - 4, width: 780, height: 92, fill: GOLD, 'fill-opacity': 0.45 }, gSum); }
+  txt(r[0], { class: 'mono', x: 800, y: top + 32, 'font-size': 32, 'font-weight': 700, fill: INK }, gSum);
+  txt(r[1], { x: 800, y: top + 72, 'font-size': 28, fill: INK }, gSum);
+});
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+/* ---------- state rendering ---------- */
+function render(idx) {
+  var st = STATES[idx], s = st.step;
+  var r = s === 6 ? st.sub : 1;            /* resolution index used for colours */
+  var coloured = s >= 5;
+
+  /* points */
+  PTS.forEach(function (p, i) {
+    var e = ptEls[i];
+    var fill = coloured ? COL[colourIdx(r, p)] : GREY;
+    var stroke = '#ffffff', sw = 1.5;
+    if (s === 2) {
+      if (i === HP) { fill = GOLD; stroke = INK; sw = 4; }
+      else if (HPN[i]) { stroke = INK; sw = 3.5; }
+    }
+    e.style.fill = fill; e.style.stroke = stroke; e.style.strokeWidth = sw;
+    umEls[i].style.fill = fill;
+  });
+  sh(ring, s === 2, 150);
+  sh(lbl, s === 2, 250);
+
+  /* edges */
+  EDGES.forEach(function (e, n) {
+    var l = edgeEls[n], o = 0, col = GREY, w = 1.5;
+    if (s === 2) { if (e.hp) { o = 1; col = INK; w = 3.5; } }
+    else if (s === 3) { o = 0.8; col = GREY; w = 1.5; }
+    else if (s === 4) {
+      if (e.w < PRUNE) { o = 0.6; col = GREY; w = 1.5; }
+      else { o = 0.9; col = '#64748b'; w = 1 + 7 * e.w; }
+    } else if (s >= 5) {
+      var lo = s >= 7 ? 0.16 : 0.32;
+      if (e.w < PRUNE) { o = lo * 0.6; col = FADE; w = 1.5; }
+      else { o = lo; col = GREY; w = 1 + 4 * e.w; }
+    }
+    l.style.setProperty('--dd', (e.hp && s === 2 ? 0 : e.stag) + 'ms');
+    l.style.stroke = col; l.style.strokeWidth = w; l.style.opacity = o;
+  });
+
+  /* code panel */
+  var ci = s <= 4 ? 0 : (s === 6 ? [2, 1, 3, 4][st.sub] : 1);
+  codeEls.forEach(function (t, i) { sh(t, i === ci, i === ci ? 200 : 0); });
+
+  /* right area contents */
+  sh(gK, s >= 2 && s <= 4, 300);
+  sh(gLeg, s === 4, 400);
+  readEls.forEach(function (t, i) {
+    var on = (s === 5 && i === 1) || (s === 6 && i === st.sub);
+    sh(t, on, 250);
+  });
+  sh(gSlider, s === 6, 300);
+  tf(knob, TX[s === 6 ? st.sub : 1], 478);
+  sh(gUm, s === 7, 450);
+  sh(gSum, s === 8, 400);
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var p0 = parseInt(params.get('step'), 10); if (!(p0 >= 1 && p0 <= NSTEP)) { p0 = 1; }
+var p1 = parseInt(params.get('sub'), 10); if (!(p1 >= 1 && p1 <= 4)) { p1 = 1; }
+var cur = stateIndex(p0, p1 - 1);
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+var LAST = STATES.length - 1;
+
+function updateUI() {
+  var st = STATES[cur];
+  setCaption(st.step);
+  stepTxt.textContent = st.step + ' / ' + NSTEP + (st.step === 6 ? '   resolution ' + RES[st.sub] + ', position ' + (st.sub + 1) + ' of 4' : '');
+  bPrev.classList.toggle('off', cur === 0);
+  bNext.classList.toggle('off', cur === LAST);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', st.step);
+  svg.setAttribute('data-sub', st.sub + 1);
+  svg.setAttribute('data-state', cur + 1);
+}
+function go(n) {
+  n = Math.max(0, Math.min(LAST, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < LAST) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(0); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* expose a small read-only summary for testing */
+window.__ep5 = { edges: EDGES.length, pruned: EDGES.filter(function (e) { return e.w < PRUNE; }).length, points: NP };
+
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

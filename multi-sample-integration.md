@@ -211,6 +211,8 @@ CCA works by:
 3. Using the anchors to compute a **correction vector** that aligns matching
    cell types across conditions
 
+[Animation: Why integrate, and what CCA integration does](files/animations/ep7_integration-anchors.html)
+
 
 ``` r
 ifnb <- IntegrateLayers(object = ifnb,

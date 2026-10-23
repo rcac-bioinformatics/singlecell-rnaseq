@@ -189,6 +189,8 @@ A good marker gene has a high `avg_log2FC`, high `pct.1` (expressed in most
 cells of the cluster), low `pct.2` (not expressed in other clusters), and a
 significant `p_val_adj`.
 
+[Animation: How FindAllMarkers scores a gene](files/animations/ep6_find-all-markers.html)
+
 ### Top markers per cluster
 
 Let's extract the top 5 markers per cluster ranked by fold change:
@@ -334,6 +336,8 @@ of labels.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
+[Animation: Labels are assigned by position](files/animations/ep6_rename-idents.html)
+
 
 ``` r
 # Build the cluster-to-cell-type mapping
@@ -406,6 +410,8 @@ Manual annotation requires expert knowledge of marker genes for every expected
 cell type. **SingleR** offers an automated alternative: it compares the
 expression profile of each cell to a labeled reference dataset and assigns the
 label of the most similar reference sample.
+
+[Animation: How SingleR labels a cell](files/animations/ep6_singler.html)
 
 ### Download the reference
 
