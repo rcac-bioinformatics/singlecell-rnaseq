@@ -88,6 +88,9 @@ B2 = dict(
     head_r1=find("02", "zcat pbmc_10k_v3_S1_L001_R1_001.fastq.gz | head -8"),
     head_r2=find("02", "zcat pbmc_10k_v3_S1_L001_R2_001.fastq.gz | head -8"),
     ls_refdata=find("02", "ls ${RCAC_SCRATCH}/scrna_workshop/reference/refdata-gex-GRCh38-2024-A/"),
+    test_cr=find("02", "sbatch --test-only run_cellranger.sh"),
+    test_idx=find("02", "sbatch --test-only ${RCAC_SCRATCH}/scrna_workshop/build_star_index.sh"),
+    test_solo=find("02", "sbatch --test-only ${RCAC_SCRATCH}/scrna_workshop/run_starsolo.sh"),
     sub_cr=find("02", "sbatch run_cellranger.sh"),
     ls_outs=find("02", "ls ${RCAC_SCRATCH}/scrna_workshop/cellranger_output/pbmc10k/outs/"),
     sub_idx=find("02", "sbatch ${RCAC_SCRATCH}/scrna_workshop/build_star_index.sh"),
@@ -162,6 +165,8 @@ S = {}
 S["02-prep"] = [("block", "02", B2[k]) for k in ("mkdir", "rsync", "whitelist", "ls_fastq", "ls_ref", "head_r1", "head_r2",
                                                  "ls_refdata")]
 S["02-prep"] += [("block", "02", SCRIPTS[n][0]) for n in ("run_cellranger.sh", "build_star_index.sh", "run_starsolo.sh")]
+# learners check each script with sbatch --test-only in class (patch 20); the real submissions are separate steps
+S["02-prep"] += [("block", "02", B2[k]) for k in ("test_cr", "test_idx", "test_solo")]
 S["02-prep"] += [("extra", "the written job scripts are exactly the episode text",
                   "\n".join('kit_check_written "$RCAC_SCRATCH/scrna_workshop/%s" "$KIT_GEN/learner-scripts/%s"' % (n, n)
                             for n in sorted(SCRIPTS))),
@@ -340,7 +345,7 @@ def step(name, kind, deps, desc, dep_type="afterok", script="-", ntasks="", time
     STEPS.append(dict(name=name, kind=kind, deps=deps, desc=desc, dep_type=dep_type, script=script, ntasks=ntasks, time=time))
 
 
-step("02-prep", "login", [], "02 directories, rsync, whitelist, listings, write the three job scripts (login node)")
+step("02-prep", "login", [], "02 directories, rsync, whitelist, listings, write the three job scripts and check them with sbatch --test-only (login node)")
 step("02-cellranger", "learner", [], "02 Cell Ranger count (run_cellranger.sh)", script="run_cellranger.sh",
      ntasks=H_NTASKS["run_cellranger.sh"], time=H_TIME["run_cellranger.sh"])
 step("02-starindex", "learner", [], "02 STAR index (build_star_index.sh)", script="build_star_index.sh",

@@ -1,0 +1,298 @@
+diff --git a/episodes/normalization-and-features.Rmd b/episodes/normalization-and-features.Rmd
+index cca0dd1..cd5dfed 100644
+--- a/episodes/normalization-and-features.Rmd
++++ b/episodes/normalization-and-features.Rmd
+@@ -479,6 +479,17 @@ However, SCTransform is the preferred method for most production analyses.
+ Run both normalization approaches on the same filtered dataset and compare the
+ top 20 variable features from each method. How many genes appear in both lists?
+ 
++This challenge is self-paced. SCTransform on the whole dataset needs about 15 GB
++of memory, so run it in a session with 8 or more cores. If your session already
++holds other large objects, restart R first (**Session > Restart R**) and reload
++the object you saved above:
++
++```r
++library(Seurat)
++work_dir <- paste0("/scratch/negishi/", Sys.getenv("USER"), "/scrna_workshop/")
++pbmc <- readRDS(paste0(work_dir, "pbmc_normalized.rds"))
++```
++
+ ```{r challenge1, eval=FALSE}
+ # LogNormalize pathway (already done above)
+ lognorm_top20 <- head(VariableFeatures(pbmc), 20)
+diff --git a/episodes/raw-data-processing.Rmd b/episodes/raw-data-processing.Rmd
+index 17af12e..65c0f05 100644
+--- a/episodes/raw-data-processing.Rmd
++++ b/episodes/raw-data-processing.Rmd
+@@ -17,8 +17,8 @@ exercises: 15
+ ::::::::::::::::::::::::::::::::::::: objectives
+ 
+ - Set up a working directory and verify FASTQ and reference files on the cluster
+-- Write and submit a SLURM job script for Cell Ranger count
+-- Write and submit a SLURM job script for STARsolo
++- Write a SLURM job script for Cell Ranger count and check it with `sbatch --test-only`
++- Write a SLURM job script for STARsolo and check it the same way
+ - Interpret Cell Ranger's web_summary.html and key QC metrics
+ - Compare the filtered count matrices produced by both tools
+ 
+@@ -278,7 +278,43 @@ cellranger count \
+ EOF
+ ```
+ 
+-Submit the job and monitor its progress:
++Check the script without running it:
++
++```bash
++cd ${RCAC_SCRATCH}/scrna_workshop
++sbatch --test-only run_cellranger.sh
++```
++
++:::::::::::::::::::::::::::::::::::::::::: spoiler
++
++## Expected output
++
++```output
++sbatch: Job 44575176 to start at 2026-10-22T18:54:55 a using 64 processors on nodes a324 in partition cpu
++```
++
++Your job number, start time and node will differ.
++
++::::::::::::::::::::::::::::::::::::::::::::::::::
++
++`--test-only` makes SLURM check the script's `#SBATCH` lines and estimate when
++the job could start. It submits nothing; the job number it prints is not a real
++job. A typo in the account, the partition or an option shows up here as an
++error, before you have waited in a queue.
++
++We do not run the job during the workshop. Cell Ranger needs 64 cores for about
++5.5 hours (see the runtime comparison at the end of this episode), and the
++workshop account runs only a few jobs that size at once. The instructor ran this
++same script before the workshop and will show its outputs, and the next episode
++starts from a pre-computed copy of the same matrix.
++
++:::::::::::::::::::::::::::::::::::::::: callout
++
++## After the workshop: run it for real
++
++At the end of the day, first close your RStudio session so its cores are free
++(Open OnDemand, **My Interactive Sessions**, **Delete**). Then submit the job
++and check that it is queued:
+ 
+ ```bash
+ cd ${RCAC_SCRATCH}/scrna_workshop
+@@ -286,9 +322,12 @@ sbatch run_cellranger.sh
+ squeue -u ${USER} # or squeue --me
+ ```
+ 
+-The job takes about 5.5 hours on 64 cores (see the runtime comparison at the end
+-of this episode). Submit it and move on: the next episode starts from a
+-pre-computed copy of the same matrix.
++The workshop account runs only a few 64-core jobs at the same time, and every
++learner submits one, so your job may stay pending (`PD` in `squeue`) for a day
++or more before its 5.5 hours start. When it has finished, the commands in the
++rest of this episode work on your own output.
++
++::::::::::::::::::::::::::::::::::::::::
+ 
+ :::::::::::::::::::::::::::::::::::::::: callout
+ 
+@@ -528,6 +567,14 @@ STAR \
+ EOF
+ ```
+ 
++Check it as you did the Cell Ranger script:
++
++```bash
++sbatch --test-only ${RCAC_SCRATCH}/scrna_workshop/build_star_index.sh
++```
++
++After the workshop, submit it for real:
++
+ ```bash
+ sbatch ${RCAC_SCRATCH}/scrna_workshop/build_star_index.sh
+ ```
+@@ -592,7 +639,13 @@ STAR \
+ EOF
+ ```
+ 
+-Submit the job:
++Check it:
++
++```bash
++sbatch --test-only ${RCAC_SCRATCH}/scrna_workshop/run_starsolo.sh
++```
++
++After the workshop, once the index job has finished, submit it for real:
+ 
+ ```bash
+ sbatch ${RCAC_SCRATCH}/scrna_workshop/run_starsolo.sh
+@@ -687,9 +740,10 @@ cell-level metrics such as the number of cells detected and UMIs per cell.
+ 
+ ## Comparing Outputs
+ 
+-Now that both tools have finished, let's compare their outputs. We can count
+-the number of cells (barcodes) and genes (features) detected by each tool
+-directly from the output files.
++Once both tools have finished, compare their outputs (during the workshop, the
++instructor shows these numbers from the pre-workshop run). We can count the
++number of cells (barcodes) and genes (features) detected by each tool directly
++from the output files.
+ 
+ Cell Ranger:
+ 
+@@ -853,7 +907,8 @@ sample.
+ 
+ - Workshop data should be organized under `${RCAC_SCRATCH}/scrna_workshop/` with separate directories for FASTQ files, reference, and outputs
+ - Cell Ranger count aligns 10x FASTQ files and produces a filtered count matrix, a web summary report, and alignment metrics
+-- STARsolo replicates Cell Ranger's pipeline but runs approximately 9x faster and is fully open source
++- STARsolo replicates Cell Ranger's pipeline but runs roughly 7x faster and is fully open source
++- `sbatch --test-only` checks a job script's resource request without submitting it
+ - Both tools produce a filtered count matrix in the same format: barcodes.tsv, features.tsv, and matrix.mtx
+ - Always inspect the Cell Ranger web_summary.html to check estimated cell count, median genes per cell, sequencing saturation, and fraction of reads in cells before proceeding
+ 
+diff --git a/instructors/instructor-notes.md b/instructors/instructor-notes.md
+index 5e14ec4..6c0fde7 100644
+--- a/instructors/instructor-notes.md
++++ b/instructors/instructor-notes.md
+@@ -26,6 +26,36 @@ Build in 10-minute breaks between episodes and a 45-minute lunch break. Expect
+ the actual pace to vary: Episode 2 may run long if SLURM queue times are slow,
+ and Episodes 6 and 8 often generate discussion.
+ 
++## Delivery on Negishi (one day, 2026-10-29)
++
++**RStudio sessions.** Learners launch RStudio (bioconductor) on Open OnDemand
++with account `rcac-rnaseq`, 8 cores (about 16 GB), 8 hours, R 4.6.1 /
++Bioconductor 3.23, and "Load extra RCAC site library" checked (setup.md,
++Step 3). Seurat, SingleR, celldex, SeuratData, presto, metap and anndataR come
++from that library; a learner with missing-package errors has most likely
++unchecked it. 20 learners at 8 cores use 160 of the account's 192 cores.
++
++**Restart R at the start of each episode** (Session > Restart R; setup.md,
++Step 5). Each episode reloads its object from scratch, so nothing is lost. The
++measured peak memory of a fresh session per episode (Negishi, 2026-10-23) is
++3.5, 14.1, 2.5, 6.6, 2.7 and 7.3 GiB for episodes 3 to 8 (8 cores give about 14.9 GiB). A session that is
++never restarted carries every earlier object along. The 14.1 GiB in episode 4
++is the self-paced SCTransform challenge; its main path peaks at 3.0 GiB. That
++challenge says to run it with 8 or more cores, in a restarted session if
++needed.
++
++**Episode 2: check, do not run.** The learner scripts ask for 64 cores; Cell
++Ranger runs about 5.5 hours and the account can run only a few such jobs at
++once. In class, learners do the login-node steps, write the three job scripts
++and check each with `sbatch --test-only`. Before the workshop, submit the same
++three scripts under your own account and show the outputs from that run
++(`web_summary.html`, `Log.final.out`, the cell and gene counts). At the end of
++the day (16:05), learners delete their RStudio session and submit
++`run_cellranger.sh` for real as follow-up (the STAR jobs are optional). With
++the RStudio sessions closed, 192 cores run three 64-core jobs at once, so 20
++Cell Ranger jobs take about a day and a half to clear; tell learners their job
++may wait a day or more.
++
+ ## Common Issues
+ 
+ ### R package installation failures
+diff --git a/learners/setup.md b/learners/setup.md
+index 0aadbf6..724fc72 100644
+--- a/learners/setup.md
++++ b/learners/setup.md
+@@ -14,9 +14,9 @@ title: Setup
+ |:-----|:------|
+ | 8:30 -- 9:00 | Arrival & Setup |
+ | 9:00 -- 9:20 | Episode 1: Introduction to Single-Cell RNA-Seq |
+-| 9:20 -- 10:05 | Episode 2: Raw Data Processing |
+-| 10:05 -- 10:20 | Break |
+-| 10:20 -- 11:05 | Episode 3: Quality Control |
++| 9:20 -- 9:55 | Episode 2: Raw Data Processing |
++| 9:55 -- 10:10 | Break |
++| 10:10 -- 11:05 | Episode 3: Quality Control |
+ | 11:05 -- 11:15 | Morning Recap |
+ | 11:15 -- 12:15 | Lunch |
+ | 12:15 -- 1:05 | Episode 4: Normalization and Feature Selection |
+@@ -25,7 +25,7 @@ title: Setup
+ | 2:35 -- 2:50 | Break |
+ | 2:50 -- 3:30 | Episode 7: Multi-Sample Integration |
+ | 3:30 -- 4:05 | Episode 8: Differential Expression & Wrap-up |
+-| 4:05 -- 4:30 | Q&A / Feedback |
++| 4:05 -- 4:30 | Q&A / Feedback; submit your Cell Ranger job (follow-up) |
+ 
+ ## Prerequisites
+ 
+@@ -169,7 +169,7 @@ From the top menu bar, click the **Interactive Apps** tab. Under the **Bioinform
+ 
+ Make sure you select **RStudio (bioconductor)** under **Bioinformatics Apps** --- *not* the **RStudio Server** option listed under the **GUIs** section. The Bioconductor version includes pre-installed single-cell analysis packages that we need for this workshop.
+ 
+-<img src="fig/ood_rstudio_dropdown.png" alt="Open OnDemand Interactive Apps menu showing RStudio (bioconductor) under the Bioinformatics Apps section" width="800px" />
++<img src="fig/ood_rstudio_dropdown.png" alt="Open OnDemand Interactive Apps menu with RStudio (bioconductor) under Bioinformatics Apps marked as the app to select, and RStudio Server under GUIs marked as the wrong one" width="800px" />
+ 
+ :::
+ 
+@@ -180,13 +180,20 @@ Enter the following settings:
+ | Field | Value |
+ |:------|:------|
+ | Partition | `cpu` |
+-| Account | *(provided by instructor)* |
++| Account | `rcac-rnaseq` |
+ | QoS | `normal` |
+-| Wall Time (hours) | `8` |
+-| Cores | `16` |
+-| R version | `4.4.0-bioconductor` |
++| Wall Time in Hours | `8` |
++| Cores | `8` |
++| R version | `R 4.6.1 / Bioconductor 3.23 (recommended)` |
++| Load extra RCAC site library (advanced) | checked (leave it checked) |
+ 
+-<img src="fig/ood_rstudio_resources.png" alt="Open OnDemand resource request form filled in with the workshop settings" width="800px" />
++You get about 2 GB of memory per core, so 8 cores give about 16 GB, enough for
++every episode. Leave **Load extra RCAC site library** checked: Seurat, SingleR,
++celldex, SeuratData, presto, metap, anndataR and other packages the workshop
++uses come from that library, and without it episodes 4 to 8 stop with missing
++packages.
++
++<img src="fig/ood_rstudio_resources.png" alt="Open OnDemand RStudio (bioconductor) form filled in with the workshop settings: partition cpu, account rcac-rnaseq, QoS normal, wall time 8 hours, 8 cores, R 4.6.1 / Bioconductor 3.23, and Load extra RCAC site library checked" width="800px" />
+ 
+ Click **Launch** to submit the job.
+ 
+@@ -194,6 +201,12 @@ Click **Launch** to submit the job.
+ 
+ Your job will be queued briefly. Once the status changes to **Running**, click the **Connect to RStudio Server** button to open RStudio in a new browser tab.
+ 
++### Step 5: Restart R at the start of each episode
++
++At the start of each episode, choose **Session > Restart R** in RStudio. Each
++episode reloads the object it needs from your scratch directory, so nothing is
++lost, and the session starts the episode with its memory free.
++
+ ## R Package Installation (skip this section if using OOD)
+ 
+ The R packages are pre-installed on the cluster. If you need to install them locally:
+@@ -203,21 +216,25 @@ The R packages are pre-installed on the cluster. If you need to install them loc
+ if (!requireNamespace("BiocManager", quietly = TRUE))
+     install.packages("BiocManager")
+ 
+-# Core packages
+-install.packages("Seurat")
+-install.packages("tidyverse")
++# CRAN packages
++install.packages(c("Seurat", "dplyr", "ggplot2", "patchwork", "clustree", "metap"))
+ 
+ # Bioconductor packages
+ BiocManager::install(c(
+     "SingleR",
+     "celldex",
++    "glmGamPoi",
++    "multtest",
++    "DESeq2",
+     "clusterProfiler",
+     "org.Hs.eg.db",
+-    "enrichplot"
++    "enrichplot",
++    "anndataR"
+ ))
+ 
+-# SeuratData for integration dataset
++# GitHub packages: SeuratData (integration dataset) and presto (fast marker tests)
+ install.packages("remotes")
+ remotes::install_github("satijalab/seurat-data")
++remotes::install_github("immunogenomics/presto")
+ ```
+ 

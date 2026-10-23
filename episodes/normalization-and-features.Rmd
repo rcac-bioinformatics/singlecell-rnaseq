@@ -479,6 +479,17 @@ However, SCTransform is the preferred method for most production analyses.
 Run both normalization approaches on the same filtered dataset and compare the
 top 20 variable features from each method. How many genes appear in both lists?
 
+This challenge is self-paced. SCTransform on the whole dataset needs about 15 GB
+of memory, so run it in a session with 8 or more cores. If your session already
+holds other large objects, restart R first (**Session > Restart R**) and reload
+the object you saved above:
+
+```r
+library(Seurat)
+work_dir <- paste0("/scratch/negishi/", Sys.getenv("USER"), "/scrna_workshop/")
+pbmc <- readRDS(paste0(work_dir, "pbmc_normalized.rds"))
+```
+
 ```{r challenge1, eval=FALSE}
 # LogNormalize pathway (already done above)
 lognorm_top20 <- head(VariableFeatures(pbmc), 20)

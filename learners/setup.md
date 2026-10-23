@@ -14,9 +14,9 @@ title: Setup
 |:-----|:------|
 | 8:30 -- 9:00 | Arrival & Setup |
 | 9:00 -- 9:20 | Episode 1: Introduction to Single-Cell RNA-Seq |
-| 9:20 -- 10:05 | Episode 2: Raw Data Processing |
-| 10:05 -- 10:20 | Break |
-| 10:20 -- 11:05 | Episode 3: Quality Control |
+| 9:20 -- 9:55 | Episode 2: Raw Data Processing |
+| 9:55 -- 10:10 | Break |
+| 10:10 -- 11:05 | Episode 3: Quality Control |
 | 11:05 -- 11:15 | Morning Recap |
 | 11:15 -- 12:15 | Lunch |
 | 12:15 -- 1:05 | Episode 4: Normalization and Feature Selection |
@@ -25,7 +25,7 @@ title: Setup
 | 2:35 -- 2:50 | Break |
 | 2:50 -- 3:30 | Episode 7: Multi-Sample Integration |
 | 3:30 -- 4:05 | Episode 8: Differential Expression & Wrap-up |
-| 4:05 -- 4:30 | Q&A / Feedback |
+| 4:05 -- 4:30 | Q&A / Feedback; submit your Cell Ranger job (follow-up) |
 
 ## Prerequisites
 
@@ -169,7 +169,7 @@ From the top menu bar, click the **Interactive Apps** tab. Under the **Bioinform
 
 Make sure you select **RStudio (bioconductor)** under **Bioinformatics Apps** --- *not* the **RStudio Server** option listed under the **GUIs** section. The Bioconductor version includes pre-installed single-cell analysis packages that we need for this workshop.
 
-<img src="fig/ood_rstudio_dropdown.png" alt="Open OnDemand Interactive Apps menu showing RStudio (bioconductor) under the Bioinformatics Apps section" width="800px" />
+<img src="fig/ood_rstudio_dropdown.png" alt="Open OnDemand Interactive Apps menu with RStudio (bioconductor) under Bioinformatics Apps marked as the app to select, and RStudio Server under GUIs marked as the wrong one" width="800px" />
 
 :::
 
@@ -180,19 +180,32 @@ Enter the following settings:
 | Field | Value |
 |:------|:------|
 | Partition | `cpu` |
-| Account | *(provided by instructor)* |
+| Account | `rcac-rnaseq` |
 | QoS | `normal` |
-| Wall Time (hours) | `8` |
-| Cores | `16` |
-| R version | `4.4.0-bioconductor` |
+| Wall Time in Hours | `8` |
+| Cores | `8` |
+| R version | `R 4.6.1 / Bioconductor 3.23 (recommended)` |
+| Load extra RCAC site library (advanced) | checked (leave it checked) |
 
-<img src="fig/ood_rstudio_resources.png" alt="Open OnDemand resource request form filled in with the workshop settings" width="800px" />
+You get about 2 GB of memory per core, so 8 cores give about 16 GB, enough for
+every episode. Leave **Load extra RCAC site library** checked: Seurat, SingleR,
+celldex, SeuratData, presto, metap, anndataR and other packages the workshop
+uses come from that library, and without it episodes 4 to 8 stop with missing
+packages.
+
+<img src="fig/ood_rstudio_resources.png" alt="Open OnDemand RStudio (bioconductor) form filled in with the workshop settings: partition cpu, account rcac-rnaseq, QoS normal, wall time 8 hours, 8 cores, R 4.6.1 / Bioconductor 3.23, and Load extra RCAC site library checked" width="800px" />
 
 Click **Launch** to submit the job.
 
 ### Step 4: Connect to the session
 
 Your job will be queued briefly. Once the status changes to **Running**, click the **Connect to RStudio Server** button to open RStudio in a new browser tab.
+
+### Step 5: Restart R at the start of each episode
+
+At the start of each episode, choose **Session > Restart R** in RStudio. Each
+episode reloads the object it needs from your scratch directory, so nothing is
+lost, and the session starts the episode with its memory free.
 
 ## R Package Installation (skip this section if using OOD)
 
@@ -203,21 +216,25 @@ The R packages are pre-installed on the cluster. If you need to install them loc
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-# Core packages
-install.packages("Seurat")
-install.packages("tidyverse")
+# CRAN packages
+install.packages(c("Seurat", "dplyr", "ggplot2", "patchwork", "clustree", "metap"))
 
 # Bioconductor packages
 BiocManager::install(c(
     "SingleR",
     "celldex",
+    "glmGamPoi",
+    "multtest",
+    "DESeq2",
     "clusterProfiler",
     "org.Hs.eg.db",
-    "enrichplot"
+    "enrichplot",
+    "anndataR"
 ))
 
-# SeuratData for integration dataset
+# GitHub packages: SeuratData (integration dataset) and presto (fast marker tests)
 install.packages("remotes")
 remotes::install_github("satijalab/seurat-data")
+remotes::install_github("immunogenomics/presto")
 ```
 

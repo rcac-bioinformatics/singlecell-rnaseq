@@ -26,6 +26,36 @@ Build in 10-minute breaks between episodes and a 45-minute lunch break. Expect
 the actual pace to vary: Episode 2 may run long if SLURM queue times are slow,
 and Episodes 6 and 8 often generate discussion.
 
+## Delivery on Negishi (one day, 2026-10-29)
+
+**RStudio sessions.** Learners launch RStudio (bioconductor) on Open OnDemand
+with account `rcac-rnaseq`, 8 cores (about 16 GB), 8 hours, R 4.6.1 /
+Bioconductor 3.23, and "Load extra RCAC site library" checked (setup.md,
+Step 3). Seurat, SingleR, celldex, SeuratData, presto, metap and anndataR come
+from that library; a learner with missing-package errors has most likely
+unchecked it. 20 learners at 8 cores use 160 of the account's 192 cores.
+
+**Restart R at the start of each episode** (Session > Restart R; setup.md,
+Step 5). Each episode reloads its object from scratch, so nothing is lost. The
+measured peak memory of a fresh session per episode (Negishi, 2026-10-23) is
+3.5, 14.1, 2.5, 6.6, 2.7 and 7.3 GiB for episodes 3 to 8 (8 cores give about 14.9 GiB). A session that is
+never restarted carries every earlier object along. The 14.1 GiB in episode 4
+is the self-paced SCTransform challenge; its main path peaks at 3.0 GiB. That
+challenge says to run it with 8 or more cores, in a restarted session if
+needed.
+
+**Episode 2: check, do not run.** The learner scripts ask for 64 cores; Cell
+Ranger runs about 5.5 hours and the account can run only a few such jobs at
+once. In class, learners do the login-node steps, write the three job scripts
+and check each with `sbatch --test-only`. Before the workshop, submit the same
+three scripts under your own account and show the outputs from that run
+(`web_summary.html`, `Log.final.out`, the cell and gene counts). At the end of
+the day (16:05), learners delete their RStudio session and submit
+`run_cellranger.sh` for real as follow-up (the STAR jobs are optional). With
+the RStudio sessions closed, 192 cores run three 64-core jobs at once, so 20
+Cell Ranger jobs take about a day and a half to clear; tell learners their job
+may wait a day or more.
+
 ## Common Issues
 
 ### R package installation failures

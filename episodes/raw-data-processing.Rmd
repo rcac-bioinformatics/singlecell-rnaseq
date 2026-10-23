@@ -17,8 +17,8 @@ exercises: 15
 ::::::::::::::::::::::::::::::::::::: objectives
 
 - Set up a working directory and verify FASTQ and reference files on the cluster
-- Write and submit a SLURM job script for Cell Ranger count
-- Write and submit a SLURM job script for STARsolo
+- Write a SLURM job script for Cell Ranger count and check it with `sbatch --test-only`
+- Write a SLURM job script for STARsolo and check it the same way
 - Interpret Cell Ranger's web_summary.html and key QC metrics
 - Compare the filtered count matrices produced by both tools
 
@@ -278,7 +278,43 @@ cellranger count \
 EOF
 ```
 
-Submit the job and monitor its progress:
+Check the script without running it:
+
+```bash
+cd ${RCAC_SCRATCH}/scrna_workshop
+sbatch --test-only run_cellranger.sh
+```
+
+:::::::::::::::::::::::::::::::::::::::::: spoiler
+
+## Expected output
+
+```output
+sbatch: Job 44575176 to start at 2026-10-22T18:54:55 a using 64 processors on nodes a324 in partition cpu
+```
+
+Your job number, start time and node will differ.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+`--test-only` makes SLURM check the script's `#SBATCH` lines and estimate when
+the job could start. It submits nothing; the job number it prints is not a real
+job. A typo in the account, the partition or an option shows up here as an
+error, before you have waited in a queue.
+
+We do not run the job during the workshop. Cell Ranger needs 64 cores for about
+5.5 hours (see the runtime comparison at the end of this episode), and the
+workshop account runs only a few jobs that size at once. The instructor ran this
+same script before the workshop and will show its outputs, and the next episode
+starts from a pre-computed copy of the same matrix.
+
+:::::::::::::::::::::::::::::::::::::::: callout
+
+## After the workshop: run it for real
+
+At the end of the day, first close your RStudio session so its cores are free
+(Open OnDemand, **My Interactive Sessions**, **Delete**). Then submit the job
+and check that it is queued:
 
 ```bash
 cd ${RCAC_SCRATCH}/scrna_workshop
@@ -286,9 +322,12 @@ sbatch run_cellranger.sh
 squeue -u ${USER} # or squeue --me
 ```
 
-The job takes about 5.5 hours on 64 cores (see the runtime comparison at the end
-of this episode). Submit it and move on: the next episode starts from a
-pre-computed copy of the same matrix.
+The workshop account runs only a few 64-core jobs at the same time, and every
+learner submits one, so your job may stay pending (`PD` in `squeue`) for a day
+or more before its 5.5 hours start. When it has finished, the commands in the
+rest of this episode work on your own output.
+
+::::::::::::::::::::::::::::::::::::::::
 
 :::::::::::::::::::::::::::::::::::::::: callout
 
@@ -528,6 +567,14 @@ STAR \
 EOF
 ```
 
+Check it as you did the Cell Ranger script:
+
+```bash
+sbatch --test-only ${RCAC_SCRATCH}/scrna_workshop/build_star_index.sh
+```
+
+After the workshop, submit it for real:
+
 ```bash
 sbatch ${RCAC_SCRATCH}/scrna_workshop/build_star_index.sh
 ```
@@ -592,7 +639,13 @@ STAR \
 EOF
 ```
 
-Submit the job:
+Check it:
+
+```bash
+sbatch --test-only ${RCAC_SCRATCH}/scrna_workshop/run_starsolo.sh
+```
+
+After the workshop, once the index job has finished, submit it for real:
 
 ```bash
 sbatch ${RCAC_SCRATCH}/scrna_workshop/run_starsolo.sh
@@ -687,9 +740,10 @@ cell-level metrics such as the number of cells detected and UMIs per cell.
 
 ## Comparing Outputs
 
-Now that both tools have finished, let's compare their outputs. We can count
-the number of cells (barcodes) and genes (features) detected by each tool
-directly from the output files.
+Once both tools have finished, compare their outputs (during the workshop, the
+instructor shows these numbers from the pre-workshop run). We can count the
+number of cells (barcodes) and genes (features) detected by each tool directly
+from the output files.
 
 Cell Ranger:
 
@@ -853,7 +907,8 @@ sample.
 
 - Workshop data should be organized under `${RCAC_SCRATCH}/scrna_workshop/` with separate directories for FASTQ files, reference, and outputs
 - Cell Ranger count aligns 10x FASTQ files and produces a filtered count matrix, a web summary report, and alignment metrics
-- STARsolo replicates Cell Ranger's pipeline but runs approximately 9x faster and is fully open source
+- STARsolo replicates Cell Ranger's pipeline but runs roughly 7x faster and is fully open source
+- `sbatch --test-only` checks a job script's resource request without submitting it
 - Both tools produce a filtered count matrix in the same format: barcodes.tsv, features.tsv, and matrix.mtx
 - Always inspect the Cell Ranger web_summary.html to check estimated cell count, median genes per cell, sequencing saturation, and fraction of reads in cells before proceeding
 
