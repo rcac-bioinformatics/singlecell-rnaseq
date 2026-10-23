@@ -1,0 +1,262 @@
+diff --git a/episodes/differential-expression.Rmd b/episodes/differential-expression.Rmd
+index 2470adf..601c3c5 100644
+--- a/episodes/differential-expression.Rmd
++++ b/episodes/differential-expression.Rmd
+@@ -380,7 +380,7 @@ FeaturePlot(ifnb,
+ 
+ ![FeaturePlot of IFIT1 split by CTRL and STIM.](fig/ep8_featureplot_ifit1.png){alt="Feature plot of IFIT1 expression split by condition showing near-absent expression in control cells and strong expression across all cell types in stimulated cells, especially monocytes."}
+ 
+-```{r de-violin, eval=FALSE, fig.alt="Violin plots showing IFIT1, CXCL10, and MX1 expression across cell types, split by control and stimulated conditions. All three genes are dramatically upregulated in the stimulated condition across multiple cell types."}
++```{r de-violin, eval=FALSE, fig.alt="Violin plots showing IFIT1, CXCL10, and MX1 expression across cell types, split by control and stimulated conditions. IFIT1 and MX1 are upregulated in the stimulated condition in every cell type; CXCL10 mainly in the monocytes, dendritic cells and B cells."}
+ VlnPlot(ifnb,
+         features = c("IFIT1", "CXCL10", "MX1"),
+         split.by = "stim",
+@@ -388,14 +388,14 @@ VlnPlot(ifnb,
+         ncol = 3)
+ ```
+ 
+-![Violin plots for IFIT1, CXCL10, and MX1 across cell types, split by condition.](fig/ep8_violin_de.png){alt="Three violin plot panels showing IFIT1, CXCL10, and MX1 dramatically upregulated in stimulated cells across all cell types, with control violins near zero and stimulated violins broad and tall."}
++![Violin plots for IFIT1, CXCL10, and MX1 across cell types, split by condition.](fig/ep8_violin_de.png){alt="Three violin plot panels showing IFIT1 and MX1 upregulated in stimulated cells of every cell type and CXCL10 mainly in stimulated monocytes, dendritic cells and B cells, with control violins near zero."}
+ 
+ ### Dot plot across cell types
+ 
+ A dot plot can show the top DE genes across all cell types simultaneously,
+ revealing which responses are shared and which are cell-type-specific:
+ 
+-```{r de-dotplot, eval=FALSE, fig.alt="Dot plot showing expression of the top 10 DE genes across all cell types, split by condition. Interferon-stimulated genes and chemokines are consistently upregulated across all cell types in the stimulated condition."}
++```{r de-dotplot, eval=FALSE, fig.alt="Dot plot showing expression of the top 10 DE genes across all cell types, split by condition. Interferon-stimulated genes such as IFIT1, IFIT3 and MX1 are upregulated in every cell type in the stimulated condition, while CCL8, CXCL11 and IDO1 rise mainly in the monocytes and dendritic cells."}
+ top_de_genes <- head(rownames(mono.wilcox), 10)
+ DotPlot(ifnb,
+         features = top_de_genes,
+@@ -482,7 +482,7 @@ go_results <- enrichGO(gene = gene_ids$ENTREZID,
+ 
+ Visualize the top enriched GO terms with a dot plot:
+ 
+-```{r go-dotplot, eval=FALSE, fig.alt="Dot plot showing the top 15 enriched GO biological process terms for upregulated genes in stimulated monocytes. The top terms are response to virus, defense response to virus, viral process, and negative regulation of viral process, with response to type II interferon and regulation of innate immune response further down the list."}
++```{r go-dotplot, eval=FALSE, fig.alt="Dot plot showing the top 15 enriched GO biological process terms for upregulated genes in stimulated monocytes. The terms with the largest gene ratios are response to virus, defense response to virus, viral process and regulation of innate immune response, followed by cytokine production, innate immune response and viral regulation terms and response to type II interferon."}
+ dotplot(go_results, showCategory = 15) +
+     ggtitle("GO Biological Process: STIM vs CTRL CD14+ Monocytes")
+ ```
+diff --git a/episodes/fig/FIGURE_DESCRIPTIONS.md b/episodes/fig/FIGURE_DESCRIPTIONS.md
+index 808ad11..f7749d6 100644
+--- a/episodes/fig/FIGURE_DESCRIPTIONS.md
++++ b/episodes/fig/FIGURE_DESCRIPTIONS.md
+@@ -265,8 +265,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `umap-plot` (`dimensionality-reduction-clustering.Rmd` line 217) |
+-| **Shown at** | line 221 |
++| **Chunk** | `umap-plot` (`dimensionality-reduction-clustering.Rmd` line 218) |
++| **Shown at** | line 222 |
+ | **Caption** | UMAP plot of all cells shown in a single color before clustering. Cells naturally organize into several spatially distinct groups corresponding to different cell types. |
+ | **Description** | UMAP scatter plot of 11310 cells in a single color before clustering, with cells forming several spatially distinct groups that correspond to different cell types. |
+ | **Plot function** | `DimPlot()` |
+@@ -276,8 +276,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `umap-clusters` (`dimensionality-reduction-clustering.Rmd` line 374) |
+-| **Shown at** | line 379 |
++| **Chunk** | `umap-clusters` (`dimensionality-reduction-clustering.Rmd` line 376) |
++| **Shown at** | line 381 |
+ | **Caption** | UMAP plot with 18 clusters labeled 0 through 17, each shown in a distinct color. Large clusters like 0 and 1 dominate the center and bottom, while smaller clusters appear at the periphery. |
+ | **Description** | UMAP plot colored by Louvain cluster identity at resolution 0.5, showing 18 clusters numbered 0 through 17 with large clusters in the center and small clusters at the periphery. |
+ | **Plot function** | `DimPlot()` |
+@@ -287,8 +287,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `clustree` (`dimensionality-reduction-clustering.Rmd` line 399) |
+-| **Shown at** | line 402 |
++| **Chunk** | `clustree` (`dimensionality-reduction-clustering.Rmd` line 401) |
++| **Shown at** | line 404 |
+ | **Caption** | Clustree diagram showing how clusters split as resolution increases from 0.2 to 1.2. At low resolution a few large clusters exist, which progressively split into more subclusters at higher resolutions. Stable splits show clean branches while unstable splits show cells moving between multiple clusters. |
+ | **Description** | Clustree diagram tracing cluster membership from resolution 0.2 to 1.2, with clean branches indicating stable splits and tangled arrows indicating unstable over-splitting. |
+ | **Plot function** | `clustree()` |
+@@ -298,8 +298,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `feature-plot` (`dimensionality-reduction-clustering.Rmd` line 432) |
+-| **Shown at** | line 438 |
++| **Chunk** | `feature-plot` (`dimensionality-reduction-clustering.Rmd` line 434) |
++| **Shown at** | line 440 |
+ | **Caption** | Four UMAP plots showing expression of CD3D, MS4A1, LYZ, and GNLY. Each gene is highlighted in a different cluster region, indicating T cells, B cells, monocytes, and NK cells respectively. |
+ | **Description** | Four UMAP panels showing expression of CD3D, MS4A1, LYZ, and GNLY on a grey-to-purple gradient, each marking distinct cell populations for T cells, B cells, monocytes, and NK cells. |
+ | **Plot function** | `FeaturePlot()` |
+@@ -309,8 +309,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `vln-markers` (`dimensionality-reduction-clustering.Rmd` line 451) |
+-| **Shown at** | line 457 |
++| **Chunk** | `vln-markers` (`dimensionality-reduction-clustering.Rmd` line 453) |
++| **Shown at** | line 459 |
+ | **Caption** | Violin plots showing expression of CD3D, MS4A1, LYZ, and GNLY across all clusters. Each marker shows high expression in one or two specific clusters and low or zero expression in the others. |
+ | **Description** | Violin plots of CD3D, MS4A1, LYZ, and GNLY expression across 18 clusters, showing each marker with high expression in specific clusters and near-zero expression elsewhere. |
+ | **Plot function** | `VlnPlot()` |
+@@ -320,8 +320,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `challenge1` (`dimensionality-reduction-clustering.Rmd` line 480) |
+-| **Shown at** | line 503 |
++| **Chunk** | `challenge1` (`dimensionality-reduction-clustering.Rmd` line 482) |
++| **Shown at** | line 505 |
+ | **Caption** | Four UMAP plots comparing clustering at resolutions 0.2, 0.5, 0.8, and 1.2. Lower resolutions produce fewer large clusters while higher resolutions split cells into progressively more subclusters. |
+ | **Description** | Side-by-side UMAP plots at resolutions 0.2, 0.5, 0.8, and 1.2 showing progressively more clusters as resolution increases. |
+ | **Plot function** | `DimPlot()` |
+@@ -331,8 +331,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `challenge2` (`dimensionality-reduction-clustering.Rmd` line 553) |
+-| **Shown at** | line 561 |
++| **Chunk** | `challenge2` (`dimensionality-reduction-clustering.Rmd` line 555) |
++| **Shown at** | line 563 |
+ | **Caption** | FeaturePlot of CD3D, MS4A1, and LYZ on the UMAP, each highlighting distinct cell populations |
+ | **Description** | Three UMAP panels showing expression of CD3D, MS4A1, and LYZ. CD3D expression is concentrated in the upper-left and lower-left regions. MS4A1 lights up a compact group in the upper-right. LYZ is strongest in the lower-left clusters. |
+ | **Plot function** | `FeaturePlot()`, `DimPlot()` |
+@@ -342,8 +342,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `challenge2` (`dimensionality-reduction-clustering.Rmd` line 553) |
+-| **Shown at** | line 563 |
++| **Chunk** | `challenge2` (`dimensionality-reduction-clustering.Rmd` line 555) |
++| **Shown at** | line 565 |
+ | **Caption** | Cluster-labeled UMAP for reference |
+ | **Description** | UMAP plot with 18 clusters labeled 0 through 17 for cross-referencing with the FeaturePlot above. |
+ | **Plot function** | `FeaturePlot()`, `DimPlot()` |
+@@ -539,7 +539,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ |-------|-------|
+ | **Chunk** | `challenge2` (`multi-sample-integration.Rmd` line 645) |
+ | **Shown at** | line 662 |
+-| **Caption** | Four-row FeaturePlot split by CTRL and STIM showing CCL8, CXCL11, HESX1, and CXCL10. CTRL panels are almost entirely grey. STIM panels show strong red expression concentrated in the monocyte clusters for all four chemokine and ISG genes. |
++| **Caption** | Four-row FeaturePlot split by CTRL and STIM showing CCL8, CXCL11, HESX1, and CXCL10. CTRL panels are almost entirely grey. STIM panels show strong red expression concentrated in the monocytes for CCL8, CXCL11 and CXCL10, with HESX1 in fewer monocytes and CXCL10 also in the B and T cells. |
+ | **Description** | FeaturePlot of CCL8, CXCL11, HESX1, and CXCL10 split by condition showing absent expression in control and strong monocyte-concentrated expression in stimulated cells. |
+ | **Plot function** | `FeaturePlot()` |
+ | **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
+@@ -563,8 +563,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `volcano` (`differential-expression.Rmd` line 344) |
+-| **Shown at** | line 365 |
++| **Chunk** | `volcano` (`differential-expression.Rmd` line 340) |
++| **Shown at** | line 361 |
+ | **Caption** | Volcano plot for CD14 monocytes STIM vs CTRL. |
+ | **Description** | Volcano plot showing upregulated genes in red in the upper right, downregulated genes in blue in the upper left, and non-significant genes in grey near the bottom, with dashed cutoff lines for significance and fold change. |
+ | **Plot function** | `ggplot()` |
+@@ -574,8 +574,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `de-viz` (`differential-expression.Rmd` line 378) |
+-| **Shown at** | line 385 |
++| **Chunk** | `de-viz` (`differential-expression.Rmd` line 374) |
++| **Shown at** | line 381 |
+ | **Caption** | FeaturePlot of IFIT1 split by CTRL and STIM. |
+ | **Description** | Feature plot of IFIT1 expression split by condition showing near-absent expression in control cells and strong expression across all cell types in stimulated cells, especially monocytes. |
+ | **Plot function** | `FeaturePlot()` |
+@@ -585,10 +585,10 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `de-violin` (`differential-expression.Rmd` line 387) |
+-| **Shown at** | line 395 |
++| **Chunk** | `de-violin` (`differential-expression.Rmd` line 383) |
++| **Shown at** | line 391 |
+ | **Caption** | Violin plots for IFIT1, CXCL10, and MX1 across cell types, split by condition. |
+-| **Description** | Three violin plot panels showing IFIT1, CXCL10, and MX1 dramatically upregulated in stimulated cells across all cell types, with control violins near zero and stimulated violins broad and tall. |
++| **Description** | Three violin plot panels showing IFIT1 and MX1 upregulated in stimulated cells of every cell type and CXCL10 mainly in stimulated monocytes, dendritic cells and B cells, with control violins near zero. |
+ | **Plot function** | `VlnPlot()` |
+ | **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
+ 
+@@ -596,8 +596,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `de-dotplot` (`differential-expression.Rmd` line 402) |
+-| **Shown at** | line 412 |
++| **Chunk** | `de-dotplot` (`differential-expression.Rmd` line 398) |
++| **Shown at** | line 408 |
+ | **Caption** | Dot plot of top 10 DE genes across cell types split by condition. |
+ | **Description** | Dot plot showing top 10 DE genes across all cell types split by CTRL and STIM, with dot size indicating percent expressed and color indicating average expression, showing consistently larger and redder dots in stimulated cells. |
+ | **Plot function** | `DotPlot()` |
+@@ -607,8 +607,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `go-dotplot` (`differential-expression.Rmd` line 489) |
+-| **Shown at** | line 501 |
++| **Chunk** | `go-dotplot` (`differential-expression.Rmd` line 485) |
++| **Shown at** | line 497 |
+ | **Caption** | GO Biological Process dot plot for STIM vs CTRL CD14 monocytes. |
+ | **Description** | GO enrichment dot plot showing 15 biological process terms with response to virus, defense response to virus, and viral process as the top three by gene ratio, with dot color from red to blue indicating adjusted p-value. |
+ | **Plot function** | `dotplot()` |
+@@ -618,8 +618,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `challenge1` (`differential-expression.Rmd` line 693) |
+-| **Shown at** | line 726 |
++| **Chunk** | `challenge1` (`differential-expression.Rmd` line 689) |
++| **Shown at** | line 722 |
+ | **Caption** | Scatter plot comparing p-values from Wilcoxon and pseudobulk DE tests. |
+ | **Description** | Scatter plot of negative log10 p-values from Wilcoxon versus pseudobulk for shared genes, with a red dashed diagonal showing equal significance and points broadly scattered indicating different significance rankings between methods. |
+ | **Plot function** | `ggplot()` |
+@@ -629,8 +629,8 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ 
+ | Field | Value |
+ |-------|-------|
+-| **Chunk** | `challenge2` (`differential-expression.Rmd` line 771) |
+-| **Shown at** | line 804 |
++| **Chunk** | `challenge2` (`differential-expression.Rmd` line 767) |
++| **Shown at** | line 800 |
+ | **Caption** | GO BP dot plot for the top 200 upregulated genes in STIM CD14 monocytes. |
+ | **Description** | GO enrichment dot plot for top 200 upregulated genes showing 10 biological process terms with response to virus and defense response to virus having the largest gene ratios and deepest red color indicating lowest adjusted p-values. |
+ | **Plot function** | `dotplot()` |
+diff --git a/episodes/multi-sample-integration.Rmd b/episodes/multi-sample-integration.Rmd
+index 15914c1..b1b001a 100644
+--- a/episodes/multi-sample-integration.Rmd
++++ b/episodes/multi-sample-integration.Rmd
+@@ -659,7 +659,7 @@ FeaturePlot(ifnb,
+ 
+ ## Solution
+ 
+-![Four-row FeaturePlot split by CTRL and STIM showing CCL8, CXCL11, HESX1, and CXCL10. CTRL panels are almost entirely grey. STIM panels show strong red expression concentrated in the monocyte clusters for all four chemokine and ISG genes.](fig/ep7_challenge2.png){alt="FeaturePlot of CCL8, CXCL11, HESX1, and CXCL10 split by condition showing absent expression in control and strong monocyte-concentrated expression in stimulated cells."}
++![Four-row FeaturePlot split by CTRL and STIM showing CCL8, CXCL11, HESX1, and CXCL10. CTRL panels are almost entirely grey. STIM panels show strong red expression concentrated in the monocytes for CCL8, CXCL11 and CXCL10, with HESX1 in fewer monocytes and CXCL10 also in the B and T cells.](fig/ep7_challenge2.png){alt="FeaturePlot of CCL8, CXCL11, HESX1, and CXCL10 split by condition showing absent expression in control and strong monocyte-concentrated expression in stimulated cells."}
+ 
+ 
+ ```output
+@@ -708,10 +708,11 @@ hallmark of a robust, uniform interferon response.
+ 
+ The FeaturePlot confirms this visually: CCL8, CXCL11, HESX1, and CXCL10 are
+ virtually absent in the CTRL panels (gray) and strongly expressed in the STIM
+-panels (red), with the signal concentrated in the monocyte clusters (right
+-side of the UMAP). CXCL10 and CXCL11 also show some expression in the
+-stimulated CD4 T and NK clusters, consistent with these cell types also
+-responding to IFN-beta, though less strongly than monocytes.
++panels (red), with the signal concentrated in the monocytes (right side of
++the UMAP); HESX1 is induced in only a subset of them. CXCL10 also reaches the
++stimulated B cells and is scattered through the T cells, consistent with
++these cell types also responding to IFN-beta, though less strongly than
++monocytes.
+ 
+ :::::::::::::::::::::::::::::::::
+ 
+diff --git a/instructors/instructor-notes.md b/instructors/instructor-notes.md
+index 832b6d9..cf4f6bb 100644
+--- a/instructors/instructor-notes.md
++++ b/instructors/instructor-notes.md
+@@ -274,7 +274,7 @@ the guard and the kit's marker anchors exist because of that.
+ ### Episode 8: Differential Expression Analysis
+ 
+ **Challenge 1 -- Wilcoxon vs. Pseudobulk:**
+-Wilcoxon finds 825 significant genes and pseudobulk 1,539 (patch 24 labels; local pre-screen, to be confirmed on Negishi). Pseudobulk
++Wilcoxon finds 825 significant genes and pseudobulk 1,539 (patch 24 labels; Negishi, 2026-10-23). Pseudobulk
+ finds more here only because the episode builds artificial pseudo-replicates
+ from one sample per condition; the episode explains this. The key teaching
+ point is still pseudoreplication: per-cell tests treat each cell as an

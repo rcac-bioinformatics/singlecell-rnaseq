@@ -175,8 +175,9 @@ biological signal; PCs after the elbow are mostly noise.
 
 ## How many PCs?
 
-For the PBMC 10k dataset, the elbow typically falls around **PC 12--15**. We
-will use **15 PCs** for the rest of this episode.
+For the PBMC 10k dataset, the elbow falls around **PC 8--10**: the curve drops
+steeply through PC 7 and flattens after PC 10. We will use **15 PCs** for the
+rest of this episode, a few more than the elbow (see below for why).
 
 In practice, the exact number is not critical. Using 10 vs. 20 PCs usually
 produces very similar clustering results for well-separated cell types.
@@ -364,8 +365,9 @@ Levels: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
 ```
 
 Cluster 0 is the largest with 2,112 cells (T cells, which are the most
-abundant PBMC type). Cluster 17 is the smallest with only 39 cells (likely
-a rare population like platelets or dendritic cells).
+abundant PBMC type). Cluster 17 is the smallest with only 39 cells; the next
+episode shows that it is a rare population of haematopoietic stem and
+progenitor cells (HSPC).
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -568,9 +570,9 @@ following pattern (exact cluster numbers may differ depending on your run):
 
 | Marker | Cell type | Cluster(s) |
 |--------|:----------|:-----------|
-| CD3D | T cells | Clusters 0, 2, 3, 5, 6 (several groups across the upper-left and lower-left UMAP). CD3D is expressed in both CD4+ and CD8+ T cells, so it marks multiple clusters. |
-| MS4A1 | B cells | Cluster 7 (a compact, clearly separated group in the upper-right). MS4A1 (also known as CD20) is highly specific to B cells. |
-| LYZ | CD14+ Monocytes | Clusters 1 and 2 (large groups in the lower portion of the UMAP). You may also see weaker LYZ expression in a smaller monocyte cluster (FCGR3A+). |
+| CD3D | T cells | Clusters 0, 3, 5, 6 and 10 (the large T cell group and its branches). CD3D is expressed in both CD4+ and CD8+ T cells, so it marks multiple clusters. |
+| MS4A1 | B cells | Clusters 4, 8 and 14 (one separate group). MS4A1 (also known as CD20) is highly specific to B cells. |
+| LYZ | CD14+ Monocytes | Clusters 1 and 2, with the smaller clusters 11 and 16 (the large monocyte group). LYZ is also high in the dendritic cells (cluster 12) and weaker in the FCGR3A+ monocytes (cluster 9). |
 
 The fact that each marker cleanly maps to specific clusters confirms that
 our clustering at resolution 0.5 is capturing meaningful biological groupings.

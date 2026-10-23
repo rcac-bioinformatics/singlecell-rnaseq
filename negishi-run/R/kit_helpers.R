@@ -24,7 +24,7 @@ kit_handoff <- function(file) {
 
 # which manual label has the highest mean expression of each canonical marker
 kit_marker_check <- function(obj, group, prefix) {
-  genes <- c("CD3D", "MS4A1", "LYZ", "GNLY", "PPBP", "FCER1A", "CD8A", "FCGR3A", "LILRA4", "CD34")
+  genes <- c("CD3D", "MS4A1", "LYZ", "CD14", "GNLY", "PPBP", "FCER1A", "CD8A", "FCGR3A", "LILRA4", "CD34")
   genes <- genes[genes %in% rownames(obj)]
   m <- SeuratObject::LayerData(obj, assay = "RNA", layer = "data")[genes, , drop = FALSE]
   g <- as.character(obj[[group, drop = TRUE]])

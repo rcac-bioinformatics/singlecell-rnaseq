@@ -50,11 +50,24 @@ ifnb cells	07	ep7_ifnb_cells	13999	exact	blocker	episodes/multi-sample-integrati
 ifnb genes	07	ep7_ifnb_genes	14053	exact	should-fix	episodes/multi-sample-integration.Rmd:103
 CTRL cells	07	ep7_ctrl_cells	6548	exact	should-fix	episodes/multi-sample-integration.Rmd:123
 STIM cells	07	ep7_stim_cells	7451	exact	should-fix	episodes/multi-sample-integration.Rmd:123
-clusters after integration (episode 7 hardcodes 14 labels)	07	ep7_clusters_integrated	14	exact	should-fix	episodes/multi-sample-integration.Rmd:243,319-334
-cell types after annotation	07	ep7_n_celltypes	9	exact	should-fix	episodes/multi-sample-integration.Rmd:319-334
+clusters after integration (challenge 3 writes 14 labels)	07	ep7_clusters_integrated	14	exact	should-fix	episodes/multi-sample-integration.Rmd:split-view,solution3
+cell types after annotation (seurat_annotations)	07	ep7_n_celltypes	13	exact	should-fix	episodes/multi-sample-integration.Rmd:annotate-int (seurat_annotations)
+CD14 highest in CD14 Mono	07	ep7_marker_CD14	CD14 Mono	in:CD14 Mono	blocker	episodes/multi-sample-integration.Rmd:annotate-int (seurat_annotations)
+LYZ highest in a myeloid label (DC > CD14 Mono here)	07	ep7_marker_LYZ	DC	in:CD14 Mono|DC	blocker	episodes/multi-sample-integration.Rmd:annotate-int (seurat_annotations)
+FCGR3A highest in CD16 Mono	07	ep7_marker_FCGR3A	CD16 Mono	in:CD16 Mono	blocker	episodes/multi-sample-integration.Rmd:annotate-int (seurat_annotations)
+GNLY highest in NK	07	ep7_marker_GNLY	NK	in:NK	blocker	episodes/multi-sample-integration.Rmd:annotate-int (seurat_annotations)
+MS4A1 highest in B	07	ep7_marker_MS4A1	B	in:B|B Activated	blocker	episodes/multi-sample-integration.Rmd:annotate-int (seurat_annotations)
+CD3D highest in a T cell label	07	ep7_marker_CD3D	CD8 T	in:CD4 Naive T|CD4 Memory T|CD8 T|T activated	blocker	episodes/multi-sample-integration.Rmd:annotate-int (seurat_annotations)
+PPBP highest in Mk	07	ep7_marker_PPBP	Mk	in:Mk	should-fix	episodes/multi-sample-integration.Rmd:annotate-int (seurat_annotations)
+LILRA4 highest in pDC	07	ep7_marker_LILRA4	pDC	in:pDC	should-fix	episodes/multi-sample-integration.Rmd:annotate-int (seurat_annotations)
+challenge 3: CD14 highest in CD14 Mono	07	ep7m_marker_CD14	CD14 Mono	in:CD14 Mono	should-fix	episodes/multi-sample-integration.Rmd:solution3 (challenge 3 label vector)
+challenge 3: FCGR3A highest in CD16 Mono	07	ep7m_marker_FCGR3A	CD16 Mono	in:CD16 Mono	should-fix	episodes/multi-sample-integration.Rmd:solution3 (challenge 3 label vector)
+challenge 3: GNLY highest in NK	07	ep7m_marker_GNLY	NK	in:NK	should-fix	episodes/multi-sample-integration.Rmd:solution3 (challenge 3 label vector)
+challenge 3: MS4A1 highest in B	07	ep7m_marker_MS4A1	B	in:B	should-fix	episodes/multi-sample-integration.Rmd:solution3 (challenge 3 label vector)
+challenge 3: CD3D highest in a T cell label	07	ep7m_marker_CD3D	CD4 Naive T	in:CD4 Naive T|CD4 Memory T|CD8 T|T activated	should-fix	episodes/multi-sample-integration.Rmd:solution3 (challenge 3 label vector)
 top STIM vs CTRL CD14 Mono genes are ISGs (episode 7)	07	ep7_mono_top20	IFIT1,IFIT3,TNFSF10,RSAD2,IFIT2,MX1,CXCL10,LY6E,CXCL11,CCL8	atleast:5:IFIT1,IFIT3,TNFSF10,RSAD2,IFIT2,MX1,CXCL10,LY6E,CXCL11,CCL8	blocker	episodes/multi-sample-integration.Rmd:433-444
-Wilcoxon significant genes	08	ep8_wilcox_sig	759	rel:0.30	blocker	episodes/differential-expression.Rmd:161
-pseudobulk DESeq2 significant genes	08	ep8_pseudobulk_sig	1464	rel:0.30	blocker	episodes/differential-expression.Rmd:315
+Wilcoxon significant genes	08	ep8_wilcox_sig	825	rel:0.30	blocker	episodes/differential-expression.Rmd:161 (patch 24, local pre-screen 2026-10-23)
+pseudobulk DESeq2 significant genes	08	ep8_pseudobulk_sig	1539	rel:0.30	blocker	episodes/differential-expression.Rmd:315 (patch 24, local pre-screen 2026-10-23)
 top Wilcoxon genes are ISGs	08	ep8_wilcox_top20	IFIT1,IFIT3,TNFSF10,RSAD2,IFIT2,MX1,CXCL10,LY6E,CXCL11,CCL8	atleast:5:IFIT1,IFIT3,TNFSF10,RSAD2,IFIT2,MX1,CXCL10,LY6E,CXCL11,CCL8	blocker	episodes/differential-expression.Rmd:137-150
 core ISGs in the top DE genes	08	ep8_wilcox_top20+ep8_pseudo_top20	ISG15,IFIT1,IFIT3,IFI6,MX1	atleast:3:ISG15,IFIT1,IFIT3,IFI6,MX1	blocker	episodes/differential-expression.Rmd:137-150,291-302
 AggregateExpression returns a Seurat object	08	ep8_aggregate_class	Seurat	exact	should-fix	episodes/differential-expression.Rmd:233
