@@ -601,10 +601,11 @@ saveRDS(pbmc, file = "pbmc_annotated.rds")
 
 ## Challenge 1: Identifying T cell subtypes from marker combinations
 
-The CD4 T cell group shows high expression of **CD3D**, **SELL**, and **IL7R**.
-But look at the **CD69** panel -- the violin is wide, not uniformly low or
-high. What does this heterogeneity tell you about the composition of this
-group?
+Plot five T cell markers across the annotated groups. In the CD4 T group,
+**CD3D** and **IL7R** are expressed almost everywhere, but **SELL** and
+**CCR7** only in part of it. What does that tell you about the composition of
+this group? Then look at **CD69**, an early activation marker: which groups
+express it, and can it pick out activated T cells in this dataset?
 
 ```{r challenge1, eval=FALSE}
 VlnPlot(pbmc, features = c("CD3D", "SELL", "CCR7", "CD69", "IL7R"), ncol = 5, pt.size = 0)
@@ -614,37 +615,41 @@ VlnPlot(pbmc, features = c("CD3D", "SELL", "CCR7", "CD69", "IL7R"), ncol = 5, pt
 
 ## Solution
 
-![Violin plots of T cell subtype markers](fig/ep6_challenge1.png){alt="Violin plots of CD3D, SELL, CCR7, CD69, and IL7R across all annotated cell types. CD4 T cells show uniformly high CD3D and IL7R, high SELL, moderate CCR7, and a broad bimodal distribution of CD69 indicating a mixture of naive and recently activated T cells."}
+![Violin plots of T cell subtype markers](fig/ep6_challenge1.png){alt="Violin plots of CD3D, SELL, CCR7, CD69, and IL7R across the ten annotated cell types. CD3D and IL7R are high in CD4 T and CD8 T cells and near zero elsewhere. SELL is expressed in most groups. CCR7 is expressed mainly in CD4 T cells. CD69 is high in CD4 T, CD8 T, B, NK and HSPC cells alike."}
 
-The broad CD69 violin in CD4 T cells reveals that this group is **not a single
-subtype** -- it contains a mixture of naive and activated T cells that were
-merged during our annotation.
+Percent of cells in each group with any expression of the marker:
 
-| Marker | CD4 T pattern | Interpretation |
-|--------|:-------------|:---------------|
-| CD3D | Uniformly high | Confirms T cell identity across the group |
-| SELL (CD62L) | High | Lymph node homing receptor; enriched in naive and central memory T cells |
-| CCR7 | Moderate, variable | Another homing receptor; high in naive, low in effector memory |
-| CD69 | Broad (bimodal) | Early activation marker; low in naive, high in recently activated cells |
-| IL7R (CD127) | High | IL-7 receptor for homeostatic survival; expressed on naive and memory T cells |
+| Marker | CD4 T | CD8 T | B | NK | Interpretation |
+|--------|:-----:|:-----:|:-:|:--:|:---------------|
+| CD3D | 92% | 91% | 9% | 13% | Confirms T cell identity |
+| IL7R (CD127) | 93% | 85% | 11% | 13% | Naive and memory T cells |
+| SELL (CD62L) | 69% | 41% | 80% | 45% | Lymph node homing; naive and central memory T cells |
+| CCR7 | 55% | 26% | 34% | 6% | Lymph node homing; high in naive, low in effector memory T cells |
+| CD69 | 88% | 87% | 90% | 87% | Early activation marker |
 
-The CD69-low subset represents **naive T cells** (SELL-high, CCR7+, CD69-low)
-that recirculate between blood and lymph nodes but have not yet encountered
-antigen. The CD69-high subset represents **recently activated T cells** that
-have been stimulated.
+**The CD4 T group is a mixture.** Nearly every cell is CD3D+ and IL7R+, so
+the group is T cells throughout. But only about two thirds express SELL and
+about half express CCR7. The SELL+ CCR7+ cells are **naive and central memory**
+T cells, which recirculate through lymph nodes; the SELL- CCR7- cells are
+**effector memory** T cells. Most of the CCR7 signal comes from cluster 3, one
+of the two clusters we merged into "CD4 T".
 
-Also note how these markers behave in other cell types:
+**CD8 T cells are more differentiated.** SELL (41%) and CCR7 (26%) are lower
+than in CD4 T cells, so the CD8 T group holds more effector and effector
+memory cells, including the MAIT-like cluster 6.
 
-- **NK cells** show the highest CD69 expression of any group, consistent with
-  constitutive activation in circulating NK cells.
-- **B cells** express SELL and IL7R, so these markers alone cannot distinguish
-  T cells from B cells -- you need CD3D to confirm T cell identity.
-- **CD8 T cells** show high CD69 but low SELL, suggesting they are
-  predominantly effector or effector memory cells rather than naive.
+**CD69 does not separate activated cells here.** It is expressed in almost
+90% of CD4 T, CD8 T, B and NK cells alike. CD69 is an immediate early gene
+that can also be switched on during sample collection and processing, so in a
+dataset like this one it does not mark a recently activated subset. Check
+whether an "activation" marker is specific before interpreting it.
+
+**SELL alone does not mark T cells.** B cells (80%), pDCs and HSPCs express it
+too; you need CD3D to confirm T cell identity.
 
 This illustrates why our coarse "CD4 T" label is a simplification. With
 higher clustering resolution or sub-clustering, you could separate the naive
-and activated subsets. For many analyses this level of granularity is
+and memory subsets. For many analyses this level of granularity is
 sufficient, but for studies focused on T cell biology you would want to
 sub-cluster further.
 
