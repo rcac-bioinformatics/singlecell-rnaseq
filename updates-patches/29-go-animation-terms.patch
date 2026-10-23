@@ -1,0 +1,64 @@
+--- a/episodes/files/animations/ep8_go-enrichment.html
++++ b/episodes/files/animations/ep8_go-enrichment.html
+@@ -17,7 +17,7 @@
+  4. Compare with what random draws would give. 45 vs about 10 is enrichment.
+     Two bars: expected by chance about 10, observed 45.
+  5. Repeat for every term, adjust for multiple testing, plot the top 15.
+-    A ranked list of 15 terms with GeneRatio and adjusted p-value drawn as a dot plot.
++    The episode 8 top 15 GO terms with their GeneRatio and adjusted p-value, ordered by GeneRatio as dotplot() draws them.
+  6. enrichGO is over-representation. GSEA is a different test on the full ranking.
+     ORA uses a cutoff list; GSEA uses the full ranked list.
+ 
+@@ -25,7 +25,11 @@
+ Derived and stated on the slide: GeneRatio 45/293 for response to virus; expected overlap 293 x 320 / 9451 = 9.9.
+ Stylised: the circle areas are not proportional to the set sizes. The dots inside the DE circle (293), the term circle (320)
+ and the overlap (45) are drawn one per gene. The grey background dots are only a sample of the 9451, placed by seed 42.
+-Illustrative: step 5 term names other than "response to virus", and all of their GeneRatio, count and adjusted p values.
++Step 5 is the real result (patch 29): the 15 terms are the episode 8 top 15 from the Negishi run (anchor ep8_go_top15, run
++2026-10-21, bundle scrna-kit-2026-10-21-20261023-1232). GeneRatio and p.adjust come from the same chunks rerun locally in
++arnstrm2/r-bioconductor:3.23-R-4.6.1 (Seurat 5.5.1, clusterProfiler 4.20.2, org.Hs.eg.db 3.23.1), which gives the identical
++15 terms in the identical order. 263 of the 293 genes are GO-annotated, hence the /263. Dot colour is -log10 p.adjust,
++scaled from 34.5 (red) to 13.0 (blue). Steps 1 to 4 stay illustrative (45 of 320 against 9451).
+ Step 6 pictograms are schematic.
+ 
+ Controls
+@@ -152,11 +156,21 @@
+ /* ---------- step 5 dot plot ---------- */
+ var gDP = el('g', { class: 't' }, svg);
+ var TERMS = [
+-  ['response to type I interferon', 0.214, 0.05], ['defense response to virus', 0.199, 0.08], ['innate immune response', 0.18, 0.12],
+-  ['response to virus', 45 / 293, 0.2], ['cellular response to interferon-beta', 0.150, 0.25], ['regulation of viral process', 0.147, 0.3],
+-  ['response to interferon-gamma', 0.14, 0.4], ['regulation of innate immune response', 0.133, 0.42], ['cytokine-mediated signaling pathway', 0.126, 0.55],
+-  ['regulation of defense response', 0.118, 0.6], ['regulation of cytokine production', 0.111, 0.7], ['response to biotic stimulus', 0.103, 0.75],
+-  ['response to external biotic stimulus', 0.097, 0.82], ['immune effector process', 0.092, 0.9], ['leukocyte activation', 0.088, 0.95]
++  ['response to virus', 55 / 263, 0.00],
++  ['defense response to virus', 49 / 263, 0.03],
++  ['viral process', 43 / 263, 0.54],
++  ['regulation of innate immune response', 43 / 263, 0.71],
++  ['positive regulation of cytokine production', 36 / 263, 1.00],
++  ['viral life cycle', 35 / 263, 0.68],
++  ['positive regulation of innate immune response', 34 / 263, 0.94],
++  ['positive regulation of response to biotic stimulus', 34 / 263, 0.98],
++  ['regulation of viral process', 28 / 263, 0.60],
++  ['response to type II interferon', 26 / 263, 0.60],
++  ['viral genome replication', 24 / 263, 0.72],
++  ['negative regulation of viral process', 23 / 263, 0.60],
++  ['regulation of viral life cycle', 23 / 263, 0.78],
++  ['regulation of viral genome replication', 21 / 263, 0.74],
++  ['negative regulation of viral genome replication', 20 / 263, 0.60]
+ ];
+ var DX0 = 780, DX1 = 1180;
+ function GX(g) { return DX0 + (g - 0.06) / 0.18 * (DX1 - DX0); }
+@@ -182,9 +196,9 @@
+ txt('small', { x: 1290, y: 280, 'font-size': 26, fill: INK }, gDP);
+ txt('large', { x: 1290 + 5 * 54 - 2, y: 280, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gDP);
+ txt('dot size = gene count', { x: 1290, y: 350, 'font-size': 26, fill: INK }, gDP);
+-txt('illustrative values,', { x: 1290, y: 420, 'font-size': 26, fill: INK }, gDP);
+-txt('except response to', { x: 1290, y: 452, 'font-size': 26, fill: INK }, gDP);
+-txt('virus (45/293)', { x: 1290, y: 484, 'font-size': 26, fill: INK }, gDP);
++txt('episode 8 values;', { x: 1290, y: 420, 'font-size': 26, fill: INK }, gDP);
++txt('263 of the 293', { x: 1290, y: 452, 'font-size': 26, fill: INK }, gDP);
++txt('genes are annotated', { x: 1290, y: 484, 'font-size': 26, fill: INK }, gDP);
+ 
+ /* ---------- step 6 cards ---------- */
+ var gNote = el('g', { class: 't' }, svg);
