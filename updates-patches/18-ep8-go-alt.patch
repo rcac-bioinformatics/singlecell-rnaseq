@@ -1,0 +1,13 @@
+diff --git a/episodes/differential-expression.Rmd b/episodes/differential-expression.Rmd
+index 08d1b83..31bc077 100644
+--- a/episodes/differential-expression.Rmd
++++ b/episodes/differential-expression.Rmd
+@@ -482,7 +482,7 @@ go_results <- enrichGO(gene = gene_ids$ENTREZID,
+ 
+ Visualize the top enriched GO terms with a dot plot:
+ 
+-```{r go-dotplot, eval=FALSE, fig.alt="Dot plot showing the top 15 enriched GO biological process terms for upregulated genes in stimulated monocytes. The top terms are response to virus, defense response to virus, viral process, and viral life cycle, with response to type I interferon and interferon-mediated signaling pathway appearing lower in the list."}
++```{r go-dotplot, eval=FALSE, fig.alt="Dot plot showing the top 15 enriched GO biological process terms for upregulated genes in stimulated monocytes. The top terms are response to virus, defense response to virus, viral process, and negative regulation of viral genome replication, with response to type II interferon and regulation of innate immune response further down the list."}
+ dotplot(go_results, showCategory = 15) +
+     ggtitle("GO Biological Process: STIM vs CTRL CD14+ Monocytes")
+ ```

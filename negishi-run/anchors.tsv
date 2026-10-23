@@ -59,6 +59,6 @@ top Wilcoxon genes are ISGs	08	ep8_wilcox_top20	IFIT1,IFIT3,TNFSF10,RSAD2,IFIT2,
 core ISGs in the top DE genes	08	ep8_wilcox_top20+ep8_pseudo_top20	ISG15,IFIT1,IFIT3,IFI6,MX1	atleast:3:ISG15,IFIT1,IFIT3,IFI6,MX1	blocker	episodes/differential-expression.Rmd:137-150,291-302
 AggregateExpression returns a Seurat object	08	ep8_aggregate_class	Seurat	exact	should-fix	episodes/differential-expression.Rmd:233
 GO top 15: virus terms	08	ep8_go_top15	response to virus|defense response to virus	contains:response to virus|defense response to virus	blocker	episodes/differential-expression.Rmd:492-493
-GO top 15: type I interferon or defense response to virus	08	ep8_go_top15	type I interferon	contains_any:type I interferon|defense response to virus	blocker	episodes/differential-expression.Rmd:475,501
-GO top 15: type I interferon itself	08	ep8_go_top15	type I interferon	contains:type I interferon	should-fix	episodes/differential-expression.Rmd:475 (fig.alt says it appears lower in the list)
+GO top 15: type I interferon or defense response to virus	08	ep8_go_top15	type I interferon	contains_any:type I interferon|defense response to virus	blocker	episodes/differential-expression.Rmd:485,499-507
+GO top 15: type II interferon (go-dotplot fig.alt)	08	ep8_go_top15	type II interferon	contains:type II interferon	should-fix	episodes/differential-expression.Rmd:485
 KEGG top terms	08	ep8_kegg_top5	-	info	check	episodes/differential-expression.Rmd:511
