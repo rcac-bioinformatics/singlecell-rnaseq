@@ -103,6 +103,7 @@ Start with `SUMMARY.md`. It covers:
 
   Fix the cause, then resubmit from that step with `--from STEP`.
 - **Before submitting anything,** `submit_all.sh` runs `build_kit.py --check`. It refuses if `SINGULARITY_BIND` or `APPTAINER_BIND` is set, because learners do not have them.
+- **Redrawing committed figures.** The kit's own figure captures (`figures/episodes/` in the bundle) are 1400 x 1000 px, smaller than the committed files. When a code change means a committed figure must be replaced, list it in `figures_redraw.tsv` and run `bash negishi-run/redraw_figures.sh --run ID` on the login node after the episode's step has passed (about a minute). It draws each figure from the run's handoff RDS with the episode's own setup and chunk code, at the committed pixel size and with a fixed seed, so a rerun gives byte-identical files. The files land in `runs/ID/records/figures/redraw/`; `collect.sh` brings them back under `figures/raw/redraw/`, and you copy them into `episodes/fig/`.
 - **If the episodes change after the kit was generated,** preflight warns and `submit_all.sh` refuses. Rebuild on Negishi with `python3 negishi-run/build_kit.py` (Python 3.6 is enough) and start a new run ID.
 
 ## Staged data on Depot

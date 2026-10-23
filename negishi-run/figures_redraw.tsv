@@ -1,0 +1,7 @@
+# Committed figures that redraw_figures.sh redraws at their committed size from a kit run's handoff RDS,
+# with the episode's own chunk code (generated/blocks/<episode>/<label>.R after the episode's setup block).
+# Pixel sizes are those of the files in episodes/fig/ (res 300). Added 2026-10-22 for the episode 6 relabel.
+fig	episode	label	handoff	width	height	res
+ep6_annotated-umap.png	06	annotated-umap	r06/pbmc_annotated.rds	2400	1800	300
+ep6_side-by-side.png	06	side-by-side	r06/pbmc_annotated.rds	2400	1800	300
+ep6_challenge1.png	06	challenge1	r06/pbmc_annotated.rds	3600	1200	300
