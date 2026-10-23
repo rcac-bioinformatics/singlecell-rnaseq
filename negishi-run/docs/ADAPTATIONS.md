@@ -55,9 +55,9 @@ Challenge, solution and callout chunks run in order. A failure in one of them is
 - **Continuous** (`r03` to `r08`): one learner copy, the RDS chain as written. Episode 3 reads the matrix its `set-paths` names; `build_kit.py` writes that path to `generated/ep3_matrix_path.txt`. With patch 01 applied (2026-10-16), that path is the staged copy in `scrna_workshop/filtered_feature_bc_matrix/`, so `r03` starts at once. If the episode pointed at `cellranger_output/...` again, the build would make `r03` wait for `02-cellranger`. `r07` starts from SeuratData and has no dependency.
 - **Cold** (`c03` to `c06`, `c08`): each episode in its own new directory, so the parallel jobs never share files. Each is seeded with what a learner who skipped the previous episode needs, copied from `$STAGED`:
   - `c03`: the staged `filtered_feature_bc_matrix/`, copied to the path in `generated/ep3_matrix_path.txt`, where episode 3 looks;
-  - `c04`, `c05`, `c06`, `c08`: the staged `rds/<input>.rds`, copied into `scrna_workshop/` where `readRDS(paste0(work_dir, ...))` looks.
+  - `c04`, `c05`, `c06`, `c08`: every staged `rds/<name>.rds` the episode reads and does not save itself, copied into `scrna_workshop/` where `readRDS(paste0(work_dir, ...))` looks. `build_kit.py` derives the list from the episode's `readRDS()` and `saveRDS()` calls and writes it to `generated/cold_seed.tsv` (`c08` gets `ifnb_annotated.rds` and `pbmc_annotated.rds`); the build stops if a file is not listed under `rds/` in `staged_manifest.tsv`.
 
-  The episodes do not tell learners to do this copy (logged; patch 05 adds the callouts). There is no `c07`: episode 7 starts from SeuratData in both passes.
+  The episodes' cold-start callouts (patch 05, applied 2026-10-22) tell learners to make the same copy. There is no `c07`: episode 7 starts from SeuratData in both passes.
 
 ### Kit-only additions (never change learner objects, never print to the learner console)
 

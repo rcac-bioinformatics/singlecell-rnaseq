@@ -151,13 +151,14 @@ kit_cold_seed() {  # ep scratch_dir
         mkdir -p "$d/$(dirname "$mp")"
         rm -rf "${d:?}/$mp"
         cp -r "$STAGED/filtered_feature_bc_matrix" "$d/$mp";;
-    04) cp "$STAGED/rds/pbmc_filtered.rds" "$d/";;
-    05) cp "$STAGED/rds/pbmc_normalized.rds" "$d/";;
-    06) cp "$STAGED/rds/pbmc_clustered.rds" "$d/";;
-    07) ;;
-    08) cp "$STAGED/rds/ifnb_annotated.rds" "$d/";;
+    04|05|06|07|08) ;;
     *) kit_die "kit_cold_seed: unknown episode $ep";;
   esac
+  # the RDS files the episode reads but does not save (generated/cold_seed.tsv, from the episode)
+  local f
+  while IFS= read -r f; do
+    cp "$STAGED/rds/$f" "$d/"
+  done < <(awk -F'\t' -v e="$ep" '$1 == e { print $2 }' "$KIT_GEN/cold_seed.tsv")
   kit_log "cold seed for $ep in $d: $(find "$d" -maxdepth 4 -type f | sed "s#^$d/##" | tr '\n' ' ')"
 }
 

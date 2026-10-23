@@ -378,6 +378,17 @@ for ep in R_EPS:
 for ep in ("03", "04", "05", "06", "08"):
     step("c" + ep, "rjob", [], "%s cold start from the staged copies (%s)" % (ep, ORDER[int(ep) - 1]))
 
+# What a cold start copies from $STAGED/rds/: every RDS the episode reads and does not save itself
+# (episode 8 needs pbmc_annotated.rds as well as ifnb_annotated.rds). Each must be a staged rds/ file.
+STAGED_RDS = {l.split("\t")[0][4:] for l in (KIT / "staged_manifest.tsv").read_text().splitlines()
+              if l.startswith("rds/") and "\tfile\t" in l}
+COLD_SEED = []
+for ep in R_EPS:
+    for f in sorted(RDS_IO[ep][0] - RDS_IO[ep][1]):
+        if f not in STAGED_RDS:
+            die("%s reads %s, which staged_manifest.tsv does not list under rds/ (cold start)" % (rel(ep), f))
+        COLD_SEED.append((ep, f))
+
 # ---------------------------------------------------------------- writers
 OUT = {}
 
@@ -511,6 +522,7 @@ def build():
     put("r_packages.tsv", tsv(pt))
     put("r_packages.txt", "\n".join(r[0] for r in pt[1:]))
     put("ep3_matrix_path.txt", EP3_MATRIX)
+    put("cold_seed.tsv", tsv([("episode", "rds")] + COLD_SEED))
     fm = [("episode", "file", "title", "teaching", "exercises")]
     for name in ORDER:
         e = EPS[KEY[name]]
