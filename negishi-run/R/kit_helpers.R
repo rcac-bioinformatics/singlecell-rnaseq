@@ -47,6 +47,20 @@ kit_marker_check <- function(obj, group, prefix) {
   kit_table(round(means, 2), paste0(prefix, "_cluster_marker_means"))
 }
 
+# per identity: mean log-normalised expression and percent of cells expressing each gene
+kit_label_profile <- function(obj, genes, name) {
+  genes <- genes[genes %in% rownames(obj)]
+  m <- SeuratObject::LayerData(obj, assay = "RNA", layer = "data")[genes, , drop = FALSE]
+  id <- Idents(obj)
+  out <- do.call(rbind, lapply(levels(id), function(l) {
+    x <- m[, id == l, drop = FALSE]
+    c(n = ncol(x), setNames(round(Matrix::rowMeans(x), 2), paste0(genes, "_mean")),
+      setNames(round(100 * Matrix::rowMeans(x > 0), 1), paste0(genes, "_pct")))
+  }))
+  rownames(out) <- levels(id)
+  kit_table(out, name)
+}
+
 kit_table <- function(tab, name) {
   f <- file.path(.rec(), "anchors", sprintf("%s_%s.tsv", .step(), name))
   utils::write.table(as.data.frame.matrix(tab), f, sep = "\t", quote = FALSE, col.names = NA)

@@ -200,6 +200,7 @@ EXTRAS = {
     ("05", "save"): 'kit_handoff("pbmc_clustered.rds")',
     ("06", "store-labels"): 'kit_marker_check(pbmc, "manual_annotation", "ep6")',
     ("06", "compare"): 'kit_table(table(Manual = pbmc$manual_annotation, SingleR = pbmc$singler_labels), "ep6_singler_vs_manual"); kit_table(table(cluster = pbmc$RNA_snn_res.0.5, SingleR = pbmc$singler_labels), "ep6_cluster_vs_singler")',
+    ("06", "challenge1"): 'kit_label_profile(pbmc, c("CD3D", "SELL", "CCR7", "CD69", "IL7R"), "ep6_challenge1")',
     ("06", "save"): 'kit_handoff("pbmc_annotated.rds"); kit_anchor("ep6_cells", ncol(pbmc)); kit_anchor("ep6_n_labels", nlevels(Idents(pbmc)))',
     ("07", "load-ifnb"): 'kit_anchor("ep7_ifnb_cells", ncol(ifnb)); kit_anchor("ep7_ifnb_genes", nrow(ifnb))',
     ("07", "check-stim"): 'kit_anchor("ep7_ctrl_cells", sum(ifnb$stim == "CTRL")); kit_anchor("ep7_stim_cells", sum(ifnb$stim == "STIM"))',
