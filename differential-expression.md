@@ -91,7 +91,7 @@ DimPlot(ifnb, reduction = "umap", label = TRUE, repel = TRUE, split.by = "stim")
 
 ## Expected output
 
-![Split UMAP showing CTRL and STIM panels with cells colored and labeled by cell type.](fig/ep8_umap_split.png){alt="UMAP split by CTRL and STIM conditions with nine cell types colored and labeled, showing identical spatial arrangement in both panels confirming successful integration."}
+![Split UMAP showing CTRL and STIM panels with cells colored and labeled by cell type.](fig/ep8_umap_split.png){alt="UMAP split by CTRL and STIM conditions with thirteen cell types colored and labeled, showing identical spatial arrangement in both panels confirming successful integration."}
 
 You should see two UMAP panels (CTRL and STIM) with the same cell type
 structure in both. Cell types are labeled and colored consistently across
@@ -152,24 +152,24 @@ cat("Significant genes (padj < 0.05):", sum(mono.wilcox$p_val_adj < 0.05), "\n")
 
 ``` output
         p_val avg_log2FC pct.1 pct.2 p_val_adj
-IFIT1       0   7.173024 0.965 0.033         0
-IFIT3       0   6.798858 0.972 0.057         0
-TNFSF10     0   6.370735 0.959 0.061         0
-RSAD2       0   6.661976 0.920 0.041         0
-IFIT2       0   6.905053 0.909 0.039         0
-MX1         0   4.839203 0.953 0.099         0
-CXCL10      0   8.007812 0.873 0.031         0
-LY6E        0   4.263751 0.990 0.174         0
-CXCL11      0   8.576537 0.801 0.011         0
-OAS1        0   4.045792 0.915 0.131         0
+IFIT1       0   7.319139 0.985 0.033         0
+CXCL10      0   8.036564 0.984 0.035         0
+RSAD2       0   6.741673 0.988 0.045         0
+TNFSF10     0   6.991279 0.989 0.047         0
+IFIT3       0   6.883785 0.992 0.056         0
+IFIT2       0   7.179929 0.961 0.039         0
+CXCL11      0   8.624208 0.932 0.012         0
+CCL8        0   9.134191 0.918 0.017         0
+IDO1        0   5.455898 0.965 0.089         0
+MX1         0   5.059052 0.960 0.093         0
 
 
-Significant genes (padj < 0.05): 759 
+Significant genes (padj < 0.05): 825 
 ```
 
-You should see approximately **759 significant genes** at padj < 0.05. The
+You should see approximately **825 significant genes** at padj < 0.05. The
 top genes include interferon-stimulated genes (IFIT1/2/3, RSAD2, MX1) and
-IFN-inducible chemokines (CXCL10, CXCL11). But notice that the
+IFN-inducible chemokines (CXCL10, CXCL11, CCL8). But notice that the
 p-values are extremely small (effectively zero). This is a symptom of per-cell
 testing with thousands of cells -- even modest differences become
 "significant."
@@ -270,15 +270,15 @@ bulk
 
 ``` output
 An object of class Seurat 
-14053 features across 54 samples within 1 assay 
+14053 features across 78 samples within 1 assay 
 Active assay: RNA (14053 features, 0 variable features)
  3 layers present: counts, data, scale.data
 ```
 
 The number of samples equals the number of unique cell type x condition x
-pseudo-replicate combinations. With 9 cell types, 2 conditions, and 3
-pseudo-replicates, you get up to 54 pseudobulk samples (some may be fewer if
-a cell type has very few cells in a given replicate).
+pseudo-replicate combinations. With 13 cell types, 2 conditions, and 3
+pseudo-replicates, you get up to 78 pseudobulk samples (fewer if a cell type
+has no cells in a given replicate).
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -313,23 +313,23 @@ cat("Significant genes (padj < 0.05):", sum(mono.pseudo$p_val_adj < 0.05, na.rm 
 
 ``` output
         p_val avg_log2FC pct.1 pct.2 p_val_adj
-ISG15       0   6.452648     1     1         0
-IFI6        0   3.711404     1     1         0
-GBP1        0   2.539654     1     1         0
-S100A8      0  -2.281767     1     1         0
-RSAD2       0   5.865844     1     1         0
-TMSB10      0   1.657216     1     1         0
-VAMP5       0   2.982033     1     1         0
-SSB         0   2.471605     1     1         0
-PLSCR1      0   2.468085     1     1         0
-TNFSF10     0   5.819272     1     1         0
+ISG15       0   6.526243     1     1         0
+IFI6        0   3.627521     1     1         0
+GBP1        0   2.583049     1     1         0
+S100A8      0  -2.269779     1     1         0
+RSAD2       0   5.939389     1     1         0
+TMSB10      0   1.705161     1     1         0
+VAMP5       0   3.068289     1     1         0
+SSB         0   2.631016     1     1         0
+PLSCR1      0   2.452130     1     1         0
+TNFSF10     0   6.054715     1     1         0
 
 
-Significant genes (padj < 0.05): 1464 
+Significant genes (padj < 0.05): 1539 
 ```
 
-The pseudobulk analysis identifies **1464 significant genes** -- more than
-the Wilcoxon test (759). This may seem surprising: we said pseudobulk is more
+The pseudobulk analysis identifies **1539 significant genes** -- more than
+the Wilcoxon test (825). This may seem surprising: we said pseudobulk is more
 conservative, so why does it find more? Because we used **pseudo-replicates**,
 not true biological replicates. The 3 random splits within each condition have
 very low within-group variance, giving DESeq2 high statistical power.
@@ -404,7 +404,7 @@ VlnPlot(ifnb,
         ncol = 3)
 ```
 
-![Violin plots for IFIT1, CXCL10, and MX1 across cell types, split by condition.](fig/ep8_violin_de.png){alt="Three violin plot panels showing IFIT1, CXCL10, and MX1 dramatically upregulated in stimulated cells across all cell types, with control violins near zero and stimulated violins broad and tall."}
+![Violin plots for IFIT1, CXCL10, and MX1 across cell types, split by condition.](fig/ep8_violin_de.png){alt="Three violin plot panels showing IFIT1 and MX1 upregulated in stimulated cells of every cell type and CXCL10 mainly in stimulated monocytes, dendritic cells and B cells, with control violins near zero."}
 
 ### Dot plot across cell types
 
@@ -466,15 +466,15 @@ head(gene_ids)
 
 
 ``` output
-Number of significant upregulated genes: 271 
+Number of significant upregulated genes: 293 
 
    SYMBOL ENTREZID
 1   IFIT1     3434
-2   IFIT3     3437
-3 TNFSF10     8743
-4   RSAD2    91543
-5   IFIT2     3433
-6     MX1     4599
+2  CXCL10     3627
+3   RSAD2    91543
+4 TNFSF10     8743
+5   IFIT3     3437
+6   IFIT2     3433
 ```
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -557,38 +557,38 @@ head(kegg_results, 5)
                    category               subcategory       ID
 hsa04621 Organismal Systems             Immune system hsa04621
 hsa05168     Human Diseases Infectious disease: viral hsa05168
-hsa05164     Human Diseases Infectious disease: viral hsa05164
-hsa05169     Human Diseases Infectious disease: viral hsa05169
 hsa04612 Organismal Systems             Immune system hsa04612
+hsa05169     Human Diseases Infectious disease: viral hsa05169
+hsa05164     Human Diseases Infectious disease: viral hsa05164
                                  Description GeneRatio  BgRatio RichFactor
-hsa04621 NOD-like receptor signaling pathway    22/166 187/9451 0.11764706
-hsa05168    Herpes simplex virus 1 infection    17/166 180/9451 0.09444444
-hsa05164                         Influenza A    16/166 173/9451 0.09248555
-hsa05169        Epstein-Barr virus infection    17/166 205/9451 0.08292683
-hsa04612 Antigen processing and presentation    11/166  82/9451 0.13414634
+hsa04621 NOD-like receptor signaling pathway    26/179 187/9451 0.13903743
+hsa05168    Herpes simplex virus 1 infection    20/179 180/9451 0.11111111
+hsa04612 Antigen processing and presentation    13/179  82/9451 0.15853659
+hsa05169        Epstein-Barr virus infection    19/179 205/9451 0.09268293
+hsa05164                         Influenza A    17/179 173/9451 0.09826590
          FoldEnrichment    zScore       pvalue     p.adjust       qvalue
-hsa04621       6.698086 10.522757 1.177304e-12 2.707800e-10 2.707800e-10
-hsa05168       5.377075  7.927494 1.508406e-08 1.734667e-06 1.734667e-06
-hsa05164       5.265548  7.570938 5.514350e-08 4.227668e-06 4.227668e-06
-hsa05169       4.721334  7.202407 1.039155e-07 5.975139e-06 5.975139e-06
-hsa04612       7.637452  8.071248 1.679829e-07 7.727211e-06 7.727211e-06
-                                                                                                                        geneID
-hsa04621 837/834/79792/115361/2634/3320/3326/10010/4939/6772/10628/3665/3428/114769/2635/7295/6347/10616/2633/4940/115362/4938
-hsa05168                                 5610/6672/4939/6772/3665/3133/29992/6892/684/6347/3107/6890/3134/4940/64135/4938/8717
-hsa05164                                       834/91543/5610/103/4939/6772/4599/3665/4600/3627/8743/6347/4940/64135/4938/8717
-hsa05169                                   4616/5610/4067/4939/6772/3665/3133/9636/6892/958/3627/3107/6890/3134/4940/4938/8717
-hsa04612                                                                5721/3320/3326/3133/3303/1514/6892/3107/6890/3134/1520
+hsa04621       7.341021 12.168483 9.114111e-16 2.114474e-13 2.114474e-13
+hsa05168       5.866543  9.159024 1.551182e-10 1.799371e-08 1.799371e-08
+hsa04612       8.370555  9.313570 3.728060e-09 2.883033e-07 2.883033e-07
+hsa05169       4.893555  7.830726 9.849154e-09 5.712510e-07 5.712510e-07
+hsa05164       5.188330  7.724892 2.584269e-08 1.101704e-06 1.101704e-06
+                                                                                                                                           geneID
+hsa04621 79792/10010/115362/2634/3320/6773/7295/10628/4939/3428/10616/8767/4938/6347/1508/3665/3326/834/115361/6772/330/4940/2633/114769/837/2635
+hsa05168                                      6672/3133/6892/64135/6773/29992/4939/684/4938/6347/6890/3665/3107/8717/6772/330/4940/3134/5610/3105
+hsa04612                                                                         3133/6892/3320/1520/3303/1508/6890/3107/3326/5721/3134/3105/1514
+hsa05169                                            3133/6892/6773/4939/4616/3627/4938/6890/3665/3107/8717/958/6772/4940/3134/5610/3105/4067/9636
+hsa05164                                                     91543/64135/6773/103/4939/3627/4938/6347/4600/3665/4599/8717/834/8743/6772/4940/5610
          Count
-hsa04621    22
-hsa05168    17
-hsa05164    16
-hsa05169    17
-hsa04612    11
+hsa04621    26
+hsa05168    20
+hsa04612    13
+hsa05169    19
+hsa05164    17
 ```
 
 The top KEGG pathways are "NOD-like receptor signaling pathway", "Herpes
-simplex virus 1 infection", "Influenza A", "Epstein-Barr virus infection" and
-"Antigen processing and presentation" -- all involving the interferon and
+simplex virus 1 infection", "Antigen processing and presentation",
+"Epstein-Barr virus infection" and "Influenza A" -- all involving the interferon and
 antiviral response.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -751,8 +751,8 @@ Which method gives more conservative results? Why?
 
 You should find that:
 
-- **Wilcoxon** identifies 759 significant genes
-- **Pseudobulk** identifies 1464 (with pseudo-replicates)
+- **Wilcoxon** identifies 825 significant genes
+- **Pseudobulk** identifies 1539 (with pseudo-replicates)
 
 Pseudobulk finds **more** significant genes here, which may seem to contradict
 the usual advice that pseudobulk is more conservative. The reason: our
@@ -834,9 +834,9 @@ The top 5 biological processes should include terms like:
 |:----:|:--------|:--------------|
 | 1 | response to virus | Broad viral response including both detection and effector mechanisms |
 | 2 | defense response to virus | Direct antiviral effector programs activated by IFN-beta |
-| 3 | viral process | Genes involved in the viral life cycle, many of which are ISGs that restrict it |
-| 4 | viral life cycle | Overlap with viral process; reflects IFIT, OAS, and MX family genes |
-| 5 | regulation of viral process | Regulatory genes that modulate antiviral defense (e.g., TRIM, IRF family) |
+| 3 | negative regulation of viral genome replication | ISGs that block viral replication directly (IFIT, OAS, MX family genes) |
+| 4 | regulation of viral process | Regulatory genes that modulate antiviral defense (e.g., TRIM, IRF family) |
+| 5 | viral genome replication | Overlaps with rank 3; genes acting on the replication step itself |
 
 These results make complete biological sense. IFN-beta (interferon beta) is a
 **type I interferon** that signals through the IFNAR receptor complex,

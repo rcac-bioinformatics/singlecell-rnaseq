@@ -202,9 +202,9 @@ proportional to the actual number of mRNA molecules in the cell, not to PCR
 amplification efficiency.
 
 For the PBMC 10k v3 dataset we will use in this workshop, the count matrix
-contains approximately 11,800 cells and 36,600 genes, but after filtering out
-lowly-expressed genes and low-quality cells, we will work with roughly 8,000 --
-10,000 cells and 15,000 -- 20,000 genes.
+contains 11,809 cell barcodes and 38,606 genes. After removing genes detected
+in fewer than 3 cells and low-quality cells, we will work with 11,310 cells
+and 29,155 genes.
 
 ## Analysis Workflow Overview
 
@@ -240,7 +240,8 @@ across cells and carry the strongest biological signal.
 With 20,000+ genes per cell, we need to reduce the data to a manageable number
 of dimensions. **PCA** (Principal Component Analysis) compresses the data into
 the top principal components. We then use **UMAP** to create a 2D visualization
-and apply the **Leiden algorithm** to group similar cells into clusters.
+and apply the **Louvain algorithm** (Seurat's default) to group similar cells
+into clusters.
 
 **5. Cell Type Annotation (Episode 6).**
 Clusters are just numbers until we assign biological meaning. We identify cell
