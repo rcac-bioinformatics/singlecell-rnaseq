@@ -329,6 +329,8 @@ rest of this episode work on your own output.
 
 ::::::::::::::::::::::::::::::::::::::::
 
+[Animation: What happens when you submit](files/animations/ep2_slurm-lifecycle.html)
+
 :::::::::::::::::::::::::::::::::::::::: callout
 
 ## If your Cell Ranger job dies
@@ -444,6 +446,8 @@ The **filtered_feature_bc_matrix/** directory is the most important output.
 It contains the UMI count matrix with only cell-containing barcodes (empty
 droplets have been removed by Cell Ranger's cell calling algorithm). This is
 the file we will load into Seurat in the next episode.
+
+[Animation: Raw matrix to filtered matrix](files/animations/ep2_cell-calling.html)
 
 The three files inside use the **MatrixMarket** sparse format:
 

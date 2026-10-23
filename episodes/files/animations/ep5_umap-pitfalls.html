@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What UMAP does not tell you</title>
+<!--
+What UMAP does not tell you (Episode 5, UMAP)
+
+Steps and captions
+ 1. A UMAP of five cell types.
+    Left panel only, labelled seed 42. 600 cells: T 250, Mono 150, B 100, NK 70, DC 30.
+ 2. Same cells, same clusters, different seed. Only the layout changed.
+    Right panel (seed 7) appears at the seed 42 layout and the cells move to a different arrangement.
+ 3. Pitfall 1. Distances between clusters are not biological similarity.
+    B and NK are joined by a line in both panels: short on the left, long on the right.
+ 4. Pitfall 2. The area of a cluster is not its number of cells.
+    Left panel: DC (30 cells, drawn spread out) and NK (70 cells, drawn compact) get count badges.
+ 5. Pitfall 3. Never compare positions across two UMAP runs.
+    Both panels animate to new layouts (seed 123 and seed 99). Cell colours never change.
+ 6. Verify with marker genes and tests, not with the picture.
+    Panels shrink and a dot plot of CD3D, LYZ, MS4A1, GNLY, FCER1A by cluster appears below.
+
+Every cell keeps its cluster, and therefore its colour, in every panel and every step. Only coordinates change.
+The cells and the layouts are generated in the page with mulberry32, seed 42, so every run is identical.
+The dot plot values are illustrative and are not taken from the lesson data.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=4 opens at step 4. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke-opacity var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: what UMAP does not tell you"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREY = '#cbd5e0', GRID = '#e2e8f0';
+var N = 6;
+var CAPTIONS = [
+  'A UMAP of five cell types.',
+  'Same cells, same clusters, different seed. Only the layout changed.',
+  'Pitfall 1. Distances between clusters are not biological similarity.',
+  'Pitfall 2. The area of a cluster is not its number of cells.',
+  'Pitfall 3. Never compare positions across two UMAP runs.',
+  'Verify with marker genes and tests, not with the picture.'
+];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, sx, sy) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + (sx === undefined ? 1 : sx) + ',' + (sy === undefined ? 1 : sy) + ')';
+}
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 350) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function setDur(e, ms) { e.style.setProperty('--dur', ms + 'ms'); }
+function setDd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+
+/* ---------- clusters and layouts ---------- */
+var NAMES = ['T', 'Mono', 'B', 'NK', 'DC'];
+var COUNTS = [250, 150, 100, 70, 30];
+var COLORS = ['#2b6cb0', '#dd6b20', '#2f855a', '#805ad5', '#d53f8c'];
+/* per cluster: centre x, centre y, sd x, sd y, rotation in degrees (panel coordinates 700 x 500) */
+var LAYOUTS = {
+  s42:  { c: [[170, 170, 55, 45, 20], [190, 390, 45, 40, -15], [440, 120, 38, 38, 0], [590, 125, 22, 22, 0], [410, 375, 52, 48, 0]], dl: [515, 242] },
+  s7:   { c: [[480, 285, 55, 48, 40], [150, 115, 46, 40, 70], [130, 385, 36, 36, 0], [615, 95, 22, 26, 0], [335, 430, 27, 27, 0]], dl: null },
+  s123: { c: [[330, 140, 55, 42, -10], [565, 265, 50, 50, 0], [140, 310, 44, 36, 50], [320, 400, 35, 25, 0], [110, 100, 25, 25, 0]], dl: null },
+  s99:  { c: [[150, 335, 50, 50, 0], [360, 125, 40, 40, 0], [575, 385, 40, 40, 0], [390, 300, 28, 28, 0], [590, 105, 48, 44, 0]], dl: null }
+};
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var rng = mulberry32(42);
+function gauss() { var u = 1 - rng(), v = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+function tg() { var g; do { g = gauss(); } while (Math.abs(g) > 2.2); return g; }
+var cells = [];
+COUNTS.forEach(function (n, k) {
+  for (var i = 0; i < n; i++) { cells.push({ k: k, gx: tg(), gy: tg() }); }
+});
+function posOf(layout, c) {
+  var p = layout.c[c.k], a = p[4] * Math.PI / 180, ox = c.gx * p[2], oy = c.gy * p[3];
+  return [p[0] + ox * Math.cos(a) - oy * Math.sin(a), p[1] + ox * Math.sin(a) + oy * Math.cos(a)];
+}
+function labPos(layout, k) {
+  var p = layout.c[k], r = 1.9 * Math.max(p[2], p[3]), y = p[1] - r - 12;
+  if (y < 18) { y = p[1] + r + 30; }
+  return [p[0], y];
+}
+
+/* ---------- frame ---------- */
+txt('What UMAP does not tell you', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 5', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: GRID, 'stroke-width': 2 }, svg);
+
+/* ---------- panels ---------- */
+function buildPanel() {
+  var P = { g: el('g', { class: 't' }, svg) };
+  el('rect', { x: 0, y: 0, width: 700, height: 500, fill: '#ffffff', stroke: INK, 'stroke-width': 3, 'vector-effect': 'non-scaling-stroke' }, P.g);
+  P.dots = cells.map(function (c) {
+    var d = el('circle', { class: 't', cx: 0, cy: 0, r: 6, fill: COLORS[c.k], 'fill-opacity': 0.85 }, P.g);
+    return d;
+  });
+  P.line = el('g', { class: 't' }, P.g);
+  P.lineA = el('line', { stroke: GOLD, 'stroke-width': 12, 'stroke-linecap': 'round' }, P.line);
+  P.lineB = el('line', { stroke: INK, 'stroke-width': 4, 'stroke-dasharray': '12 8' }, P.line);
+  P.lineT = txt('', { class: 'halo', 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, P.line);
+  P.labs = NAMES.map(function (n) {
+    return txt(n, { class: 't halo', x: 0, y: 0, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, P.g);
+  });
+  return P;
+}
+var PL = buildPanel(), PR = buildPanel();
+/* count badges, left panel only */
+var badges = el('g', { class: 't' }, PL.g);
+function badge(cx, cy, label) {
+  el('rect', { x: cx - 76, y: cy - 22, width: 152, height: 44, rx: 6, ry: 6, fill: GOLD, stroke: INK, 'stroke-width': 2.5 }, badges);
+  txt(label, { x: cx, y: cy + 9, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, badges);
+}
+badge(590, 204, '70 cells');
+badge(410, 243, '30 cells');
+
+/* seed labels */
+function seedLab(str, x) { return txt(str, { class: 't mono', x: x, y: 0, 'font-size': 34, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, svg); }
+var slL1 = seedLab('seed 42', 0), slL2 = seedLab('seed 123', 0), slR1 = seedLab('seed 7', 0), slR2 = seedLab('seed 99', 0);
+
+/* ---------- dot plot (step 6) ---------- */
+var gDot = el('g', { class: 't' }, svg);
+var GENES = ['CD3D', 'LYZ', 'MS4A1', 'GNLY', 'FCER1A'];
+var DP = [
+  [[.95, .9], [.05, .05], [.03, .05], [.08, .1], [.02, .02]],
+  [[.08, .1], [1, 1], [.02, .03], [.05, .05], [.06, .08]],
+  [[.05, .05], [.1, .1], [.92, .9], [.02, .02], [.03, .03]],
+  [[.35, .4], [.06, .05], [.02, .02], [.95, .95], [.02, .02]],
+  [[.04, .04], [.8, .7], [.1, .1], [.03, .03], [.85, .9]]
+];
+function lerpC(a) {
+  var c0 = [203, 213, 224], c1 = [31, 41, 55];
+  return 'rgb(' + c0.map(function (v, i) { return Math.round(v + (c1[i] - v) * a); }).join(',') + ')';
+}
+var DX0 = 640, DDX = 190, DY0 = 462, DDY = 48;
+GENES.forEach(function (g, j) {
+  txt(g, { class: 'mono', x: DX0 + j * DDX, y: 418, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gDot);
+});
+NAMES.forEach(function (n, i) {
+  var y = DY0 + i * DDY;
+  el('line', { x1: 480, y1: y, x2: DX0 + 4 * DDX + 90, y2: y, stroke: GRID, 'stroke-width': 2 }, gDot);
+  el('circle', { cx: 510, cy: y, r: 11, fill: COLORS[i] }, gDot);
+  txt(n, { x: 534, y: y + 10, 'font-size': 28, 'font-weight': 700, fill: INK }, gDot);
+  DP[i].forEach(function (v, j) {
+    el('circle', { cx: DX0 + j * DDX, cy: y, r: 4 + 20 * Math.sqrt(v[0]), fill: lerpC(v[1]) }, gDot);
+  });
+});
+txt('dot size: share of cells expressing. Darker: higher average expression.', { x: 800, y: 710, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gDot);
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+
+/* ---------- state rendering ---------- */
+var LAB_FOCUS = null;
+function layoutKeys(s) {
+  var l = 's42', r = 's42';
+  if (s >= 2) { r = 's7'; }
+  if (s >= 5) { l = 's123'; r = 's99'; }
+  return [l, r];
+}
+function focusOf(s, side) {
+  if (s === 3) { return [2, 3]; }
+  if (s === 4) { return side === 0 ? [3, 4] : []; }
+  return null;
+}
+function applyPanel(P, side, s, prev) {
+  var key = layoutKeys(s)[side], L = LAYOUTS[key];
+  var morph = (s === 5 || (prev === 5 && s < 5));
+  var focus = focusOf(s, side);
+  cells.forEach(function (c, i) {
+    var p = posOf(L, c), d = P.dots[i];
+    setDur(d, morph ? 2400 : 900);
+    setDd(d, morph ? c.k * 150 : ((side === 1 && s === 2 && prev === 1) ? 700 : 0));
+    tf(d, p[0], p[1]);
+    d.style.fillOpacity = (focus && focus.indexOf(c.k) < 0) ? 0.12 : 0.85;
+  });
+  P.labs.forEach(function (t, k) {
+    var lp = labPos(L, k);
+    setDur(t, morph ? 2400 : 900);
+    setDd(t, morph ? k * 150 : ((side === 1 && s === 2 && prev === 1) ? 700 : 0));
+    tf(t, lp[0], lp[1]);
+    var show = (s === 1 || s === 2 || s === 5) || (s === 3 && (k === 2 || k === 3));
+    op(t, show ? 1 : 0);
+  });
+}
+function render(s, prev) {
+  applyPanel(PL, 0, s, prev);
+  applyPanel(PR, 1, s, prev);
+  /* panel placement */
+  var small = s === 6;
+  tf(PL.g, small ? 300 : 50, small ? 130 : 150, small ? 0.5 : 1, small ? 0.5 : 1);
+  tf(PR.g, small ? 950 : 850, small ? 130 : 150, small ? 0.5 : 1, small ? 0.5 : 1);
+  sh(PR.g, s >= 2, 0);
+  /* seed labels */
+  var lx = small ? 475 : 400, rx = small ? 1125 : 1200, ly = small ? 112 : 136;
+  [slL1, slL2].forEach(function (t) { tf(t, lx, ly); });
+  [slR1, slR2].forEach(function (t) { tf(t, rx, ly); });
+  op(slL1, s < 5 ? 1 : 0); op(slL2, s >= 5 ? 1 : 0);
+  op(slR1, s >= 2 && s < 5 ? 1 : 0); op(slR2, s >= 5 ? 1 : 0);
+  /* pitfall 1 lines */
+  [[PL, 's42', 0], [PR, 's7', 1]].forEach(function (a) {
+    var P = a[0], L = LAYOUTS[a[1]], b = L.c[2], n = L.c[3];
+    [P.lineA, P.lineB].forEach(function (ln) {
+      ln.setAttribute('x1', b[0]); ln.setAttribute('y1', b[1]); ln.setAttribute('x2', n[0]); ln.setAttribute('y2', n[1]);
+    });
+    var tx = L.dl ? L.dl[0] : (b[0] + n[0]) / 2 + 55, ty = L.dl ? L.dl[1] : (b[1] + n[1]) / 2 + 40;
+    P.lineT.setAttribute('x', tx); P.lineT.setAttribute('y', ty);
+    P.lineT.textContent = a[2] === 0 ? 'short' : 'long';
+    sh(P.line, s === 3, 500);
+  });
+  sh(badges, s === 4, 500);
+  sh(gDot, s === 6, 900);
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  var pv = cur; cur = n; render(cur, pv); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur, 0); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+window.__ep5u = {
+  fills: function () { return [PL.dots, PR.dots].map(function (d) { return d.map(function (c) { return c.getAttribute('fill'); }).join(''); }); },
+  bounds: function () {
+    var out = {};
+    Object.keys(LAYOUTS).forEach(function (k) {
+      var mnx = 1e9, mxx = -1e9, mny = 1e9, mxy = -1e9;
+      cells.forEach(function (c) { var p = posOf(LAYOUTS[k], c); mnx = Math.min(mnx, p[0]); mxx = Math.max(mxx, p[0]); mny = Math.min(mny, p[1]); mxy = Math.max(mxy, p[1]); });
+      out[k] = [mnx, mxx, mny, mxy].map(Math.round);
+    });
+    return out;
+  },
+  counts: COUNTS.map(function (n, k) { return cells.filter(function (c) { return c.k === k; }).length; })
+};
+})();
+</script>
+</body>
+</html>

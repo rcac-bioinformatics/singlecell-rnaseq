@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why integrate, and what CCA integration does</title>
+<!--
+Why integrate, and what CCA integration does (Episode 7, Integration)
+
+Steps and captions
+ 1. Control PBMCs: T cells, B cells and monocytes form three groups.
+    CTRL cells only (salmon outline), three well separated blobs of 40 cells each.
+ 2. Add the stimulated sample. The same cell types land somewhere else.
+    STIM cells (teal outline) appear as the same three blobs, shifted up and right. Six blobs.
+ 3. Clustering without integration gives clusters by condition, not by cell type. This is the batch effect.
+    Six hulls, each holding one condition.
+ 4. CCA finds anchors: pairs of cells from the two conditions that are each other's nearest neighbours in a shared space.
+    For each cell type, 6 dashed lines join mutual nearest neighbour pairs across conditions.
+ 5. The anchors define a correction that moves matching cell types together.
+    Arrowheads mark the correction vectors, STIM blobs slide onto CTRL blobs. The axis label changes from pca to integrated.cca.
+ 6. After integration each cluster holds both conditions. This is what the split UMAP checks.
+    Three hulls, each holding salmon and teal outlines.
+ 7. The expression values are not changed. IFIT1 is still high only in stimulated monocytes.
+    The IFIT1 strip lights up: CTRL violin near zero, STIM violin tall. Note: integrated.cca is a new reduction, RNA counts are unchanged.
+ 8. Do not integrate when the samples have no shared cell types. Anchors would force unrelated cells together.
+    New panel: tumour and normal samples with four different cell types. Anchors between unrelated types are marked with a red cross.
+
+All positions, blobs and anchors are drawn for teaching. The mutual nearest neighbour pairs are computed on the generated points.
+Randomness: mulberry32 with seed 42, so every run is identical.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=4 opens at step 4. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke var(--dur) ease var(--dd,0ms),stroke-width var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: why integrate, and what CCA integration does"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREY = '#a0aec0', RED = '#b22222';
+var CTRL = '#e07b54', STIM = '#2a9d8f';
+var N = 8;
+var CAPTIONS = [
+  'Control PBMCs: T cells, B cells and monocytes form three groups.',
+  'Add the stimulated sample. The same cell types land somewhere else.',
+  'Clustering without integration gives clusters by condition, not by cell type. This is the batch effect.',
+  'CCA finds anchors: pairs of cells from the two conditions that are each other\'s nearest neighbours in a shared space.',
+  'The anchors define a correction that moves matching cell types together.',
+  'After integration each cluster holds both conditions. This is what the split UMAP checks.',
+  'The expression values are not changed. IFIT1 is still high only in stimulated monocytes.',
+  'Do not integrate when the samples have no shared cell types. Anchors would force unrelated cells together.'
+];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y) { e.style.transform = 'translate(' + x + 'px,' + y + 'px)'; }
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 0) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function dd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+function dur(e, ms) { e.style.setProperty('--dur', ms + 'ms'); }
+
+/* ---------- seeded data ---------- */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var rng = mulberry32(42);
+function gauss() { var u = 1 - rng(), v = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+function blob(cx, cy, sd, n, minD) {
+  var out = [], tries = 0;
+  while (out.length < n) {
+    var x = cx + sd * gauss(), y = cy + sd * gauss();
+    tries++;
+    var md = tries < 4000 ? minD : minD * 0.7;
+    var ok = true;
+    for (var i = 0; i < out.length; i++) {
+      var dx = out[i].x - x, dy = out[i].y - y;
+      if (dx * dx + dy * dy < md * md) { ok = false; break; }
+    }
+    if (ok) { out.push({ x: x, y: y }); }
+  }
+  return out;
+}
+
+var TYPES = [
+  { name: 'T cells', col: '#2b6cb0', c: [200, 470], res: [6, -5] },
+  { name: 'B cells', col: '#2f855a', c: [390, 535], res: [5, 6] },
+  { name: 'Monocytes', col: '#dd6b20', c: [200, 290], res: [-6, 4] }
+];
+var OFF = [350, -90];
+var NCELL = 40;
+var cells = [];   /* every cell of the embedding panel */
+TYPES.forEach(function (ty, ti) {
+  ty.ctrl = blob(ty.c[0], ty.c[1], 27, NCELL, 20).map(function (p) { return { x: p.x, y: p.y, t: ti, cond: 0 }; });
+});
+TYPES.forEach(function (ty, ti) {
+  ty.stim = blob(ty.c[0] + OFF[0], ty.c[1] + OFF[1], 27, NCELL, 20).map(function (p) { return { x: p.x, y: p.y, t: ti, cond: 1 }; });
+});
+
+/* mutual nearest neighbours in the shared space (STIM shifted back by the offset) */
+function dist(a, b, ox, oy) { return Math.hypot(a.x - (b.x - ox), a.y - (b.y - oy)); }
+TYPES.forEach(function (ty) {
+  var A = ty.ctrl, B = ty.stim, nab = [], nba = [], i, j;
+  for (i = 0; i < A.length; i++) {
+    var bj = 0, bd = 1e9;
+    for (j = 0; j < B.length; j++) { var d = dist(A[i], B[j], OFF[0], OFF[1]); if (d < bd) { bd = d; bj = j; } }
+    nab.push(bj);
+  }
+  for (j = 0; j < B.length; j++) {
+    var bi = 0, bd2 = 1e9;
+    for (i = 0; i < A.length; i++) { var d2 = dist(A[i], B[j], OFF[0], OFF[1]); if (d2 < bd2) { bd2 = d2; bi = i; } }
+    nba.push(bi);
+  }
+  var pairs = [];
+  for (i = 0; i < A.length; i++) {
+    if (nba[nab[i]] === i) { pairs.push({ i: i, j: nab[i], d: dist(A[i], B[nab[i]], OFF[0], OFF[1]) }); }
+  }
+  ty.mnnCount = pairs.length;
+  pairs.sort(function (a, b) { return a.d - b.d; });
+  var chosen = [];
+  [48, 34, 20, 0].forEach(function (sep) {
+    pairs.forEach(function (p) {
+      if (chosen.length >= 6) { return; }
+      if (chosen.indexOf(p) >= 0) { return; }
+      var ok = chosen.every(function (q) { return Math.hypot(A[p.i].x - A[q.i].x, A[p.i].y - A[q.i].y) >= sep; });
+      if (ok) { chosen.push(p); }
+    });
+  });
+  ty.anchors = chosen;
+});
+
+/* convex hull with outward padding */
+function hull(pts, pad) {
+  var p = pts.map(function (q) { return [q.x, q.y]; }).sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+  function cross(o, a, b) { return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); }
+  var lo = [], up = [], i;
+  for (i = 0; i < p.length; i++) { while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], p[i]) <= 0) { lo.pop(); } lo.push(p[i]); }
+  for (i = p.length - 1; i >= 0; i--) { while (up.length >= 2 && cross(up[up.length - 2], up[up.length - 1], p[i]) <= 0) { up.pop(); } up.push(p[i]); }
+  up.pop(); lo.pop();
+  var h = lo.concat(up), cx = 0, cy = 0;
+  h.forEach(function (q) { cx += q[0]; cy += q[1]; });
+  cx /= h.length; cy /= h.length;
+  return h.map(function (q) {
+    var dx = q[0] - cx, dy = q[1] - cy, l = Math.hypot(dx, dy) || 1;
+    return (q[0] + dx / l * pad).toFixed(1) + ',' + (q[1] + dy / l * pad).toFixed(1);
+  }).join(' ');
+}
+
+/* ---------- frame ---------- */
+txt('Why integrate, and what CCA integration does', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 7', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: '#e2e8f0', 'stroke-width': 2 }, svg);
+
+/* ---------- embedding panel ---------- */
+var gEmb = el('g', { class: 't' }, svg);
+dur(gEmb, 600);
+el('rect', { x: 40, y: 120, width: 860, height: 580, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gEmb);
+var gAxHi = el('g', { class: 't' }, gEmb);
+el('rect', { x: 340, y: 664, width: 260, height: 34, fill: GOLD, 'fill-opacity': 0.55 }, gAxHi);
+el('rect', { x: 46, y: 300, width: 34, height: 260, fill: GOLD, 'fill-opacity': 0.55 }, gAxHi);
+var axPre = el('g', { class: 't' }, gEmb), axPost = el('g', { class: 't' }, gEmb);
+txt('pca', { class: 'mono', x: 470, y: 690, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, axPre);
+txt('pca', { class: 'mono', x: 0, y: 0, 'font-size': 26, 'text-anchor': 'middle', fill: INK, transform: 'translate(70,430) rotate(-90)' }, axPre);
+txt('integrated.cca', { class: 'mono', x: 470, y: 690, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, axPost);
+txt('integrated.cca', { class: 'mono', x: 0, y: 0, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK, transform: 'translate(70,430) rotate(-90)' }, axPost);
+
+/* hulls */
+var hulls6 = [], hulls3 = [];
+var gH = el('g', {}, gEmb);
+TYPES.forEach(function (ty) {
+  [ty.ctrl, ty.stim].forEach(function (arr) {
+    hulls6.push(el('polygon', { class: 't', points: hull(arr, 18), fill: ty.col, 'fill-opacity': 0.12, stroke: INK, 'stroke-width': 3, 'stroke-linejoin': 'round' }, gH));
+  });
+  var merged = ty.ctrl.concat(ty.stim.map(function (p) { return { x: p.x - OFF[0] + ty.res[0], y: p.y - OFF[1] + ty.res[1] }; }));
+  hulls3.push(el('polygon', { class: 't', points: hull(merged, 18), fill: ty.col, 'fill-opacity': 0.12, stroke: INK, 'stroke-width': 3, 'stroke-linejoin': 'round' }, gH));
+});
+hulls6.concat(hulls3).forEach(function (h) { h.style.opacity = 0; dur(h, 600); });
+
+/* cells */
+var gC = el('g', {}, gEmb);
+var cellEls = [];
+function mkCell(p, ty) {
+  var c = el('circle', { class: 't', cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: 8, fill: ty.col, stroke: p.cond ? STIM : CTRL, 'stroke-width': 3 }, gC);
+  c.style.opacity = 0; dur(c, 900);
+  cellEls.push({ e: c, p: p, ty: ty });
+}
+TYPES.forEach(function (ty) { ty.ctrl.forEach(function (p) { mkCell(p, ty); }); });
+TYPES.forEach(function (ty) { ty.stim.forEach(function (p) { mkCell(p, ty); }); });
+
+/* anchors */
+var gA = el('g', {}, gEmb);
+var anchorEls = [];
+TYPES.forEach(function (ty) {
+  ty.anchors.forEach(function (a) {
+    var C = ty.ctrl[a.i], S = ty.stim[a.j];
+    var len = Math.hypot(S.x - C.x, S.y - C.y), ux = (S.x - C.x) / len, uy = (S.y - C.y) / len;
+    var line = el('line', { class: 't', x1: C.x.toFixed(1), y1: C.y.toFixed(1), x2: S.x.toFixed(1), y2: S.y.toFixed(1), stroke: INK, 'stroke-width': 3, 'stroke-dasharray': '10 8', 'stroke-linecap': 'round' }, gA);
+    var tx = C.x + ux * 13, ty2 = C.y + uy * 13, px = -uy, py = ux;
+    var head = el('polygon', { class: 't', points: [tx, ty2, tx + ux * 22 + px * 9, ty2 + uy * 22 + py * 9, tx + ux * 22 - px * 9, ty2 + uy * 22 - py * 9].map(function (v) { return v.toFixed(1); }).join(','), fill: INK }, gA);
+    line.style.opacity = 0; head.style.opacity = 0; dur(line, 500); dur(head, 500);
+    anchorEls.push({ line: line, head: head });
+  });
+});
+
+/* blob labels */
+var lblEls = [];
+TYPES.forEach(function (ty, ti) {
+  var cE = txt(ty.name, { class: 't halo', x: ty.c[0], y: ty.c[1] - 58, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gEmb);
+  var sE = txt(ty.name, { class: 't halo', x: ty.c[0] + OFF[0], y: ty.c[1] + OFF[1] - 58, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gEmb);
+  cE.style.opacity = 0; sE.style.opacity = 0; dur(cE, 500); dur(sE, 500);
+  lblEls.push({ c: cE, s: sE });
+});
+
+/* outline legend */
+var legC = el('g', { class: 't' }, gEmb), legS = el('g', { class: 't' }, gEmb);
+el('circle', { cx: 700, cy: 160, r: 9, fill: '#ffffff', stroke: CTRL, 'stroke-width': 3 }, legC);
+txt('CTRL', { class: 'mono', x: 722, y: 169, 'font-size': 26, fill: INK }, legC);
+el('circle', { cx: 700, cy: 200, r: 9, fill: '#ffffff', stroke: STIM, 'stroke-width': 3 }, legS);
+txt('STIM', { class: 'mono', x: 722, y: 209, 'font-size': 26, fill: INK }, legS);
+
+/* ---------- IFIT1 strip ---------- */
+var gStrip = el('g', { class: 't' }, svg);
+dur(gStrip, 600);
+var gStripBase = el('g', { class: 't' }, gStrip);
+dur(gStripBase, 600);
+var stripBox = el('rect', { class: 't', x: 940, y: 120, width: 620, height: 400, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gStripBase);
+txt('IFIT1 in monocytes', { x: 962, y: 160, 'font-size': 28, 'font-weight': 700, fill: INK }, gStripBase);
+el('line', { x1: 1050, y1: 190, x2: 1050, y2: 470, stroke: INK, 'stroke-width': 3 }, gStripBase);
+el('line', { x1: 1050, y1: 470, x2: 1520, y2: 470, stroke: INK, 'stroke-width': 3 }, gStripBase);
+txt('high', { class: 'mono', x: 1038, y: 202, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gStripBase);
+txt('low', { class: 'mono', x: 1038, y: 470, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gStripBase);
+txt('CTRL', { class: 'mono', x: 1190, y: 506, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: CTRL }, gStripBase);
+txt('STIM', { class: 'mono', x: 1400, y: 506, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: STIM }, gStripBase);
+var gViol = el('g', { class: 't' }, gStrip);
+dur(gViol, 700);
+function violin(cx, base, H, peak, spread, top, wmax, col) {
+  var L = [], R = [], k, t, w;
+  for (k = 0; k <= 40; k++) {
+    t = top * k / 40;
+    w = wmax * Math.exp(-Math.pow((t - peak) / spread, 2)) + 3;
+    L.push((cx - w).toFixed(1) + ',' + (base - t * H).toFixed(1));
+    R.unshift((cx + w).toFixed(1) + ',' + (base - t * H).toFixed(1));
+  }
+  el('polygon', { points: L.concat(R).join(' '), fill: col, 'fill-opacity': 0.35, stroke: col, 'stroke-width': 4, 'stroke-linejoin': 'round' }, gViol);
+}
+violin(1190, 470, 280, 0.04, 0.09, 0.3, 62, CTRL);
+violin(1400, 470, 280, 0.66, 0.2, 0.96, 64, STIM);
+el('line', { x1: 1140, y1: 470 - 0.05 * 280, x2: 1240, y2: 470 - 0.05 * 280, stroke: INK, 'stroke-width': 4 }, gViol);
+el('line', { x1: 1350, y1: 470 - 0.66 * 280, x2: 1450, y2: 470 - 0.66 * 280, stroke: INK, 'stroke-width': 4 }, gViol);
+var stripHi = el('rect', { class: 't', x: 937, y: 117, width: 626, height: 406, fill: 'none', stroke: GOLD, 'stroke-width': 6 }, gStrip);
+stripHi.style.opacity = 0; dur(stripHi, 600);
+/* note: new reduction, counts unchanged */
+var gNote = el('g', { class: 't' }, svg);
+dur(gNote, 600);
+el('rect', { x: 940, y: 548, width: 270, height: 50, fill: GOLD, 'fill-opacity': 0.6 }, gNote);
+txt('integrated.cca', { class: 'mono', x: 956, y: 585, 'font-size': 30, 'font-weight': 700, fill: INK }, gNote);
+txt('is a new reduction', { x: 1230, y: 585, 'font-size': 30, fill: INK }, gNote);
+txt('RNA counts: unchanged', { class: 'mono', x: 956, y: 650, 'font-size': 30, 'font-weight': 700, fill: INK }, gNote);
+txt('RNA data: unchanged', { class: 'mono', x: 956, y: 696, 'font-size': 30, 'font-weight': 700, fill: INK }, gNote);
+
+/* ---------- step 8 panel ---------- */
+var gP8 = el('g', { class: 't' }, svg);
+dur(gP8, 600);
+el('rect', { x: 40, y: 120, width: 860, height: 580, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gP8);
+txt('pca', { class: 'mono', x: 470, y: 690, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gP8);
+txt('pca', { class: 'mono', x: 0, y: 0, 'font-size': 26, 'text-anchor': 'middle', fill: INK, transform: 'translate(70,430) rotate(-90)' }, gP8);
+var T8 = [
+  { cx: 200, cy: 270, col: '#d53f8c', out: INK, side: 0 },
+  { cx: 200, cy: 520, col: '#805ad5', out: INK, side: 0 },
+  { cx: 700, cy: 270, col: '#718096', out: GREY, side: 1 },
+  { cx: 700, cy: 520, col: '#f6ad55', out: GREY, side: 1 }
+];
+var gP8c = el('g', {}, gP8);
+T8.forEach(function (b) {
+  b.pts = blob(b.cx, b.cy, 27, NCELL, 20);
+  b.pts.forEach(function (p) { el('circle', { cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: 8, fill: b.col, stroke: b.out, 'stroke-width': 3 }, gP8c); });
+});
+/* anchors between unrelated types: tumour blob k with the normal blob on the same row */
+var gP8a = el('g', {}, gP8);
+[[0, 2], [1, 3]].forEach(function (pr) {
+  var A = T8[pr[0]].pts.slice().sort(function (a, b) { return b.x - a.x; }).slice(0, 3).sort(function (a, b) { return a.y - b.y; });
+  var B = T8[pr[1]].pts.slice().sort(function (a, b) { return a.x - b.x; }).slice(0, 3).sort(function (a, b) { return a.y - b.y; });
+  for (var i = 0; i < 3; i++) {
+    el('line', { x1: A[i].x.toFixed(1), y1: A[i].y.toFixed(1), x2: B[i].x.toFixed(1), y2: B[i].y.toFixed(1), stroke: INK, 'stroke-width': 3, 'stroke-dasharray': '10 8', 'stroke-linecap': 'round' }, gP8a);
+    var mx = (A[i].x + B[i].x) / 2, my = (A[i].y + B[i].y) / 2;
+    el('line', { x1: mx - 13, y1: my - 13, x2: mx + 13, y2: my + 13, stroke: RED, 'stroke-width': 6, 'stroke-linecap': 'round' }, gP8a);
+    el('line', { x1: mx - 13, y1: my + 13, x2: mx + 13, y2: my - 13, stroke: RED, 'stroke-width': 6, 'stroke-linecap': 'round' }, gP8a);
+  }
+});
+txt('tumour', { class: 'mono', x: 200, y: 168, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gP8);
+txt('normal', { class: 'mono', x: 700, y: 168, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gP8);
+var gL8 = el('g', { class: 't' }, svg);
+dur(gL8, 600);
+txt('No shared cell types', { x: 940, y: 168, 'font-size': 32, 'font-weight': 700, fill: INK }, gL8);
+el('circle', { cx: 956, cy: 236, r: 9, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gL8);
+txt('tumour sample', { x: 984, y: 246, 'font-size': 28, fill: INK }, gL8);
+el('circle', { cx: 956, cy: 290, r: 9, fill: '#ffffff', stroke: GREY, 'stroke-width': 3 }, gL8);
+txt('normal sample', { x: 984, y: 300, 'font-size': 28, fill: INK }, gL8);
+el('line', { x1: 943, y1: 341, x2: 969, y2: 367, stroke: RED, 'stroke-width': 6, 'stroke-linecap': 'round' }, gL8);
+el('line', { x1: 943, y1: 367, x2: 969, y2: 341, stroke: RED, 'stroke-width': 6, 'stroke-linecap': 'round' }, gL8);
+txt('anchor between unrelated types', { x: 984, y: 362, 'font-size': 28, fill: INK }, gL8);
+gP8.style.opacity = 0; gL8.style.opacity = 0;
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+/* ---------- state rendering ---------- */
+function render(s) {
+  var emb = s <= 7;
+  sh(gEmb, emb, 0);
+  sh(gStrip, emb, 0);
+
+  /* cells */
+  var nC = TYPES.length * NCELL;
+  cellEls.forEach(function (c, i) {
+    var isStim = c.p.cond === 1;
+    var vis = emb && (!isStim || s >= 2);
+    c.e.style.opacity = vis ? 1 : 0;
+    var slide = isStim && s >= 5;
+    var tx = slide ? -OFF[0] + c.ty.res[0] : 0, ty = slide ? -OFF[1] + c.ty.res[1] : 0;
+    tf(c.e, tx, ty);
+    var delay = 0;
+    if (isStim && s === 2) { delay = (i - nC) * 7; }
+    if (isStim && s === 5) { delay = 700 + TYPES.indexOf(c.ty) * 120; }
+    dd(c.e, delay);
+  });
+
+  /* labels */
+  lblEls.forEach(function (l, i) {
+    sh(l.c, emb, 100);
+    sh(l.s, s >= 2 && s <= 4, 100);
+  });
+  sh(legC, emb, 0);
+  sh(legS, s >= 2 && emb, 200);
+
+  /* axis labels */
+  sh(axPre, s < 5, 0);
+  sh(axPost, s >= 5 && emb, s === 5 ? 2000 : 0);
+  sh(gAxHi, s === 7, 300);
+
+  /* hulls */
+  hulls6.forEach(function (h) { sh(h, s === 3 || s === 4, 0); op(h, s === 3 ? 1 : (s === 4 ? 0.45 : 0)); });
+  hulls3.forEach(function (h) { sh(h, s === 6 || s === 7, s === 6 ? 300 : 0); });
+
+  /* anchors */
+  anchorEls.forEach(function (a, i) {
+    var on4 = s === 4 || s === 5;
+    dd(a.line, s === 4 ? (i % 6) * 70 : 0);
+    a.line.style.opacity = on4 ? 1 : 0;
+    dd(a.head, s === 5 ? 200 : 0);
+    a.head.style.opacity = s === 5 ? 1 : 0;
+  });
+
+  /* strip */
+  op(gStripBase, s >= 2 ? (s === 7 ? 1 : 0.3) : 0);
+  sh(gViol, s === 7, 300);
+  sh(stripHi, s === 7, 300);
+  sh(gNote, s === 7, 600);
+
+  /* step 8 */
+  sh(gP8, s === 8, 300);
+  sh(gL8, s === 8, 300);
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+window.__ep7 = { anchors: TYPES.map(function (t) { return [t.anchors.length, t.mnnCount]; }), cells: cellEls.length };
+
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

@@ -199,6 +199,8 @@ condition and have no other option.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 
+[Animation: Cells are not replicates](files/animations/ep8_pseudobulk.html)
+
 ## Pseudobulk Analysis
 
 Pseudobulk aggregation sums the raw UMI counts for each gene across all cells
@@ -413,6 +415,8 @@ A list of hundreds of DE genes is difficult to interpret gene by gene.
 **Gene Ontology (GO) enrichment analysis** asks: are the DE genes enriched
 for specific biological processes? This connects individual gene changes to
 broader biological themes.
+
+[Animation: What enrichGO tests](files/animations/ep8_go-enrichment.html)
 
 ### Converting gene symbols to Entrez IDs
 

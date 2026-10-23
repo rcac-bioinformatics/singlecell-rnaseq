@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What the aligner does with each read</title>
+<!--
+What the aligner does with each read (Episodes 1 and 2)
+
+Steps and captions
+ 1. One fragment, three reads.
+    R1 28 bp (16 bp cell barcode, blue; 12 bp UMI, orange), R2 91 bp cDNA (green), I1 8 bp sample index (purple). Bar lengths follow base pairs.
+ 2. The index read assigns the fragment to a sample.
+    I1 lifts off to a box "sample: pbmc_10k_v3".
+ 3. The 16 bp cell barcode is matched to the whitelist, allowing one mismatch.
+    The barcode lifts off next to a scrolling whitelist panel and one entry highlights.
+ 4. Read 2 aligns to the genome and lands in a gene.
+    The cDNA read lifts off to a genome track and lands on LYZ.
+ 5. The UMI deduplicates PCR copies of the same molecule.
+    The UMI joins three identical UMIs for this cell and LYZ, then the group collapses to one.
+ 6. One original molecule, one increment in the count matrix.
+    Matrix cell (row LYZ, column the barcode) goes from 2 to 3.
+ 7. Cell Ranger and STARsolo do the same steps and produce the same matrix format.
+    Cell Ranger about 5.5 h on 64 cores, STARsolo about 45 min, same matrix. Bar lengths follow the times.
+
+The whitelist strings, the other barcodes and the other matrix values are made up (mulberry32, seed 42).
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=4 opens at step 4. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke-opacity var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: what the aligner does with each read"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREY = '#cbd5e0', GRID = '#e2e8f0', GREYS = '#a0aec0';
+var BLUE = '#2b6cb0', ORANGE = '#dd6b20', GREEN = '#2f855a', PURPLE = '#805ad5';
+var N = 7;
+var CAPTIONS = [
+  'One fragment, three reads.',
+  'The index read assigns the fragment to a sample.',
+  'The 16 bp cell barcode is matched to the whitelist, allowing one mismatch.',
+  'Read 2 aligns to the genome and lands in a gene.',
+  'The UMI deduplicates PCR copies of the same molecule.',
+  'One original molecule, one increment in the count matrix.',
+  'Cell Ranger and STARsolo do the same steps and produce the same matrix format.'
+];
+var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, sx, sy) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + (sx === undefined ? 1 : sx) + ',' + (sy === undefined ? 1 : sy) + ')';
+}
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 350) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function setDur(e, ms) { e.style.setProperty('--dur', ms + 'ms'); }
+function setDd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var rng = mulberry32(42);
+function seq(n) { var s = '', b = 'ACGT'; for (var i = 0; i < n; i++) { s += b[Math.floor(rng() * 4)]; } return s; }
+var WL = []; for (var w = 0; w < 30; w++) { WL.push(seq(16)); }
+var MATCH = 22, BC = WL[MATCH], BC2 = WL[5], BC3 = WL[11];
+
+/* ---------- frame ---------- */
+txt('What the aligner does with each read', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episodes 1 and 2', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: GRID, 'stroke-width': 2 }, svg);
+
+/* ---------- read bars ---------- */
+var PB = 9, X0 = 140, BH = 48, RY = { R1: 150, R2: 270, I1: 390 };
+var gBars = el('g', { class: 't' }, svg);
+['R1', 'R2', 'I1'].forEach(function (r) { txt(r, { class: 'mono', x: 40, y: RY[r] + 34, 'font-size': 32, 'font-weight': 700, fill: INK }, gBars); });
+function seg(parent, x, y, w, fill, label) {
+  var g = el('g', { class: 't' }, parent);
+  el('rect', { x: x, y: y, width: w, height: BH, fill: fill, stroke: INK, 'stroke-width': 3 }, g);
+  txt(label, { x: x + w / 2, y: y + 33, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: '#ffffff' }, g);
+  return g;
+}
+var sCB = seg(gBars, X0, RY.R1, 16 * PB, BLUE, '16 bp');
+var sUMI = seg(gBars, X0 + 16 * PB, RY.R1, 12 * PB, ORANGE, '12 bp');
+var sR2 = seg(gBars, X0, RY.R2, 91 * PB, GREEN, '91 bp cDNA');
+var sI1 = seg(gBars, X0, RY.I1, 8 * PB, PURPLE, '8 bp');
+txt('28 bp: 16 bp cell barcode + 12 bp UMI', { x: X0 + 28 * PB + 22, y: RY.R1 + 34, 'font-size': 26, fill: INK }, gBars);
+txt('8 bp sample index', { x: X0 + 8 * PB + 22, y: RY.I1 + 34, 'font-size': 26, fill: INK }, gBars);
+
+/* chips (copies that travel) */
+function chip(x, y, w, fill, label) {
+  var g = el('g', { class: 't' }, svg);
+  setDur(g, 1100);
+  el('rect', { x: 0, y: 0, width: w, height: BH, fill: fill, stroke: INK, 'stroke-width': 3 }, g);
+  txt(label, { x: w / 2, y: 33, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: '#ffffff' }, g);
+  g._h = [x, y]; tf(g, x, y); op(g, 0);
+  return g;
+}
+var cI1 = chip(X0, RY.I1, 8 * PB, PURPLE, 'I1');
+var cCB = chip(X0, RY.R1, 16 * PB, BLUE, 'barcode');
+var cR2 = chip(X0, RY.R2, 156, GREEN, 'cDNA 91 bp');
+var cUMI = chip(X0 + 16 * PB, RY.R1, 12 * PB, ORANGE, 'UMI');
+
+/* step 2: sample box */
+var gSample = el('g', { class: 't' }, svg);
+el('rect', { x: 1000, y: 374, width: 540, height: 80, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gSample);
+txt('sample: pbmc_10k_v3', { class: 'mono', x: 1096, y: 424, 'font-size': 30, 'font-weight': 700, fill: INK }, gSample);
+
+/* step 3: whitelist */
+var gWL = el('g', { class: 't' }, svg);
+var clip = el('clipPath', { id: 'wlclip' }, el('defs', {}, svg));
+el('rect', { x: 1000, y: 150, width: 540, height: 360 }, clip);
+txt('whitelist', { x: 1000, y: 134, 'font-size': 30, 'font-weight': 700, fill: INK }, gWL);
+el('rect', { x: 1000, y: 150, width: 540, height: 360, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gWL);
+var wlClipG = el('g', { 'clip-path': 'url(#wlclip)' }, gWL);
+var wlList = el('g', { class: 't' }, wlClipG);
+WL.forEach(function (s, i) { txt(s, { class: 'mono', x: 1020, y: 150 + i * 40 + 29, 'font-size': 26, fill: INK }, wlList); });
+var wlHi = el('rect', { class: 't', x: 1000, y: 150 + 6 * 40, width: 540, height: 40, fill: GOLD, 'fill-opacity': 0.55, stroke: INK, 'stroke-width': 2.5 }, gWL);
+gWL.insertBefore(wlHi, wlClipG);
+txt('one mismatch allowed', { x: 1000, y: 556, 'font-size': 26, fill: INK }, gWL);
+
+/* step 4: genome track */
+var gGen = el('g', { class: 't' }, svg);
+txt('genome', { x: 1000, y: 510, 'font-size': 30, 'font-weight': 700, fill: INK }, gGen);
+el('line', { x1: 1000, y1: 430, x2: 1540, y2: 430, stroke: INK, 'stroke-width': 4 }, gGen);
+[[1020, 90, 0], [1330, 70, 0], [1430, 90, 0]].forEach(function (g) { el('rect', { x: g[0], y: 400, width: g[1], height: 60, fill: GRID, stroke: INK, 'stroke-width': 2.5 }, gGen); });
+el('rect', { x: 1147, y: 400, width: 156, height: 60, fill: GOLD, stroke: INK, 'stroke-width': 3 }, gGen);
+txt('LYZ', { class: 'mono', x: 1225, y: 440, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gGen);
+
+/* step 5: UMI group */
+var gGrp = el('g', { class: 't' }, svg);
+txt('same cell, same gene, same UMI', { x: 1000, y: 194, 'font-size': 28, 'font-weight': 700, fill: INK }, gGrp);
+el('rect', { x: 1000, y: 210, width: 540, height: 180, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gGrp);
+var GP = [[1030, 240], [1170, 240], [1030, 320], [1170, 320]], gc = [];
+[0, 1, 2].forEach(function (i) { gc.push(chip(GP[i][0], GP[i][1], 12 * PB, ORANGE, 'UMI')); setDur(gc[i], 800); });
+var lab4 = txt('4 reads', { class: 't mono', x: 1320, y: 312, 'font-size': 32, 'font-weight': 700, fill: INK }, svg);
+var lab1 = txt('1 molecule', { class: 't mono', x: 1320, y: 312, 'font-size': 32, 'font-weight': 700, fill: INK }, svg);
+
+/* step 6: matrix */
+var gMat = el('g', { class: 't' }, svg);
+txt('count matrix', { x: 1030, y: 150, 'font-size': 30, 'font-weight': 700, fill: INK }, gMat);
+var CX = [1030, 1190, 1350], RYM = [260, 330, 400], GN = ['LYZ', 'CD3D', 'ACTB'];
+var VALS = [[2, 5, 0], [0, 1, 4], [7, 9, 12]];
+[BC, BC2, BC3].forEach(function (s, j) { txt(s.slice(0, 6) + '...', { class: 'mono', x: CX[j] + 80, y: 212, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gMat); });
+GN.forEach(function (g, i) {
+  txt(g, { class: 'mono', x: 1018, y: RYM[i] + 42, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gMat);
+  CX.forEach(function (x, j) {
+    el('rect', { x: x, y: RYM[i], width: 160, height: 64, fill: '#ffffff', stroke: INK, 'stroke-width': 2.5 }, gMat);
+    if (!(i === 0 && j === 0)) { txt(String(VALS[i][j]), { class: 'mono', x: x + 80, y: RYM[i] + 43, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gMat); }
+  });
+});
+var mHi = el('rect', { class: 't', x: 1030, y: 260, width: 160, height: 64, fill: GOLD, 'fill-opacity': 0.6, stroke: INK, 'stroke-width': 4 }, gMat);
+var v2 = txt('2', { class: 't mono', x: 1120, y: 303, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gMat);
+var v3 = txt('3', { class: 't mono', x: 1120, y: 303, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gMat);
+var plus = txt('+1', { class: 't mono', x: 1040, y: 303, 'font-size': 28, 'font-weight': 700, fill: INK }, gMat);
+txt('cells (barcodes)', { x: 1270, y: 512, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gMat);
+
+/* step 7: comparison */
+var gCmp = el('g', { class: 't' }, svg);
+function card(x, name, w, label) {
+  el('rect', { x: x, y: 140, width: 620, height: 270, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gCmp);
+  txt(name, { x: x + 30, y: 205, 'font-size': 42, 'font-weight': 700, fill: INK }, gCmp);
+  el('rect', { x: x + 30, y: 245, width: 560, height: 44, fill: '#ffffff', stroke: INK, 'stroke-width': 2.5 }, gCmp);
+  el('rect', { x: x + 30, y: 245, width: w, height: 44, fill: GREYS, stroke: INK, 'stroke-width': 2.5 }, gCmp);
+  txt(label, { x: x + 30, y: 350, 'font-size': 34, 'font-weight': 700, fill: INK }, gCmp);
+}
+card(100, 'Cell Ranger', 560, 'about 5.5 h on 64 cores');
+card(880, 'STARsolo', 560 * 45 / 330, 'about 45 min');
+[[410, 440, 740, 540], [1190, 440, 860, 540]].forEach(function (a) { el('line', { x1: a[0], y1: 412, x2: a[2], y2: a[3] - 10, stroke: INK, 'stroke-width': 4 }, gCmp); });
+el('polygon', { points: '748,552 726,528 752,520', fill: INK }, gCmp);
+el('polygon', { points: '852,552 848,520 874,528', fill: INK }, gCmp);
+for (var r = 0; r < 3; r++) { for (var c = 0; c < 4; c++) { el('rect', { x: 716 + c * 42, y: 566 + r * 42, width: 36, height: 36, fill: GRID, stroke: INK, 'stroke-width': 2 }, gCmp); } }
+txt('same matrix', { x: 910, y: 640, 'font-size': 32, 'font-weight': 700, fill: INK }, gCmp);
+
+[cI1, cCB, cR2, cUMI].concat(gc).forEach(function (c) { svg.appendChild(c); });
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+
+/* ---------- state ---------- */
+var phaseTimer = null, firstRender = true;
+function place(c, atDest, dest, on) {
+  var p = atDest ? dest : c._h;
+  tf(c, p[0], p[1]); op(c, on ? 1 : 0);
+}
+function render(s, prev) {
+  clearTimeout(phaseTimer);
+  var anim = !firstRender && !REDUCE;
+  /* bars */
+  sh(gBars, s <= 6, 350);
+  op(sI1, s >= 2 ? 0.25 : 1); op(sCB, s >= 3 ? 0.25 : 1); op(sR2, s >= 4 ? 0.25 : 1); op(sUMI, s >= 5 ? 0.25 : 1);
+  /* chips */
+  setDd(cI1, 0); setDd(cCB, 0); setDd(cR2, 0); setDd(cUMI, 0);
+  place(cI1, s >= 2, [1012, RY.I1 + 0], s === 2);
+  place(cCB, s >= 3, [846, 394], s === 3);
+  place(cR2, s >= 4, [1147, 346], s === 4);
+  place(cUMI, s >= 5, [GP[3][0], GP[3][1]], s === 5);
+  /* panels */
+  sh(gSample, s === 2, 450);
+  sh(gWL, s === 3, 350);
+  setDur(wlList, 2400);
+  wlList.style.setProperty('--dd', s === 3 ? '1200ms' : '0ms');
+  tf(wlList, 0, s >= 3 ? -(MATCH - 6) * 40 : 0);
+  wlHi.style.setProperty('--dd', s === 3 ? '3500ms' : '0ms'); op(wlHi, s === 3 ? 1 : 0);
+  sh(gGen, s === 4, 450);
+  sh(gGrp, s === 5, 350);
+  /* step 5 two-phase */
+  var pre5 = (s === 5 && prev === 4 && anim);
+  gc.forEach(function (c, i) {
+    setDd(c, 0); tf(c, pre5 ? GP[i][0] : GP[3][0], pre5 ? GP[i][1] : GP[3][1]);
+    op(c, pre5 ? 1 : 0);
+  });
+  op(lab4, pre5 ? 1 : 0); op(lab1, (s === 5 && !pre5) ? 1 : 0);
+  if (pre5) {
+    phaseTimer = setTimeout(function () {
+      gc.forEach(function (c) { tf(c, GP[3][0], GP[3][1]); op(c, 0); });
+      op(lab4, 0); op(lab1, 1);
+    }, 2600);
+  }
+  /* step 6 two-phase */
+  sh(gMat, s === 6, 350);
+  var pre6 = (s === 6 && prev !== 6 && anim);
+  op(v2, pre6 ? 1 : 0); op(v3, (s === 6 && !pre6) ? 1 : 0);
+  op(plus, (s === 6 && !pre6) ? 1 : 0);
+  op(mHi, s === 6 ? 1 : 0);
+  if (pre6) {
+    phaseTimer = setTimeout(function () { op(v2, 0); op(v3, 1); op(plus, 1); }, 1600);
+  }
+  sh(gCmp, s === 7, 350);
+  firstRender = false;
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  var pv = cur; cur = n; render(cur, pv); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur, 0); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

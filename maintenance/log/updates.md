@@ -199,6 +199,57 @@ Prose that contradicts the measured output blocks. The coaching files use the me
   - The ep7 13-label figures (`annotated-umap`, `challenge1`), `ep8_umap_split`, `ep8_volcano`, `ep8_pval_comparison` and `ep8_go_top200` match their text as is.
   - The three missing ep6 figures came back in bundle `scrna-kit-2026-10-21-20261023-1232` (redraw log `redraw_figures.770930.log`, all 25 rows; the other 22 byte-identical to the earlier copies) and are in `episodes/fig/`; `coaching_09` checked against them.
 
+### Instructor animations, 2026-10-23
+
+`episodes/files/animations/` holds 22 self-contained step-through animations (all tiers of `maintenance/prompts/prompt-03-animations.md`; committed 2026-10-23 with patches 27 and 28). Patch 27 (`updates-patches/27-animation-links.patch`, proposed and applied 2026-10-23; links visible to learners, no instructor divs, no iframe) adds one `[Animation: <title>](files/animations/<file>.html)` line for each, after the paragraph or callout it supports. The prompt-03 line anchors predate patches 24 to 26, so each was placed by its section heading; lines below are after the patch. Step counts are from each file's header comment.
+
+| File | Steps | Linked at (after patch 27) |
+|---|---|---|
+| `ep1_bulk-vs-single-cell` | 4 | `introduction.Rmd:48`, after the smoothie paragraph |
+| `ep1_gem-formation` | 7 | `introduction.Rmd:128`, after "3. Library construction" |
+| `ep1_reads-to-matrix` | 7 | `introduction.Rmd:150`, after the "alignment software reads all three components" paragraph (prompt-03 also names `raw-data-processing.Rmd` "What is in each read?"; linked once, in episode 1) |
+| `ep1_umi-dedup` | 7 | `introduction.Rmd:210`, after "UMIs solve the PCR duplication problem" |
+| `ep2_slurm-lifecycle` | 6 | `raw-data-processing.Rmd:332`, after the "After the workshop: run it for real" callout |
+| `ep2_cell-calling` | 5 | `raw-data-processing.Rmd:450`, after the filtered_feature_bc_matrix paragraph |
+| `ep3_seurat-object-tracker` | 13 | `quality-control.Rmd:171`, after the Seurat v5 object figure |
+| `ep3_dying-cell` | 6 | `quality-control.Rmd:357`, after the "What do dying cells look like?" callout |
+| `ep3_qc-thresholds` | interactive, 3 presets | `quality-control.Rmd:400`, after the threshold violin paragraph |
+| `ep3_doublets` | 6 | `quality-control.Rmd:541`, after the "Doublets in scRNA-seq" callout |
+| `ep4_lognormalize` | 7 | `normalization-and-features.Rmd:121`, after the formula |
+| `ep4_variable-features` | 6 | `normalization-and-features.Rmd:294`, after the vst parameter table |
+| `ep4_scaling` | 4 | `normalization-and-features.Rmd:349`, after "Why is this necessary?" |
+| `ep5_pca-axes` | 8 | `dimensionality-reduction-clustering.Rmd:111`, after the PCA key properties list |
+| `ep5_umap-pitfalls` | 6 | `dimensionality-reduction-clustering.Rmd:272`, after the "UMAP interpretation pitfalls" callout |
+| `ep5_graph-clustering` | 8 (step 6 has 4 resolution sub-steps) | `dimensionality-reduction-clustering.Rmd:326`, after the FindClusters parameter table |
+| `ep6_find-all-markers` | 8 | `cell-type-annotation.Rmd:187`, after "A good marker gene has..." |
+| `ep6_rename-idents` | 4 | `cell-type-annotation.Rmd:327`, after the "Check the mapping against your own clusters" callout |
+| `ep6_singler` | 5 | `cell-type-annotation.Rmd:399`, after the SingleR intro paragraph |
+| `ep7_integration-anchors` | 8 | `multi-sample-integration.Rmd:206`, after the three-step CCA list |
+| `ep8_pseudobulk` | 8 | `differential-expression.Rmd:202`, after "The pseudobulk revolution" callout |
+| `ep8_go-enrichment` | 6 | `differential-expression.Rmd:419`, after the Functional Enrichment intro |
+
+- Build: `sandpaper::build_lesson()` (sandpaper 0.17.1, pegboard 0.7.9, varnish 1.0.7) copies `episodes/files/` to `site/built/files/animations/` and on to `site/docs/files/animations/` (22 files, byte-identical). With patch 27 applied (in a scratch worktree), the links render as `files/animations/...` on learner pages and are rewritten to `../files/animations/...` on instructor pages, so both views resolve; `validate_lesson()` is clean.
+- `[should-fix]` `ep1_umi-dedup.html` is mode 0444. Sandpaper keeps the mode when copying, so the second local build fails with `[EACCES] Failed to copy ... ep1_umi-dedup.html` and the site keeps the old copy. CI is not affected (git stores 0644). Fixed 2026-10-23: `chmod 644` on the source. The copies an earlier local build had already made in `site/built/` and `site/docs/` kept 0444 and still blocked the copy (and every file after it, so five patched animations stayed stale in `site/`) until they were made writable as well; anyone who built locally before the fix needs `chmod 644 site/built/files/animations/ep1_umi-dedup.html site/docs/files/animations/ep1_umi-dedup.html` once.
+- `[check]` Raw HTML embedding. A probe (an `<iframe src="files/animations/ep3_dying-cell.html">` in `quality-control.Rmd`, scratch worktree only) builds and validates, and the tag reaches both pages unchanged, but the instructor page keeps `src="files/..."`, which does not exist under `instructor/`. Sandpaper rewrites markdown links for the instructor view, not raw HTML attributes. Still to check in a browser: whether the iframe renders and scales on the learner page. Until then keep plain links.
+- Animation content that no longer matches the lesson (the briefs were written before patches 24 and 25); all six fixed by patch 28 below:
+  - `[should-fix]` `ep8_pseudobulk` step 7: Wilcoxon 759 and pseudobulk 1,464; the lesson now gives 825 and 1,539 (`differential-expression.Rmd:161,315`).
+  - `[should-fix]` `ep3_seurat-object-tracker` step 13: `bulk` with 54 columns; the episode 8 output block shows 78 pseudobulk samples (patch 24).
+  - `[should-fix]` `ep3_doublets` step 6: "about 3 to 5 percent doublets" at 10,000 cells; patch 25 changed the episode to 0.8 percent per 1,000 cells recovered, about 8 to 9 percent here (`quality-control.Rmd:525-528`).
+  - `[should-fix]` `ep3_qc-thresholds` challenge presets: counter shows "of 9874 cells" with answers 7,579 and 2,709; since patch 25 challenge 1 compares with the episode's 11,310 cells (7,579) and challenge 2 is `percent.mt < 5` on the filtered object (3,276 cells).
+  - `[nice]` `ep8_go-enrichment` step 1: 271 up-regulated genes; the episode now gives 293 (`differential-expression.Rmd:449`). The overlap numbers (320, 45, about 9) are marked illustrative in the file.
+  - `[nice]` `ep2_slurm-lifecycle` header comment says the project notes list the account as `workshop`; the lesson uses `rcac-rnaseq` (patch 09), which is what the animation shows. Only the comment is stale.
+- Patch 28 (`updates-patches/28-animation-numbers.patch`, proposed and applied 2026-10-23) fixes the six items above in the animation files only:
+  - `ep8_pseudobulk` step 7: caption, header and both counter cards now 825 and 1,539 (bar widths keep the ratio).
+  - `ep3_seurat-object-tracker` step 13: `bulk` badge and grid now 78 columns (13 x 6 grid, 13 cell types x 2 conditions x 3 pseudo-replicates, smaller squares to fit the box).
+  - `ep3_doublets` step 6: card now "about 8 to 9 percent", with "10x expects about 0.8 percent per 1,000 cells recovered, so about 8 to 9 percent for the 11,809 cells here". Caption unchanged.
+  - `ep3_qc-thresholds`: the challenge line now reads "From the 11310 filtered cells: N kept (lesson answer: 7579 / 3276)". Both presets are inside the lesson defaults, so N is the preset's simulated count over the defaults' simulated count, times 11,310. Achieved: challenge 1 8,181 (lesson 7,579, +7.9 percent), `percent.mt < 5` 3,118 (lesson 3,276, -4.8 percent), within prompt-03's 10 percent. The simulation itself is unchanged.
+  - `ep8_go-enrichment`: 293 up-regulated genes; GeneRatio 45/293; expected overlap 293 x 320 / 9451 = 9.9, so "about 10" in the bar, its label and the step 4 caption. To keep the step 5 dot plot sorted, the illustrative ratio of the row below "response to virus" moved from 0.155 to 0.150.
+  - `ep2_slurm-lifecycle`: header comment now says the account is `rcac-rnaseq` as in episode 2 since patch 09.
+  - Tested: headless Chromium 1600 x 900 screenshots of each changed step and of both presets, and an autoplay run of all six files with no console errors. `build_lesson()` copies all 22 files byte-identical to `site/docs/files/animations/`; `validate_lesson()` clean.
+- `[should-fix]` (new, not fixed) `ep8_go-enrichment` step 5 term list is illustrative but leads with "response to type I interferon"; the episode's Negishi GO top 15 has no type I interferon term (patch 18) and leads with response to virus, defense response to virus, viral process. Replace the illustrative names with the episode's terms (`differential-expression.Rmd` GO expected output) before the delivery, or say so out loud at step 5.
+- Cue sheet inputs: the table above is also in `maintenance/prompts/prompt-02-generate-coaching.md` (new "Animations" paragraph), so the coaching files can refer to each animation at the point it is shown. The existing coaching files were not regenerated; one paragraph naming each episode's animations was appended to `coaching_00` to `coaching_09` on 2026-10-23 (markup scan clean). That puts three files over prompt-02's word ranges: `coaching_00` 1,571 (max 1,500), `coaching_07` 3,052 (max 3,000), `coaching_09` 5,039 (max 5,000); the others stay in range.
+- `[nice]` `coaching_03` (two places) says challenge 2 loses "seventy-two percent"; the episode says 71 percent (3,276 of 11,310). Fix at the next regeneration. CLAUDE.md says the cue sheets are generated with prompt-02, but prompt-02 only defines the coaching files; there is no cue sheet spec.
+
 ## Runtime record
 
 Append per-step wall time and MaxRSS from testing (Cell Ranger count, STAR index, STARsolo), RStudio session memory peaks per episode, tool versions and `sessionInfo()`. Compare against the times claimed in the text and the schedule.

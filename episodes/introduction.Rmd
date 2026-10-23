@@ -45,6 +45,8 @@ RNA-seq gives you the smoothie. **Single-cell RNA-seq (scRNA-seq)** gives you
 the fruit bowl: every piece of fruit is kept separate, so you can count, sort,
 and inspect them one by one.
 
+[Animation: Bulk averages, single-cell counts](files/animations/ep1_bulk-vs-single-cell.html)
+
 scRNA-seq works by isolating individual cells, capturing their mRNA, and
 sequencing each cell's transcriptome independently. Instead of one expression
 profile per sample, you get thousands of individual expression profiles, one
@@ -123,6 +125,8 @@ prepared into a sequencing library. Even though the cDNA from all cells is now
 mixed in one tube, the cell barcodes embedded in each molecule let us
 computationally sort the reads back to their cell of origin.
 
+[Animation: Inside a 10x Chromium GEM](files/animations/ep1_gem-formation.html)
+
 **4. Sequencing.**
 The library is sequenced on an Illumina sequencer, producing paired-end reads
 plus an index read. The read structure is:
@@ -142,6 +146,8 @@ The alignment software (Cell Ranger or STARsolo) reads all three components:
 it uses the index read to assign reads to samples, the cell barcode to assign
 reads to cells, the UMI to count unique molecules, and Read 2 to identify the
 gene of origin.
+
+[Animation: What the aligner does with each read](files/animations/ep1_reads-to-matrix.html)
 
 :::::::::::::::::::::::::::::::::::::::: callout
 
@@ -200,6 +206,8 @@ appear to be highly expressed. With UMIs, all 100 reads share the same UMI
 sequence and are collapsed into a single count. This means UMI counts are
 proportional to the actual number of mRNA molecules in the cell, not to PCR
 amplification efficiency.
+
+[Animation: Why UMI counts are integers](files/animations/ep1_umi-dedup.html)
 
 For the PBMC 10k v3 dataset we will use in this workshop, the count matrix
 contains 11,809 cell barcodes and 38,606 genes. After removing genes detected

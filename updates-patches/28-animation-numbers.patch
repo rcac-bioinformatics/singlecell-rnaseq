@@ -1,0 +1,212 @@
+--- a/episodes/files/animations/ep2_slurm-lifecycle.html
++++ b/episodes/files/animations/ep2_slurm-lifecycle.html
+@@ -22,8 +22,7 @@
+     A job shows TO, the _lock file is removed, the job is resubmitted and the later stages run.
+ 
+ Check before teaching
+- - The account name rcac-rnaseq is as given in the brief. The project notes list the workshop SLURM account as "workshop".
+-   Change the ACCOUNT constant below if the lesson uses the other one.
++ - The account is rcac-rnaseq, as in episode 2 since patch 09 (2026-10-21; it was "workshop" before).
+  - The #SBATCH lines are my reconstruction of the requested resources (account, nodes, ntasks, time), not the lesson's file.
+    There is no --mem line, as RCAC memory follows core count.
+  - "would start at ..." keeps the ellipsis from the brief because no time was supplied.
+--- a/episodes/files/animations/ep3_doublets.html
++++ b/episodes/files/animations/ep3_doublets.html
+@@ -19,7 +19,7 @@
+  5. Thresholds cannot see it. This is what scDblFinder and DoubletFinder are for.
+     The two T cell barcode sits inside the main cloud. The first doublet is shown faded as removed.
+  6. At standard loading, QC thresholds and annotation catch most of the damage.
+-    Note card: about 3 to 5 percent doublets at 10000 cells loaded; dedicated tools matter at high loading or with multiplexing.
++    Note card: about 0.8 percent doublets per 1,000 cells recovered, so about 8 to 9 percent for the 11,809 cells here; dedicated tools matter at high loading or with multiplexing.
+ 
+ The scatter cloud is simulated (mulberry32, seed 42) with a median nCount_RNA of 10357 and a median nFeature_RNA of 3378.
+ The two doublet points are placed by hand and are illustrative, as are the bar heights.
+@@ -185,7 +185,7 @@
+ el('rect', { x: 240, y: 130, width: 1120, height: 530, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gCard);
+ el('rect', { x: 240, y: 130, width: 14, height: 530, fill: GOLD }, gCard);
+ txt('Doublet rate', { x: 290, y: 210, 'font-size': 44, 'font-weight': 700, fill: INK }, gCard);
+-txt('about 3 to 5 percent', { x: 290, y: 320, 'font-size': 76, 'font-weight': 700, fill: INK }, gCard);
++txt('about 8 to 9 percent', { x: 290, y: 320, 'font-size': 76, 'font-weight': 700, fill: INK }, gCard);
+ var cardA = txt('', { x: 290, y: 400, 'font-size': 36, fill: INK }, gCard);
+ var cardB = txt('', { x: 290, y: 530, 'font-size': 36, fill: INK }, gCard);
+ 
+@@ -221,7 +221,7 @@
+   lines.forEach(function (ln, n) { var ts = el('tspan', { x: 290, dy: n ? lh : 0 }, t); ts.textContent = ln; });
+   meas.setAttribute('font-size', 32);
+ }
+-fill(cardA, '10x at 10000 cells loaded gives about 3 to 5 percent doublets.', 1020, 36, 50);
++fill(cardA, '10x expects about 0.8 percent per 1,000 cells recovered, so about 8 to 9 percent for the 11,809 cells here.', 1020, 36, 50);
+ fill(cardB, 'Dedicated tools matter at high loading or with multiplexing.', 1020, 36, 50);
+ var controls = el('g', { id: 'controls' }, svg);
+ function mkBtn(label, x, w, fn) {
+--- a/episodes/files/animations/ep3_qc-thresholds.html
++++ b/episodes/files/animations/ep3_qc-thresholds.html
+@@ -18,6 +18,8 @@
+ Interaction
+  Drag any of the four dashed red lines by its handle (44 px tall). The counter and the faded points update live.
+  Buttons or keys: 1 = Lesson defaults (200, 7000, 50000, 15). 2 = Challenge 1 (300, 4000, 10). 3 = percent.mt < 5.
++ The challenge presets also show the count from the 11310 filtered cells, as the episode's challenges run on the filtered object
++ (lesson answers 7579 and 3276); both presets are inside the defaults, so this is the defaults' kept cells scaled to 11310.
+  Presets animate the lines over 600 ms. R also restores the lesson defaults.
+  URL: ?preset=2 opens with a preset.
+ -->
+@@ -236,8 +238,8 @@
+   var kept = scaled(k);
+   counter.textContent = 'Cells kept: ' + kept + ' of ' + TOTAL + ' (' + (kept / TOTAL * 100).toFixed(1) + ' percent)';
+   /* cells failing each panel's own lines */
+-  var CH = [null, 7579, 2709], frac = k / NSIM;
+-  counter2.textContent = (match0() >= 1) ? ('Challenge dataset: ' + Math.round(frac * 9874) + ' of 9874 cells (lesson answer: ' + CH[match0()] + ')') : '';
++  var CH = [null, 7579, 3276], frac = k / simKept(PRESETS[0].v);
++  counter2.textContent = (match0() >= 1) ? ('From the 11310 filtered cells: ' + Math.round(frac * DEFAULT_KEPT) + ' kept (lesson answer: ' + CH[match0()] + ')') : '';
+   var f = [0, 0, 0];
+   for (i = 0; i < NSIM; i++) {
+     if (!(NF[i] > vals[0] && NF[i] < vals[1])) { f[0]++; }
+--- a/episodes/files/animations/ep3_seurat-object-tracker.html
++++ b/episodes/files/animations/ep3_seurat-object-tracker.html
+@@ -28,7 +28,7 @@
+  11. ifnb appears           Episode 7. Splitting an assay makes one layer per sample.
+  12. IntegrateLayers() and JoinLayers()
+                             Integration adds a reduction. JoinLayers merges the layers again. Saved as ifnb_annotated.rds.
+- 13. AggregateExpression()  Episode 8. Pseudobulk is a new, much smaller object.               (bulk, 54 columns)
++ 13. AggregateExpression()  Episode 8. Pseudobulk is a new, much smaller object.               (bulk, 78 columns: 13 cell types x 2 conditions x 3 pseudo-replicates)
+ 
+ Controls
+  Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+@@ -241,15 +241,15 @@
+ el('rect', { x: 720, y: 330, width: 430, height: 340, fill: '#ffffff', stroke: INK, 'stroke-width': 4 }, gB);
+ txt('bulk', { class: 'mono', x: 744, y: 378, 'font-size': 38, 'font-weight': 700, fill: INK }, gB);
+ (function () {
+-  var p = pill(gB, 944, 346, 186, 46, '54 columns', { fill: '#ffffff', fs: 26, rx: 23 });
++  var p = pill(gB, 944, 346, 186, 46, '78 columns', { fill: '#ffffff', fs: 26, rx: 23 });
+   p.t.setAttribute('x', 1037); p.t.setAttribute('text-anchor', 'middle');
+   reg(p.g, 13, 99, 0, [{ el: p.r, base: '#ffffff' }]);
+   var cells = el('g', { class: 't' }, gB);
+   dur(cells, 500);
+   var rects = [];
+-  for (var i = 0; i < 54; i++) {
+-    var cx = 744 + (i % 9) * 40, cy = 420 + Math.floor(i / 9) * 40;
+-    rects.push(el('rect', { class: 't', x: cx, y: cy, width: 32, height: 32, fill: FILL, stroke: INK, 'stroke-width': 2 }, cells));
++  for (var i = 0; i < 78; i++) {
++    var cx = 744 + (i % 13) * 30, cy = 420 + Math.floor(i / 13) * 30;
++    rects.push(el('rect', { class: 't', x: cx, y: cy, width: 24, height: 24, fill: FILL, stroke: INK, 'stroke-width': 2 }, cells));
+     dur(rects[i], 450);
+   }
+   reg(cells, 13, 99, 0, rects.map(function (r) { return { el: r, base: FILL }; }));
+--- a/episodes/files/animations/ep8_go-enrichment.html
++++ b/episodes/files/animations/ep8_go-enrichment.html
+@@ -8,22 +8,22 @@
+ What enrichGO tests (Episode 8, GO enrichment)
+ 
+ Steps and captions
+- 1. Start with 271 up-regulated genes and the background of tested genes.
+-    A box "all tested genes, 9451" with a field of dots, and a circle "DE genes, 271".
++ 1. Start with 293 up-regulated genes and the background of tested genes.
++    A box "all tested genes, 9451" with a field of dots, and a circle "DE genes, 293".
+  2. Each GO term is a set of genes.
+     A second circle "response to virus, 320 genes".
+  3. Count the overlap.
+     The 45 shared dots highlight, label "45 shared".
+- 4. Compare with what random draws would give. 45 vs about 9 is enrichment.
+-    Two bars: expected by chance about 9, observed 45.
++ 4. Compare with what random draws would give. 45 vs about 10 is enrichment.
++    Two bars: expected by chance about 10, observed 45.
+  5. Repeat for every term, adjust for multiple testing, plot the top 15.
+     A ranked list of 15 terms with GeneRatio and adjusted p-value drawn as a dot plot.
+  6. enrichGO is over-representation. GSEA is a different test on the full ranking.
+     ORA uses a cutoff list; GSEA uses the full ranked list.
+ 
+-Numbers from the brief: 9451, 271, 320, 45, about 9, 15.
+-Derived and stated on the slide: GeneRatio 45/271 for response to virus; expected overlap 271 x 320 / 9451 = 9.2.
+-Stylised: the circle areas are not proportional to the set sizes. The dots inside the DE circle (271), the term circle (320)
++Numbers: 9451, 320, 45 and 15 from the brief; 293 from the episode 8 output block (patch 28; the brief had 271).
++Derived and stated on the slide: GeneRatio 45/293 for response to virus; expected overlap 293 x 320 / 9451 = 9.9.
++Stylised: the circle areas are not proportional to the set sizes. The dots inside the DE circle (293), the term circle (320)
+ and the overlap (45) are drawn one per gene. The grey background dots are only a sample of the 9451, placed by seed 42.
+ Illustrative: step 5 term names other than "response to virus", and all of their GeneRatio, count and adjusted p values.
+ Step 6 pictograms are schematic.
+@@ -59,10 +59,10 @@
+ var INK = '#1f2937', GOLD = '#ceb888', GRID = '#e2e8f0', UP = '#b22222', DOWN = '#4682b4', GREYS = '#a0aec0', SLATE = '#4a5568', BG = '#cbd5e0';
+ var N = 6;
+ var CAPTIONS = [
+-  'Start with 271 up-regulated genes and the background of tested genes.',
++  'Start with 293 up-regulated genes and the background of tested genes.',
+   'Each GO term is a set of genes.',
+   'Count the overlap.',
+-  'Compare with what random draws would give. 45 vs about 9 is enrichment.',
++  'Compare with what random draws would give. 45 vs about 10 is enrichment.',
+   'Repeat for every term, adjust for multiple testing, plot the top 15.',
+   'enrichGO is over-representation. GSEA is a different test on the full ranking.'
+ ];
+@@ -127,7 +127,7 @@
+ var gC1 = el('g', { class: 't' }, gDiag);
+ el('circle', { cx: C1.x, cy: C1.y, r: C1.r, fill: 'none', stroke: UP, 'stroke-width': 5 }, gC1);
+ txt('DE genes,', { x: C1.x - C1.r - 14, y: C1.y - 6, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'end', fill: UP }, gC1);
+-txt('271', { x: C1.x - C1.r - 14, y: C1.y + 32, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'end', fill: UP }, gC1);
++txt('293', { x: C1.x - C1.r - 14, y: C1.y + 32, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'end', fill: UP }, gC1);
+ var gC2 = el('g', { class: 't' }, gDiag);
+ el('circle', { cx: C2.x, cy: C2.y, r: C2.r, fill: 'none', stroke: SLATE, 'stroke-width': 5 }, gC2);
+ txt('response to virus,', { x: C2.x + C2.r + 14, y: C2.y - 6, 'font-size': 30, 'font-weight': 700, fill: SLATE }, gC2);
+@@ -143,17 +143,17 @@
+ txt('expected by chance', { x: BX0 - 20, y: 275, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gBars);
+ txt('observed', { x: BX0 - 20, y: 435, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gBars);
+ el('line', { x1: BX0, y1: 190, x2: BX0, y2: 520, stroke: INK, 'stroke-width': 3 }, gBars);
+-var bExp = el('rect', { class: 't', x: 0, y: 0, width: 9 * UPX, height: 100, fill: GREYS, stroke: INK, 'stroke-width': 3 }, gBars);
++var bExp = el('rect', { class: 't', x: 0, y: 0, width: 10 * UPX, height: 100, fill: GREYS, stroke: INK, 'stroke-width': 3 }, gBars);
+ var bObs = el('rect', { class: 't', x: 0, y: 0, width: 45 * UPX, height: 100, fill: GOLD, stroke: INK, 'stroke-width': 3 }, gBars);
+-var tExp = txt('about 9', { class: 't', x: BX0 + 9 * UPX + 18, y: 275, 'font-size': 38, 'font-weight': 700, fill: INK }, gBars);
++var tExp = txt('about 10', { class: 't', x: BX0 + 10 * UPX + 18, y: 275, 'font-size': 38, 'font-weight': 700, fill: INK }, gBars);
+ var tObs = txt('45', { class: 't', x: BX0 + 45 * UPX + 18, y: 435, 'font-size': 38, 'font-weight': 700, fill: INK }, gBars);
+-txt('expected = 271 x 320 / 9451', { x: BX0, y: 580, 'font-size': 30, fill: INK }, gBars);
++txt('expected = 293 x 320 / 9451', { x: BX0, y: 580, 'font-size': 30, fill: INK }, gBars);
+ 
+ /* ---------- step 5 dot plot ---------- */
+ var gDP = el('g', { class: 't' }, svg);
+ var TERMS = [
+   ['response to type I interferon', 0.214, 0.05], ['defense response to virus', 0.199, 0.08], ['innate immune response', 0.18, 0.12],
+-  ['response to virus', 45 / 271, 0.2], ['cellular response to interferon-beta', 0.155, 0.25], ['regulation of viral process', 0.147, 0.3],
++  ['response to virus', 45 / 293, 0.2], ['cellular response to interferon-beta', 0.150, 0.25], ['regulation of viral process', 0.147, 0.3],
+   ['response to interferon-gamma', 0.14, 0.4], ['regulation of innate immune response', 0.133, 0.42], ['cytokine-mediated signaling pathway', 0.126, 0.55],
+   ['regulation of defense response', 0.118, 0.6], ['regulation of cytokine production', 0.111, 0.7], ['response to biotic stimulus', 0.103, 0.75],
+   ['response to external biotic stimulus', 0.097, 0.82], ['immune effector process', 0.092, 0.9], ['leukocyte activation', 0.088, 0.95]
+@@ -184,7 +184,7 @@
+ txt('dot size = gene count', { x: 1290, y: 350, 'font-size': 26, fill: INK }, gDP);
+ txt('illustrative values,', { x: 1290, y: 420, 'font-size': 26, fill: INK }, gDP);
+ txt('except response to', { x: 1290, y: 452, 'font-size': 26, fill: INK }, gDP);
+-txt('virus (45/271)', { x: 1290, y: 484, 'font-size': 26, fill: INK }, gDP);
++txt('virus (45/293)', { x: 1290, y: 484, 'font-size': 26, fill: INK }, gDP);
+ 
+ /* ---------- step 6 cards ---------- */
+ var gNote = el('g', { class: 't' }, svg);
+--- a/episodes/files/animations/ep8_pseudobulk.html
++++ b/episodes/files/animations/ep8_pseudobulk.html
+@@ -21,8 +21,8 @@
+  6. The workshop splits one sample into three pseudo-replicates. Their variance is far smaller than between real donors.
+     One cloud per condition is split at random into rep1, rep2, rep3 by colour. Bars are nearly identical.
+     The bars use the same scale as step 5. Stats box: pseudo-replicates, n = 3, variance too small.
+- 7. That is why pseudobulk found more genes here (1464 vs 759). With real donors it usually finds fewer.
+-    Counter panel: Wilcoxon 759 significant genes, pseudobulk with pseudo-replicates 1464.
++ 7. That is why pseudobulk found more genes here (1539 vs 825). With real donors it usually finds fewer.
++    Counter panel: Wilcoxon 825 significant genes, pseudobulk with pseudo-replicates 1539.
+  8. Use per-cell tests to explore. Use pseudobulk with biological replicates for anything you report.
+     Rule card: Explore with Wilcoxon. Report with pseudobulk on real replicates.
+ 
+@@ -68,7 +68,7 @@
+   'Pseudobulk sums the counts per sample and cell type. With one donor per condition there is nothing to test.',
+   'With three donors per condition, pseudobulk gives three replicates and a real variance estimate.',
+   'The workshop splits one sample into three pseudo-replicates. Their variance is far smaller than between real donors.',
+-  'That is why pseudobulk found more genes here (1464 vs 759). With real donors it usually finds fewer.',
++  'That is why pseudobulk found more genes here (1539 vs 825). With real donors it usually finds fewer.',
+   'Use per-cell tests to explore. Use pseudobulk with biological replicates for anything you report.'
+ ];
+ 
+@@ -286,8 +286,8 @@
+   el('rect', { x: x + 32, y: 440, width: barW, height: 44, fill: barCol, stroke: INK, 'stroke-width': 3 }, gCnt);
+   txt(foot, { x: x + 32, y: 560, 'font-size': 28, fill: INK }, gCnt);
+ }
+-card(110, 'Wilcoxon, per cell', '759', Math.round(576 * 759 / 1464), GREY, 'each cell counted as a replicate');
+-card(850, 'pseudobulk, pseudo-replicates', '1464', 576, GOLD, 'one sample split into three');
++card(110, 'Wilcoxon, per cell', '825', Math.round(576 * 825 / 1539), GREY, 'each cell counted as a replicate');
++card(850, 'pseudobulk, pseudo-replicates', '1539', 576, GOLD, 'one sample split into three');
+ gCnt.style.opacity = 0;
+ 
+ /* ---------- step 8 rule card ---------- */

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inside a 10x Chromium GEM</title>
+<!--
+Inside a 10x Chromium GEM (Episode 1, Introduction to scRNA-seq)
+
+Steps and captions
+ 1. Cells, barcoded gel beads and oil meet on the chip.
+    Microfluidic junction with three inlet channels (cells, gel beads, oil) and one outlet.
+ 2. Each droplet is a GEM. Most are empty, some hold one cell, a few hold two.
+    Five droplets leave the junction and move down the outlet: bead + cell, bead only, bead + cell, bead + two cells, bead only.
+ 3. Empty GEMs are removed by cell calling. Doublets are addressed in quality control.
+    Labels under the five GEMs: cell, empty, cell, doublet, empty.
+ 4. Inside the GEM, the cell is lysed and releases its mRNA.
+    Zoom into the first GEM. The cell outline dissolves and 8 mRNA molecules are released.
+ 5. The bead dissolves and releases primers. Same 16 nt cell barcode on all, a different 12 nt UMI on each.
+    8 primers, each with the cell barcode CB 7 and its own UMI label.
+ 6. mRNA binds the primers through its poly(A) tail and is copied into barcoded cDNA.
+    The mRNAs slide onto the primers and a cDNA strand grows from each primer.
+ 7. GEMs are broken and everything is pooled. The barcodes keep each molecule traceable to its cell.
+    Zoom out, the GEMs break and the cDNA pools into one tube. The first GEM is CB 7 (blue), the third is CB 12 (orange).
+
+Left to right, the first GEM is the one nearest the junction. The cDNA of the two-cell GEM is not drawn.
+Randomness (positions of pooled cDNA): mulberry32 with seed 42, so every run is identical.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=5 opens at step 5. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke var(--dur) ease var(--dd,0ms),stroke-width var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: inside a 10x Chromium GEM"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREY = '#a0aec0', CELL = '#e2e8f0', MRNA = '#718096';
+var CB7 = '#2b6cb0', CB12 = '#dd6b20';
+var N = 7;
+var CAPTIONS = [
+  'Cells, barcoded gel beads and oil meet on the chip.',
+  'Each droplet is a GEM. Most are empty, some hold one cell, a few hold two.',
+  'Empty GEMs are removed by cell calling. Doublets are addressed in quality control.',
+  'Inside the GEM, the cell is lysed and releases its mRNA.',
+  'The bead dissolves and releases primers. Same 16 nt cell barcode on all, a different 12 nt UMI on each.',
+  'mRNA binds the primers through its poly(A) tail and is copied into barcoded cDNA.',
+  'GEMs are broken and everything is pooled. The barcodes keep each molecule traceable to its cell.'
+];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, s, rot) { e.style.transform = 'translate(' + x + 'px,' + y + 'px)' + (rot ? ' rotate(' + rot + 'deg)' : '') + ' scale(' + (s === undefined ? 1 : s) + ')'; }
+function sh(e, on, delay) { e.style.setProperty('--dd', (on ? (delay || 0) : 0) + 'ms'); e.style.opacity = on ? 1 : 0; }
+function dd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+function dur(e, ms) { e.style.setProperty('--dur', ms + 'ms'); }
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var rng = mulberry32(42);
+
+/* ---------- frame ---------- */
+txt('Inside a 10x Chromium GEM', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 1', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: '#e2e8f0', 'stroke-width': 2 }, svg);
+
+/* ---------- chip view ---------- */
+var JX = 640, JY = 400;                      /* junction */
+var DX = [760, 880, 1000, 1120, 1240];       /* GEM x positions, first GEM nearest the junction */
+var chipG = el('g', { class: 't' }, svg);
+dur(chipG, 900);
+var CHANNELS = {
+  cells: [[90, 250], [300, 250], [420, 400], [JX, JY]],
+  beads: [[90, 550], [300, 550], [420, 400], [JX, JY]],
+  oil: [[JX, 150], [JX, JY]],
+  out: [[JX, JY], [1380, JY]]
+};
+function pathOf(pts) { return pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0] + ',' + p[1]; }).join(' '); }
+var names = ['cells', 'beads', 'oil', 'out'];
+names.forEach(function (n) { el('path', { d: pathOf(CHANNELS[n]), fill: 'none', stroke: INK, 'stroke-width': 48, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, chipG); });
+names.forEach(function (n) { el('path', { d: pathOf(CHANNELS[n]), fill: 'none', stroke: '#ffffff', 'stroke-width': 40, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, chipG); });
+el('path', { d: pathOf(CHANNELS.oil), fill: 'none', stroke: GOLD, 'stroke-opacity': 0.35, 'stroke-width': 40, 'stroke-linecap': 'round' }, chipG);
+el('path', { d: 'M' + (JX + 20) + ',400 L' + (JX + 120) + ',400', fill: 'none', stroke: GOLD, 'stroke-opacity': 0.35, 'stroke-width': 40, 'stroke-linecap': 'butt' }, chipG);
+/* flow arrows */
+function arrow(x, y, rot) { var a = el('polygon', { points: '-9,-10 11,0 -9,10', fill: INK, transform: 'translate(' + x + ',' + y + ') rotate(' + rot + ')' }, chipG); return a; }
+arrow(210, 250, 0); arrow(210, 550, 0); arrow(JX, 270, 90); arrow(1320, 400, 0);
+/* inlet labels */
+txt('cells', { class: 'mono', x: 90, y: 200, 'font-size': 30, 'font-weight': 700, fill: INK }, chipG);
+txt('gel beads', { class: 'mono', x: 90, y: 620, 'font-size': 30, 'font-weight': 700, fill: INK }, chipG);
+txt('oil', { class: 'mono', x: JX + 40, y: 170, 'font-size': 30, 'font-weight': 700, fill: INK }, chipG);
+txt('outlet', { class: 'mono', x: 1320, y: 340, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, chipG);
+/* items in the inlets */
+function cellAt(parent, x, y, r) { return el('circle', { cx: x, cy: y, r: r, fill: CELL, stroke: INK, 'stroke-width': 3 }, parent); }
+function beadAt(parent, x, y, r) { return el('circle', { cx: x, cy: y, r: r, fill: GOLD, stroke: INK, 'stroke-width': 3 }, parent); }
+[130, 270].forEach(function (x) { cellAt(chipG, x, 250, 13); });
+cellAt(chipG, 360, 298, 13);
+[130, 270].forEach(function (x) { beadAt(chipG, x, 550, 14); });
+beadAt(chipG, 360, 502, 14);
+cellAt(chipG, 500, 400, 13); beadAt(chipG, 570, 400, 14);
+
+/* GEMs (droplets) */
+var GEMS = [
+  { beads: 1, cells: 1, label: 'cell' },
+  { beads: 1, cells: 0, label: 'empty' },
+  { beads: 1, cells: 1, label: 'cell' },
+  { beads: 1, cells: 2, label: 'doublet' },
+  { beads: 1, cells: 0, label: 'empty' }
+];
+var gemEls = [], gemLbl = [];
+GEMS.forEach(function (g, i) {
+  var grp = el('g', { class: 't' }, chipG);
+  dur(grp, 800);
+  el('circle', { cx: 0, cy: 0, r: 48, fill: '#ffffff', stroke: INK, 'stroke-width': 4 }, grp);
+  if (g.cells === 1) { beadAt(grp, -20, 2, 15); cellAt(grp, 18, -2, 19); }
+  else if (g.cells === 2) { beadAt(grp, 0, 22, 14); cellAt(grp, -22, -14, 16); cellAt(grp, 22, -14, 16); }
+  else { beadAt(grp, 0, 0, 16); }
+  tf(grp, JX + 20, JY, 0.15); grp.style.opacity = 0;
+  gemEls.push(grp);
+  var l = txt(g.label, { class: 't mono', x: DX[i], y: 488, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, chipG);
+  l.style.opacity = 0; dur(l, 500);
+  gemLbl.push(l);
+});
+
+/* collection tube */
+var gTube = el('g', { class: 't' }, chipG);
+dur(gTube, 600);
+el('path', { d: 'M1380,230 L1380,570 L1432,650 L1468,650 L1520,570 L1520,230', fill: '#ffffff', stroke: INK, 'stroke-width': 4, 'stroke-linejoin': 'round' }, gTube);
+el('path', { d: 'M1381,430 L1381,570 L1432,649 L1468,649 L1519,570 L1519,430 Z', fill: CELL, 'fill-opacity': 0.8 }, gTube);
+el('rect', { x: 1368, y: 214, width: 164, height: 24, rx: 6, ry: 6, fill: '#ffffff', stroke: INK, 'stroke-width': 4 }, gTube);
+txt('pooled tube', { class: 'mono', x: 1450, y: 190, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gTube);
+gTube.style.opacity = 0;
+
+/* pooled cDNA pieces: 8 from CB 7 (first GEM) and 8 from CB 12 (third GEM) */
+var pieces = [];
+[[CB7, 0], [CB12, 2]].forEach(function (cb) {
+  for (var k = 0; k < 8; k++) {
+    var g = el('g', { class: 't' }, chipG);
+    el('rect', { x: -28, y: -6, width: 56, height: 12, rx: 6, ry: 6, fill: cb[0], stroke: INK, 'stroke-width': 2 }, g);
+    var sx = DX[cb[1]] + (rng() - 0.5) * 60, sy = JY + (rng() - 0.5) * 60;
+    var tx = 1405 + rng() * 90, ty = 475 + rng() * 135, ang = Math.round((rng() - 0.5) * 120);
+    g.style.opacity = 0;
+    g.style.transition = 'none';
+    tf(g, sx, sy, 0.6, 0);
+    pieces.push({ g: g, sx: sx, sy: sy, tx: tx, ty: ty, ang: ang, k: k });
+  }
+});
+/* barcode legend (step 7) */
+var gLeg7 = el('g', { class: 't' }, chipG);
+dur(gLeg7, 600);
+el('rect', { x: 700, y: 584, width: 74, height: 36, fill: CB7, stroke: INK, 'stroke-width': 3 }, gLeg7);
+txt('CB 7', { class: 'mono', x: 737, y: 611, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: '#ffffff' }, gLeg7);
+txt('first GEM', { x: 792, y: 612, 'font-size': 28, fill: INK }, gLeg7);
+el('rect', { x: 700, y: 636, width: 74, height: 36, fill: CB12, stroke: INK, 'stroke-width': 3 }, gLeg7);
+txt('CB 12', { class: 'mono', x: 737, y: 663, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: '#ffffff' }, gLeg7);
+txt('third GEM', { x: 792, y: 664, 'font-size': 28, fill: INK }, gLeg7);
+gLeg7.style.opacity = 0;
+
+/* ---------- zoomed GEM ---------- */
+var ZX = 560, ZY = 412, ZR = 285;
+var gZ = el('g', { class: 't' }, svg);
+dur(gZ, 900);
+el('circle', { cx: 0, cy: 0, r: ZR, fill: '#ffffff', stroke: INK, 'stroke-width': 5 }, gZ);
+/* bead and cell */
+var beadG = el('g', { class: 't' }, gZ);
+dur(beadG, 700);
+el('circle', { cx: -130, cy: 0, r: 72, fill: GOLD, stroke: INK, 'stroke-width': 4 }, beadG);
+txt('gel bead', { x: -130, y: 9, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, beadG);
+var cellG = el('g', { class: 't' }, gZ);
+dur(cellG, 900);
+el('circle', { cx: 110, cy: 0, r: 92, fill: CELL, stroke: INK, 'stroke-width': 4 }, cellG);
+txt('cell', { x: 110, y: 9, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, cellG);
+
+var ROWS = [], i0;
+for (i0 = 0; i0 < 8; i0++) { ROWS.push(-161 + 46 * i0); }
+var UMI = ['U1', 'U2', 'U3', 'U4', 'U5', 'U6', 'U7', 'U8'];
+var PX = -215;           /* primer left edge */
+var MX0 = 25, MX1 = -62; /* mRNA origin: released, docked */
+function wavePath(x0, x1) {
+  var d = 'M' + x0 + ',0', x = x0, up = -1;
+  while (x < x1 - 1) { var nx = Math.min(x + 14, x1); d += ' Q' + (x + 7) + ',' + (up * 7) + ' ' + nx + ',0'; x = nx; up = -up; }
+  return d;
+}
+var mrnaEls = [], primerEls = [], cdnaEls = [];
+ROWS.forEach(function (y, i) {
+  /* cDNA (under the others) */
+  var cd = el('g', { class: 't' }, gZ);
+  dur(cd, 700);
+  el('line', { x1: 0, y1: 0, x2: 150, y2: 0, stroke: CB7, 'stroke-width': 9, 'stroke-linecap': 'round' }, cd);
+  tf(cd, MX1 + 37, y + 9, 1); cd.style.opacity = 0;
+  cdnaEls.push(cd);
+  /* primer */
+  var pr = el('g', { class: 't' }, gZ);
+  dur(pr, 800);
+  el('rect', { x: 0, y: -7, width: 80, height: 32, fill: CB7, stroke: INK, 'stroke-width': 2.5 }, pr);
+  txt('CB 7', { class: 'mono', x: 40, y: 18, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: '#ffffff' }, pr);
+  el('rect', { x: 80, y: -7, width: 60, height: 32, fill: '#ffffff', stroke: INK, 'stroke-width': 2.5 }, pr);
+  txt(UMI[i], { class: 'mono', x: 110, y: 18, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, pr);
+  el('line', { x1: 140, y1: 9, x2: 190, y2: 9, stroke: INK, 'stroke-width': 6, 'stroke-linecap': 'round' }, pr);
+  tf(pr, PX, y, 1); pr.style.opacity = 0;
+  primerEls.push(pr);
+  /* mRNA */
+  var m = el('g', { class: 't' }, gZ);
+  dur(m, 800);
+  el('path', { d: wavePath(36, 190), fill: 'none', stroke: MRNA, 'stroke-width': 4, 'stroke-linecap': 'round' }, m);
+  el('line', { x1: 0, y1: 0, x2: 36, y2: 0, stroke: INK, 'stroke-width': 9, 'stroke-linecap': 'round' }, m);
+  tf(m, 110, 0, 0.1); m.style.opacity = 0;
+  mrnaEls.push(m);
+});
+/* every row is drawn with its own y; the mRNA sits 11 px above the primer centre line */
+gZ.style.opacity = 0;
+tf(gZ, DX[0], JY, 48 / ZR);
+
+/* ---------- key for the zoomed steps ---------- */
+function keyGroup(head, rows) {
+  var g = el('g', { class: 't' }, svg);
+  dur(g, 600);
+  txt(head, { x: 930, y: 190, 'font-size': 34, 'font-weight': 700, fill: INK }, g);
+  rows.forEach(function (r, i) {
+    var y = 262 + i * 76;
+    r.sw(g, y);
+    txt(r.t, { x: 1030, y: y + 10, 'font-size': 28, fill: INK }, g);
+  });
+  g.style.opacity = 0;
+  return g;
+}
+function swRect(fill, label, col) { return function (g, y) { el('rect', { x: 930, y: y - 18, width: 80, height: 36, fill: fill, stroke: INK, 'stroke-width': 3 }, g); txt(label, { class: 'mono', x: 970, y: y + 9, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: col }, g); }; }
+function swLine(col, w, wave) { return function (g, y) {
+  if (wave) { el('path', { d: wavePath(0, 80), fill: 'none', stroke: col, 'stroke-width': w, 'stroke-linecap': 'round', transform: 'translate(930,' + y + ')' }, g); }
+  else { el('line', { x1: 930, y1: y, x2: 1010, y2: y, stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' }, g); }
+}; }
+var key4 = keyGroup('8 mRNA molecules', [
+  { sw: swLine(MRNA, 4, true), t: 'mRNA' },
+  { sw: swLine(INK, 9, false), t: 'poly(A) tail' }
+]);
+var key5 = keyGroup('8 primers', [
+  { sw: swRect(CB7, 'CB 7', '#ffffff'), t: 'cell barcode, 16 nt, same on all' },
+  { sw: swRect('#ffffff', 'U1', INK), t: 'UMI, 12 nt, different on each' },
+  { sw: swLine(INK, 6, false), t: 'poly(T) tail' }
+]);
+var key6 = keyGroup('Reverse transcription', [
+  { sw: swLine(MRNA, 4, true), t: 'mRNA, poly(A) pairs with poly(T)' },
+  { sw: swLine(CB7, 9, false), t: 'cDNA, with barcode and UMI' }
+]);
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+/* ---------- state rendering ---------- */
+var prevStep = 0;
+function render(s) {
+  var zoom = s >= 4 && s <= 6;
+  var fromChip = prevStep > 0 && prevStep < 4 && s === 4;
+
+  /* chip: zoom about the first GEM */
+  dd(chipG, 0);
+  if (zoom) { tf(chipG, DX[0] * (1 - 3), JY * (1 - 3), 3); chipG.style.opacity = 0; }
+  else { tf(chipG, 0, 0, 1); chipG.style.opacity = 1; }
+
+  /* GEMs forming and moving down the outlet */
+  gemEls.forEach(function (g, i) {
+    var on = s >= 2 && s <= 6;
+    var delay = s === 2 ? (4 - i) * 260 : 0;
+    dd(g, delay);
+    tf(g, on ? DX[i] : JX + 20, JY, on ? 1 : 0.15);
+    g.style.opacity = on ? 1 : 0;
+    if (s === 7) { dd(g, 500); g.style.opacity = 0; }
+    sh(gemLbl[i], s === 3, 500);
+  });
+
+  /* step 7: pooled cDNA */
+  sh(gTube, s === 7, 300);
+  sh(gLeg7, s === 7, 1800);
+  pieces.forEach(function (p, i) {
+    var on = s === 7;
+    var d = i * 55;
+    p.g.style.transition = (document.querySelector('svg.notrans') || window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'none' :
+      (on ? 'opacity 300ms ease ' + (300 + d / 4) + 'ms, transform 1100ms ease ' + (1000 + d) + 'ms' : 'opacity 300ms ease 0ms, transform 0ms linear 300ms');
+    tf(p.g, on ? p.tx : p.sx, on ? p.ty : p.sy, 0.6, on ? p.ang : 0);
+    p.g.style.opacity = on ? 1 : 0;
+  });
+
+  /* zoomed GEM */
+  dd(gZ, 0);
+  if (zoom) { tf(gZ, ZX, ZY, 1); gZ.style.opacity = 1; }
+  else { tf(gZ, DX[0], JY, 48 / ZR); gZ.style.opacity = 0; }
+  var d4 = fromChip ? 900 : 0;
+  sh(beadG, s <= 4, 0);
+  sh(cellG, s <= 3, d4 === 0 ? 0 : 900);
+  mrnaEls.forEach(function (m, i) {
+    var rel = s >= 4, dock = s >= 6;
+    dd(m, s === 4 ? d4 + i * 40 : (dock ? i * 50 : 0));
+    var x = dock ? MX1 : MX0;
+    if (rel) { tf(m, x, ROWS[i] - 11 + (dock ? 0 : 0), 1); m.style.opacity = 1; }
+    else { tf(m, 110, 0, 0.1); m.style.opacity = 0; }
+  });
+  primerEls.forEach(function (p, i) {
+    var on = s >= 5;
+    dd(p, s === 5 ? 250 + i * 40 : 0);
+    if (on) { tf(p, PX, ROWS[i], 1); p.style.opacity = 1; }
+    else { tf(p, -130, 0, 0.1); p.style.opacity = 0; }
+  });
+  cdnaEls.forEach(function (c, i) {
+    var on = s >= 6;
+    dd(c, on ? 900 + i * 90 : 0);
+    c.style.transform = 'translate(' + (MX1 + 37) + 'px,' + (ROWS[i] + 9) + 'px) scale(' + (on ? 1 : 0.001) + ',1)';
+    c.style.opacity = on ? 1 : 0;
+  });
+  sh(key4, s === 4, d4 ? 1500 : 300);
+  sh(key5, s === 5, 400);
+  sh(key6, s === 6, 400);
+  prevStep = s;
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

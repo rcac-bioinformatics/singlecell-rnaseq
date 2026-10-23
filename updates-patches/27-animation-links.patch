@@ -1,0 +1,230 @@
+diff --git a/episodes/cell-type-annotation.Rmd b/episodes/cell-type-annotation.Rmd
+index d1d082b..4ac1e71 100644
+--- a/episodes/cell-type-annotation.Rmd
++++ b/episodes/cell-type-annotation.Rmd
+@@ -184,6 +184,8 @@ A good marker gene has a high `avg_log2FC`, high `pct.1` (expressed in most
+ cells of the cluster), low `pct.2` (not expressed in other clusters), and a
+ significant `p_val_adj`.
+ 
++[Animation: How FindAllMarkers scores a gene](files/animations/ep6_find-all-markers.html)
++
+ ### Top markers per cluster
+ 
+ Let's extract the top 5 markers per cluster ranked by fold change:
+@@ -322,6 +324,8 @@ of labels.
+ 
+ ::::::::::::::::::::::::::::::::::::::::::::::::::
+ 
++[Animation: Labels are assigned by position](files/animations/ep6_rename-idents.html)
++
+ ```{r annotate, eval=FALSE}
+ # Build the cluster-to-cell-type mapping
+ # Adjust cluster IDs to match YOUR results
+@@ -392,6 +396,8 @@ cell type. **SingleR** offers an automated alternative: it compares the
+ expression profile of each cell to a labeled reference dataset and assigns the
+ label of the most similar reference sample.
+ 
++[Animation: How SingleR labels a cell](files/animations/ep6_singler.html)
++
+ ### Download the reference
+ 
+ We use the **Monaco Immune Data** reference from the `celldex` package. This
+diff --git a/episodes/differential-expression.Rmd b/episodes/differential-expression.Rmd
+index 601c3c5..0e42a2b 100644
+--- a/episodes/differential-expression.Rmd
++++ b/episodes/differential-expression.Rmd
+@@ -199,6 +199,8 @@ condition and have no other option.
+ 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::
+ 
++[Animation: Cells are not replicates](files/animations/ep8_pseudobulk.html)
++
+ ## Pseudobulk Analysis
+ 
+ Pseudobulk aggregation sums the raw UMI counts for each gene across all cells
+@@ -414,6 +416,8 @@ A list of hundreds of DE genes is difficult to interpret gene by gene.
+ for specific biological processes? This connects individual gene changes to
+ broader biological themes.
+ 
++[Animation: What enrichGO tests](files/animations/ep8_go-enrichment.html)
++
+ ### Converting gene symbols to Entrez IDs
+ 
+ clusterProfiler requires Entrez gene IDs. We convert from gene symbols using
+diff --git a/episodes/dimensionality-reduction-clustering.Rmd b/episodes/dimensionality-reduction-clustering.Rmd
+index a34d914..f6cb92e 100644
+--- a/episodes/dimensionality-reduction-clustering.Rmd
++++ b/episodes/dimensionality-reduction-clustering.Rmd
+@@ -108,6 +108,8 @@ The key properties of PCA:
+ - The first 10--20 PCs typically capture the major biological structure (cell
+   types), while later PCs are dominated by noise
+ 
++[Animation: PCA compresses correlated genes](files/animations/ep5_pca-axes.html)
++
+ ```{r run-pca, eval=FALSE}
+ pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
+ ```
+@@ -267,6 +269,8 @@ statistics) rather than relying on visual impressions from UMAP alone.
+ 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::
+ 
++[Animation: What UMAP does not tell you](files/animations/ep5_umap-pitfalls.html)
++
+ :::::::::::::::::::::::::::::::::::::::::: callout
+ 
+ ## t-SNE as an alternative
+@@ -319,6 +323,8 @@ pbmc <- FindClusters(pbmc, resolution = 0.5)
+ | `resolution` | `0.5` | Controls the number of clusters. Lower values (0.1--0.3) produce fewer, larger clusters. Higher values (1.0--2.0) produce more, smaller clusters. |
+ | `algorithm` | `1` (default) | Community detection method. `1` = Louvain (default, fast and reliable). `4` = Leiden (more robust against poorly connected clusters, requires the `leidenalg` Python package). |
+ 
++[Animation: FindNeighbors and FindClusters](files/animations/ep5_graph-clustering.html)
++
+ :::::::::::::::::::::::::::::::::::::::::: spoiler
+ 
+ ## Expected output
+diff --git a/episodes/introduction.Rmd b/episodes/introduction.Rmd
+index 0a8276a..9482978 100644
+--- a/episodes/introduction.Rmd
++++ b/episodes/introduction.Rmd
+@@ -45,6 +45,8 @@ RNA-seq gives you the smoothie. **Single-cell RNA-seq (scRNA-seq)** gives you
+ the fruit bowl: every piece of fruit is kept separate, so you can count, sort,
+ and inspect them one by one.
+ 
++[Animation: Bulk averages, single-cell counts](files/animations/ep1_bulk-vs-single-cell.html)
++
+ scRNA-seq works by isolating individual cells, capturing their mRNA, and
+ sequencing each cell's transcriptome independently. Instead of one expression
+ profile per sample, you get thousands of individual expression profiles, one
+@@ -123,6 +125,8 @@ prepared into a sequencing library. Even though the cDNA from all cells is now
+ mixed in one tube, the cell barcodes embedded in each molecule let us
+ computationally sort the reads back to their cell of origin.
+ 
++[Animation: Inside a 10x Chromium GEM](files/animations/ep1_gem-formation.html)
++
+ **4. Sequencing.**
+ The library is sequenced on an Illumina sequencer, producing paired-end reads
+ plus an index read. The read structure is:
+@@ -143,6 +147,8 @@ it uses the index read to assign reads to samples, the cell barcode to assign
+ reads to cells, the UMI to count unique molecules, and Read 2 to identify the
+ gene of origin.
+ 
++[Animation: What the aligner does with each read](files/animations/ep1_reads-to-matrix.html)
++
+ :::::::::::::::::::::::::::::::::::::::: callout
+ 
+ ## Other Single-Cell Platforms
+@@ -201,6 +207,8 @@ sequence and are collapsed into a single count. This means UMI counts are
+ proportional to the actual number of mRNA molecules in the cell, not to PCR
+ amplification efficiency.
+ 
++[Animation: Why UMI counts are integers](files/animations/ep1_umi-dedup.html)
++
+ For the PBMC 10k v3 dataset we will use in this workshop, the count matrix
+ contains 11,809 cell barcodes and 38,606 genes. After removing genes detected
+ in fewer than 3 cells and low-quality cells, we will work with 11,310 cells
+diff --git a/episodes/multi-sample-integration.Rmd b/episodes/multi-sample-integration.Rmd
+index b1b001a..051ccd5 100644
+--- a/episodes/multi-sample-integration.Rmd
++++ b/episodes/multi-sample-integration.Rmd
+@@ -203,6 +203,8 @@ CCA works by:
+ 3. Using the anchors to compute a **correction vector** that aligns matching
+    cell types across conditions
+ 
++[Animation: Why integrate, and what CCA integration does](files/animations/ep7_integration-anchors.html)
++
+ ```{r integrate, eval=FALSE}
+ ifnb <- IntegrateLayers(object = ifnb,
+                         method = CCAIntegration,
+diff --git a/episodes/normalization-and-features.Rmd b/episodes/normalization-and-features.Rmd
+index 9ffaab4..be547c4 100644
+--- a/episodes/normalization-and-features.Rmd
++++ b/episodes/normalization-and-features.Rmd
+@@ -118,6 +118,8 @@ The formula for a single gene *g* in cell *c* is:
+ 
+ **normalized(g, c) = log(1 + count(g, c) / total_counts(c) x 10000)**
+ 
++[Animation: Normalization corrects sequencing depth](files/animations/ep4_lognormalize.html)
++
+ ```{r normalize, eval=FALSE}
+ pbmc <- NormalizeData(pbmc,
+                       normalization.method = "LogNormalize",
+@@ -289,6 +291,8 @@ pbmc <- FindVariableFeatures(pbmc,
+ | `selection.method` | `"vst"` | Variance-stabilizing transformation. Fits a mean-variance relationship across genes using local regression, then selects genes with the highest standardized variance (i.e., genes that vary more than expected given their expression level). |
+ | `nfeatures` | `2000` | Number of variable features to select. 2,000 is the standard default for most scRNA-seq analyses. |
+ 
++[Animation: Which genes vary more than expected](files/animations/ep4_variable-features.html)
++
+ Let's see which genes were selected:
+ 
+ ```{r top-variable, eval=FALSE}
+@@ -342,6 +346,8 @@ they carry more biological information. Scaling puts all genes on equal footing
+ so that PCA identifies the axes of true biological variation rather than
+ expression magnitude.
+ 
++[Animation: ScaleData puts genes on one footing](files/animations/ep4_scaling.html)
++
+ ```{r scale, eval=FALSE}
+ pbmc <- ScaleData(pbmc)
+ ```
+diff --git a/episodes/quality-control.Rmd b/episodes/quality-control.Rmd
+index 7f1b74c..70f099b 100644
+--- a/episodes/quality-control.Rmd
++++ b/episodes/quality-control.Rmd
+@@ -168,6 +168,8 @@ structure. The key components are:
+ 
+ ![Structure of the Seurat v5 object](fig/seurat_object.png){alt="Diagram of the Seurat v5 object showing the RNA assay with its three layers (counts, data, scale.data) and the per-cell metadata columns"}
+ 
++[Animation: The Seurat object through the day](files/animations/ep3_seurat-object-tracker.html)
++
+ You can inspect the metadata that Seurat automatically computed during object
+ creation:
+ 
+@@ -352,6 +354,8 @@ quality. A healthy PBMC typically has 3--8% mitochondrial content. Cells with
+ 
+ :::::::::::::::::::::::::::::::::::::::
+ 
++[Animation: What a dying cell looks like in QC](files/animations/ep3_dying-cell.html)
++
+ 
+ ## Setting Thresholds
+ 
+@@ -393,6 +397,8 @@ Cells above or below the red lines will be removed. The small point size
+ (`pt.size = 0.1`) lets you see how many individual cells fall outside the
+ thresholds.
+ 
++[Animation: Choose the thresholds, watch the cells](files/animations/ep3_qc-thresholds.html)
++
+ Let's record how many cells we have before filtering:
+ 
+ ```{r before-filter, eval=FALSE}
+@@ -532,6 +538,8 @@ but be aware of these tools for your own analyses.
+ 
+ :::::::::::::::::::::::::::::::::::::::
+ 
++[Animation: Why some doublets hide](files/animations/ep3_doublets.html)
++
+ 
+ ::::::::::::::::::::::::::::::::::::: challenge
+ 
+diff --git a/episodes/raw-data-processing.Rmd b/episodes/raw-data-processing.Rmd
+index 65c0f05..5418f36 100644
+--- a/episodes/raw-data-processing.Rmd
++++ b/episodes/raw-data-processing.Rmd
+@@ -329,6 +329,8 @@ rest of this episode work on your own output.
+ 
+ ::::::::::::::::::::::::::::::::::::::::
+ 
++[Animation: What happens when you submit](files/animations/ep2_slurm-lifecycle.html)
++
+ :::::::::::::::::::::::::::::::::::::::: callout
+ 
+ ## If your Cell Ranger job dies
+@@ -445,6 +447,8 @@ It contains the UMI count matrix with only cell-containing barcodes (empty
+ droplets have been removed by Cell Ranger's cell calling algorithm). This is
+ the file we will load into Seurat in the next episode.
+ 
++[Animation: Raw matrix to filtered matrix](files/animations/ep2_cell-calling.html)
++
+ The three files inside use the **MatrixMarket** sparse format:
+ 
+ - **barcodes.tsv.gz** -- one cell barcode per line

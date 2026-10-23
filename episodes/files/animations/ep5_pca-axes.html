@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCA compresses correlated genes</title>
+<!--
+PCA compresses correlated genes (Episode 5, Dimensionality reduction)
+
+Steps and captions
+ 1. Two monocyte genes rise and fall together. Two axes carry one piece of information.
+    200 seeded cells, x = LYZ, y = S100A9 (scaled values). Monocytes high on both, lymphocytes low on both.
+ 2. PCA finds the direction of greatest variance. This is PC1.
+    A line rotates from horizontal to the direction of greatest spread. The variance bar is computed from the data
+    at every frame, rises as the line turns and stops at its maximum, where the line is PC1.
+ 3. PC2 is orthogonal to PC1 and captures what is left.
+    A perpendicular line appears. A second, much shorter variance bar is drawn on the same scale.
+ 4. Projecting onto PC1 keeps the separation with one number per cell.
+    Points slide along the grey guides onto PC1 and are copied to a 1D strip.
+ 5. Each PC is a weighted sum of genes. The weights are the loadings you saw in VizDimLoadings.
+    Dot plot of PC1 loadings: LYZ 0.71, S100A9 0.70, CD3D -0.05.
+ 6. The real data has 2000 variable genes. PCA computes 50 PCs from them.
+    A stylised block of genes (not to scale) and a stylised row of 50 PC bars.
+ 7. Variance falls off. The lesson keeps 15 PCs, a little past the elbow.
+    Elbow plot, PCs 1 to 30, about 12 at PC1, about 3.5 at PC7, flat after PC10, marker at PC 15.
+    Values for the other PCs are illustrative, drawn to follow that shape.
+ 8. This is why ScaleData runs before RunPCA.
+    Note card: Scaling first. Without ScaleData, PC1 would just follow the most highly expressed gene.
+
+The 200 cells come from a seeded generator (mulberry32, seed 42), so every run is identical.
+The principal axes and variances are computed from those 200 cells in the page.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=4 opens at step 4. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke-opacity var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: PCA compresses correlated genes"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREY = '#cbd5e0', GRID = '#e2e8f0', MONO = '#dd6b20', LYMPH = '#2b6cb0';
+var N = 8;
+var CAPTIONS = [
+  'Two monocyte genes rise and fall together. Two axes carry one piece of information.',
+  'PCA finds the direction of greatest variance. This is PC1.',
+  'PC2 is orthogonal to PC1 and captures what is left.',
+  'Projecting onto PC1 keeps the separation with one number per cell.',
+  'Each PC is a weighted sum of genes. The weights are the loadings you saw in VizDimLoadings.',
+  'The real data has 2000 variable genes. PCA computes 50 PCs from them.',
+  'Variance falls off. The lesson keeps 15 PCs, a little past the elbow.',
+  'This is why ScaleData runs before RunPCA.'
+];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, sx, sy) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + (sx === undefined ? 1 : sx) + ',' + (sy === undefined ? 1 : sy) + ')';
+}
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 350) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function setDur(e, ms) { e.style.setProperty('--dur', ms + 'ms'); }
+var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- seeded data: 200 cells ---------- */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var rng = mulberry32(42);
+function gauss() { var u = 1 - rng(), v = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+var R2 = Math.SQRT1_2, cells = [];
+for (var i = 0; i < 200; i++) {
+  var mono = i < 100;
+  var u = (mono ? 1.5 : -1.5) + 0.6 * gauss(), v = 0.45 * gauss();
+  cells.push({ mono: mono, x: (u - v) * R2, y: (u + v) * R2 });
+}
+var mx = 0, my = 0;
+cells.forEach(function (c) { mx += c.x; my += c.y; });
+mx /= 200; my /= 200;
+var sxx = 0, syy = 0, sxy = 0;
+cells.forEach(function (c) { c.x -= mx; c.y -= my; sxx += c.x * c.x; syy += c.y * c.y; sxy += c.x * c.y; });
+sxx /= 199; syy /= 199; sxy /= 199;
+var THETA = 0.5 * Math.atan2(2 * sxy, sxx - syy);            /* PC1 angle, data space */
+var TOT = sxx + syy, HALF = Math.sqrt(Math.pow((sxx - syy) / 2, 2) + sxy * sxy);
+var LAM1 = TOT / 2 + HALF, LAM2 = TOT / 2 - HALF;
+function varAt(a) { var c = Math.cos(a), s = Math.sin(a); return c * c * sxx + 2 * s * c * sxy + s * s * syy; }
+cells.forEach(function (c) {
+  var t = c.x * Math.cos(THETA) + c.y * Math.sin(THETA);
+  c.t = t; c.px = t * Math.cos(THETA); c.py = t * Math.sin(THETA);
+  c.jit = (rng() - 0.5) * 70;
+});
+
+/* ---------- frame ---------- */
+txt('PCA compresses correlated genes', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 5', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: GRID, 'stroke-width': 2 }, svg);
+var defs = el('defs', {}, svg);
+var clip = el('clipPath', { id: 'plotclip' }, defs);
+var BX0 = 160, BY0 = 110, BS = 540, S = BS / 7, CX = BX0 + BS / 2, CY = BY0 + BS / 2;
+el('rect', { x: BX0, y: BY0, width: BS, height: BS }, clip);
+function X(x) { return CX + x * S; }
+function Y(y) { return CY - y * S; }
+
+/* ---------- scatter (steps 1 to 4) ---------- */
+var gScatter = el('g', { class: 't' }, svg);
+el('rect', { x: BX0, y: BY0, width: BS, height: BS, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gScatter);
+[-3, -2, -1, 0, 1, 2, 3].forEach(function (v) {
+  if (v !== 0) {
+    el('line', { x1: X(v), y1: BY0, x2: X(v), y2: BY0 + BS, stroke: GRID, 'stroke-width': 2 }, gScatter);
+    el('line', { x1: BX0, y1: Y(v), x2: BX0 + BS, y2: Y(v), stroke: GRID, 'stroke-width': 2 }, gScatter);
+  }
+  txt(String(v), { x: X(v), y: BY0 + BS + 34, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gScatter);
+  txt(String(v), { x: BX0 - 14, y: Y(v) + 9, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gScatter);
+});
+txt('LYZ (scaled)', { class: 'mono', x: CX, y: 718, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gScatter);
+txt('S100A9 (scaled)', { class: 'mono', x: 0, y: 0, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK, transform: 'translate(62,' + CY + ') rotate(-90)' }, gScatter);
+
+var gClip = el('g', { 'clip-path': 'url(#plotclip)' }, gScatter);
+var gRes = el('g', { class: 't' }, gClip);
+var resL = cells.map(function () { return el('line', { stroke: GREY, 'stroke-width': 1.5 }, gRes); });
+var line2 = el('line', { class: 't', stroke: INK, 'stroke-width': 4, 'stroke-dasharray': '16 10' }, gClip);
+var line1 = el('line', { class: 't', stroke: INK, 'stroke-width': 5 }, gClip);
+var dots = cells.map(function (c) {
+  var d = el('circle', { class: 't', cx: 0, cy: 0, r: 7, fill: c.mono ? MONO : LYMPH, 'fill-opacity': 0.8 }, gClip);
+  setDur(d, 900);
+  return d;
+});
+var lab1 = txt('PC1', { class: 't halo', 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gScatter);
+var lab2 = txt('PC2', { class: 't halo', 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gScatter);
+
+var curAngle = 0;
+function setAngle(a) {
+  curAngle = a;
+  var c = Math.cos(a), s = Math.sin(a), L = 420;
+  line1.setAttribute('x1', X(0) - L * c); line1.setAttribute('y1', Y(0) + L * s);
+  line1.setAttribute('x2', X(0) + L * c); line1.setAttribute('y2', Y(0) - L * s);
+  lab1.setAttribute('x', X(0) + 290 * c - 40); lab1.setAttribute('y', Y(0) - 290 * s - 14);
+  cells.forEach(function (p, k) {
+    var t = p.x * c + p.y * s;
+    resL[k].setAttribute('x1', X(p.x)); resL[k].setAttribute('y1', Y(p.y));
+    resL[k].setAttribute('x2', X(t * c)); resL[k].setAttribute('y2', Y(t * s));
+  });
+  barFill.setAttribute('width', (varAt(a) / TOT * BARW).toFixed(1));
+}
+/* PC2 line is fixed at THETA + 90 degrees */
+(function () {
+  var c = Math.cos(THETA + Math.PI / 2), s = Math.sin(THETA + Math.PI / 2), L = 420;
+  line2.setAttribute('x1', X(0) - L * c); line2.setAttribute('y1', Y(0) + L * s);
+  line2.setAttribute('x2', X(0) + L * c); line2.setAttribute('y2', Y(0) - L * s);
+  lab2.setAttribute('x', X(0) + 225 * c - 62); lab2.setAttribute('y', Y(0) - 225 * s);
+})();
+
+/* ---------- right panel: legend, variance bars, strip ---------- */
+var gLegend = el('g', { class: 't' }, svg);
+el('circle', { cx: 860, cy: 150, r: 11, fill: MONO }, gLegend);
+txt('monocytes', { x: 886, y: 160, 'font-size': 30, fill: INK }, gLegend);
+el('circle', { cx: 860, cy: 204, r: 11, fill: LYMPH }, gLegend);
+txt('lymphocytes', { x: 886, y: 214, 'font-size': 30, fill: INK }, gLegend);
+txt('200 cells', { x: 1500, y: 160, 'font-size': 30, 'text-anchor': 'end', fill: INK }, gLegend);
+
+var BARX = 860, BARW = 640;
+var gBars = el('g', { class: 't' }, svg);
+var bar1Lab = txt('variance along this axis', { class: 't', x: BARX, y: 320, 'font-size': 30, 'font-weight': 700, fill: INK }, gBars);
+var bar1Lab2 = txt('variance along PC1', { class: 't', x: BARX, y: 320, 'font-size': 30, 'font-weight': 700, fill: INK }, gBars);
+el('rect', { x: BARX, y: 340, width: BARW, height: 50, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gBars);
+var barFill = el('rect', { x: BARX, y: 340, width: 0, height: 50, fill: GOLD, stroke: INK, 'stroke-width': 3 }, gBars);
+var maxTick = el('g', { class: 't' }, gBars);
+var mxX = BARX + LAM1 / TOT * BARW;
+el('line', { x1: mxX, y1: 330, x2: mxX, y2: 400, stroke: INK, 'stroke-width': 4 }, maxTick);
+txt('maximum', { x: mxX, y: 436, 'font-size': 28, 'text-anchor': 'end', fill: INK }, maxTick);
+var gBar2 = el('g', { class: 't' }, svg);
+txt('variance along PC2', { x: BARX, y: 520, 'font-size': 30, 'font-weight': 700, fill: INK }, gBar2);
+el('rect', { x: BARX, y: 540, width: BARW, height: 50, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gBar2);
+var bar2 = el('rect', { class: 't', x: BARX, y: 540, width: LAM2 / TOT * BARW, height: 50, fill: GOLD, stroke: INK, 'stroke-width': 3, 'vector-effect': 'non-scaling-stroke' }, gBar2);
+setDur(bar2, 900);
+txt('what is left', { x: BARX + BARW, y: 626, 'font-size': 28, 'text-anchor': 'end', fill: INK }, gBar2);
+
+/* 1D strip */
+var gStrip = el('g', { class: 't' }, svg);
+var SCX = 1180, KS = 330 / Math.max.apply(null, cells.map(function (c) { return Math.abs(c.t); })), SY = 380;
+el('line', { x1: 840, y1: SY + 70, x2: 1520, y2: SY + 70, stroke: INK, 'stroke-width': 3 }, gStrip);
+el('line', { x1: SCX, y1: SY + 62, x2: SCX, y2: SY + 78, stroke: INK, 'stroke-width': 3 }, gStrip);
+txt('0', { x: SCX, y: SY + 110, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gStrip);
+txt('PC1 score, one number per cell', { x: SCX, y: SY + 160, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gStrip);
+cells.forEach(function (c) {
+  el('circle', { cx: SCX + c.t * KS, cy: SY + c.jit * 0.9, r: 7, fill: c.mono ? MONO : LYMPH, 'fill-opacity': 0.8 }, gStrip);
+});
+var m1 = 0, m2 = 0;
+cells.forEach(function (c) { if (c.mono) { m1 += c.t; } else { m2 += c.t; } });
+txt('lymphocytes', { x: SCX + m2 / 100 * KS, y: SY - 70, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: LYMPH }, gStrip);
+txt('monocytes', { x: SCX + m1 / 100 * KS, y: SY - 70, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: MONO }, gStrip);
+
+/* ---------- step 5: loadings ---------- */
+var gLoad = el('g', { class: 't' }, svg);
+el('rect', { x: 40, y: 92, width: 1520, height: 58, fill: '#f7fafc', stroke: INK, 'stroke-width': 2 }, gLoad);
+txt('PC1 = 0.71 x LYZ + 0.70 x S100A9 - 0.05 x CD3D', { class: 'mono', x: 800, y: 132, 'font-size': 34, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gLoad);
+var Z0 = 940, KL = 400;
+var rows = [['LYZ', 0.71, MONO, 250], ['S100A9', 0.70, MONO, 360], ['CD3D', -0.05, LYMPH, 470]];
+[-1, 0, 1].forEach(function (v) {
+  el('line', { x1: Z0 + v * KL, y1: 200, x2: Z0 + v * KL, y2: 540, stroke: v === 0 ? INK : GRID, 'stroke-width': v === 0 ? 3 : 2 }, gLoad);
+  txt(String(v), { x: Z0 + v * KL, y: 584, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gLoad);
+});
+el('line', { x1: Z0 - KL, y1: 540, x2: Z0 + KL, y2: 540, stroke: INK, 'stroke-width': 3 }, gLoad);
+txt('PC1 loading', { class: 'mono', x: Z0, y: 628, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gLoad);
+rows.forEach(function (r) {
+  txt(r[0], { class: 'mono', x: 500, y: r[3] + 11, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gLoad);
+  el('line', { x1: Z0, y1: r[3], x2: Z0 + r[1] * KL, y2: r[3], stroke: r[2], 'stroke-width': 5 }, gLoad);
+  el('circle', { cx: Z0 + r[1] * KL, cy: r[3], r: 17, fill: r[2] }, gLoad);
+  txt(r[1] < 0 ? '-0.05' : r[1].toFixed(2), { class: 'mono', x: Z0 + r[1] * KL + (r[1] < 0 ? -30 : 30), y: r[3] + 10, 'font-size': 30, 'font-weight': 700, 'text-anchor': r[1] < 0 ? 'end' : 'start', fill: INK }, gLoad);
+});
+
+/* ---------- step 6: 2000 genes into 50 PCs (stylised) ---------- */
+var gS6 = el('g', { class: 't' }, svg);
+var gGenes = el('g', { class: 't' }, svg);
+for (var gi = 0; gi < 200; gi++) {
+  el('rect', { x: 160 + (gi % 25) * 20, y: 290 + Math.floor(gi / 25) * 20, width: 14, height: 14, fill: '#4a5568', 'fill-opacity': 0.75 }, gGenes);
+}
+var lblG = txt('2000 genes', { class: 't', x: 410, y: 248, 'font-size': 40, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, svg);
+var gArrow = el('g', { class: 't' }, svg);
+el('line', { x1: 700, y1: 380, x2: 930, y2: 380, stroke: INK, 'stroke-width': 4 }, gArrow);
+el('polygon', { points: '960,380 928,364 928,396', fill: INK }, gArrow);
+txt('RunPCA()', { class: 'mono', x: 830, y: 340, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gArrow);
+var lblP = txt('50 PCs', { class: 't', x: 1250, y: 248, 'font-size': 40, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, svg);
+var pcBars = [];
+for (var bi = 0; bi < 50; bi++) {
+  var hh = 14 + 166 * Math.exp(-bi / 9);
+  var bg = el('g', { class: 't' }, svg);
+  setDur(bg, 500);
+  el('rect', { x: 0, y: -hh, width: 7, height: hh, fill: GOLD, stroke: INK, 'stroke-width': 1.5 }, bg);
+  pcBars.push(bg);
+}
+el('line', { x1: 975, y1: 470, x2: 1525, y2: 470, stroke: INK, 'stroke-width': 3, class: 'cap6' }, svg);
+var base6 = svg.lastChild; base6.setAttribute('class', 't');
+txt('not to scale', { x: 1250, y: 520, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, svg);
+var note6 = svg.lastChild; note6.setAttribute('class', 't');
+
+/* ---------- step 7: elbow ---------- */
+var SD = [12.0, 9.2, 7.1, 5.6, 4.5, 3.9, 3.5, 3.3, 3.2, 3.1, 3.05, 3.0, 2.96, 2.92, 2.88, 2.85, 2.82, 2.79, 2.77, 2.75, 2.73, 2.71, 2.69, 2.67, 2.65, 2.63, 2.62, 2.6, 2.58, 2.57];
+var EX0 = 260, EX1 = 1500, EY0 = 130, EY1 = 640;
+function ex(pc) { return EX0 + (pc - 1) / 29 * (EX1 - EX0 - 30) + 15; }
+function ey(v) { return EY1 - v / 13 * (EY1 - EY0); }
+var gEl = el('g', { class: 't' }, svg);
+el('line', { x1: EX0 - 10, y1: EY0 - 10, x2: EX0 - 10, y2: EY1, stroke: INK, 'stroke-width': 3 }, gEl);
+el('line', { x1: EX0 - 10, y1: EY1, x2: EX1, y2: EY1, stroke: INK, 'stroke-width': 3 }, gEl);
+[0, 4, 8, 12].forEach(function (v) {
+  if (v > 0) { el('line', { x1: EX0 - 10, y1: ey(v), x2: EX1, y2: ey(v), stroke: GRID, 'stroke-width': 2 }, gEl); }
+  txt(String(v), { x: EX0 - 24, y: ey(v) + 9, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gEl);
+});
+[1, 5, 10, 15, 20, 25, 30].forEach(function (p) {
+  el('line', { x1: ex(p), y1: EY1, x2: ex(p), y2: EY1 + 8, stroke: INK, 'stroke-width': 3 }, gEl);
+  txt(String(p), { x: ex(p), y: EY1 + 38, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gEl);
+});
+txt('principal component (PC)', { x: (EX0 + EX1) / 2, y: 716, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gEl);
+txt('standard deviation', { x: 0, y: 0, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK, transform: 'translate(86,' + ((EY0 + EY1) / 2) + ') rotate(-90)' }, gEl);
+var elbowItems = [];
+SD.forEach(function (v, k) {
+  if (k > 0) {
+    var sg = el('line', { class: 't', x1: ex(k), y1: ey(SD[k - 1]), x2: ex(k + 1), y2: ey(v), stroke: INK, 'stroke-width': 3 }, svg);
+    elbowItems.push([sg, k]);
+  }
+  var pt = el('circle', { class: 't', cx: ex(k + 1), cy: ey(v), r: 9, fill: INK }, svg);
+  elbowItems.push([pt, k]);
+});
+var gMark = el('g', { class: 't' }, svg);
+el('line', { x1: ex(15), y1: EY0 - 6, x2: ex(15), y2: EY1, stroke: GOLD, 'stroke-width': 7 }, gMark);
+txt('15 PCs kept', { x: ex(15) + 16, y: EY0 + 30, 'font-size': 30, 'font-weight': 700, fill: INK }, gMark);
+var gElbow = el('g', { class: 't' }, svg);
+el('circle', { cx: ex(7), cy: ey(SD[6]), r: 20, fill: 'none', stroke: GOLD, 'stroke-width': 5 }, gElbow);
+txt('elbow', { x: ex(7) + 34, y: ey(SD[6]) - 34, 'font-size': 30, 'font-weight': 700, fill: INK }, gElbow);
+
+/* ---------- step 8: note card ---------- */
+var gCard = el('g', { class: 't' }, svg);
+el('rect', { x: 240, y: 130, width: 1120, height: 300, fill: '#f7fafc', stroke: INK, 'stroke-width': 3 }, gCard);
+el('rect', { x: 240, y: 130, width: 14, height: 300, fill: GOLD }, gCard);
+txt('Scaling first.', { x: 290, y: 206, 'font-size': 44, 'font-weight': 700, fill: INK }, gCard);
+var cardBody = txt('', { x: 290, y: 282, 'font-size': 36, fill: INK }, gCard);
+var gPipe = el('g', { class: 't' }, svg);
+function box(x, label, fill) {
+  el('rect', { x: x, y: 520, width: 300, height: 90, fill: fill, stroke: INK, 'stroke-width': 3 }, gPipe);
+  txt(label, { class: 'mono', x: x + 150, y: 577, 'font-size': 34, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gPipe);
+}
+box(400, 'ScaleData()', GOLD);
+box(900, 'RunPCA()', '#ffffff');
+el('line', { x1: 710, y1: 565, x2: 868, y2: 565, stroke: INK, 'stroke-width': 4 }, gPipe);
+el('polygon', { points: '894,565 866,550 866,580', fill: INK }, gPipe);
+txt('first', { x: 550, y: 660, 'font-size': 28, 'text-anchor': 'middle', fill: INK }, gPipe);
+txt('second', { x: 1050, y: 660, 'font-size': 28, 'text-anchor': 'middle', fill: INK }, gPipe);
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+
+(function () {
+  var words = 'Without ScaleData, PC1 would just follow the most highly expressed gene.'.split(' '), lines = [], c = '';
+  meas.setAttribute('font-size', 36);
+  words.forEach(function (w) {
+    var t = c ? c + ' ' + w : w; meas.textContent = t;
+    if (meas.getComputedTextLength() > 1000 && c) { lines.push(c); c = w; } else { c = t; }
+  });
+  if (c) { lines.push(c); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 290, dy: n ? 50 : 0 }, cardBody); ts.textContent = ln; });
+  meas.setAttribute('font-size', 32);
+})();
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+
+/* ---------- rotation tween (step 2) ---------- */
+var rafId = 0, startTimer = null;
+function stopRot() { cancelAnimationFrame(rafId); clearTimeout(startTimer); }
+function rotate(from, to, dur, done) {
+  stopRot();
+  if (REDUCE || dur <= 0) { setAngle(to); if (done) { done(); } return; }
+  var t0 = null;
+  function frame(ts) {
+    if (t0 === null) { t0 = ts; }
+    var u = Math.min(1, (ts - t0) / dur), e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+    setAngle(from + (to - from) * e);
+    if (u < 1) { rafId = requestAnimationFrame(frame); } else if (done) { done(); }
+  }
+  rafId = requestAnimationFrame(frame);
+}
+
+/* ---------- state rendering ---------- */
+var firstRender = true;
+function render(s) {
+  var scat = s <= 4;
+  sh(gScatter, scat, 350);
+  sh(gLegend, s <= 4, 350);
+  sh(gBars, s === 2 || s === 3, 350);
+  op(bar1Lab, s === 2 ? 1 : 0); op(bar1Lab2, s === 3 ? 1 : 0);
+  op(maxTick, s === 2 ? 1 : 0);
+  sh(gBar2, s === 3, 350);
+  tf(bar2, 0, 0, s === 3 ? 1 : 0.0001, 1);
+  sh(gStrip, s === 4, 700);
+  sh(gLoad, s === 5, 350);
+  sh(gS6, false, 0);
+  sh(lblG, s === 6, 0); sh(gGenes, s === 6, 0); sh(gArrow, s === 6, 1000);
+  sh(lblP, s === 6, 1500);
+  sh(base6, s === 6, 1500); sh(note6, s === 6, 1500);
+  pcBars.forEach(function (b, k) { tf(b, 980 + k * 11, 470, 1, s === 6 ? 1 : 0.0001); b.style.setProperty('--dd', s === 6 ? (1500 + k * 25) + 'ms' : '0ms'); op(b, s === 6 ? 1 : 0); });
+  sh(gEl, s === 7, 350);
+  elbowItems.forEach(function (it) { sh(it[0], s === 7, 500 + it[1] * 45); });
+  sh(gMark, s === 7, 500 + 15 * 45 + 400);
+  sh(gElbow, s === 7, 500 + 8 * 45 + 400);
+  sh(gCard, s === 8, 350); sh(gPipe, s === 8, 700);
+
+  /* scatter layers */
+  op(gRes, (s >= 2 && s <= 4) ? 1 : 0);
+  op(line1, s >= 2 ? 1 : 0);
+  op(line2, s === 3 ? 1 : 0);
+  op(lab2, s === 3 ? 1 : 0);
+  op(lab1, s >= 3 && s <= 4 ? 1 : 0);
+  cells.forEach(function (c, k) {
+    if (s >= 4) { tf(dots[k], X(c.px), Y(c.py)); } else { tf(dots[k], X(c.x), Y(c.y)); }
+  });
+  /* axis rotation */
+  if (s === 2) {
+    stopRot(); setAngle(0);
+    startTimer = setTimeout(function () {
+      rotate(0, THETA, 2800, function () { if (cur === 2) { op(lab1, 1); } });
+    }, firstRender ? 400 : 900);
+  } else if (s >= 3 && s <= 4) {
+    stopRot(); setAngle(THETA);
+  } else if (s === 1) {
+    stopRot(); setAngle(0);
+  }
+  firstRender = false;
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+window.__ep5pca = { theta: THETA * 180 / Math.PI, lam1: LAM1, lam2: LAM2, v0: varAt(0), setAngle: setAngle, varAt: varAt, tot: TOT };
+})();
+</script>
+</body>
+</html>

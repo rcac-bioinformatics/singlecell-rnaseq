@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bulk averages, single-cell counts</title>
+<!--
+Bulk averages, single-cell counts (Episode 1, bulk versus single-cell)
+
+Steps and captions
+ 1. A tissue is a mix of cell types.
+    A bowl with 12 circles in four colours (5, 4, 2 and 1 pieces). The single purple piece is the rare population.
+ 2. Bulk RNA-seq blends everything into one average profile.
+    The pieces drop into a blender, blend into one uniform colour, and one averaged bar chart appears.
+ 3. Single-cell RNA-seq keeps each cell separate: one profile per cell.
+    Rewind. The pieces return to the bowl and each gets its own bar chart, grouped by colour.
+ 4. Rare populations vanish in the average and survive in the fruit bowl.
+    The purple piece is ringed in gold. Its profile has a clear peak at gene 6; the bulk average barely shows it.
+
+Illustrative: the group sizes (5, 4, 2, 1), the colours, and all bar heights are made up (mulberry32 seed 42).
+The averaged profile is computed from the 12 piece profiles, so it is a true average of what is drawn.
+The colours are borrowed from the cell-type palette but carry no cell-type meaning here.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=3 opens at step 3. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke-opacity var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: bulk averages, single-cell counts"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GRID = '#e2e8f0', SLATE = '#4a5568';
+var N = 4;
+var CAPTIONS = [
+  'A tissue is a mix of cell types.',
+  'Bulk RNA-seq blends everything into one average profile.',
+  'Single-cell RNA-seq keeps each cell separate: one profile per cell.',
+  'Rare populations vanish in the average and survive in the fruit bowl.'
+];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, sx, sy) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + (sx === undefined ? 1 : sx) + ',' + (sy === undefined ? 1 : sy) + ')';
+}
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 350) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function setDd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+var rnd = mulberry32(42);
+function hex2rgb(h) { return [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)]; }
+
+/* ---------- frame ---------- */
+txt('Bulk averages, single-cell counts', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 1', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: GRID, 'stroke-width': 2 }, svg);
+
+/* ---------- data ---------- */
+var GROUPS = [
+  { col: '#2b6cb0', n: 5, prof: [0.85, 0.30, 0.20, 0.25, 0.15, 0.05] },
+  { col: '#dd6b20', n: 4, prof: [0.25, 0.85, 0.30, 0.20, 0.20, 0.05] },
+  { col: '#2f855a', n: 2, prof: [0.20, 0.25, 0.85, 0.30, 0.20, 0.05] },
+  { col: '#805ad5', n: 1, prof: [0.20, 0.15, 0.20, 0.20, 0.25, 0.95] }
+];
+/* bowl slots (offsets from rim centre) */
+var SLOTS = [[-93, 130], [-31, 130], [31, 130], [93, 130], [-132, 70], [-66, 70], [0, 70], [66, 70], [132, 70], [-66, 0], [0, 0], [66, 0]];
+var JAR = [[-84, 490], [-28, 490], [28, 490], [84, 490], [-84, 436], [-28, 436], [28, 436], [84, 436], [-84, 382], [-28, 382], [28, 382], [84, 382]];
+/* assign groups to slots; the purple piece goes to the top right slot */
+var order = [];
+GROUPS.forEach(function (g, gi) { for (var i = 0; i < g.n; i++) { order.push(gi); } });
+var rest = order.slice(0, 11), j, t;
+for (var i = rest.length - 1; i > 0; i--) { j = Math.floor(rnd() * (i + 1)); t = rest[i]; rest[i] = rest[j]; rest[j] = t; }
+var slotGroup = rest.concat([3]);
+var pieces = slotGroup.map(function (gi, si) {
+  var prof = GROUPS[gi].prof.map(function (v) { return Math.max(0.03, Math.min(1, v + (rnd() - 0.5) * 0.14)); });
+  return { gi: gi, slot: SLOTS[si], jar: JAR[si], prof: prof, col: GROUPS[gi].col };
+});
+var avgProf = [0, 1, 2, 3, 4, 5].map(function (k) { return pieces.reduce(function (a, p) { return a + p.prof[k]; }, 0) / 12; });
+var avgRGB = [0, 1, 2].map(function (c) { return Math.round(pieces.reduce(function (a, p) { return a + hex2rgb(p.col)[c]; }, 0) / 12); });
+var AVGCOL = 'rgb(' + avgRGB.join(',') + ')';
+var purple = pieces[11];
+
+/* ---------- jar (step 2) ---------- */
+var gJar = el('g', { class: 't' }, svg);
+var JX = 420;
+el('polygon', { points: (JX - 170) + ',150 ' + (JX + 170) + ',150 ' + (JX + 120) + ',520 ' + (JX - 120) + ',520', fill: '#fff', stroke: INK, 'stroke-width': 4 }, gJar);
+var liquid = el('polygon', { class: 't', points: (JX - 144) + ',340 ' + (JX + 144) + ',340 ' + (JX + 118) + ',518 ' + (JX - 118) + ',518', fill: AVGCOL }, gJar);
+el('rect', { x: JX - 150, y: 520, width: 300, height: 56, fill: SLATE, stroke: INK, 'stroke-width': 4 }, gJar);
+txt('blender', { x: JX, y: 620, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gJar);
+
+/* ---------- bowl ---------- */
+var gBowl = el('g', { class: 't' }, svg);
+el('path', { d: 'M -200 0 A 200 180 0 0 0 200 0 Z', fill: '#fff', stroke: INK, 'stroke-width': 4 }, gBowl);
+txt('tissue', { x: 0, y: 250, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gBowl);
+
+/* ---------- pieces ---------- */
+var gPieces = el('g', {}, svg);
+pieces.forEach(function (p) {
+  p.c = el('circle', { class: 't', cx: 0, cy: 0, r: 34, fill: p.col, stroke: INK, 'stroke-width': 3 }, gPieces);
+});
+var ring = el('circle', { class: 't', cx: 0, cy: 0, r: 46, fill: 'none', stroke: GOLD, 'stroke-width': 7 }, svg);
+
+/* ---------- bar charts ---------- */
+function chart(parent, x, base, maxH, bw, stride, vals, color) {
+  var bars = vals.map(function (v, k) {
+    var r = el('rect', { class: 't', x: 0, y: -maxH, width: bw, height: maxH, fill: Array.isArray(color) ? color[k] : color }, parent);
+    r._x = x + k * stride; r._base = base; r._v = v; return r;
+  });
+  el('line', { x1: x - 6, y1: base, x2: x + vals.length * stride, y2: base, stroke: INK, 'stroke-width': 3 }, parent);
+  return bars;
+}
+function setBars(bars, on, dd0, step) {
+  bars.forEach(function (b, k) {
+    setDd(b, on ? dd0 + k * (step || 70) : 0);
+    tf(b, b._x, b._base, 1, on ? b._v : 0); op(b, on ? 1 : 0);
+  });
+}
+
+/* step 2: average chart */
+var gAvg = el('g', { class: 't' }, svg);
+txt('one averaged profile', { x: 1075, y: 190, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gAvg);
+var avgBars = chart(gAvg, 900, 560, 300, 44, 58, avgProf, SLATE);
+txt('genes', { x: 1075, y: 604, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gAvg);
+
+/* step 3: grouped mini charts */
+var gMini = el('g', { class: 't' }, svg);
+var miniBars = [], gi2 = [0, 0, 0, 0];
+var rowBase = [190, 340, 490, 640];
+GROUPS.forEach(function (g, r) {
+  el('circle', { cx: 660, cy: rowBase[r] - 40, r: 22, fill: g.col, stroke: INK, 'stroke-width': 3 }, gMini);
+});
+pieces.forEach(function (p, i) {
+  var r = p.gi, jx = gi2[r]++;
+  p.mini = chart(gMini, 712 + jx * 124, rowBase[r], 80, 12, 16, p.prof, p.col);
+  p.row = r;
+});
+txt('one profile', { x: 1350, y: 190, 'font-size': 28, 'font-weight': 700, fill: INK }, gMini);
+txt('per cell', { x: 1350, y: 224, 'font-size': 28, 'font-weight': 700, fill: INK }, gMini);
+
+/* step 4: two big charts */
+var gBig = el('g', { class: 't' }, svg);
+txt('the purple cell', { x: 830, y: 190, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gBig);
+txt('the bulk average', { x: 1270, y: 190, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gBig);
+var bigL = chart(gBig, 700, 560, 300, 36, 48, purple.prof, '#805ad5');
+var bigR = chart(gBig, 1140, 560, 300, 36, 48, avgProf, SLATE);
+txt('genes', { x: 830, y: 604, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gBig);
+txt('genes', { x: 1270, y: 604, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gBig);
+[700, 1140].forEach(function (x) {
+  el('rect', { x: x + 5 * 48 - 8, y: 240, width: 52, height: 330, fill: 'none', stroke: GOLD, 'stroke-width': 5, 'stroke-dasharray': '12 8' }, gBig);
+});
+txt('clear peak', { x: 830, y: 660, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gBig);
+txt('lost in the average', { x: 1270, y: 660, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gBig);
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+
+/* ---------- state rendering ---------- */
+var phaseTimer = null;
+function blendState(final) {
+  pieces.forEach(function (p) { setDd(p.c, 0); p.c.style.fill = AVGCOL; op(p.c, 0); });
+  sh(liquid, true, 0); op(liquid, 1);
+  setBars(avgBars, true, 400, 80);
+}
+function render(s, prev) {
+  if (phaseTimer) { clearTimeout(phaseTimer); phaseTimer = null; }
+  sh(gBowl, s !== 2, 350);
+  tf(gBowl, s === 1 ? 800 : 300, 380, 1, 1);
+  sh(gJar, s === 2, 350);
+  sh(gAvg, s === 2, 350);
+  sh(gMini, s === 3, 600);
+  sh(gBig, s === 4, 600);
+  op(liquid, 0);
+  pieces.forEach(function (p, i) {
+    var c = p.c;
+    setDd(c, 0);
+    c.style.fill = p.col;
+    if (s === 1) { tf(c, 800 + p.slot[0], 380 + p.slot[1], 1, 1); op(c, 1); }
+    if (s === 3) { tf(c, 300 + p.slot[0], 380 + p.slot[1], 1, 1); op(c, 1); }
+    if (s === 4) { tf(c, 300 + p.slot[0], 380 + p.slot[1], 1, 1); op(c, p === purple ? 1 : 0.3); }
+    if (s === 2) { tf(c, JX + p.jar[0], p.jar[1], 0.8, 0.8); }
+  });
+  /* mini bars */
+  pieces.forEach(function (p) { setBars(p.mini, s === 3, 800 + p.row * 250, 60); });
+  setBars(bigL, s === 4, 900, 80); setBars(bigR, s === 4, 1100, 80);
+  /* ring */
+  tf(ring, 300 + purple.slot[0], 380 + purple.slot[1], 1, 1);
+  setDd(ring, s === 4 ? 700 : 0); op(ring, s === 4 ? 1 : 0);
+  /* step 2 */
+  setBars(avgBars, false, 0);
+  if (s === 2) {
+    if (prev === 1) {
+      pieces.forEach(function (p, i) { setDd(p.c, i * 90); op(p.c, 1); });
+      phaseTimer = setTimeout(function () { blendState(); }, 2300);
+    } else {
+      blendState();
+    }
+  }
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  var pv = cur; cur = n; render(cur, pv); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

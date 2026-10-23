@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Normalization corrects sequencing depth</title>
+<!--
+Normalization corrects sequencing depth (Episode 4, Log Normalization, normalization-and-features.Rmd 94-125)
+
+Steps and captions
+ 1. Cell A and Cell B express the same genes at the same levels. B was sequenced twice as deep.
+    Raw counts. A = 40, 25, 0, 30, 100. B = 80, 50, 0, 60, 200 (LYZ, ACTB, CD3D, S100A9, MALAT1).
+ 2. Every gene in B looks twice as high. That is sequencing depth, not biology.
+    The totals under each column are highlighted: 5000 and 10000.
+ 3. Step 1, divide each count by the cell's total UMI count.
+    Formula strip: count / total_counts. Both columns: 0.008, 0.005, 0, 0.006, 0.02. Axis rescales to fractions.
+ 4. Step 2, multiply by the scale factor 10000 so values are not tiny fractions.
+    Formula strip: count / total_counts x 10000. Both columns: 80, 50, 0, 60, 200. Axis rescales.
+ 5. Step 3, log1p compresses the range. MALAT1 no longer dominates the plot.
+    Formula strip: log(1 + count / total_counts x 10000). Both columns: 4.39, 3.93, 0, 4.11, 5.30. Axis rescales.
+ 6. Identical cells now have identical values. This is the data layer.
+    Column B slides onto column A and overlaps it exactly (B drawn as an outline). Seurat object diagram shows the counts layer.
+ 7. NormalizeData() writes the result to pbmc[['RNA']]$data and leaves counts untouched.
+    The diagram gains the data layer.
+
+CD3D is 0 in every step and keeps a flat marker and a 0 label.
+There are no random elements in this animation, so every run looks the same.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=4 opens at step 4. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke-opacity var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: normalization corrects sequencing depth"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GREY = '#cbd5e0', GRID = '#e2e8f0', CA = '#2b6cb0', CB = '#63b3ed';
+var N = 7;
+var CAPTIONS = [
+  'Cell A and Cell B express the same genes at the same levels. B was sequenced twice as deep.',
+  'Every gene in B looks twice as high. That is sequencing depth, not biology.',
+  'Step 1, divide each count by the cell\'s total UMI count.',
+  'Step 2, multiply by the scale factor 10000 so values are not tiny fractions.',
+  'Step 3, log1p compresses the range. MALAT1 no longer dominates the plot.',
+  'Identical cells now have identical values. This is the data layer.',
+  'NormalizeData() writes the result to pbmc[[\'RNA\']]$data and leaves counts untouched.'
+];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, sx, sy) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + (sx === undefined ? 1 : sx) + ',' + (sy === undefined ? 1 : sy) + ')';
+}
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 350) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function setDur(e, ms) { e.style.setProperty('--dur', ms + 'ms'); }
+
+/* ---------- data ---------- */
+var GENES = ['LYZ', 'ACTB', 'CD3D', 'S100A9', 'MALAT1'];
+var FR = [0.008, 0.005, 0, 0.006, 0.02];
+var SC = [80, 50, 0, 60, 200];
+var LG = SC.map(function (v) { return Math.log(1 + v); });
+var STAGES = [
+  { max: 250, ticks: [0, 50, 100, 150, 200, 250], tl: ['0', '50', '100', '150', '200', '250'], title: 'raw count' },
+  { max: 0.025, ticks: [0, 0.005, 0.01, 0.015, 0.02, 0.025], tl: ['0', '0.005', '0.01', '0.015', '0.02', '0.025'], title: 'count / total_counts' },
+  { max: 250, ticks: [0, 50, 100, 150, 200, 250], tl: ['0', '50', '100', '150', '200', '250'], title: 'scaled value' },
+  { max: 6, ticks: [0, 1, 2, 3, 4, 5, 6], tl: ['0', '1', '2', '3', '4', '5', '6'], title: 'log1p value' }
+];
+var VALS = {
+  A: [[40, 25, 0, 30, 100], FR, SC, LG],
+  B: [[80, 50, 0, 60, 200], FR, SC, LG]
+};
+var LABS = {
+  A: [['40', '25', '0', '30', '100'], ['0.008', '0.005', '0', '0.006', '0.02'], ['80', '50', '0', '60', '200'], ['4.39', '3.93', '0', '4.11', '5.30']],
+  B: [['80', '50', '0', '60', '200'], ['0.008', '0.005', '0', '0.006', '0.02'], ['80', '50', '0', '60', '200'], ['4.39', '3.93', '0', '4.11', '5.30']]
+};
+
+/* ---------- geometry ---------- */
+var BASE = 580, H = 340, AXX = 150, SLOT = 108, BW = 64, PW = 540;
+function yv(v, max) { return BASE - v / max * H; }
+function lx(i) { return 54 + SLOT * i; }
+
+/* ---------- fixed frame ---------- */
+txt('Normalization corrects sequencing depth', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 4', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: GRID, 'stroke-width': 2 }, svg);
+
+/* formula strip */
+el('rect', { x: 40, y: 92, width: 1520, height: 58, fill: '#f7fafc', stroke: INK, 'stroke-width': 2 }, svg);
+var STR = 'log(1 + count / total_counts x 10000)';
+var stripAttrs = { class: 'mono', 'font-size': 34, 'font-weight': 700, fill: INK };
+var meas0 = el('text', { class: 'mono', x: 0, y: -200, 'font-size': 34, 'font-weight': 700, opacity: 0, 'pointer-events': 'none' }, svg);
+meas0.textContent = STR;
+function cs(i) { return meas0.getStartPositionOfChar(i).x; }
+function ce(i) { return meas0.getEndPositionOfChar(i).x; }
+var gRaw = el('g', { class: 't' }, svg);
+txt('raw counts', { class: 'mono', x: 800, y: 132, 'font-size': 34, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gRaw);
+var gForm = el('g', { class: 't' }, svg);
+var P = [
+  { s: 'log(1 +', i0: 0, i1: 6 },
+  { s: 'count / total_counts', i0: 8, i1: 27 },
+  { s: 'x 10000', i0: 29, i1: 35 },
+  { s: ')', i0: 36, i1: 36 }
+];
+P.forEach(function (p) {
+  p.x = cs(p.i0);
+  p.e = txt(p.s, { class: 't mono', x: p.x, y: 132, 'font-size': 34, 'font-weight': 700, fill: INK }, gForm);
+});
+function spanX(a, b) { return [cs(P[a].i0), ce(P[b].i1)]; }
+function formDx(a, b) { var sp = spanX(a, b); return 800 - (sp[0] + sp[1]) / 2; }
+
+/* shared y axis */
+el('line', { x1: AXX, y1: 236, x2: AXX, y2: BASE, stroke: INK, 'stroke-width': 3 }, svg);
+var gAxHi = el('g', { class: 't' }, svg);
+el('rect', { x: 52, y: 224, width: 94, height: 376, rx: 6, ry: 6, fill: GOLD, 'fill-opacity': 0.45 }, gAxHi);
+var gTick = STAGES.map(function (st) {
+  var g = el('g', { class: 't' }, svg);
+  setDur(g, 450);
+  st.ticks.forEach(function (v, i) {
+    var y = yv(v, st.max);
+    el('line', { x1: AXX - 7, y1: y, x2: AXX, y2: y, stroke: INK, 'stroke-width': 3 }, g);
+    txt(st.tl[i], { x: AXX - 14, y: y + 9, 'font-size': 26, 'text-anchor': 'end', fill: INK }, g);
+  });
+  txt(st.title, { class: 'mono', x: 0, y: 0, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK, transform: 'translate(34,' + (BASE - H / 2) + ') rotate(-90)' }, g);
+  return g;
+});
+
+/* columns */
+var COLS = [
+  { id: 'A', ox: 160, col: CA, name: 'Cell A', total: '5000' },
+  { id: 'B', ox: 760, col: CB, name: 'Cell B', total: '10000' }
+];
+COLS.forEach(function (c) {
+  var g = el('g', { class: 't' }, svg);
+  c.g = g; tf(g, c.ox, 0);
+  c.gStatic = el('g', { class: 't' }, g);
+  c.grid = STAGES.map(function (st) {
+    var gg = el('g', { class: 't' }, c.gStatic);
+    setDur(gg, 450);
+    st.ticks.forEach(function (v) {
+      var y = yv(v, st.max);
+      if (v === 0) { return; }
+      el('line', { x1: 0, y1: y, x2: PW, y2: y, stroke: GRID, 'stroke-width': 2 }, gg);
+    });
+    return gg;
+  });
+  el('line', { x1: 0, y1: BASE, x2: PW, y2: BASE, stroke: INK, 'stroke-width': 3 }, c.gStatic);
+  GENES.forEach(function (gn, i) {
+    txt(gn, { class: 'mono', x: lx(i), y: 620, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, c.gStatic);
+  });
+  c.hdr = txt(c.name, { class: 't', x: PW / 2, y: 206, 'font-size': 34, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, g);
+  /* totals */
+  c.gTot = el('g', { class: 't' }, g);
+  c.totHi = el('rect', { class: 't', x: PW / 2 - 168, y: 646, width: 336, height: 46, fill: GOLD }, c.gTot);
+  setDur(c.totHi, 500);
+  txt('total_counts = ' + c.total, { class: 'mono', x: PW / 2, y: 679, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, c.gTot);
+  /* bars */
+  c.gBars = el('g', {}, g);
+  c.bars = []; c.rects = [];
+  GENES.forEach(function (gn, i) {
+    var bg = el('g', { class: 't' }, c.gBars);
+    var r = el('rect', { class: 't', x: -BW / 2, y: -H, width: BW, height: H, fill: c.col, stroke: INK, 'stroke-width': 4, 'stroke-opacity': 0, 'vector-effect': 'non-scaling-stroke' }, bg);
+    c.bars.push(bg); c.rects.push(r);
+  });
+  /* zero marker for CD3D */
+  c.mark = el('rect', { class: 't', x: lx(2) - BW / 2, y: BASE - 6, width: BW, height: 6, fill: c.col }, g);
+  /* value labels, one set per stage */
+  c.gLab = STAGES.map(function (st, k) {
+    var gl = el('g', { class: 't' }, g);
+    setDur(gl, 450);
+    VALS[c.id][k].forEach(function (v, i) {
+      var y = (v === 0 ? BASE - 20 : yv(v, st.max) - 12);
+      txt(LABS[c.id][k][i], { class: 'mono halo', x: lx(i), y: y, 'font-size': 26, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gl);
+    });
+    return gl;
+  });
+});
+var hdrBoth = txt('Cell A and Cell B', { class: 't', x: 160 + PW / 2, y: 206, 'font-size': 34, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, svg);
+
+/* ---------- Seurat object diagram ---------- */
+var gSeu = el('g', { class: 't' }, svg);
+setDur(gSeu, 500);
+el('rect', { x: 900, y: 190, width: 640, height: 390, fill: '#ffffff', stroke: INK, 'stroke-width': 3 }, gSeu);
+txt('pbmc', { class: 'mono', x: 925, y: 236, 'font-size': 32, 'font-weight': 700, fill: INK }, gSeu);
+el('rect', { x: 935, y: 258, width: 570, height: 300, fill: '#ffffff', stroke: INK, 'stroke-width': 2 }, gSeu);
+txt('RNA assay, layers', { x: 955, y: 292, 'font-size': 26, fill: INK }, gSeu);
+el('rect', { x: 965, y: 315, width: 510, height: 70, fill: GRID, stroke: INK, 'stroke-width': 3 }, gSeu);
+txt('counts', { class: 'mono', x: 995, y: 360, 'font-size': 32, 'font-weight': 700, fill: INK }, gSeu);
+var gSeuData = el('g', { class: 't' }, svg);
+setDur(gSeuData, 600);
+var gTagC = txt('unchanged', { x: 1445, y: 360, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gSeuData);
+el('line', { x1: 1010, y1: 393, x2: 1010, y2: 424, stroke: INK, 'stroke-width': 3 }, gSeuData);
+el('polygon', { points: '1010,442 998,422 1022,422', fill: INK }, gSeuData);
+txt('NormalizeData()', { class: 'mono', x: 1040, y: 428, 'font-size': 28, 'font-weight': 700, fill: INK }, gSeuData);
+el('rect', { x: 965, y: 445, width: 510, height: 70, fill: GOLD, stroke: INK, 'stroke-width': 3 }, gSeuData);
+txt('data', { class: 'mono', x: 995, y: 490, 'font-size': 32, 'font-weight': 700, fill: INK }, gSeuData);
+txt('log-normalized', { x: 1445, y: 490, 'font-size': 26, 'text-anchor': 'end', fill: INK }, gSeuData);
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+/* ---------- state rendering ---------- */
+function stageOf(s) { return s <= 2 ? 0 : (s === 3 ? 1 : (s === 4 ? 2 : 3)); }
+function render(s) {
+  var k = stageOf(s), st = STAGES[k], merged = s >= 6;
+
+  /* formula strip */
+  op(gRaw, s <= 2 ? 1 : 0);
+  op(gForm, s >= 3 ? 1 : 0);
+  var a = 1, b = 1;
+  if (s >= 4) { b = 2; }
+  if (s >= 5) { a = 0; b = 3; }
+  tf(gForm, formDx(a, b), 0);
+  op(P[0].e, s >= 5 ? 1 : 0);
+  op(P[1].e, s >= 3 ? 1 : 0);
+  op(P[2].e, s >= 4 ? 1 : 0);
+  op(P[3].e, s >= 5 ? 1 : 0);
+
+  /* axis */
+  op(gAxHi, (s >= 3 && s <= 5) ? 1 : 0);
+  gTick.forEach(function (g, i) { sh(g, i === k, 300); });
+
+  /* columns */
+  COLS.forEach(function (c) {
+    var isB = c.id === 'B';
+    tf(c.g, (isB && merged) ? 160 : c.ox, 0);
+    c.grid.forEach(function (g, i) { sh(g, i === k, 300); });
+    c.gLab.forEach(function (g, i) { sh(g, i === k && !(isB && merged), 400); });
+    c.bars.forEach(function (bg, i) { tf(bg, lx(i), BASE, 1, VALS[c.id][k][i] / st.max); });
+    if (isB) {
+      c.rects.forEach(function (r) {
+        r.style.fillOpacity = merged ? 0 : 1;
+        r.style.strokeOpacity = merged ? 1 : 0;
+      });
+      op(c.gStatic, merged ? 0 : 1);
+      op(c.mark, merged ? 0 : 1);
+      op(c.hdr, merged ? 0 : 1);
+      op(c.gTot, 0);
+    } else {
+      op(c.hdr, merged ? 0 : 1);
+    }
+    var totOn = (s >= 2 && s <= 5);
+    op(c.gTot, totOn ? 1 : 0);
+    c.totHi.style.opacity = s === 2 ? 1 : 0;
+  });
+  op(hdrBoth, merged ? 1 : 0);
+
+  /* Seurat diagram */
+  sh(gSeu, s >= 6, 450);
+  sh(gSeuData, s >= 7, 250);
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+void getComputedStyle(gForm).opacity;
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>

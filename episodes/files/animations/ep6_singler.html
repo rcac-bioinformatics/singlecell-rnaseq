@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How SingleR labels a cell</title>
+<!--
+How SingleR labels a cell (Episode 6, SingleR)
+
+Steps and captions
+ 1. SingleR compares each cell to every reference profile.
+    One query cell as a bar strip, six Monaco reference profiles below (B cells, CD4+ T, CD8+ T, Monocytes, NK, Progenitors).
+ 2. The label with the highest Spearman correlation wins, after fine tuning among the top candidates.
+    Correlation bars appear beside each reference; Monocytes is highest.
+ 3. Monaco has no platelet profile. The closest available label is Progenitors.
+    A platelet query cell (PPBP and PF4 high). Progenitors scores highest.
+ 4. This is why 154 platelets are called Progenitors. Check rare types with markers.
+    Cross-tab snippet: Platelet row, Progenitors 154.
+ 5. No reference is complete. Use more than one and cross-check.
+    HPCA has platelets but collapses T cell subtypes.
+
+Illustrative: the 24 gene bars (only PPBP and PF4 are named), the six reference profiles, and the correlation bar lengths
+are made up (mulberry32 seed 42). Bars carry no numbers. The only real numbers are 154 and the six Monaco labels.
+The step 4 snippet shows only the Platelet row and Progenitors column; other columns are elided with "...".
+Step 5 states in words that Monaco has no platelet label and splits CD4+ T from CD8+ T, and that HPCA has platelets
+but one collapsed T cell label, as in the brief.
+
+Controls
+ Right arrow or Space: next step. Left arrow: previous step. R: restart. P: autoplay on or off.
+ URL: ?step=3 opens at step 3. ?autoplay=1&dwell=3000 plays through with 3000 ms per step.
+-->
+<style>
+html,body{margin:0;padding:0;height:100%;background:#ffffff;overflow:hidden}
+svg{display:block;width:100vw;height:100vh;background:#ffffff;--dur:800ms;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:#1f2937}
+.mono{font-family:Consolas,Menlo,"DejaVu Sans Mono","Liberation Mono",monospace}
+.t{transition:transform var(--dur) ease var(--dd,0ms),opacity var(--dur) ease var(--dd,0ms),fill var(--dur) ease var(--dd,0ms),fill-opacity var(--dur) ease var(--dd,0ms),stroke-opacity var(--dur) ease var(--dd,0ms);transform-origin:0 0}
+.halo{paint-order:stroke;stroke:#ffffff;stroke-width:6px;stroke-linejoin:round}
+svg.notrans *{transition:none!important}
+@media (prefers-reduced-motion:reduce){svg *{transition:none!important}}
+.btn{cursor:pointer}
+.btn rect{fill:#ffffff;stroke:#1f2937;stroke-width:3}
+.btn text{fill:#1f2937;font-size:26px;text-anchor:middle;font-weight:600}
+.btn:hover rect{fill:#f1f5f9}
+.btn.off{opacity:.35;pointer-events:none}
+#controls.hide{visibility:hidden}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animation: how SingleR labels a cell"></svg>
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var svg = document.getElementById('stage');
+var INK = '#1f2937', GOLD = '#ceb888', GRID = '#e2e8f0', UP = '#b22222', SLATE = '#4a5568', GREYS = '#a0aec0';
+var N = 5;
+var CAPTIONS = [
+  'SingleR compares each cell to every reference profile.',
+  'The label with the highest Spearman correlation wins, after fine tuning among the top candidates.',
+  'Monaco has no platelet profile. The closest available label is Progenitors.',
+  'This is why 154 platelets are called Progenitors. Check rare types with markers.',
+  'No reference is complete. Use more than one and cross-check.'
+];
+
+function el(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+  if (parent) { parent.appendChild(e); }
+  return e;
+}
+function txt(str, attrs, parent) { var e = el('text', attrs, parent); e.textContent = str; return e; }
+function tf(e, x, y, sx, sy) {
+  e.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + (sx === undefined ? 1 : sx) + ',' + (sy === undefined ? 1 : sy) + ')';
+}
+function op(e, v) { e.style.opacity = v; }
+function sh(e, on, delay) { e.style.setProperty('--dd', on ? (delay || 350) + 'ms' : '0ms'); op(e, on ? 1 : 0); }
+function setDd(e, ms) { e.style.setProperty('--dd', ms + 'ms'); }
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+var rnd = mulberry32(42);
+function jit(m, s) { return Math.max(0.04, Math.min(1, m + (rnd() - 0.5) * 2 * s)); }
+
+/* ---------- frame ---------- */
+txt('How SingleR labels a cell', { x: 40, y: 62, 'font-size': 36, 'font-weight': 700, fill: INK }, svg);
+txt('Episode 6', { x: 1560, y: 58, 'font-size': 24, 'text-anchor': 'end', fill: INK }, svg);
+el('line', { x1: 40, y1: 728, x2: 1560, y2: 728, stroke: GRID, 'stroke-width': 2 }, svg);
+
+/* ---------- profiles over 24 genes ---------- */
+var NG = 24;
+var REFS = [['B cells', '#2f855a'], ['CD4+ T', '#2b6cb0'], ['CD8+ T', '#63b3ed'], ['Monocytes', '#dd6b20'], ['NK', '#805ad5'], ['Progenitors', '#a0aec0']];
+/* gene modules: 0,1,22,23 housekeeping; 2,3 PPBP PF4; 4-7 T; 8-10 B; 11-14 mono; 15-17 NK; 18-21 progenitor */
+function inMod(g, name) {
+  var m = { T: [4, 7], B: [8, 10], M: [11, 14], K: [15, 17], P: [18, 21] }[name];
+  return g >= m[0] && g <= m[1];
+}
+function profile(kind) {
+  var v = [];
+  for (var g = 0; g < NG; g++) {
+    var hk = (g < 2 || g > 21), pf = (g === 2 || g === 3), val;
+    if (hk) { val = jit(0.5, 0.1); }
+    else if (pf) { val = kind === 'plat' ? 1.0 : (kind === 'Progenitors' ? jit(0.45, 0.05) : jit(0.07, 0.03)); }
+    else {
+      var hi = false;
+      if (kind === 'B cells' || kind === 'bq') { hi = inMod(g, 'B'); }
+      if (kind === 'CD4+ T') { hi = g >= 4 && g <= 6; }
+      if (kind === 'CD8+ T') { hi = g >= 5 && g <= 7; }
+      if (kind === 'Monocytes' || kind === 'mono') { hi = inMod(g, 'M'); }
+      if (kind === 'NK') { hi = inMod(g, 'K'); }
+      if (kind === 'Progenitors') { hi = inMod(g, 'P'); }
+      val = hi ? jit(0.85, 0.1) : jit(0.12, 0.06);
+      if (kind === 'plat' && !pf) { val = jit(0.1, 0.05); }
+    }
+    v.push(val);
+  }
+  return v;
+}
+var QMONO = profile('mono'), QPLAT = profile('plat');
+var RPROF = REFS.map(function (r) { return profile(r[0]); });
+var SC2 = [0.22, 0.30, 0.28, 0.85, 0.33, 0.40], SC3 = [0.12, 0.10, 0.10, 0.30, 0.12, 0.62];
+
+/* ---------- main panel ---------- */
+var gMain = el('g', { class: 't' }, svg);
+var X0 = 330, STR = 33.5, BW = 26, QB = 190, QH = 80, RB0 = 300, RSP = 70, RH = 50;
+txt('query cell', { x: 300, y: 150, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gMain);
+var q2 = txt('(platelet)', { x: 300, y: 184, 'font-size': 28, 'text-anchor': 'end', fill: INK, class: 't' }, gMain);
+txt('reference profiles (Monaco)', { x: X0, y: 232, 'font-size': 26, 'font-weight': 700, fill: INK }, gMain);
+txt('genes', { x: X0 + (NG * STR) / 2, y: 718, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gMain);
+el('line', { x1: X0 - 6, y1: QB, x2: X0 + NG * STR, y2: QB, stroke: INK, 'stroke-width': 3 }, gMain);
+var qbars = [];
+for (var g = 0; g < NG; g++) {
+  var r = el('rect', { class: 't', x: 0, y: -QH, width: BW, height: QH, fill: SLATE }, gMain);
+  qbars.push(r);
+}
+var gQL = el('g', { class: 't' }, gMain);
+txt('PPBP and PF4 high', { x: X0 + 4 * STR + 12, y: 140, 'font-size': 28, 'font-weight': 700, fill: INK }, gQL);
+REFS.forEach(function (rf, k) {
+  var base = RB0 + k * RSP;
+  el('line', { x1: X0 - 6, y1: base, x2: X0 + NG * STR, y2: base, stroke: INK, 'stroke-width': 2 }, gMain);
+  txt(rf[0], { x: 300, y: base - 10, 'font-size': 28, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gMain);
+  for (var gg = 0; gg < NG; gg++) {
+    var h = RPROF[k][gg] * RH;
+    var rr = el('rect', { x: 0, y: -h, width: BW, height: h, fill: rf[1] }, gMain);
+    rr.style.transform = 'translate(' + (X0 + gg * STR) + 'px,' + base + 'px)';
+  }
+});
+
+/* scores */
+var SX = 1200, SW = 300;
+var gScores = el('g', { class: 't' }, svg);
+txt('Spearman correlation', { x: SX, y: 232, 'font-size': 26, 'font-weight': 700, fill: INK }, gScores);
+var sbars = [];
+REFS.forEach(function (rf, k) {
+  var base = RB0 + k * RSP;
+  var b = el('rect', { class: 't', x: 0, y: -40, width: SW, height: 34, fill: GREYS, stroke: INK, 'stroke-width': 2 }, gScores);
+  tf(b, SX, base, 0, 1); op(b, 0);
+  sbars.push(b);
+});
+var hi = el('rect', { class: 't', x: 0, y: 0, width: 1470, height: 66, fill: 'none', stroke: GOLD, 'stroke-width': 6 }, svg);
+var gNote2 = el('g', { class: 't' }, svg);
+txt('then fine tuning among', { x: SX, y: 130, 'font-size': 26, fill: INK }, gNote2);
+txt('the top candidates', { x: SX, y: 162, 'font-size': 26, fill: INK }, gNote2);
+var gNote3 = el('g', { class: 't' }, svg);
+txt('no platelet profile', { x: SX, y: 130, 'font-size': 26, 'font-weight': 700, fill: UP }, gNote3);
+txt('in Monaco', { x: SX, y: 162, 'font-size': 26, 'font-weight': 700, fill: UP }, gNote3);
+
+/* ---------- step 4: cross-tab snippet ---------- */
+var gTab = el('g', { class: 't' }, svg);
+txt('cross-tab: lesson label (rows) by SingleR label (columns)', { x: 800, y: 210, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gTab);
+var TX = 310, CWS = [200, 260, 260, 260];
+var cx = TX;
+var HDR = ['', '...', 'Progenitors', '...'], ROW = ['Platelet', '...', '154', '...'];
+CWS.forEach(function (w, i) {
+  el('rect', { x: cx, y: 290, width: w, height: 80, fill: '#fff', stroke: INK, 'stroke-width': 3 }, gTab);
+  el('rect', { x: cx, y: 370, width: w, height: 90, fill: i === 2 ? GOLD : '#fff', stroke: INK, 'stroke-width': 3 }, gTab);
+  txt(HDR[i], { class: 'mono', x: cx + w / 2, y: 342, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gTab);
+  txt(ROW[i], { class: 'mono', x: cx + w / 2, y: 428, 'font-size': i === 2 ? 44 : 34, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gTab);
+  cx += w;
+});
+txt('the other columns are not shown', { x: 800, y: 520, 'font-size': 26, 'text-anchor': 'middle', fill: INK }, gTab);
+
+/* ---------- step 5: reference comparison ---------- */
+var gRef = el('g', { class: 't' }, svg);
+var RX = 240, RWS = [300, 420, 420], rcx = RX;
+var T5 = [['', 'Monaco', 'HPCA'], ['platelets', 'absent', 'present'], ['T cell subtypes', 'CD4+ T and CD8+ T', 'collapsed']];
+T5.forEach(function (row, ri) {
+  rcx = RX;
+  row.forEach(function (c, ci) {
+    var gap = (ri === 1 && ci === 1) || (ri === 2 && ci === 2);
+    el('rect', { x: rcx, y: 200 + ri * 110, width: RWS[ci], height: 100, fill: gap ? GRID : '#fff', stroke: INK, 'stroke-width': 3 }, gRef);
+    txt(c, { x: rcx + RWS[ci] / 2, y: 200 + ri * 110 + 62, 'font-size': ci === 0 ? 30 : 34, 'font-weight': 700, 'text-anchor': 'middle', fill: gap ? UP : INK }, gRef);
+    rcx += RWS[ci];
+  });
+});
+txt('shaded = the gap in that reference', { x: 810, y: 580, 'font-size': 28, 'text-anchor': 'middle', fill: INK }, gRef);
+
+/* ---------- caption, counter, controls ---------- */
+var cap = el('text', { x: 40, y: 772, 'font-size': 32, fill: INK }, svg);
+var stepTxt = txt('', { x: 40, y: 872, 'font-size': 26, fill: INK }, svg);
+var meas = el('text', { x: 0, y: -100, 'font-size': 32, opacity: 0, 'pointer-events': 'none' }, svg);
+function wrap(text, maxW) {
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function (w) {
+    var test = cur ? cur + ' ' + w : w;
+    meas.textContent = test;
+    if (meas.getComputedTextLength() > maxW && cur) { lines.push(cur); cur = w; } else { cur = test; }
+  });
+  if (cur) { lines.push(cur); }
+  return lines;
+}
+function setCaption(step) {
+  var lines = wrap(CAPTIONS[step - 1], 1500);
+  while (cap.firstChild) { cap.removeChild(cap.firstChild); }
+  lines.forEach(function (ln, n) { var ts = el('tspan', { x: 40, dy: n ? 42 : 0 }, cap); ts.textContent = ln; });
+  cap.setAttribute('data-lines', lines.length);
+}
+var controls = el('g', { id: 'controls' }, svg);
+function mkBtn(label, x, w, fn) {
+  var b = el('g', { class: 'btn' }, controls);
+  el('rect', { x: x, y: 836, width: w, height: 48, rx: 6, ry: 6 }, b);
+  var t = txt(label, { x: x + w / 2, y: 869 }, b);
+  b.addEventListener('click', fn);
+  b._t = t;
+  return b;
+}
+var bPrev = mkBtn('Prev', 1032, 124, function () { prev(); });
+var bNext = mkBtn('Next', 1168, 124, function () { next(); });
+var bPlay = mkBtn('Play', 1304, 124, function () { toggleAuto(); });
+var bRestart = mkBtn('Restart', 1440, 140, function () { restart(); });
+
+
+/* ---------- state rendering ---------- */
+function render(s) {
+  sh(gMain, s <= 3, 350);
+  sh(gScores, s === 2 || s === 3, 350);
+  sh(gTab, s === 4, 350);
+  sh(gRef, s === 5, 350);
+  var plat = s >= 3, q = plat ? QPLAT : QMONO;
+  qbars.forEach(function (b, i) { tf(b, X0 + i * STR, QB, 1, q[i]); });
+  op(q2, plat ? 1 : 0); sh(gQL, s === 3, 700);
+  sh(gNote2, s === 2, 900); sh(gNote3, s === 3, 900);
+  var sc = s === 3 ? SC3 : SC2;
+  sbars.forEach(function (b, k) {
+    var on = (s === 2 || s === 3);
+    setDd(b, on ? 400 + k * 90 : 0);
+    tf(b, SX, RB0 + k * RSP, on ? sc[k] : 0, 1); op(b, on ? 1 : 0);
+    b.style.fill = (on && k === (s === 3 ? 5 : 3)) ? GOLD : GREYS;
+  });
+  var win = s === 3 ? 5 : 3;
+  setDd(hi, (s === 2 || s === 3) ? 1500 : 0);
+  tf(hi, 90, RB0 + win * RSP - 58, 1, 1); op(hi, (s === 2 || s === 3) ? 1 : 0);
+}
+
+/* ---------- navigation, autoplay ---------- */
+var params = new URLSearchParams(window.location.search);
+var cur = parseInt(params.get('step'), 10); if (!(cur >= 1 && cur <= N)) { cur = 1; }
+var dwell = parseInt(params.get('dwell'), 10); if (!(dwell > 0)) { dwell = 4000; }
+var auto = params.get('autoplay') === '1';
+var timer = null, hideTimer = null;
+
+function updateUI() {
+  setCaption(cur);
+  stepTxt.textContent = cur + ' / ' + N;
+  bPrev.classList.toggle('off', cur === 1);
+  bNext.classList.toggle('off', cur === N);
+  bPlay._t.textContent = auto ? 'Pause' : 'Play';
+  svg.setAttribute('data-step', cur);
+}
+function go(n) {
+  n = Math.max(1, Math.min(N, n));
+  if (n === cur) { return; }
+  cur = n; render(cur); updateUI();
+}
+function schedule() {
+  clearTimeout(timer);
+  if (!auto) { return; }
+  timer = setTimeout(function () {
+    if (cur < N) { go(cur + 1); schedule(); } else { setAuto(false); showControls(); }
+  }, dwell);
+}
+function setAuto(v) {
+  auto = v; updateUI();
+  if (auto) { controls.classList.add('hide'); } else { clearTimeout(hideTimer); controls.classList.remove('hide'); }
+  schedule();
+}
+function showControls() {
+  controls.classList.remove('hide');
+  clearTimeout(hideTimer);
+  if (auto) { hideTimer = setTimeout(function () { if (auto) { controls.classList.add('hide'); } }, 3000); }
+}
+function next() { go(cur + 1); schedule(); }
+function prev() { go(cur - 1); schedule(); }
+function restart() { go(1); schedule(); }
+function toggleAuto() { setAuto(!auto); }
+
+window.addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+  var k = e.key, handled = true;
+  if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar') { next(); }
+  else if (k === 'ArrowLeft') { prev(); }
+  else if (k === 'r' || k === 'R') { restart(); }
+  else if (k === 'p' || k === 'P') { toggleAuto(); }
+  else { handled = false; }
+  if (handled) { e.preventDefault(); }
+  showControls();
+});
+
+/* first render without animation */
+svg.classList.add('notrans');
+render(cur); updateUI();
+if (auto) { controls.classList.add('hide'); schedule(); }
+void svg.getBoundingClientRect();
+requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('notrans'); }); });
+})();
+</script>
+</body>
+</html>
