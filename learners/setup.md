@@ -138,7 +138,7 @@ rsync -avP /depot/workshop/data/scrna_workshop/ ${RCAC_SCRATCH}/scrna_workshop/
 
 This will copy:
 
-- **FASTQ files**: `fastq/pbmc_10k_v3_S1_L00{1,2}_R{1,2}_001.fastq.gz`
+- **FASTQ files**: `fastq/pbmc_10k_v3_S1_L00{1,2}_{I1,R1,R2}_001.fastq.gz`
 - **10x Reference**: `reference/refdata-gex-GRCh38-2024-A/`
 - **Pre-computed count matrix**: `filtered_feature_bc_matrix/` (for episodes 3+)
 - **Pre-computed R objects**: `rds/` (optional, for jumping into later episodes)

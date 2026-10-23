@@ -65,6 +65,16 @@ work_dir <- paste0(
 setwd(work_dir)
 ```
 
+:::::::::::::::::::::::::::::::::::::::: callout
+
+## Starting here without the previous episode?
+
+Copy the saved objects from the workshop data first (`pbmc_annotated.rds` is
+used by the export section at the end):
+`file.copy(paste0(work_dir, c("rds/ifnb_annotated.rds", "rds/pbmc_annotated.rds")), work_dir)`
+
+:::::::::::::::::::::::::::::::::::::::
+
 ```{r load-data, eval=FALSE}
 ifnb <- readRDS(paste0(work_dir, "ifnb_annotated.rds"))
 Idents(ifnb) <- "celltype"
