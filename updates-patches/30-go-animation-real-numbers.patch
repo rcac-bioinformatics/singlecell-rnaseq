@@ -1,0 +1,122 @@
+--- a/episodes/files/animations/ep8_go-enrichment.html
++++ b/episodes/files/animations/ep8_go-enrichment.html
+@@ -8,28 +8,29 @@
+ What enrichGO tests (Episode 8, GO enrichment)
+ 
+ Steps and captions
+- 1. Start with 293 up-regulated genes and the background of tested genes.
+-    A box "all tested genes, 9451" with a field of dots, and a circle "DE genes, 293".
++ 1. Start with 293 up-regulated genes, 263 of them with GO annotations, against all annotated genes.
++    A box "background, 18842 annotated genes" with a field of dots, and a circle "DE genes, 263 (of 293)".
+  2. Each GO term is a set of genes.
+-    A second circle "response to virus, 320 genes".
++    A second circle "response to virus, 400 genes".
+  3. Count the overlap.
+-    The 45 shared dots highlight, label "45 shared".
+- 4. Compare with what random draws would give. 45 vs about 10 is enrichment.
+-    Two bars: expected by chance about 10, observed 45.
++    The 55 shared dots highlight, label "55 shared".
++ 4. Compare with what random draws would give. 55 vs about 5.6 is enrichment.
++    Two bars: expected by chance about 5.6, observed 55.
+  5. Repeat for every term, adjust for multiple testing, plot the top 15.
+     The episode 8 top 15 GO terms with their GeneRatio and adjusted p-value, ordered by GeneRatio as dotplot() draws them.
+  6. enrichGO is over-representation. GSEA is a different test on the full ranking.
+     ORA uses a cutoff list; GSEA uses the full ranked list.
+ 
+-Numbers: 9451, 320, 45 and 15 from the brief; 293 from the episode 8 output block (patch 28; the brief had 271).
+-Derived and stated on the slide: GeneRatio 45/293 for response to virus; expected overlap 293 x 320 / 9451 = 9.9.
+-Stylised: the circle areas are not proportional to the set sizes. The dots inside the DE circle (293), the term circle (320)
+-and the overlap (45) are drawn one per gene. The grey background dots are only a sample of the 9451, placed by seed 42.
++Steps 1 to 4 use the real response to virus numbers (patch 30): 293 up-regulated genes (episode 8 output block), 263 of them
++GO-annotated (the GeneRatio denominator), a 400-gene term, 55 shared, and the 18842-gene background enrichGO used (BgRatio
++400/18842). Expected overlap 263 x 400 / 18842 = 5.58, shown as about 5.6. Same source as step 5 below.
++Stylised: the circle areas are not proportional to the set sizes. The dots inside the DE circle (263), the term circle (400)
++and the overlap (55) are drawn one per gene. The grey background dots are only a sample of the 18842, placed by seed 42.
+ Step 5 is the real result (patch 29): the 15 terms are the episode 8 top 15 from the Negishi run (anchor ep8_go_top15, run
+ 2026-10-21, bundle scrna-kit-2026-10-21-20261023-1232). GeneRatio and p.adjust come from the same chunks rerun locally in
+ arnstrm2/r-bioconductor:3.23-R-4.6.1 (Seurat 5.5.1, clusterProfiler 4.20.2, org.Hs.eg.db 3.23.1), which gives the identical
+ 15 terms in the identical order. 263 of the 293 genes are GO-annotated, hence the /263. Dot colour is -log10 p.adjust,
+-scaled from 34.5 (red) to 13.0 (blue). Steps 1 to 4 stay illustrative (45 of 320 against 9451).
++scaled from 34.5 (red) to 13.0 (blue).
+ Step 6 pictograms are schematic.
+ 
+ Controls
+@@ -63,10 +64,10 @@
+ var INK = '#1f2937', GOLD = '#ceb888', GRID = '#e2e8f0', UP = '#b22222', DOWN = '#4682b4', GREYS = '#a0aec0', SLATE = '#4a5568', BG = '#cbd5e0';
+ var N = 6;
+ var CAPTIONS = [
+-  'Start with 293 up-regulated genes and the background of tested genes.',
++  'Start with 293 up-regulated genes, 263 of them with GO annotations, against all annotated genes.',
+   'Each GO term is a set of genes.',
+   'Count the overlap.',
+-  'Compare with what random draws would give. 45 vs about 10 is enrichment.',
++  'Compare with what random draws would give. 55 vs about 5.6 is enrichment.',
+   'Repeat for every term, adjust for multiple testing, plot the top 15.',
+   'enrichGO is over-representation. GSEA is a different test on the full ranking.'
+ ];
+@@ -95,7 +96,7 @@
+ 
+ /* ---------- Venn-style diagram ---------- */
+ var BX = 60, BY = 100, BW = 1080, BH = 600;
+-var C1 = { x: 490, y: 400, r: 145 }, C2 = { x: 690, y: 400, r: 155 };
++var C1 = { x: 490, y: 400, r: 145 }, C2 = { x: 695, y: 400, r: 165 };
+ function inC(c, x, y, m) { var dx = x - c.x, dy = y - c.y; return Math.sqrt(dx * dx + dy * dy) <= c.r - (m || 0); }
+ var placed = [];
+ function free(x, y, md) { for (var i = 0; i < placed.length; i++) { var dx = placed[i][0] - x, dy = placed[i][1] - y; if (dx * dx + dy * dy < md * md) { return false; } } return true; }
+@@ -113,16 +114,16 @@
+ var dots = [];
+ var inBoth = function (x, y) { return inC(C1, x, y, 7) && inC(C2, x, y, 7); };
+ var nearC = function (x, y) { return inC({ x: C1.x, y: C1.y, r: C1.r + 8 }, x, y) || inC({ x: C2.x, y: C2.y, r: C2.r + 8 }, x, y); };
+-dots = dots.concat(fill(45, 'ov', inBoth, [C2.x - C2.r, 240, C1.x + C1.r, 560]));
+-dots = dots.concat(fill(226, 'de', function (x, y) { return inC(C1, x, y, 7) && !inC({ x: C2.x, y: C2.y, r: C2.r + 8 }, x, y); }, [C1.x - C1.r, 250, C1.x + C1.r, 550]));
+-dots = dots.concat(fill(275, 'tm', function (x, y) { return inC(C2, x, y, 7) && !inC({ x: C1.x, y: C1.y, r: C1.r + 8 }, x, y); }, [C2.x - C2.r, 240, C2.x + C2.r, 560]));
++dots = dots.concat(fill(55, 'ov', inBoth, [C2.x - C2.r, 240, C1.x + C1.r, 560]));
++dots = dots.concat(fill(208, 'de', function (x, y) { return inC(C1, x, y, 7) && !inC({ x: C2.x, y: C2.y, r: C2.r + 8 }, x, y); }, [C1.x - C1.r, 250, C1.x + C1.r, 550]));
++dots = dots.concat(fill(345, 'tm', function (x, y) { return inC(C2, x, y, 7) && !inC({ x: C1.x, y: C1.y, r: C1.r + 8 }, x, y); }, [C2.x - C2.r, 240, C2.x + C2.r, 560]));
+ dots = dots.concat(fill(520, 'bg', function (x, y) { return !nearC(x, y); }, [BX + 20, BY + 70, BX + BW - 20, BY + BH - 50]));
+ var counts = { ov: 0, de: 0, tm: 0, bg: 0 }; dots.forEach(function (d) { counts[d.type]++; });
+ window.__counts = counts;
+ 
+ var gDiag = el('g', { class: 't' }, svg);
+ el('rect', { x: BX, y: BY, width: BW, height: BH, fill: '#fff', stroke: INK, 'stroke-width': 3 }, gDiag);
+-txt('all tested genes, 9451', { x: BX + 22, y: BY + 44, 'font-size': 32, 'font-weight': 700, fill: INK }, gDiag);
++txt('background, 18842 annotated genes', { x: BX + 22, y: BY + 44, 'font-size': 32, 'font-weight': 700, fill: INK }, gDiag);
+ txt('background dots are stylised', { x: BX + 22, y: BY + BH - 20, 'font-size': 26, fill: INK }, gDiag);
+ dots.forEach(function (d) {
+   d.c = el('circle', { class: 't', cx: 0, cy: 0, r: 4, fill: BG }, gDiag);
+@@ -131,15 +132,15 @@
+ var gC1 = el('g', { class: 't' }, gDiag);
+ el('circle', { cx: C1.x, cy: C1.y, r: C1.r, fill: 'none', stroke: UP, 'stroke-width': 5 }, gC1);
+ txt('DE genes,', { x: C1.x - C1.r - 14, y: C1.y - 6, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'end', fill: UP }, gC1);
+-txt('293', { x: C1.x - C1.r - 14, y: C1.y + 32, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'end', fill: UP }, gC1);
++txt('263 (of 293)', { x: C1.x - C1.r - 14, y: C1.y + 32, 'font-size': 30, 'font-weight': 700, 'text-anchor': 'end', fill: UP }, gC1);
+ var gC2 = el('g', { class: 't' }, gDiag);
+ el('circle', { cx: C2.x, cy: C2.y, r: C2.r, fill: 'none', stroke: SLATE, 'stroke-width': 5 }, gC2);
+ txt('response to virus,', { x: C2.x + C2.r + 14, y: C2.y - 6, 'font-size': 30, 'font-weight': 700, fill: SLATE }, gC2);
+-txt('320 genes', { x: C2.x + C2.r + 14, y: C2.y + 32, 'font-size': 30, 'font-weight': 700, fill: SLATE }, gC2);
++txt('400 genes', { x: C2.x + C2.r + 14, y: C2.y + 32, 'font-size': 30, 'font-weight': 700, fill: SLATE }, gC2);
+ var gOv = el('g', { class: 't' }, gDiag);
+ var LXm = (C2.x - C2.r + C1.x + C1.r) / 2;
+ el('line', { x1: LXm, y1: 545, x2: LXm, y2: 596, stroke: INK, 'stroke-width': 3 }, gOv);
+-txt('45 shared', { x: LXm, y: 640, 'font-size': 38, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gOv);
++txt('55 shared', { x: LXm, y: 640, 'font-size': 38, 'font-weight': 700, 'text-anchor': 'middle', fill: INK }, gOv);
+ 
+ /* ---------- step 4 bars ---------- */
+ var gBars = el('g', { class: 't' }, svg);
+@@ -147,11 +148,11 @@
+ txt('expected by chance', { x: BX0 - 20, y: 275, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gBars);
+ txt('observed', { x: BX0 - 20, y: 435, 'font-size': 32, 'font-weight': 700, 'text-anchor': 'end', fill: INK }, gBars);
+ el('line', { x1: BX0, y1: 190, x2: BX0, y2: 520, stroke: INK, 'stroke-width': 3 }, gBars);
+-var bExp = el('rect', { class: 't', x: 0, y: 0, width: 10 * UPX, height: 100, fill: GREYS, stroke: INK, 'stroke-width': 3 }, gBars);
+-var bObs = el('rect', { class: 't', x: 0, y: 0, width: 45 * UPX, height: 100, fill: GOLD, stroke: INK, 'stroke-width': 3 }, gBars);
+-var tExp = txt('about 10', { class: 't', x: BX0 + 10 * UPX + 18, y: 275, 'font-size': 38, 'font-weight': 700, fill: INK }, gBars);
+-var tObs = txt('45', { class: 't', x: BX0 + 45 * UPX + 18, y: 435, 'font-size': 38, 'font-weight': 700, fill: INK }, gBars);
+-txt('expected = 293 x 320 / 9451', { x: BX0, y: 580, 'font-size': 30, fill: INK }, gBars);
++var bExp = el('rect', { class: 't', x: 0, y: 0, width: 5.58 * UPX, height: 100, fill: GREYS, stroke: INK, 'stroke-width': 3 }, gBars);
++var bObs = el('rect', { class: 't', x: 0, y: 0, width: 55 * UPX, height: 100, fill: GOLD, stroke: INK, 'stroke-width': 3 }, gBars);
++var tExp = txt('about 5.6', { class: 't', x: BX0 + 5.58 * UPX + 18, y: 275, 'font-size': 38, 'font-weight': 700, fill: INK }, gBars);
++var tObs = txt('55', { class: 't', x: BX0 + 55 * UPX + 18, y: 435, 'font-size': 38, 'font-weight': 700, fill: INK }, gBars);
++txt('expected = 263 x 400 / 18842', { x: BX0, y: 580, 'font-size': 30, fill: INK }, gBars);
+ 
+ /* ---------- step 5 dot plot ---------- */
+ var gDP = el('g', { class: 't' }, svg);
