@@ -9,7 +9,7 @@ Front matter totals 445 min; the day in `learners/setup.md` allows about 325 min
 | Episode | Front matter | Live on 2026-10-29 | What moves to self-paced |
 |---|---|---|---|
 | 1 Introduction | 30 | 20 min | Technology comparison detail |
-| 2 Raw data processing | 60 | 35 min, write and `sbatch --test-only`; instructor shows a pre-run (patch 20) | Running the jobs for real (submitted at 16:05 as follow-up); both challenges |
+| 2 Raw data processing | 60 | 35 min, write and `sbatch --test-only`; instructor shows a pre-run (patch 20) | Running the jobs for real (submitted at 16:00 as follow-up); both challenges |
 | 3 Quality control | 60 | 55 min (10 min from episode 2, patch 20) | Challenge 2 (aggressive mt filtering) |
 | 4 Normalization and features | 55 | 50 min | SCTransform comparison (challenge 1; needs 12 or more cores, patch 20) |
 | 5 Dim reduction and clustering | 60 | 45 min | Clustree walkthrough shortened; challenge 2 |
@@ -18,6 +18,8 @@ Front matter totals 445 min; the day in `learners/setup.md` allows about 325 min
 | 8 Differential expression | 60 | 35 min | sceasy export; GO challenge if short on time |
 
 Adjust after the timed dry run.
+
+Schedule change, 2026-10-23: lunch is back at 12:00 to 1:00. The meeting that moved it to 11:15 (`ef2f391`, 2026-10-16) has moved, so episode 4 goes back before lunch, as in the May schedule (`89eea2a`). Episode lengths are unchanged: episode 4 11:05 to 11:55, recap 11:55 to 12:00 (was 10 min, now 5), lunch 12:00 to 1:00, episode 5 1:00 to 1:45, episode 6 1:45 to 2:30, break 2:30 to 2:45, episode 7 2:45 to 3:25, episode 8 3:25 to 4:00, Q&A and the Cell Ranger submission 4:00 to 4:30 (was 25 min, now 30). Updated: `learners/setup.md`, `instructors/instructor-notes.md` (16:00), the table above, the local CLAUDE.md, and the clock times in `coaching_00` and `coaching_02` to `coaching_08` (edited in place; `coaching_03` and `coaching_04` no longer place episode 4 after lunch; markup scan clean). Episode 4 now follows episode 3 with no break, so watch the pace there in the dry run.
 
 ## Open findings
 

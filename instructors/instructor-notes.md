@@ -49,7 +49,7 @@ once. In class, learners do the login-node steps, write the three job scripts
 and check each with `sbatch --test-only`. Before the workshop, submit the same
 three scripts under your own account and show the outputs from that run
 (`web_summary.html`, `Log.final.out`, the cell and gene counts). At the end of
-the day (16:05), learners delete their RStudio session and submit
+the day (16:00), learners delete their RStudio session and submit
 `run_cellranger.sh` for real as follow-up (the STAR jobs are optional). With
 the RStudio sessions closed, 192 cores run three 64-core jobs at once, so 20
 Cell Ranger jobs take about a day and a half to clear; tell learners their job

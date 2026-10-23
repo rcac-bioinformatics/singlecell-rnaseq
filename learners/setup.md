@@ -17,15 +17,15 @@ title: Setup
 | 9:20 -- 9:55 | Episode 2: Raw Data Processing |
 | 9:55 -- 10:10 | Break |
 | 10:10 -- 11:05 | Episode 3: Quality Control |
-| 11:05 -- 11:15 | Morning Recap |
-| 11:15 -- 12:15 | Lunch |
-| 12:15 -- 1:05 | Episode 4: Normalization and Feature Selection |
-| 1:05 -- 1:50 | Episode 5: Dimensionality Reduction and Clustering |
-| 1:50 -- 2:35 | Episode 6: Cell Type Annotation |
-| 2:35 -- 2:50 | Break |
-| 2:50 -- 3:30 | Episode 7: Multi-Sample Integration |
-| 3:30 -- 4:05 | Episode 8: Differential Expression & Wrap-up |
-| 4:05 -- 4:30 | Q&A / Feedback; submit your Cell Ranger job (follow-up) |
+| 11:05 -- 11:55 | Episode 4: Normalization and Feature Selection |
+| 11:55 -- 12:00 | Morning Recap |
+| 12:00 -- 1:00 | Lunch |
+| 1:00 -- 1:45 | Episode 5: Dimensionality Reduction and Clustering |
+| 1:45 -- 2:30 | Episode 6: Cell Type Annotation |
+| 2:30 -- 2:45 | Break |
+| 2:45 -- 3:25 | Episode 7: Multi-Sample Integration |
+| 3:25 -- 4:00 | Episode 8: Differential Expression & Wrap-up |
+| 4:00 -- 4:30 | Q&A / Feedback; submit your Cell Ranger job (follow-up) |
 
 ## Prerequisites
 
