@@ -26,6 +26,35 @@ Build in 10-minute breaks between episodes and a 45-minute lunch break. Expect
 the actual pace to vary: Episode 2 may run long if SLURM queue times are slow,
 and Episodes 6 and 8 often generate discussion.
 
+## Delivery on Negishi (one day, 2026-10-29)
+
+**RStudio sessions.** Learners launch RStudio (bioconductor) on Open OnDemand
+with account `rcac-rnaseq`, 8 cores (about 16 GB), 8 hours, R 4.6.1 /
+Bioconductor 3.23, and "Load extra RCAC site library" checked (setup.md,
+Step 3). Seurat, SingleR, celldex, SeuratData, presto, metap and anndataR come
+from that library; a learner with missing-package errors has most likely
+unchecked it. 20 learners at 8 cores use 160 of the account's 192 cores.
+
+**Restart R at the start of each episode** (Session > Restart R; setup.md,
+Step 5). Each episode reloads its object from scratch, so nothing is lost. The
+measured peak memory of a fresh session per episode (Negishi, 2026-10-23) is
+3.5, 14.1, 2.5, 6.6, 2.7 and 7.3 GiB for episodes 3 to 8 (8 cores give about 14.9 GiB). A session that is
+never restarted carries every earlier object along. The 14.1 GiB in episode 4
+is the self-paced SCTransform challenge; its main path peaks at 3.0 GiB. That
+challenge says to run it in a new session with 12 or more cores.
+
+**Episode 2: check, do not run.** The learner scripts ask for 64 cores; Cell
+Ranger runs about 5.5 hours and the account can run only a few such jobs at
+once. In class, learners do the login-node steps, write the three job scripts
+and check each with `sbatch --test-only`. Before the workshop, submit the same
+three scripts under your own account and show the outputs from that run
+(`web_summary.html`, `Log.final.out`, the cell and gene counts). At the end of
+the day (16:05), learners delete their RStudio session and submit
+`run_cellranger.sh` for real as follow-up (the STAR jobs are optional). With
+the RStudio sessions closed, 192 cores run three 64-core jobs at once, so 20
+Cell Ranger jobs take about a day and a half to clear; tell learners their job
+may wait a day or more.
+
 ## Common Issues
 
 ### R package installation failures
@@ -49,8 +78,9 @@ Seurat operations (especially `ScaleData`, `RunPCA`, `FindAllMarkers`, and
 `SCTransform`) require substantial memory. Running these on a login node will
 either fail with an out-of-memory error or get killed by the resource monitor.
 
-**Solution:** Always use a compute node allocation or RStudio Server through
-Open OnDemand. Request at least 16 GB of memory for R sessions.
+**Solution:** Always use a compute node allocation or RStudio (bioconductor)
+through Open OnDemand, with 8 or more cores (about 16 GB; see "Delivery on
+Negishi" above).
 
 ### STAR index building OOM
 
@@ -58,9 +88,10 @@ Building a STAR genome index for the human genome requires approximately 32 GB
 of RAM. If the SLURM job requests less memory, STAR will crash with a
 segmentation fault or `std::bad_alloc` error.
 
-**Solution:** Ensure the `build_star_index.sh` script requests `--mem=40G` or
-higher. The pre-built index in the workshop data directory avoids this step
-entirely.
+**Solution:** Negishi allocates about 2 GB of memory per core, so the core count
+sets the memory; do not add `--mem`. The episode's script asks for 64 cores
+(about 128 GB), and the index build peaked at 34 GB on Negishi. A learner who
+lowered `--ntasks` below about 18 cores will hit this.
 
 ### Cell Ranger license not found
 
@@ -88,15 +119,19 @@ upgrade or use the cluster installation.
 - [ ] **Data staging:** Verify workshop data is accessible at
   `/depot/workshop/data/scrna_workshop/` and contains `fastq/`, `reference/`,
   and `filtered_feature_bc_matrix/` directories
-- [ ] **Module availability:** Confirm that `ml biocontainers; ml cellranger`
-  and `ml biocontainers; ml star` load without errors on Negishi
-- [ ] **R packages:** Install all required R packages on training accounts and
-  verify they load:
+- [ ] **Module availability:** Confirm that `ml biocontainers; ml cellranger/10.0.0`
+  and `ml biocontainers; ml star` load without errors on Negishi (episode 2
+  pins Cell Ranger 10.0.0; the Negishi default is newer)
+- [ ] **R packages:** In an RStudio (bioconductor) session with the workshop
+  settings (setup.md, Step 3), confirm these load. They come from the image
+  or from the extra RCAC site library; `negishi-run/00_preflight.sh` checks
+  them all:
   - `Seurat`, `ggplot2`, `patchwork`, `dplyr`
-  - `clustree`, `SingleR`, `celldex`
-  - `SeuratData` (and run `InstallData("ifnb")`)
-  - `clusterProfiler`, `org.Hs.eg.db`
-  - `sceasy` (optional, for Episode 8 export)
+  - `clustree`, `glmGamPoi`
+  - `SingleR`, `celldex`, `presto` (presto makes `FindAllMarkers` fast)
+  - `SeuratData` (and run `InstallData("ifnb")`), `metap`, `multtest`
+  - `DESeq2`, `clusterProfiler`, `org.Hs.eg.db`, `anndataR` (Episode 8
+    export; it replaced sceasy, which cannot convert Seurat v5 objects)
 - [ ] **Pre-computed objects:** Generate and stage all intermediate `.rds` files
   so learners who fall behind can catch up:
   - `pbmc_filtered.rds` (end of Episode 3)
@@ -106,10 +141,15 @@ upgrade or use the cluster installation.
   - `ifnb_annotated.rds` (end of Episode 7, used in Episode 8)
 - [ ] **Build test:** Run `sandpaper::build_lesson()` and confirm it renders
   without errors
-- [ ] **RStudio Server:** Verify Open OnDemand RStudio Server app is available
-  and launches R with the correct version and package library
-- [ ] **SLURM queue:** Confirm the `workshop` account/queue is active and
-  accepting jobs. Submit a test job to check wait times.
+- [ ] **RStudio (bioconductor):** Verify the Open OnDemand app launches R 4.6.1 /
+  Bioconductor 3.23 under `rcac-rnaseq` with 8 cores and the extra RCAC site
+  library checked
+- [ ] **SLURM account:** Confirm `rcac-rnaseq` is active, has its 192 cores, and
+  that learners are members. `sbatch --test-only run_cellranger.sh` should
+  print an estimated start, not an account error.
+- [ ] **Pre-run for episode 2:** Submit `run_cellranger.sh`, `build_star_index.sh`
+  and `run_starsolo.sh` under your own account at least a day ahead, so the
+  outputs are ready to show
 - [ ] **Network access:** Confirm compute nodes can reach Bioconductor and CRAN
   mirrors (needed for `celldex` reference downloads in Episode 6)
 
@@ -144,18 +184,18 @@ aggressive filtering removes more noise but may also remove real cells
 most at risk from a low nFeature_RNA threshold?"
 
 **Challenge 2 -- Aggressive Mitochondrial Filtering:**
-With percent.mt < 5, roughly 35--40% of cells are removed because the median
-mitochondrial percentage is ~5.5%. This disproportionately removes metabolically
+With percent.mt < 5, only 2,709 cells remain against 9,874 at < 15, a loss of
+over 72%, because the median mitochondrial percentage is about 5.8%. This disproportionately removes metabolically
 active immune cells (monocytes, activated T cells). Use this to reinforce that
 thresholds must be tuned to the specific tissue and dataset.
 
 ### Episode 4: Normalization and Feature Selection
 
 **Challenge 1 -- LogNormalize vs. SCTransform Variable Features:**
-Expect ~60--70% overlap in the top 20 variable features. The shared genes
-(S100A9, LYZ, GNLY, NKG7, IGKC) are strong cell-type markers that any
-reasonable method will identify. The differences are in moderately variable
-genes where the two variance estimation approaches disagree. Emphasize that
+Expect 7 of 20 shared (PPBP, PF4, GP1BB, IGKC, GNLY, LINGO2, CAVIN2). The
+LogNormalize list leans to sparse, low-expressed genes (LINC01478, PTGDS,
+SOX5), the SCTransform list to strongly expressed markers (S100A9, S100A8,
+LYZ, NKG7). This challenge is self-paced and needs 12 or more cores. Emphasize that
 downstream clustering is typically robust to these differences.
 
 **Challenge 2 -- Housekeeping vs. Variable Gene Behavior:**
@@ -170,9 +210,9 @@ normalization (remove technical variation) and variable feature selection
 **Challenge 1 -- Choosing a Resolution with Clustree:**
 Guide learners through reading the clustree plot. Stable splits (clean
 branching) suggest real biology; unstable splits (cells scattering across
-multiple clusters) suggest over-splitting. Resolution 0.5 typically gives
-9--11 clusters matching the ~8 major PBMC types. Resolution 0.2 under-clusters
-(merges T cell subtypes), while 1.2 over-splits.
+multiple clusters) suggest over-splitting. Resolutions 0.2, 0.5, 0.8 and 1.2
+give 16, 18, 21 and 25 clusters. The workshop uses 0.5 (18 clusters, which
+episode 6 merges into 10 cell types); 1.2 over-splits.
 
 **Challenge 2 -- Mapping Markers to Clusters:**
 This is a preview of Episode 6. Learners should identify that CD3D marks
@@ -184,28 +224,34 @@ in all T cell subtypes, which are resolved into separate clusters.
 ### Episode 6: Cell Type Annotation
 
 **Challenge 1 -- Identifying a T Cell Subtype:**
-The pattern SELL-high, CCR7-high, CD69-low identifies naive T cells. Use this
-to discuss the concept of marker combinations: no single gene is sufficient for
-subtype identification. Ask learners what markers would distinguish effector
-memory T cells (SELL-low, CCR7-low, possibly CD69-high).
+CD3D and IL7R are expressed in almost every CD4 T cell, but SELL (69%) and
+CCR7 (55%) only in part of the group: it mixes naive and central memory cells
+(SELL+ CCR7+) with effector memory cells (SELL- CCR7-). CD69 is expressed in
+about 90% of T, B and NK cells alike, so it does not mark activated cells here
+(it is also induced during sample processing). Use this to discuss marker
+combinations and checking that a marker is specific before trusting it.
 
 **Challenge 2 -- Comparing Two SingleR References:**
 Monaco Immune works better for PBMCs because it was built from sorted immune
-populations. HPCA may assign non-immune labels (e.g., "Tissue_stem_cells")
-because its reference includes non-immune cell types. Discuss the importance
+populations. The two agree on B cells, monocytes, NK and T cells, but HPCA
+cannot split T cells into CD4 and CD8, calls most Monaco dendritic cells
+"Monocyte", and labels Monaco's progenitors mostly "Platelets", with a few
+bone-marrow classes (CMP, GMP, MEP, HSC). Discuss the importance
 of choosing a reference appropriate for your tissue type.
 
 ### Episode 7: Multi-Sample Integration
 
 **Challenge 1 -- Quantifying Integration Quality:**
-The proportion table should show ~45--55% per condition within each cell type.
+The proportion table shows 43--57% per condition within each cell type
+(CD14 Mono 50.3/49.7).
 If a cell type is heavily skewed (e.g., 90% from one condition), it could be a
 condition-specific population or a sign of incomplete integration. Ask: "What
 would it mean if a cluster was 95% STIM cells?" It could represent a
 stimulation-induced cell state that does not exist in control.
 
 **Challenge 2 -- Interferon Response Genes:**
-All top 10 DE genes should be ISGs (IFIT1, ISG15, IFI6, MX1, etc.). Use this
+The top 10 are led by IFN-inducible chemokines (CCL8, CXCL11, CXCL10) and
+HESX1, followed by ISGs (IFIT1, IFIT2, IFIT3, RSAD2). Use this
 to validate the integration: if the biological signal was lost during
 integration, these genes would not be differentially expressed. This challenge
 connects back to the biology -- IFN-beta activates the JAK-STAT pathway, which
@@ -214,15 +260,18 @@ induces ISG transcription.
 ### Episode 8: Differential Expression Analysis
 
 **Challenge 1 -- Wilcoxon vs. Pseudobulk:**
-Wilcoxon identifies thousands of significant genes; pseudobulk identifies
-hundreds. The key teaching point is pseudoreplication: per-cell tests treat
-each cell as independent (n = 4,000) when the true sample size is n = 2.
+Wilcoxon finds 759 significant genes and pseudobulk 1,464 (Negishi). Pseudobulk
+finds more here only because the episode builds artificial pseudo-replicates
+from one sample per condition; the episode explains this. The key teaching
+point is still pseudoreplication: per-cell tests treat each cell as an
+independent sample.
 Discuss when per-cell tests are acceptable (single-sample, exploratory) vs.
 when pseudobulk is required (multi-sample, publication).
 
 **Challenge 2 -- GO Enrichment:**
-Top GO terms should all relate to interferon/antiviral response: "defense
-response to virus", "type I interferon signaling pathway", "response to virus".
+Top GO terms all relate to the antiviral response: "response to virus",
+"defense response to virus", "regulation of viral process". No type I
+interferon term reaches the top (patch 18).
 Use this as the capstone: the full pipeline (from raw data through integration
 and DE) correctly identifies the expected biology. Ask learners to think about
 what GO terms they would expect for their own research questions.

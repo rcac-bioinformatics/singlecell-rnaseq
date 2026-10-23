@@ -65,6 +65,15 @@ work_dir <- paste0(
 setwd(work_dir)
 ```
 
+:::::::::::::::::::::::::::::::::::::::: callout
+
+## Starting here without the previous episode?
+
+Copy the saved object from the workshop data first:
+`file.copy(paste0(work_dir, "rds/pbmc_normalized.rds"), work_dir)`
+
+:::::::::::::::::::::::::::::::::::::::
+
 
 ``` r
 pbmc <- readRDS(paste0(work_dir, "pbmc_normalized.rds"))

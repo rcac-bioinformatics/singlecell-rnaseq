@@ -394,28 +394,39 @@ monocytes.
 ## Expected output
 
 ```
-         CTRL_p_val CTRL_avg_log2FC CTRL_pct.1 CTRL_pct.2 CTRL_p_val_adj    STIM_p_val STIM_avg_log2FC
-TYROBP            0        2.356269      0.940      0.227              0  0.000000e+00        2.337569
-FCER1G            0        2.197678      0.930      0.233              0  0.000000e+00        2.549589
-S100A8            0        4.739502      0.743      0.071              0  0.000000e+00        5.318497
-C15orf48          0        2.720354      0.869      0.201              0  0.000000e+00        2.751572
-IL8               0        3.651882      0.799      0.144              0 9.967253e-252        3.819957
-CD63              0        2.740801      0.958      0.333              0  0.000000e+00        2.889984
-S100A9            0        4.606045      0.691      0.069              0  0.000000e+00        5.236085
-CTSB              0        3.116819      0.772      0.183              0  0.000000e+00        3.400786
-LGALS1            0        2.400262      0.905      0.321              0  0.000000e+00        2.848345
-TYMP              0        2.084914      0.860      0.282              0  0.000000e+00        2.267578
-         STIM_pct.1 STIM_pct.2 STIM_p_val_adj      max_pval minimump_p_val
-TYROBP        0.952      0.199   0.000000e+00  0.000000e+00              0
-FCER1G        0.910      0.197   0.000000e+00  0.000000e+00              0
-S100A8        0.445      0.020   0.000000e+00  0.000000e+00              0
-C15orf48      0.860      0.201   0.000000e+00  0.000000e+00              0
-IL8           0.295      0.028  1.400698e-247 9.967253e-252              0
-CD63          0.931      0.276   0.000000e+00  0.000000e+00              0
-S100A9        0.584      0.036   0.000000e+00  0.000000e+00              0
-CTSB          0.822      0.183   0.000000e+00  0.000000e+00              0
-LGALS1        0.867      0.217   0.000000e+00  0.000000e+00              0
-TYMP          0.926      0.438   0.000000e+00  0.000000e+00              0
+         CTRL_p_val CTRL_avg_log2FC CTRL_pct.1 CTRL_pct.2 CTRL_p_val_adj
+TYROBP            0        2.357371      0.940      0.227              0
+FCER1G            0        2.197611      0.930      0.233              0
+S100A8            0        4.737642      0.742      0.071              0
+C15orf48          0        2.719921      0.868      0.201              0
+IL8               0        3.648031      0.798      0.144              0
+CD63              0        2.739659      0.957      0.333              0
+S100A9            0        4.597336      0.690      0.070              0
+CTSB              0        3.108400      0.771      0.183              0
+LGALS1            0        2.396676      0.904      0.322              0
+TYMP              0        2.075884      0.859      0.283              0
+            STIM_p_val STIM_avg_log2FC STIM_pct.1 STIM_pct.2 STIM_p_val_adj
+TYROBP    0.000000e+00        2.344174      0.951      0.197   0.000000e+00
+FCER1G    0.000000e+00        2.552006      0.910      0.196   0.000000e+00
+S100A8    0.000000e+00        5.328514      0.444      0.020   0.000000e+00
+C15orf48  0.000000e+00        2.758492      0.860      0.199   0.000000e+00
+IL8      3.434056e-251        3.687341      0.294      0.028  4.825879e-247
+CD63      0.000000e+00        2.896965      0.931      0.275   0.000000e+00
+S100A9    0.000000e+00        5.195483      0.581      0.036   0.000000e+00
+CTSB      0.000000e+00        3.421778      0.822      0.182   0.000000e+00
+LGALS1    0.000000e+00        2.860965      0.866      0.216   0.000000e+00
+TYMP      0.000000e+00        2.278326      0.927      0.437   0.000000e+00
+              max_pval minimump_p_val
+TYROBP    0.000000e+00              0
+FCER1G    0.000000e+00              0
+S100A8    0.000000e+00              0
+C15orf48  0.000000e+00              0
+IL8      3.434056e-251              0
+CD63      0.000000e+00              0
+S100A9    0.000000e+00              0
+CTSB      0.000000e+00              0
+LGALS1    0.000000e+00              0
+TYMP      0.000000e+00              0
 ```
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -450,22 +461,24 @@ head(mono.de, 10)
 
 ```
         p_val avg_log2FC pct.1 pct.2 p_val_adj
-IFIT1       0   7.117626 0.965 0.034         0
-IFIT3       0   6.737338 0.971 0.057         0
-TNFSF10     0   6.322227 0.959 0.062         0
-RSAD2       0   6.619577 0.920 0.042         0
-IFIT2       0   6.893956 0.909 0.040         0
-MX1         0   4.824046 0.953 0.099         0
-CXCL10      0   7.975000 0.873 0.032         0
-LY6E        0   4.255152 0.990 0.174         0
-CXCL11      0   8.521702 0.800 0.011         0
-CCL8        0   9.063100 0.800 0.015         0
+IFIT1       0   7.173024 0.965 0.033         0
+IFIT3       0   6.798858 0.972 0.057         0
+TNFSF10     0   6.370735 0.959 0.061         0
+RSAD2       0   6.661976 0.920 0.041         0
+IFIT2       0   6.905053 0.909 0.039         0
+MX1         0   4.839203 0.953 0.099         0
+CXCL10      0   8.007812 0.873 0.031         0
+LY6E        0   4.263751 0.990 0.174         0
+CXCL11      0   8.576537 0.801 0.011         0
+OAS1        0   4.045792 0.915 0.131         0
 ```
 
 The top DE genes are all **interferon-stimulated genes (ISGs)**: IFIT1, IFIT3,
 TNFSF10, RSAD2, IFIT2. These are exactly the genes you would expect to be
 upregulated by IFN-beta stimulation, confirming that our integration preserved
-the biological signal while correcting the batch effect.
+the biological signal while correcting the batch effect. The exact fold changes,
+and the number of genes that pass a significance cutoff, vary slightly between
+Seurat versions; the leading ISGs do not.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -539,9 +552,13 @@ Are the proportions roughly balanced (close to 50/50) within each cell type?
 
 ```
          CellType
-Condition CD14 Mono  CD4 T  CD8 T     NK      B FCGR3A Mono     DC     Mk  Eryth
-     CTRL     0.504  0.432  0.477  0.435  0.482       0.530  0.447  0.446  0.458
-     STIM     0.496  0.568  0.523  0.565  0.518       0.470  0.553  0.554  0.542
+Condition CD14 Mono     CD4 T     CD8 T        NK         B FCGR3A Mono
+     CTRL 0.5033865 0.4326872 0.4775281 0.4287425 0.4812594   0.5378641
+     STIM 0.4966135 0.5673128 0.5224719 0.5712575 0.5187406   0.4621359
+         CellType
+Condition        DC        Mk     Eryth
+     CTRL 0.4473684 0.4561404 0.4583333
+     STIM 0.5526316 0.5438596 0.5416667
 ```
 
 ![Split UMAP with CTRL and STIM panels, cells labeled by cell type. Both panels show identical cluster arrangement with CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, and Eryth labels, confirming balanced condition mixing within each cell type.](fig/ep7_challenge1.png){alt="Split UMAP showing CTRL and STIM panels with cell type labels, demonstrating balanced mixing of conditions within each annotated cluster."}
@@ -553,7 +570,7 @@ cluster appears in both CTRL and STIM with comparable density.
 
 Some observations worth discussing:
 
-- **CD14 Mono** is the best-mixed cell type (50.4/49.6), essentially a perfect
+- **CD14 Mono** is the best-mixed cell type (50.3/49.7), essentially a perfect
   split. This is expected for the most abundant population.
 - **CD4 T and NK** show the largest deviation (~43/57), with more cells in the
   stimulated condition. This could reflect a real biological shift -- IFN-beta
@@ -602,21 +619,21 @@ FeaturePlot(ifnb,
 
 ## Solution
 
-![Four-row FeaturePlot split by CTRL and STIM showing CCL8, CXCL11, CXCL10, and HESX1. CTRL panels are almost entirely grey. STIM panels show strong red expression concentrated in the monocyte clusters for all four chemokine and ISG genes.](fig/ep7_challenge2.png){alt="FeaturePlot of CCL8, CXCL11, CXCL10, and HESX1 split by condition showing absent expression in control and strong monocyte-concentrated expression in stimulated cells."}
+![Four-row FeaturePlot split by CTRL and STIM showing CCL8, CXCL11, HESX1, and CXCL10. CTRL panels are almost entirely grey. STIM panels show strong red expression concentrated in the monocyte clusters for all four chemokine and ISG genes.](fig/ep7_challenge2.png){alt="FeaturePlot of CCL8, CXCL11, HESX1, and CXCL10 split by condition showing absent expression in control and strong monocyte-concentrated expression in stimulated cells."}
 
 
 ```
                  p_val avg_log2FC pct.1 pct.2     p_val_adj
-CCL8      0.000000e+00   9.063    0.800 0.015  0.000000e+00
-CXCL11    0.000000e+00   8.522    0.800 0.011  0.000000e+00
-CXCL10    0.000000e+00   7.975    0.873 0.032  0.000000e+00
-HESX1    1.756212e-217   7.935    0.335 0.002 2.468004e-213
-IFIT1     0.000000e+00   7.118    0.965 0.034  0.000000e+00
-IFIT2     0.000000e+00   6.894    0.909 0.040  0.000000e+00
-IFIT3     0.000000e+00   6.737    0.971 0.057  0.000000e+00
-GMPR     1.772282e-239   6.634    0.371 0.005 2.490588e-235
-RSAD2     0.000000e+00   6.620    0.920 0.042  0.000000e+00
-APOBEC3B 1.261976e-127   6.600    0.273 0.034 1.773454e-123
+CCL8      0.000000e+00   9.059454 0.798 0.015  0.000000e+00
+CXCL11    0.000000e+00   8.576537 0.801 0.011  0.000000e+00
+HESX1    3.530769e-218   8.283957 0.335 0.001 4.961789e-214
+CXCL10    0.000000e+00   8.007812 0.873 0.031  0.000000e+00
+IFIT1     0.000000e+00   7.173024 0.965 0.033  0.000000e+00
+IFIT2     0.000000e+00   6.905053 0.909 0.039  0.000000e+00
+IFIT3     0.000000e+00   6.798858 0.972 0.057  0.000000e+00
+GMPR     2.606001e-242   6.750793 0.373 0.004 3.662213e-238
+APOBEC3B 1.036577e-127   6.685079 0.272 0.034 1.456702e-123
+RSAD2     0.000000e+00   6.661976 0.920 0.041  0.000000e+00
 ```
 
 The top 10 genes fall into two functional categories, both consistent with
@@ -625,20 +642,20 @@ IFN-beta stimulation:
 | Gene | log2FC | pct.1 / pct.2 | Function |
 |------|:------:|:--------------|:---------|
 | CCL8 | 9.06 | 0.80 / 0.02 | Chemokine; recruits monocytes and T cells to sites of inflammation |
-| CXCL11 | 8.52 | 0.80 / 0.01 | IFN-inducible chemokine; attracts activated T cells via CXCR3 |
-| CXCL10 | 7.98 | 0.87 / 0.03 | IFN-inducible chemokine (IP-10); major recruiter of immune cells |
-| HESX1 | 7.93 | 0.34 / 0.00 | Transcription factor; emerging role in IFN signaling |
-| IFIT1 | 7.12 | 0.97 / 0.03 | Directly induced by type I IFN; inhibits viral translation |
-| IFIT2 | 6.89 | 0.91 / 0.04 | Antiviral effector; regulates translation during infection |
-| IFIT3 | 6.74 | 0.97 / 0.06 | Antiviral effector; forms complex with IFIT1 and IFIT2 |
-| GMPR | 6.63 | 0.37 / 0.01 | Guanosine monophosphate reductase; modulates purine metabolism |
-| RSAD2 | 6.62 | 0.92 / 0.04 | Viperin; broad-spectrum antiviral enzyme induced by IFN |
-| APOBEC3B | 6.60 | 0.27 / 0.03 | Cytidine deaminase; innate antiviral defense via RNA editing |
+| CXCL11 | 8.58 | 0.80 / 0.01 | IFN-inducible chemokine; attracts activated T cells via CXCR3 |
+| HESX1 | 8.28 | 0.34 / 0.00 | Transcription factor; emerging role in IFN signaling |
+| CXCL10 | 8.01 | 0.87 / 0.03 | IFN-inducible chemokine (IP-10); major recruiter of immune cells |
+| IFIT1 | 7.17 | 0.97 / 0.03 | Directly induced by type I IFN; inhibits viral translation |
+| IFIT2 | 6.91 | 0.91 / 0.04 | Antiviral effector; regulates translation during infection |
+| IFIT3 | 6.80 | 0.97 / 0.06 | Antiviral effector; forms complex with IFIT1 and IFIT2 |
+| GMPR | 6.75 | 0.37 / 0.00 | Guanosine monophosphate reductase; modulates purine metabolism |
+| APOBEC3B | 6.69 | 0.27 / 0.03 | Cytidine deaminase; innate antiviral defense via RNA editing |
+| RSAD2 | 6.66 | 0.92 / 0.04 | Viperin; broad-spectrum antiviral enzyme induced by IFN |
 
 Two patterns stand out:
 
-**Chemokines dominate the top 3.** CCL8, CXCL11, and CXCL10 have the highest
-fold changes (7.9-9.1), reflecting the monocyte's primary role as a sentinel
+**Chemokines dominate the top.** CCL8, CXCL11, and CXCL10 are three of the
+top four, with fold changes of 8.0-9.1, reflecting the monocyte's primary role as a sentinel
 cell: upon IFN stimulation, monocytes broadcast chemokine signals to recruit
 other immune cells. Note the pct.2 values (0.01-0.03) -- these chemokines are
 essentially absent in control cells and massively induced by stimulation.
@@ -649,7 +666,7 @@ The IFIT family shows the highest pct.1 values (0.91-0.97), meaning nearly
 every stimulated monocyte expresses them -- a hallmark of a robust, uniform
 interferon response.
 
-The FeaturePlot confirms this visually: CCL8, CXCL11, CXCL10, and HESX1 are
+The FeaturePlot confirms this visually: CCL8, CXCL11, HESX1, and CXCL10 are
 virtually absent in the CTRL panels (gray) and strongly expressed in the STIM
 panels (red), with the signal concentrated in the monocyte clusters (right
 side of the UMAP). CXCL10 and CXCL11 also show some expression in the
