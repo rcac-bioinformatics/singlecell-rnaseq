@@ -262,12 +262,12 @@ description, and notes on what the figure should show.
 | **Seurat function** | `VlnPlot(ncol = 4)` |
 | **Auto-generated?** | Yes |
 
-#### 6.5 annotated-umap (line 241)
+#### 6.5 annotated-umap (line 365; `ep6_annotated-umap.png`)
 
 | Field | Value |
 |-------|-------|
 | **Chunk** | `annotated-umap` |
-| **Description** | UMAP with cells colored and labeled by cell type name (CD4 T, CD8 T, B, CD14 Mono, FCGR3A Mono, NK, DC, Platelet). Labels placed with repel to avoid overlap. No legend. |
+| **Description** | UMAP with cells colored and labeled by the ten manual labels from the `annotate` chunk (corrected 2026-10-22, patch 13): CD4 T (clusters 0, 3; center-left), CD8 T (5, 6, 10; upper-center), NK (7), B (4, 8, 14; right), CD14 Mono (1, 2, 11, 16; lower-center), FCGR3A+ Mono (9), DC (12), Platelet (13; thin streak), pDC (15; small, bottom), HSPC (17; a few cells, far left). Labels placed with repel to avoid overlap. No legend. Regenerate from the kit's continuous `r06` capture. |
 | **Seurat function** | `DimPlot(label = TRUE, repel = TRUE) + NoLegend()` |
 | **Auto-generated?** | Yes |
 
@@ -280,13 +280,22 @@ description, and notes on what the figure should show.
 | **Seurat function** | `DimPlot(group.by = "singler_labels")` |
 | **Auto-generated?** | Yes |
 
-#### 6.7 side-by-side (line 358)
+#### 6.7 side-by-side (line 534; `ep6_side-by-side.png`)
 
 | Field | Value |
 |-------|-------|
 | **Chunk** | `side-by-side` |
-| **Description** | Two UMAP panels side by side: left = manual annotation, right = SingleR annotation. Most clusters receive consistent labels. Minor differences in naming conventions (e.g., "CD14 Mono" vs "Classical monocytes"). |
+| **Description** | Two UMAP panels side by side: left = the ten manual labels (as in 6.5), right = SingleR Monaco main labels (CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, Basophils). Most groups agree; the visible differences are platelets called Progenitors, the CD8 T cluster 6 called generic T cells, and pDCs called Dendritic cells. Regenerate from the kit's continuous `r06` capture. |
 | **Seurat function** | `DimPlot()` + patchwork |
+| **Auto-generated?** | Yes |
+
+#### 6.8 challenge1 (line 609; `ep6_challenge1.png`)
+
+| Field | Value |
+|-------|-------|
+| **Chunk** | `challenge1` |
+| **Description** | Five violin panels (CD3D, SELL, CCR7, CD69, IL7R) across the ten manual labels, `pt.size = 0`. The solution text describes these distributions per label; regenerate the figure and that text together from the same `r06` run (the kit records per-label means and percent expressing in `ep6_challenge1`). |
+| **Seurat function** | `VlnPlot(ncol = 5, pt.size = 0)` |
 | **Auto-generated?** | Yes |
 
 ---

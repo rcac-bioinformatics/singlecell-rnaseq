@@ -1,0 +1,126 @@
+diff --git a/episodes/cell-type-annotation.Rmd b/episodes/cell-type-annotation.Rmd
+index 0519026..21124f7 100644
+--- a/episodes/cell-type-annotation.Rmd
++++ b/episodes/cell-type-annotation.Rmd
+@@ -286,9 +286,32 @@ VlnPlot(pbmc,
+ 
+ 
+ Based on these plots and the `FindAllMarkers` results, we can build a mapping
+-from cluster numbers to cell type names. Your exact cluster numbers will depend
+-on the random seed, but the logic is the same: find which clusters express each
+-set of markers.
++from cluster numbers to cell type names: find which clusters express each set
++of markers.
++
++:::::::::::::::::::::::::::::::::::::::::: callout
++
++## Check the mapping against your own clusters
++
++The labels below fit the 18 clusters that this lesson's matrix gives with the
++package versions in the setup instructions. If your matrix or your package
++versions differ, the number or the order of the clusters can change, and a
++label vector written for someone else's clusters puts the wrong names on yours
++without any error. Before trusting the labels, plot the canonical markers per
++cluster and compare each row with the table above and the comment next to each
++label below:
++
++```{r check-mapping, eval=FALSE}
++DotPlot(pbmc, features = c("CD3D", "IL7R", "CCR7", "CD8A", "CD8B", "MS4A1",
++                           "CD79A", "LYZ", "CD14", "FCGR3A", "MS4A7", "GNLY",
++                           "NKG7", "FCER1A", "CLEC10A", "LILRA4", "IL3RA",
++                           "PPBP", "PF4", "CD34")) + coord_flip()
++```
++
++The code below also stops if your number of clusters does not match the number
++of labels.
++
++::::::::::::::::::::::::::::::::::::::::::::::::::
+ 
+ ```{r annotate, eval=FALSE}
+ # Build the cluster-to-cell-type mapping
+@@ -313,6 +336,7 @@ new.cluster.ids <- c(
+     "CD14 Mono",       # 16: LYZ+, CD14+, some MS4A1
+     "HSPC"             # 17: CD34+, CD3D-
+ )
++if (nlevels(pbmc) != length(new.cluster.ids)) stop("pbmc has ", nlevels(pbmc), " clusters but new.cluster.ids has ", length(new.cluster.ids), " labels; check the markers and edit new.cluster.ids")
+ names(new.cluster.ids) <- levels(pbmc)
+ pbmc <- RenameIdents(pbmc, new.cluster.ids)
+ ```
+@@ -698,23 +722,24 @@ resolution, Monaco is the better reference. Interestingly, Monaco assigns
+ the T/B boundary (possibly NKT cells or doublets).
+ 
+ **3. Dendritic cells split across HPCA labels.** Monaco calls 274 cells
+-"Dendritic cells," but HPCA scatters these across "Monocyte" (218), "CMP"
++"Dendritic cells," but HPCA scatters these across "Monocyte" (218), "GMP"
+ (8), "Pre-B_cell_CD34-" (6), "B_cell" (36), and only 4 as "T_cells." HPCA
+ lacks a dedicated dendritic cell category with sufficient resolution, so DCs
+ get assigned to the nearest available profile -- usually monocytes, which
+ share many myeloid markers.
+ 
+ **4. Progenitors become Platelets in HPCA.** Monaco labels 176 cells as
+-"Progenitors," and HPCA calls 151 of those "Platelets." These are the cells
+-we manually annotated as platelets. Monaco does not have a platelet reference
+-profile, so it assigns them to "Progenitors" (the nearest match based on low
+-transcriptional complexity). HPCA does include a platelet profile and gets
++"Progenitors," and HPCA calls 151 of those "Platelets." Most of them (154) are
++the cells we manually annotated as platelets; another 21 are our HSPC cluster.
++Monaco does not have a platelet reference profile, so it assigns platelets to
++"Progenitors", the nearest match it has. HPCA does include a platelet profile and gets
+ this right. Neither reference is wrong -- they just have different coverage.
+ 
+ **5. HPCA introduces hematopoietic progenitor labels.** HPCA assigns some
+ cells to "BM," "CMP," "GMP," "MEP," "HSC_-G-CSF," and "Pro-Myelocyte" --
+-categories that should not be present in PBMCs. These are artifacts of the
+-HPCA reference containing bone marrow profiles. When a cell's expression
++categories that are rare in blood (our 39-cell HSPC cluster is the genuine
++case). Most of these calls are artifacts of the HPCA reference containing bone
++marrow profiles. When a cell's expression
+ sits between two immune types, HPCA may assign a progenitor label rather
+ than committing to either.
+ 
+diff --git a/episodes/fig/FIGURE_DESCRIPTIONS.md b/episodes/fig/FIGURE_DESCRIPTIONS.md
+index f43d0b0..d417114 100644
+--- a/episodes/fig/FIGURE_DESCRIPTIONS.md
++++ b/episodes/fig/FIGURE_DESCRIPTIONS.md
+@@ -262,12 +262,12 @@ description, and notes on what the figure should show.
+ | **Seurat function** | `VlnPlot(ncol = 4)` |
+ | **Auto-generated?** | Yes |
+ 
+-#### 6.5 annotated-umap (line 241)
++#### 6.5 annotated-umap (line 365; `ep6_annotated-umap.png`)
+ 
+ | Field | Value |
+ |-------|-------|
+ | **Chunk** | `annotated-umap` |
+-| **Description** | UMAP with cells colored and labeled by cell type name (CD4 T, CD8 T, B, CD14 Mono, FCGR3A Mono, NK, DC, Platelet). Labels placed with repel to avoid overlap. No legend. |
++| **Description** | UMAP with cells colored and labeled by the ten manual labels from the `annotate` chunk (corrected 2026-10-22, patch 13): CD4 T (clusters 0, 3; center-left), CD8 T (5, 6, 10; upper-center), NK (7), B (4, 8, 14; right), CD14 Mono (1, 2, 11, 16; lower-center), FCGR3A+ Mono (9), DC (12), Platelet (13; thin streak), pDC (15; small, bottom), HSPC (17; a few cells, far left). Labels placed with repel to avoid overlap. No legend. Regenerate from the kit's continuous `r06` capture. |
+ | **Seurat function** | `DimPlot(label = TRUE, repel = TRUE) + NoLegend()` |
+ | **Auto-generated?** | Yes |
+ 
+@@ -280,15 +280,24 @@ description, and notes on what the figure should show.
+ | **Seurat function** | `DimPlot(group.by = "singler_labels")` |
+ | **Auto-generated?** | Yes |
+ 
+-#### 6.7 side-by-side (line 358)
++#### 6.7 side-by-side (line 534; `ep6_side-by-side.png`)
+ 
+ | Field | Value |
+ |-------|-------|
+ | **Chunk** | `side-by-side` |
+-| **Description** | Two UMAP panels side by side: left = manual annotation, right = SingleR annotation. Most clusters receive consistent labels. Minor differences in naming conventions (e.g., "CD14 Mono" vs "Classical monocytes"). |
++| **Description** | Two UMAP panels side by side: left = the ten manual labels (as in 6.5), right = SingleR Monaco main labels (CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, Basophils). Most groups agree; the visible differences are platelets called Progenitors, the CD8 T cluster 6 called generic T cells, and pDCs called Dendritic cells. Regenerate from the kit's continuous `r06` capture. |
+ | **Seurat function** | `DimPlot()` + patchwork |
+ | **Auto-generated?** | Yes |
+ 
++#### 6.8 challenge1 (line 609; `ep6_challenge1.png`)
++
++| Field | Value |
++|-------|-------|
++| **Chunk** | `challenge1` |
++| **Description** | Five violin panels (CD3D, SELL, CCR7, CD69, IL7R) across the ten manual labels, `pt.size = 0`. The solution text describes these distributions per label; regenerate the figure and that text together from the same `r06` run (the kit records per-label means and percent expressing in `ep6_challenge1`). |
++| **Seurat function** | `VlnPlot(ncol = 5, pt.size = 0)` |
++| **Auto-generated?** | Yes |
++
+ ---
+ 
+ ### Episode 7: Multi-Sample Integration

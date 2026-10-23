@@ -33,17 +33,19 @@ cells after QC	03	ep3_cells_after_qc	11310	rel:0.10	blocker	episodes/quality-con
 variable features	04	ep4_n_variable	2000	exact	should-fix	episodes/normalization-and-features.Rmd:275
 PPBP among the top 10 variable genes	04	ep4_top10_variable	1:PPBP	atleast:1:PPBP	should-fix	episodes/normalization-and-features.Rmd:294
 clusters at resolution 0.5	05	ep5_clusters_res0.5	18	abs:2	blocker	episodes/dimensionality-reduction-clustering.Rmd:327
-clusters at resolution 0.5 (episode 6 hardcodes 18 labels)	05	ep5_clusters_res0.5	18	exact	should-fix	episodes/cell-type-annotation.Rmd:293-312
+clusters at resolution 0.5 (episode 6 hardcodes 18 labels)	05	ep5_clusters_res0.5	18	exact	should-fix	episodes/cell-type-annotation.Rmd:319-338
 clusters at resolution 0.2	05	ep5_clusters_res0.2	16	abs:2	should-fix	episodes/dimensionality-reduction-clustering.Rmd:511
 clusters at resolution 0.8	05	ep5_clusters_res0.8	21	abs:2	should-fix	episodes/dimensionality-reduction-clustering.Rmd:514
-CD3D highest in a T cell label	06	ep6_marker_CD3D	CD4 T|CD8 T	in:CD4 T|CD8 T	blocker	episodes/cell-type-annotation.Rmd:293-312
-MS4A1 highest in B	06	ep6_marker_MS4A1	B	in:B	blocker	episodes/cell-type-annotation.Rmd:293-312
-LYZ highest in CD14 Mono	06	ep6_marker_LYZ	CD14 Mono	in:CD14 Mono|FCGR3A+ Mono	blocker	episodes/cell-type-annotation.Rmd:293-312
-GNLY highest in NK	06	ep6_marker_GNLY	NK	in:NK	blocker	episodes/cell-type-annotation.Rmd:293-312
-PPBP highest in Platelet	06	ep6_marker_PPBP	Platelet	in:Platelet	blocker	episodes/cell-type-annotation.Rmd:293-312
-FCER1A highest in DC	06	ep6_marker_FCER1A	DC	in:DC	blocker	episodes/cell-type-annotation.Rmd:293-312
-CD8A highest in CD8 T (the label SingleR calls B cells)	06	ep6_marker_CD8A	CD8 T	in:CD8 T	should-fix	episodes/cell-type-annotation.Rmd:298,442-464
-annotated labels	06	ep6_n_labels	9	exact	should-fix	episodes/cell-type-annotation.Rmd:442-452
+CD3D highest in a T cell label	06	ep6_marker_CD3D	CD4 T|CD8 T	in:CD4 T|CD8 T	blocker	episodes/cell-type-annotation.Rmd:319-338
+MS4A1 highest in B	06	ep6_marker_MS4A1	B	in:B	blocker	episodes/cell-type-annotation.Rmd:319-338
+LYZ highest in CD14 Mono	06	ep6_marker_LYZ	CD14 Mono	in:CD14 Mono|FCGR3A+ Mono	blocker	episodes/cell-type-annotation.Rmd:319-338
+GNLY highest in NK	06	ep6_marker_GNLY	NK	in:NK	blocker	episodes/cell-type-annotation.Rmd:319-338
+PPBP highest in Platelet	06	ep6_marker_PPBP	Platelet	in:Platelet	blocker	episodes/cell-type-annotation.Rmd:319-338
+FCER1A highest in DC	06	ep6_marker_FCER1A	DC	in:DC	blocker	episodes/cell-type-annotation.Rmd:319-338
+CD8A highest in CD8 T	06	ep6_marker_CD8A	CD8 T	in:CD8 T	blocker	episodes/cell-type-annotation.Rmd:319-338
+LILRA4 highest in pDC	06	ep6_marker_LILRA4	pDC	in:pDC	blocker	episodes/cell-type-annotation.Rmd:319-338
+CD34 highest in HSPC	06	ep6_marker_CD34	HSPC	in:HSPC	should-fix	episodes/cell-type-annotation.Rmd:319-338
+annotated labels	06	ep6_n_labels	10	exact	should-fix	episodes/cell-type-annotation.Rmd:469-493
 ifnb cells	07	ep7_ifnb_cells	13999	exact	blocker	episodes/multi-sample-integration.Rmd:103
 ifnb genes	07	ep7_ifnb_genes	14053	exact	should-fix	episodes/multi-sample-integration.Rmd:103
 CTRL cells	07	ep7_ctrl_cells	6548	exact	should-fix	episodes/multi-sample-integration.Rmd:123
