@@ -257,7 +257,9 @@ lists the canonical markers for each expected cell type:
 | FCGR3A+ Monocytes | FCGR3A, MS4A7 | ~5% |
 | NK cells | GNLY, NKG7, KLRD1 | ~10% |
 | Dendritic cells | FCER1A, CST3 | ~3% |
+| Plasmacytoid DCs (pDC) | LILRA4, IL3RA | ~0.5% |
 | Platelets | PPBP, PF4 | ~2% |
+| Haematopoietic progenitors (HSPC) | CD34 | <0.5% |
 
 Let's visualize these markers on the UMAP to see which clusters they map to:
 
@@ -292,24 +294,24 @@ set of markers.
 # Build the cluster-to-cell-type mapping
 # Adjust cluster IDs to match YOUR results
 new.cluster.ids <- c(
-    "CD4 T",           # 0: CD3D+, IL7R+, large central cluster
-    "CD14 Mono",       # 1: LYZ+ high, large bottom cluster
-    "CD14 Mono",       # 2: LYZ+ high, adjacent to cluster 1
-    "CD4 T",           # 3: CD3D+, IL7R+, upper-left
-    "CD8 T",           # 4: CD8A+, right side
-    "CD4 T",           # 5: CD3D+, IL7R+, upper-center
-    "NK",              # 6: GNLY+ high, center-right
-    "NK",              # 7: GNLY+, upper-right island
-    "B",               # 8: MS4A1+, right side
-    "FCGR3A+ Mono",   # 9: FCGR3A+ high, lower-right
-    "CD4 T",           # 10: CD3D+, IL7R+, small upper cluster
-    "CD14 Mono",       # 11: LYZ+, between mono clusters
-    "pDC",             # 12: small isolated, low expression of all major markers
-    "DC",              # 13: FCER1A+, small upper-right
-    "B",               # 14: MS4A1+, adjacent to cluster 8
-    "Platelet",        # 15: PPBP+ high, small isolated bottom
-    "CD14 Mono",       # 16: LYZ+, near mono territory
-    "CD4 T"            # 17: CD3D+, small isolated far-left
+    "CD4 T",           # 0: CD3D+, IL7R+, CD8A-
+    "CD14 Mono",       # 1: LYZ+, CD14+, S100A9+
+    "CD14 Mono",       # 2: LYZ+, CD14+, S100A9+
+    "CD4 T",           # 3: CD3D+, IL7R+, CCR7+ (naive)
+    "B",               # 4: MS4A1+, CD79A+
+    "CD8 T",           # 5: CD3D+, CD8A+, CD8B+, NKG7+ (cytotoxic)
+    "CD8 T",           # 6: CD3D+, CD8A+, IL7R+, NKG7+, CD8B low
+    "NK",              # 7: GNLY+, NKG7+, KLRD1+, CD3D-
+    "B",               # 8: MS4A1+, CD79A+
+    "FCGR3A+ Mono",    # 9: FCGR3A+, MS4A7+
+    "CD8 T",           # 10: CD3D+, CD8A+, CD8B+, CCR7+ (naive)
+    "CD14 Mono",       # 11: LYZ+, CD14+
+    "DC",              # 12: FCER1A+, CLEC10A+, CST3+
+    "Platelet",        # 13: PPBP+, PF4+
+    "B",               # 14: MS4A1+, CD79A+, some T cell signal
+    "pDC",             # 15: LILRA4+, IL3RA+
+    "CD14 Mono",       # 16: LYZ+, CD14+, some MS4A1
+    "HSPC"             # 17: CD34+, CD3D-
 )
 names(new.cluster.ids) <- levels(pbmc)
 pbmc <- RenameIdents(pbmc, new.cluster.ids)
@@ -336,11 +338,11 @@ revise, and repeat until you are confident in the assignments.
 
 Visualize the final annotated UMAP:
 
-```{r annotated-umap, eval=FALSE, fig.alt="UMAP plot with cells colored and labeled by cell type name. Nine groups are visible: CD4 T (large, upper-left), CD14 Mono (lower-left), NK (upper-center), DC (upper-right), B (right), CD8 T (right), FCGR3A+ Mono (lower-right), pDC (small, lower-center), and Platelet (small, bottom)."}
+```{r annotated-umap, eval=FALSE, fig.alt="UMAP plot with cells colored and labeled by cell type name. Ten groups are visible: CD4 T (large, center-left), CD8 T (upper-center), NK (upper-right of center), B (right), CD14 Mono (large, lower-center), FCGR3A+ Mono (above the CD14 monocytes), DC (small, lower-right of center), Platelet (thin streak, center-right), pDC (small, bottom), and HSPC (a few cells, far left)."}
 DimPlot(pbmc, reduction = "umap", label = TRUE, repel = TRUE) + NoLegend()
 ```
 
-![Annotated UMAP with cell type labels](fig/ep6_annotated-umap.png){alt="UMAP plot with cells labeled by manually assigned cell type names: CD4 T, CD14 Mono, NK, B, CD8 T, FCGR3A+ Mono, DC, pDC, and Platelet."}
+![Annotated UMAP with cell type labels](fig/ep6_annotated-umap.png){alt="UMAP plot with cells labeled by manually assigned cell type names: CD4 T, CD14 Mono, B, CD8 T, NK, FCGR3A+ Mono, DC, Platelet, pDC, and HSPC."}
 
 
 Store the annotation in the metadata so it persists after saving:
@@ -443,65 +445,63 @@ table(Manual = pbmc$manual_annotation, SingleR = pbmc$singler_labels)
 ```{output}
               SingleR
 Manual         B cells Basophils CD4+ T cells CD8+ T cells Dendritic cells Monocytes NK cells Progenitors
-  CD4 T              3         0         2596          583               0         5       43          22
+  CD4 T              3         0         2586          183               0         5        1           1
   CD14 Mono          3         0            0            0              32      3259        1           0
-  CD8 T           1006         0            0            0               0         0        0           0
+  B               1614         0            0            0               5         0       15           0
+  CD8 T              0         0            9          400               0         0       31           0
   NK                 0         0            3            1               0         0      607           0
-  B                608         0            0            0               5         0       15           0
   FCGR3A+ Mono       0         0            0            0               1       428        0           0
-  pDC                0         0            0            0             157        19        0           0
-  DC                 4         2            3            2               1         6        0         154
-  Platelet           0         0            0            0              78         0        0           0
+  DC                 0         0            0            0             157        19        0           0
+  Platelet           4         2            3            2               1         6        0         154
+  pDC                0         0            0            0              78         0        0           0
+  HSPC               0         0            1            0               0         0       11          21
               SingleR
 Manual         T cells
-  CD4 T            987
+  CD4 T            348
   CD14 Mono          0
-  CD8 T              0
-  NK               662
   B                 11
+  CD8 T           1272
+  NK                23
   FCGR3A+ Mono       0
+  DC                 0
+  Platelet           3
   pDC                0
-  DC                 3
-  Platelet           0
+  HSPC               6
 ```
 
-The table reveals a mix of strong agreement and instructive disagreements:
+The table shows broad agreement, and the disagreements that remain are
+instructive:
 
-- **Strong agreement**: CD14+ Monocytes are overwhelmingly called "Monocytes"
-  by SingleR (3,259 of 3,295). B cells agree well (608 of 639). FCGR3A+
-  Monocytes are correctly called "Monocytes" (428 of 429). These cell types
-  have distinctive transcriptional profiles that both methods recognize.
-- **CD4 T cell splitting**: SingleR splits our CD4 T cells across "CD4+ T
-  cells" (2,596), generic "T cells" (987), and "CD8+ T cells" (583). The
-  generic "T cells" label reflects SingleR's uncertainty about subtype when
-  activation or memory signatures blur the CD4/CD8 boundary. The 583 cells
-  called "CD8+ T" may be misclassified by SingleR or represent a subset where
-  our manual annotation was too broad.
-- **CD8 T mislabeled as B cells**: this is the largest disagreement. All 1,006
-  cells we labeled "CD8 T" are called "B cells" by SingleR. This likely means
-  our manual annotation of cluster 4 as CD8 T is wrong and should be
-  reconsidered -- check the MS4A1 and CD8A expression in that cluster
-  (visible in the VlnPlot) to determine whether SingleR's B cell call is
-  more appropriate. **Go back and verify marker expression in this cluster.**
-- **NK split with T cells**: SingleR calls 607 of our NK cells as "NK cells"
-  but labels 662 as "T cells." This likely reflects NKT cells or cytotoxic
-  CD8+ T cells that share expression of GNLY and NKG7 with NK cells. Our
-  manual annotation grouped them based on GNLY expression alone, which is
-  insufficient to distinguish NK from NKT populations.
-- **DC and pDC**: SingleR calls our pDC cluster "Dendritic cells" (157), which
-  is correct at a coarser level. However, it calls our DC cluster
-  "Progenitors" (154), suggesting the reference dataset's progenitor signature
-  overlaps with the markers in that small cluster. This is a case where manual
-  annotation with known markers (FCER1A, CST3) is more trustworthy.
-- **Platelets misclassified**: SingleR calls all 78 platelets "Dendritic
-  cells." Platelets are often absent from SingleR reference datasets (Monaco
-  Immune Data does not include them), so the classifier assigns the nearest
-  available label. This is a known limitation -- always verify rare or
-  non-standard cell types manually.
+- **Strong agreement**: SingleR calls 3,259 of 3,295 CD14 Monocytes
+  "Monocytes", 1,614 of 1,645 B cells "B cells", 607 of 634 NK cells
+  "NK cells", 428 of 429 FCGR3A+ Monocytes "Monocytes", and 157 of 176 DCs
+  "Dendritic cells". These cell types have distinctive transcriptional
+  profiles that both methods recognize.
+- **CD4 T cells**: 2,586 of 3,127 are "CD4+ T cells". Most of the rest (348)
+  get the generic "T cells" label.
+- **CD8 T cells**: only 400 of 1,712 are "CD8+ T cells"; 1,272 are generic
+  "T cells". Nearly all of those come from cluster 6, which expresses CD8A,
+  IL7R and NKG7 but little CD8B. That pattern fits mucosal-associated
+  invariant T (MAIT) cells, which the Monaco reference groups with
+  gamma-delta T cells under its generic "T cells" label. Our coarse "CD8 T"
+  label is defensible; sub-clustering would separate them.
+- **Platelets called "Progenitors"**: 154 of our 175 platelets (PPBP+, PF4+)
+  are called "Progenitors". Monaco Immune Data has no platelets, so SingleR
+  assigns the closest profile it has. Always check rare or non-standard cell
+  types with markers.
+- **pDCs called "Dendritic cells"**: all 78 pDCs (LILRA4+, IL3RA+) get the
+  coarser "Dendritic cells" label, which is correct at this level; Monaco's
+  fine labels separate plasmacytoid from myeloid DCs.
+- **HSPC**: the 39 CD34+ cells of cluster 17 are mostly "Progenitors" (21),
+  with some "NK cells" (11). A cluster this small is often a mixture; it is
+  labelled for completeness.
 
-The key takeaway: neither method is always right. SingleR caught a likely
-error in our manual CD8 T annotation but failed on platelets and DCs. The
-best practice is to use both methods and investigate every disagreement.
+The key takeaway: agreement on the large populations gives confidence in
+both methods, and every disagreement has a reason you can check with marker
+genes. A large disagreement (for example, a whole cluster you labelled as T
+cells called "B cells" by SingleR) is a signal to go back to the markers for
+that cluster before trusting either label. Use both methods and investigate
+every disagreement.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -516,7 +516,7 @@ p1 + p2
 ```
 
 
-![Manual vs SingleR annotation side by side](fig/ep6_side-by-side.png){alt="Two UMAP plots side by side. Left panel shows manual annotation with CD4 T, CD14 Mono, NK, B, CD8 T, FCGR3A+ Mono, DC, pDC, and Platelet labels. Right panel shows SingleR annotation with CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils. Most cell groups receive consistent labels between the two methods."}
+![Manual vs SingleR annotation side by side](fig/ep6_side-by-side.png){alt="Two UMAP plots side by side. Left panel shows manual annotation with CD4 T, CD14 Mono, B, CD8 T, NK, FCGR3A+ Mono, DC, Platelet, pDC, and HSPC labels. Right panel shows SingleR annotation with CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils. Most cell groups receive consistent labels between the two methods."}
 
 When the two methods **agree**, you can be very confident in the label. When
 they **disagree**, check the marker gene expression for the disputed cluster

@@ -602,7 +602,7 @@ It writes the file directly from R, so no Python installation is needed:
 ```{r convert-anndata, eval=FALSE}
 # Install anndataR if needed: BiocManager::install("anndataR")
 library(anndataR)
-write_h5ad(pbmc, "pbmc_annotated.h5ad")
+write_h5ad(pbmc, "pbmc_annotated.h5ad", mode = "w")  # "w" overwrites an earlier export
 ```
 
 The counts, normalized data, cell metadata and the PCA and UMAP embeddings
