@@ -151,6 +151,17 @@ Run `/scratch/negishi/aseethar/scrna-kit/runs/2026-10-21`, episodes as of commit
 - `[should-fix]` kit (fixed 2026-10-23): `c08` FAILED (job 44580367). Its anchors all pass (759, 1,464, GO and KEGG terms), but `export-csv` stopped with `cannot open compressed file '.../cold/08/scratch/scrna_workshop/pbmc_annotated.rds'`, and `export-dense` and `convert-anndata` failed after it with `object 'pbmc' not found`. The cause is the kit, not the episode. `kit_cold_seed` (`negishi-run/lib.sh`) hardcoded one RDS per episode and gave `c08` only `ifnb_annotated.rds`, while episode 8 (since patch 03) and its patch 05 callout also read `pbmc_annotated.rds`. Fix: `build_kit.py` derives the cold seed from each episode's `readRDS()` minus `saveRDS()` names, writes `generated/cold_seed.tsv`, and stops if a seed file is not a staged `rds/` file. `kit_cold_seed` copies that list. A mutation test was added. Confirmed 2026-10-23 (`c08` 44601306 PASS, collected 08:53): the seed held `ifnb_annotated.rds` and `pbmc_annotated.rds` (plus `ifnb_de.rds` left over from the failed job, which the episode rewrites), with no chunk errors, and all 56 anchors pass. The kit's cold pass is now fully green.
 - `redraw_figures.sh --run 2026-10-21` on Negishi: the three `ep6_*` figures are byte-identical to the committed files. `ep7_challenge2.png` is not, because its UMAP layout differs: the local pre-screen's `ifnb_annotated.rds` embeds the same clusters in a rotated layout. The genes, the row order and the CTRL versus STIM pattern are the same, and the alt text and FIGURE_DESCRIPTIONS describe no layout. The committed file is replaced with the Negishi redraw (`r07` 44579914), which is what learners will see.
 - Staged manifest frozen: `make_staged_manifest.py` on the verified copy (`check_staged.sh` full, 0 problems) is committed as `negishi-run/staged_manifest.tsv`, with sizes and md5 for all 21 files. `README.txt` md5 matches `negishi-run/staged-top/README.txt` (2,782 bytes), so the republished README is the kit copy.
+- `[should-fix]` `instructors/instructor-notes.md` challenge discussion points contradict the episodes' solutions and the Negishi run:
+  - ep3 C2 says 35 to 40 percent removed; the solution and Negishi say over 72 percent (2,709 vs 9,874).
+  - ep4 C1 says 60 to 70 percent overlap with S100A9, LYZ and NKG7 shared; the actual overlap is 7 of 20, and those three are not among them.
+  - ep5 C1 says 9 to 11 clusters at 0.5; the actual count is 18.
+  - ep6 C1 says "CD69-low naive"; CD69 is about 90 percent everywhere (patch 15).
+  - ep6 C2 mentions "Tissue_stem_cells"; HPCA gives no such label here.
+  - ep7 C2 says "all top 10 are ISGs"; chemokines and HESX1 lead.
+  - ep8 C1 says "Wilcoxon thousands, pseudobulk hundreds"; it is 759 vs 1,464.
+  - ep8 C2 names a type I interferon term, which is absent.
+  
+  Proposed fix: `updates-patches/23-instructor-challenge-notes.patch` (checked with `git apply --check`, not applied).
 
 ## Runtime record
 
