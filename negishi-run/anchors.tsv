@@ -53,8 +53,8 @@ STIM cells	07	ep7_stim_cells	7451	exact	should-fix	episodes/multi-sample-integra
 clusters after integration (episode 7 hardcodes 14 labels)	07	ep7_clusters_integrated	14	exact	should-fix	episodes/multi-sample-integration.Rmd:243,319-334
 cell types after annotation	07	ep7_n_celltypes	9	exact	should-fix	episodes/multi-sample-integration.Rmd:319-334
 top STIM vs CTRL CD14 Mono genes are ISGs (episode 7)	07	ep7_mono_top20	IFIT1,IFIT3,TNFSF10,RSAD2,IFIT2,MX1,CXCL10,LY6E,CXCL11,CCL8	atleast:5:IFIT1,IFIT3,TNFSF10,RSAD2,IFIT2,MX1,CXCL10,LY6E,CXCL11,CCL8	blocker	episodes/multi-sample-integration.Rmd:433-444
-Wilcoxon significant genes	08	ep8_wilcox_sig	765	rel:0.30	blocker	episodes/differential-expression.Rmd:151
-pseudobulk DESeq2 significant genes	08	ep8_pseudobulk_sig	1455	rel:0.30	blocker	episodes/differential-expression.Rmd:305
+Wilcoxon significant genes	08	ep8_wilcox_sig	759	rel:0.30	blocker	episodes/differential-expression.Rmd:161
+pseudobulk DESeq2 significant genes	08	ep8_pseudobulk_sig	1464	rel:0.30	blocker	episodes/differential-expression.Rmd:315
 top Wilcoxon genes are ISGs	08	ep8_wilcox_top20	IFIT1,IFIT3,TNFSF10,RSAD2,IFIT2,MX1,CXCL10,LY6E,CXCL11,CCL8	atleast:5:IFIT1,IFIT3,TNFSF10,RSAD2,IFIT2,MX1,CXCL10,LY6E,CXCL11,CCL8	blocker	episodes/differential-expression.Rmd:137-150
 core ISGs in the top DE genes	08	ep8_wilcox_top20+ep8_pseudo_top20	ISG15,IFIT1,IFIT3,IFI6,MX1	atleast:3:ISG15,IFIT1,IFIT3,IFI6,MX1	blocker	episodes/differential-expression.Rmd:137-150,291-302
 AggregateExpression returns a Seurat object	08	ep8_aggregate_class	Seurat	exact	should-fix	episodes/differential-expression.Rmd:233
