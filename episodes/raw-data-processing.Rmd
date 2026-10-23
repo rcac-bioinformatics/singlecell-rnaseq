@@ -290,6 +290,38 @@ The job takes about 5.5 hours on 64 cores (see the runtime comparison at the end
 of this episode). Submit it and move on: the next episode starts from a
 pre-computed copy of the same matrix.
 
+:::::::::::::::::::::::::::::::::::::::: callout
+
+## If your Cell Ranger job dies
+
+A job can be killed by its time limit, a node failure or a cluster outage.
+Resubmitting the same script then usually stops within seconds, because
+`cellranger_output/pbmc10k/` already exists from the interrupted run. Read
+the end of `cellranger_<jobid>.out` and `cellranger_<jobid>.err` for the
+reason, then choose one:
+
+- **Resume.** Cell Ranger can continue an interrupted run from its last
+  finished stage. Remove the lock file the killed run left behind and submit
+  the same script again:
+
+  ```bash
+  rm ${RCAC_SCRATCH}/scrna_workshop/cellranger_output/pbmc10k/_lock
+  sbatch ${RCAC_SCRATCH}/scrna_workshop/run_cellranger.sh
+  ```
+
+- **Start over.** Move the old run aside and submit again:
+
+  ```bash
+  mv ${RCAC_SCRATCH}/scrna_workshop/cellranger_output/pbmc10k \
+     ${RCAC_SCRATCH}/scrna_workshop/cellranger_output/pbmc10k_failed
+  sbatch ${RCAC_SCRATCH}/scrna_workshop/run_cellranger.sh
+  ```
+
+Either way, the rest of the workshop does not wait for it: episode 3 uses the
+pre-computed matrix.
+
+::::::::::::::::::::::::::::::::::::::::
+
 ### Cell Ranger count parameters
 
 | Parameter | Value | Description |
