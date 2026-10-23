@@ -64,8 +64,13 @@ From the laptop. The kit reads the episodes, `learners/setup.md`, and `config.ya
 cd ~/svn/singlecell-rnaseq
 python3 negishi-run/build_kit.py --check          # must say "matches a fresh build"
 bash negishi-run/tests/run_all.sh                 # laptop self-tests, about 1 min
-rsync -av --relative ./episodes ./learners ./config.yaml ./negishi-run aseethar@negishi.rcac.purdue.edu:singlecell-rnaseq/
+rsync -av --delete --relative --exclude /negishi-run/records/ ./episodes ./learners ./config.yaml ./negishi-run \
+    aseethar@negishi.rcac.purdue.edu:/scratch/negishi/aseethar/singlecell-rnaseq/
 ```
+
+`--delete` removes files the laptop no longer has (for example generated jobs for a step that was
+dropped); without it `build_kit.py --check` on Negishi reports them as stale. `records/` is excluded,
+so the collected tarballs are not sent back up and nothing under it on Negishi is deleted.
 
 `collect.sh` prints the command to bring the tarball back. Each collect writes a new timestamped tarball, so nothing is overwritten. Extract it into `negishi-run/records/`, which is gitignored. Do not extract it into the repo root: sandpaper would render its `SUMMARY.md`.
 

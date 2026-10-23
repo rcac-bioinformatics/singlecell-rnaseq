@@ -118,7 +118,7 @@ while IFS=$'\t' read -r step kind deps dep_type _ _ script desc; do
   for d in ${deps//,/ }; do
     [ "$d" = - ] && continue
     if [ -n "${JOB[$d]:-}" ]; then dl="$dl:${JOB[$d]}"
-    elif step_done "$d" || [ "$dep_type" = afterany ]; then :
+    elif kit_step_passed "$d" || [ "$dep_type" = afterany ]; then :
     elif [ $DRY = 1 ] || ! in_scope "$d"; then kit_log "note: $step depends on $d, which is not done (submit it, or run --only all)"
     else kit_die "$step depends on $d, which is neither done nor submitted; use --from $d"; fi
   done
