@@ -50,9 +50,11 @@ Where the files come from
 
 fastq/       https://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_fastqs.tar
 reference/   https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2024-A.tar.gz
-             (both fetched FILL-IN-DATE, archive size and S3 ETag checked)
+             (both fetched 2026-10-21, archive size and S3 ETag checked)
 filtered_feature_bc_matrix/
-             FILL-IN-MATRIX-SOURCE
-rds/         FILL-IN-RDS-SOURCE
+             episode 2 Cell Ranger script (cellranger 10.0.0, GRCh38-2024-A); a fresh
+             run on Negishi on 2026-10-22 gave the same 38,606 genes and identical barcodes
+rds/         saved by episodes 3 to 7 in a full run of this lesson on Negishi,
+             2026-10-22 (R 4.6.1, Bioconductor 3.23, Seurat 5.5.1)
 
 Questions: ask an instructor, or rcac-help@purdue.edu.
