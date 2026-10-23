@@ -724,58 +724,131 @@ mix well, skip integration and analyze directly.</p>
 </div>
 </div>
 </section><section><h2 class="section-heading" id="analysis-on-integrated-data">Analysis on Integrated Data<a class="anchor" aria-label="anchor" href="#analysis-on-integrated-data"></a></h2>
-<hr class="half-width"><p>Now that the data is integrated, we can annotate cell types and
-compare between conditions.</p>
+<hr class="half-width"><p>Now that the data is integrated, we can label cell types and compare
+between conditions.</p>
 <div class="section level3">
-<h3 id="annotating-integrated-clusters">Annotating integrated clusters<a class="anchor" aria-label="anchor" href="#annotating-integrated-clusters"></a></h3>
-<p>Find markers for each integrated cluster:</p>
+<h3 id="cell-type-labels">Cell type labels<a class="anchor" aria-label="anchor" href="#cell-type-labels"></a></h3>
+<p>The ifnb object comes with cell type labels: the
+<code>seurat_annotations</code> column in its metadata, assigned by the
+Seurat developers from marker genes. We use them as our cell types
+instead of labelling the 14 integrated clusters by hand. Episode 6
+showed the manual approach, and Challenge 3 at the end of this episode
+repeats it on these clusters.</p>
 <div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ifnb.markers</span> <span class="op">&lt;-</span> <span class="fu">FindAllMarkers</span><span class="op">(</span><span class="va">ifnb</span>,</span>
-<span>                                only.pos <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                min.pct <span class="op">=</span> <span class="fl">0.25</span>,</span>
-<span>                                logfc.threshold <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span></code></pre>
+<code class="sourceCode R"><span><span class="co"># Use the cell type labels that ship with the ifnb dataset</span></span>
+<span><span class="va">ifnb</span><span class="op">$</span><span class="va">celltype</span> <span class="op">&lt;-</span> <span class="va">ifnb</span><span class="op">$</span><span class="va">seurat_annotations</span></span>
+<span><span class="fu">Idents</span><span class="op">(</span><span class="va">ifnb</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"celltype"</span></span>
+<span><span class="fu">table</span><span class="op">(</span><span class="va">ifnb</span><span class="op">$</span><span class="va">celltype</span><span class="op">)</span></span></code></pre>
 </div>
-<p>Annotate the clusters using known PBMC markers (the same markers from
-Episode 6):</p>
-<div class="codewrapper sourceCode" id="cb18">
+<div id="accordionSpoiler4" class="accordion spoiler-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
+  <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
+</button>
+<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
+<div class="accordion-body">
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>   CD14 Mono  CD4 Naive T CD4 Memory T    CD16 Mono            B        CD8 T
+        4362         2504         1762         1044          978          814
+ T activated           NK           DC  B Activated           Mk          pDC
+         633          619          472          388          236          132
+       Eryth
+          55 </code></pre>
+</div>
+<p>Thirteen cell types. They are finer than the ten of episode 6 in some
+places (naive and memory CD4 T cells, resting and activated B cells, an
+activated T cell group) and include megakaryocytes (Mk, the platelet
+precursors) and a few erythrocytes (Eryth). CD16 Mono are the FCGR3A+
+monocytes of episode 6 (FCGR3A is the gene that encodes CD16).</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section level3">
+<h3 id="checking-the-integration-against-the-labels">Checking the integration against the labels<a class="anchor" aria-label="anchor" href="#checking-the-integration-against-the-labels"></a></h3>
+<p>The labels were assigned independently of our integration, so they
+give a check on it: if integration grouped cells by type, each
+integrated cluster should consist mostly of one cell type, drawn from
+both conditions.</p>
+<div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Adjust cluster IDs to match YOUR results</span></span>
-<span><span class="va">new.cluster.ids</span> <span class="op">&lt;-</span> <span class="fu">c</span><span class="op">(</span></span>
-<span>    <span class="st">"CD14 Mono"</span>,    <span class="co"># 0</span></span>
-<span>    <span class="st">"CD4 T"</span>,        <span class="co"># 1</span></span>
-<span>    <span class="st">"CD4 T"</span>,        <span class="co"># 2</span></span>
-<span>    <span class="st">"CD4 T"</span>,        <span class="co"># 3</span></span>
-<span>    <span class="st">"CD8 T"</span>,        <span class="co"># 4</span></span>
-<span>    <span class="st">"NK"</span>,           <span class="co"># 5</span></span>
-<span>    <span class="st">"B"</span>,            <span class="co"># 6</span></span>
-<span>    <span class="st">"CD14 Mono"</span>,    <span class="co"># 7</span></span>
-<span>    <span class="st">"FCGR3A Mono"</span>,  <span class="co"># 8</span></span>
-<span>    <span class="st">"DC"</span>,           <span class="co"># 9</span></span>
-<span>    <span class="st">"CD14 Mono"</span>,    <span class="co"># 10</span></span>
-<span>    <span class="st">"Mk"</span>,           <span class="co"># 11</span></span>
-<span>    <span class="st">"B"</span>,            <span class="co"># 12</span></span>
-<span>    <span class="st">"Eryth"</span>         <span class="co"># 13</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu">names</span><span class="op">(</span><span class="va">new.cluster.ids</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">levels</span><span class="op">(</span><span class="va">ifnb</span><span class="op">)</span></span>
-<span><span class="va">ifnb</span> <span class="op">&lt;-</span> <span class="fu">RenameIdents</span><span class="op">(</span><span class="va">ifnb</span>, <span class="va">new.cluster.ids</span><span class="op">)</span></span>
-<span><span class="va">ifnb</span><span class="op">$</span><span class="va">celltype</span> <span class="op">&lt;-</span> <span class="fu">Idents</span><span class="op">(</span><span class="va">ifnb</span><span class="op">)</span></span></code></pre>
+<code class="sourceCode R"><span><span class="fu">table</span><span class="op">(</span>cluster <span class="op">=</span> <span class="va">ifnb</span><span class="op">$</span><span class="va">seurat_clusters</span>, celltype <span class="op">=</span> <span class="va">ifnb</span><span class="op">$</span><span class="va">celltype</span><span class="op">)</span></span></code></pre>
 </div>
-<div class="codewrapper sourceCode" id="cb19">
+<div id="accordionSpoiler5" class="accordion spoiler-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
+  <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
+</button>
+<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
+<div class="accordion-body">
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>       celltype
+cluster CD14 Mono CD4 Naive T CD4 Memory T CD16 Mono    B CD8 T T activated
+     0       4272           0            0        16    1     0           0
+     1          0        2332           47         1    1     9          20
+     2          5         132         1643         0    0    30          16
+     3          0           0            0         0  975     1          15
+     4         28           0            0      1027    0     0           0
+     5          1           2           51         0    0   765           7
+     6          0          38            8         0    0     1         575
+     7          0           0            0         0    0     8           0
+     8         48           0            0         0    0     0           0
+     9          0           0           13         0    1     0           0
+     10         0           0            0         0    0     0           0
+     11         3           0            0         0    0     0           0
+     12         5           0            0         0    0     0           0
+     13         0           0            0         0    0     0           0
+       celltype
+cluster   NK   DC B Activated   Mk  pDC Eryth
+     0     0    4           1    2    0     0
+     1     0    0           0    6    0     0
+     2     1    0           0    1    0     0
+     3     0    0         387    0    0     1
+     4     0    0           0   13    0     0
+     5     9    0           0    0    0     0
+     6     0    0           0    0    1     0
+     7   608    0           0    0    0     0
+     8     0  466           0    0    1     0
+     9     1    0           0  175    0     0
+     10    0    2           0    0  106     0
+     11    0    0           0    0    0    54
+     12    0    0           0   39    0     0
+     13    0    0           0    0   24     0</code></pre>
+</div>
+<p>Almost every cluster is dominated by one cell type: cluster 0 is CD14
+monocytes, 3 is B cells (resting and activated together), 4 is CD16
+monocytes, 5 CD8 T cells, 7 NK cells, 8 dendritic cells, 10 pDCs and 11
+erythrocytes. Clusters 1 and 2 split the CD4 T cells into mostly naive
+and mostly memory cells, and the megakaryocytes fall into two small
+clusters (9 and 12). A cluster that mixed, say, T cells and monocytes
+would point to an integration or clustering problem. Together with the
+split view above, which shows every cluster in both conditions, this
+confirms the integration.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DimPlot</span><span class="op">(</span><span class="va">ifnb</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, label <span class="op">=</span> <span class="cn">TRUE</span>, repel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu">NoLegend</span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/ep7_annotated-umap.png" alt="Annotated UMAP plot of the integrated IFNB dataset with nine labeled cell types including CD14 Mono, CD4 T, CD8 T, B, NK, FCGR3A Mono, DC, Mk, and Eryth." class="figure mx-auto d-block"><div class="figcaption">UMAP plot with cells colored and labeled by
-annotated cell type. Nine cell types are visible: CD14 Mono (large
-cluster, right), CD4 T (large, upper left), CD8 T (upper right), B
-(center left), NK (left), FCGR3A Mono (lower right), DC (small, center),
-Mk (small, center right), and Eryth (small, bottom).</div>
+<figure><img src="fig/ep7_annotated-umap.png" alt="Annotated UMAP plot of the integrated IFNB dataset with thirteen labeled cell types: CD14 Mono, CD4 Naive T, CD4 Memory T, CD16 Mono, B, CD8 T, T activated, NK, DC, B Activated, Mk, pDC and Eryth." class="figure mx-auto d-block"><div class="figcaption">UMAP plot of the integrated IFNB dataset with
+cells labeled by cell type. CD4 Naive T, CD4 Memory T, T activated, CD8
+T and NK cells form one large group, B and B Activated cells a second,
+and CD14 Mono, CD16 Mono and DC a third, with small Mk, pDC and Eryth
+groups.</div>
 </figure></div>
 <div class="section level3">
 <h3 id="conserved-markers">Conserved markers<a class="anchor" aria-label="anchor" href="#conserved-markers"></a></h3>
@@ -783,7 +856,7 @@ Mk (small, center right), and Eryth (small, bottom).</div>
 cell type in <strong>both</strong> conditions.
 <code>FindConservedMarkers()</code> tests for differential expression
 within each condition separately and then combines the results:</p>
-<div class="codewrapper sourceCode" id="cb20">
+<div class="codewrapper sourceCode" id="cb22">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -810,48 +883,52 @@ level of this variable.</td>
 <td>Only return upregulated genes.</td>
 </tr></tbody></table><p>The output has columns for each condition (e.g.,
 <code>CTRL_avg_log2FC</code>, <code>STIM_avg_log2FC</code>) showing that
-the marker is consistent across both. Genes like LYZ, S100A9, and CD14
-should appear as strong conserved markers for monocytes.</p>
-<div id="accordionSpoiler4" class="accordion spoiler-accordion accordion-flush">
+the marker is consistent across both. Genes like S100A8, S100A9, TYROBP
+and FCER1G appear as strong conserved markers for monocytes.</p>
+<div id="accordionSpoiler6" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
-  <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
+<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler6" aria-expanded="false" aria-controls="collapseSpoiler6">
+  <h3 class="accordion-header" id="headingSpoiler6">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
+<div id="collapseSpoiler6" class="accordion-collapse collapse" aria-labelledby="headingSpoiler6" data-bs-parent="#accordionSpoiler6">
 <div class="accordion-body">
-<pre><code>         CTRL_p_val CTRL_avg_log2FC CTRL_pct.1 CTRL_pct.2 CTRL_p_val_adj
-TYROBP            0        2.357371      0.940      0.227              0
-FCER1G            0        2.197611      0.930      0.233              0
-S100A8            0        4.737642      0.742      0.071              0
-C15orf48          0        2.719921      0.868      0.201              0
-IL8               0        3.648031      0.798      0.144              0
-CD63              0        2.739659      0.957      0.333              0
-S100A9            0        4.597336      0.690      0.070              0
-CTSB              0        3.108400      0.771      0.183              0
-LGALS1            0        2.396676      0.904      0.322              0
-TYMP              0        2.075884      0.859      0.283              0
-            STIM_p_val STIM_avg_log2FC STIM_pct.1 STIM_pct.2 STIM_p_val_adj
-TYROBP    0.000000e+00        2.344174      0.951      0.197   0.000000e+00
-FCER1G    0.000000e+00        2.552006      0.910      0.196   0.000000e+00
-S100A8    0.000000e+00        5.328514      0.444      0.020   0.000000e+00
-C15orf48  0.000000e+00        2.758492      0.860      0.199   0.000000e+00
-IL8      3.434056e-251        3.687341      0.294      0.028  4.825879e-247
-CD63      0.000000e+00        2.896965      0.931      0.275   0.000000e+00
-S100A9    0.000000e+00        5.195483      0.581      0.036   0.000000e+00
-CTSB      0.000000e+00        3.421778      0.822      0.182   0.000000e+00
-LGALS1    0.000000e+00        2.860965      0.866      0.216   0.000000e+00
-TYMP      0.000000e+00        2.278326      0.927      0.437   0.000000e+00
-              max_pval minimump_p_val
-TYROBP    0.000000e+00              0
-FCER1G    0.000000e+00              0
-S100A8    0.000000e+00              0
-C15orf48  0.000000e+00              0
-IL8      3.434056e-251              0
-CD63      0.000000e+00              0
-S100A9    0.000000e+00              0
-CTSB      0.000000e+00              0
-LGALS1    0.000000e+00              0
-TYMP      0.000000e+00              0</code></pre>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>         CTRL_p_val CTRL_avg_log2FC CTRL_pct.1 CTRL_pct.2 CTRL_p_val_adj
+C15orf48          0        3.056281      0.984      0.189              0
+S100A8            0        5.231200      0.853      0.063              0
+IL8               0        4.008658      0.911      0.133              0
+TYROBP            0        2.505484      0.997      0.249              0
+FCER1G            0        2.375142      0.992      0.251              0
+S100A9            0        5.162259      0.795      0.060              0
+CTSB              0        3.378535      0.873      0.174              0
+TYMP              0        2.359353      0.961      0.272              0
+SOD2              0        2.418683      0.963      0.276              0
+S100A4            0        2.704430      0.953      0.270              0
+         STIM_p_val STIM_avg_log2FC STIM_pct.1 STIM_pct.2 STIM_p_val_adj
+C15orf48          0        3.110432      0.988      0.191              0
+S100A8            0        6.080987      0.523      0.016              0
+IL8               0        4.025185      0.343      0.025              0
+TYROBP            0        2.550902      0.999      0.227              0
+FCER1G            0        2.753517      0.991      0.210              0
+S100A9            0        5.758266      0.686      0.030              0
+CTSB              0        3.791644      0.944      0.174              0
+TYMP              0        2.554257      0.998      0.441              0
+SOD2              0        3.103627      0.991      0.319              0
+S100A4            0        2.986390      0.928      0.186              0
+         max_pval minimump_p_val
+C15orf48        0              0
+S100A8          0              0
+IL8             0              0
+TYROBP          0              0
+FCER1G          0              0
+S100A9          0              0
+CTSB            0              0
+TYMP            0              0
+SOD2            0              0
+S100A4          0              0</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -863,7 +940,7 @@ TYMP      0.000000e+00              0</code></pre>
 change between control and stimulated cells within the same cell
 type?</strong> To answer this, we subset to a single cell type and
 compare conditions:</p>
-<div class="codewrapper sourceCode" id="cb22">
+<div class="codewrapper sourceCode" id="cb24">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -881,37 +958,42 @@ compare conditions:</p>
 <span>                       logfc.threshold <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span>
 <span><span class="fu">head</span><span class="op">(</span><span class="va">mono.de</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre>
 </div>
-<div id="accordionSpoiler5" class="accordion spoiler-accordion accordion-flush">
+<div id="accordionSpoiler7" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
-  <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
+<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler7" aria-expanded="false" aria-controls="collapseSpoiler7">
+  <h3 class="accordion-header" id="headingSpoiler7">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
+<div id="collapseSpoiler7" class="accordion-collapse collapse" aria-labelledby="headingSpoiler7" data-bs-parent="#accordionSpoiler7">
 <div class="accordion-body">
-<pre><code>        p_val avg_log2FC pct.1 pct.2 p_val_adj
-IFIT1       0   7.173024 0.965 0.033         0
-IFIT3       0   6.798858 0.972 0.057         0
-TNFSF10     0   6.370735 0.959 0.061         0
-RSAD2       0   6.661976 0.920 0.041         0
-IFIT2       0   6.905053 0.909 0.039         0
-MX1         0   4.839203 0.953 0.099         0
-CXCL10      0   8.007812 0.873 0.031         0
-LY6E        0   4.263751 0.990 0.174         0
-CXCL11      0   8.576537 0.801 0.011         0
-OAS1        0   4.045792 0.915 0.131         0</code></pre>
-<p>The top DE genes are all <strong>interferon-stimulated genes
-(ISGs)</strong>: IFIT1, IFIT3, TNFSF10, RSAD2, IFIT2. These are exactly
-the genes you would expect to be upregulated by IFN-beta stimulation,
-confirming that our integration preserved the biological signal while
-correcting the batch effect. The exact fold changes, and the number of
-genes that pass a significance cutoff, vary slightly between Seurat
-versions; the leading ISGs do not.</p>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>        p_val avg_log2FC pct.1 pct.2 p_val_adj
+IFIT1       0   7.319139 0.985 0.033         0
+CXCL10      0   8.036564 0.984 0.035         0
+RSAD2       0   6.741673 0.988 0.045         0
+TNFSF10     0   6.991279 0.989 0.047         0
+IFIT3       0   6.883785 0.992 0.056         0
+IFIT2       0   7.179929 0.961 0.039         0
+CXCL11      0   8.624208 0.932 0.012         0
+CCL8        0   9.134191 0.918 0.017         0
+IDO1        0   5.455898 0.965 0.089         0
+MX1         0   5.059052 0.960 0.093         0</code></pre>
+</div>
+<p>The top DE genes are <strong>interferon-stimulated genes
+(ISGs)</strong> such as IFIT1, RSAD2, TNFSF10, IFIT3, IFIT2 and MX1,
+together with the IFN-inducible chemokines CXCL10, CXCL11 and CCL8.
+These are exactly the genes you would expect to be upregulated by
+IFN-beta stimulation, confirming that our integration preserved the
+biological signal while correcting the batch effect. The exact fold
+changes, and the number of genes that pass a significance cutoff, vary
+slightly between Seurat versions; the leading ISGs do not.</p>
 </div>
 </div>
 </div>
 </div>
 <p>Save the annotated ifnb object for the next episode:</p>
-<div class="codewrapper sourceCode" id="cb24">
+<div class="codewrapper sourceCode" id="cb26">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -922,7 +1004,7 @@ versions; the leading ISGs do not.</p>
 <h3 id="visualizing-condition-specific-changes">Visualizing condition-specific changes<a class="anchor" aria-label="anchor" href="#visualizing-condition-specific-changes"></a></h3>
 <p>Let’s visualize a few ISGs to see the condition-specific
 response:</p>
-<div class="codewrapper sourceCode" id="cb25">
+<div class="codewrapper sourceCode" id="cb27">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -931,11 +1013,11 @@ response:</p>
 <span>            split.by <span class="op">=</span> <span class="st">"stim"</span>,</span>
 <span>            cols <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"grey85"</span>, <span class="st">"firebrick"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
-<figure><img src="fig/ep7_isg-feature.png" alt="FeaturePlot of ISG genes split by condition showing near-absent expression in CTRL panels and strong red expression in STIM panels, especially in monocyte clusters." class="figure mx-auto d-block"><div class="figcaption">Four-row FeaturePlot split by CTRL and STIM for
-ISG15, IFIT1, TNFSF10, and RSAD2. CTRL panels show mostly grey cells
-with sparse expression. STIM panels show strong red expression across
-monocyte and other clusters for all four genes.</div>
-</figure><div class="codewrapper sourceCode" id="cb26">
+<figure><img src="fig/ep7_isg-feature.png" alt="FeaturePlot of ISG genes split by condition showing near-absent expression in CTRL panels and strong red expression in STIM panels, especially in monocyte clusters." class="figure mx-auto d-block"><div class="figcaption">Two-row FeaturePlot split by CTRL and STIM for
+IFIT3 and IFIT1. CTRL panels show mostly grey cells with sparse
+expression. STIM panels show strong red expression across all cell
+types, strongest in the monocytes.</div>
+</figure><div class="codewrapper sourceCode" id="cb28">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -968,7 +1050,7 @@ quality</h3>
 same type are well mixed within each cluster. Use
 <code>DimPlot(split.by = "stim")</code> to visualize, then compute the
 proportion of each condition per cluster.</p>
-<div class="codewrapper sourceCode" id="cb27">
+<div class="codewrapper sourceCode" id="cb29">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -991,45 +1073,47 @@ cell type?</p>
 </button>
 <div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
-<pre><code>         CellType
-Condition CD14 Mono     CD4 T     CD8 T        NK         B FCGR3A Mono
-     CTRL 0.5033865 0.4326872 0.4775281 0.4287425 0.4812594   0.5378641
-     STIM 0.4966135 0.5673128 0.5224719 0.5712575 0.5187406   0.4621359
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>         CellType
+Condition CD14 Mono CD4 Naive T CD4 Memory T CD16 Mono         B     CD8 T
+     CTRL 0.5077946   0.3905751    0.4875142 0.4856322 0.4161554 0.4324324
+     STIM 0.4922054   0.6094249    0.5124858 0.5143678 0.5838446 0.5675676
          CellType
-Condition        DC        Mk     Eryth
-     CTRL 0.4473684 0.4561404 0.4583333
-     STIM 0.5526316 0.5438596 0.5416667</code></pre>
-<figure><img src="fig/ep7_challenge1.png" alt="Split UMAP showing CTRL and STIM panels with cell type labels, demonstrating balanced mixing of conditions within each annotated cluster." class="figure mx-auto d-block"><div class="figcaption">Split UMAP with CTRL and STIM panels, cells
-labeled by cell type. Both panels show identical cluster arrangement
-with CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, and Eryth
-labels, confirming balanced condition mixing within each cell
-type.</div>
-</figure><p>Most cell types fall in the <strong>0.43–0.57</strong> range,
-confirming that integration successfully mixed cells from both
-conditions. The split UMAP shows the same cell types present in both
-panels with similar spatial arrangement – each cluster appears in both
-CTRL and STIM with comparable density.</p>
+Condition T activated        NK        DC B Activated        Mk       pDC
+     CTRL   0.4739336 0.4814216 0.5466102   0.4768041 0.4872881 0.3863636
+     STIM   0.5260664 0.5185784 0.4533898   0.5231959 0.5127119 0.6136364
+         CellType
+Condition     Eryth
+     CTRL 0.4181818
+     STIM 0.5818182</code></pre>
+</div>
+<figure><img src="fig/ep7_challenge1.png" alt="Split UMAP showing CTRL and STIM panels with cell type labels, demonstrating balanced mixing of conditions within each annotated cell type." class="figure mx-auto d-block"><div class="figcaption">Split UMAP with CTRL and STIM panels, cells
+labeled by cell type. Both panels show the same arrangement of the
+thirteen cell types, confirming balanced condition mixing within each
+cell type.</div>
+</figure><p>Most cell types fall in the <strong>0.40–0.60</strong> range, and the
+split UMAP shows every cell type in both panels with similar density.
+The baseline is not 50/50: STIM has 7,451 of the 13,999 cells (53%), so
+about 0.47 CTRL and 0.53 STIM is what perfect mixing looks like
+here.</p>
 <p>Some observations worth discussing:</p>
 <ul><li>
-<strong>CD14 Mono</strong> is the best-mixed cell type (50.3/49.7),
-essentially a perfect split. This is expected for the most abundant
-population.</li>
+<strong>CD14 Mono</strong>, the largest population, is close to the
+baseline (50.8/49.2).</li>
 <li>
-<strong>CD4 T and NK</strong> show the largest deviation (~43/57),
-with more cells in the stimulated condition. This could reflect a real
-biological shift – IFN-beta stimulation may promote T cell and NK cell
-survival or proliferation in culture – rather than a failure of
-integration.</li>
+<strong>CD4 Naive T and pDC</strong> show the largest deviation
+(about 39/61), with more cells in the stimulated condition. This could
+reflect a real biological shift in culture rather than a failure of
+integration; a few percentage points either way are well within what two
+samples of one experiment give.</li>
 <li>
-<strong>Rare populations</strong> (Mk, Eryth, DC) show reasonable
-balance despite small cell numbers, where stochastic variation has more
-impact.</li>
+<strong>Rare populations</strong> (Mk, Eryth, pDC) have small cell
+numbers, so chance has more effect on their proportions.</li>
 </ul><p>The key diagnostic: if integration had failed, you would see a cell
-type that is 90%+ from one condition, or you would see the same cell
-type forming separate clusters in the two panels. Neither is the case
-here. The moderate CD4 T skew (43/57) is well within the range of
-expected biological variation between a control and stimulated
-sample.</p>
+type that is 90%+ from one condition, or the same cell type forming
+separate clusters in the two panels. Neither is the case here.</p>
 </div>
 </div>
 </div>
@@ -1047,7 +1131,7 @@ monocytes</h3>
 control <strong>CD14+ monocytes</strong> (we computed this above as
 <code>mono.de</code>). Are these genes consistent with an interferon
 stimulation response?</p>
-<div class="codewrapper sourceCode" id="cb29">
+<div class="codewrapper sourceCode" id="cb31">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -1075,18 +1159,23 @@ stimulation response?</p>
 <figure><img src="fig/ep7_challenge2.png" alt="FeaturePlot of CCL8, CXCL11, HESX1, and CXCL10 split by condition showing absent expression in control and strong monocyte-concentrated expression in stimulated cells." class="figure mx-auto d-block"><div class="figcaption">Four-row FeaturePlot split by CTRL and STIM
 showing CCL8, CXCL11, HESX1, and CXCL10. CTRL panels are almost entirely
 grey. STIM panels show strong red expression concentrated in the
-monocyte clusters for all four chemokine and ISG genes.</div>
-</figure><pre><code>                 p_val avg_log2FC pct.1 pct.2     p_val_adj
-CCL8      0.000000e+00   9.059454 0.798 0.015  0.000000e+00
-CXCL11    0.000000e+00   8.576537 0.801 0.011  0.000000e+00
-HESX1    3.530769e-218   8.283957 0.335 0.001 4.961789e-214
-CXCL10    0.000000e+00   8.007812 0.873 0.031  0.000000e+00
-IFIT1     0.000000e+00   7.173024 0.965 0.033  0.000000e+00
-IFIT2     0.000000e+00   6.905053 0.909 0.039  0.000000e+00
-IFIT3     0.000000e+00   6.798858 0.972 0.057  0.000000e+00
-GMPR     2.606001e-242   6.750793 0.373 0.004 3.662213e-238
-APOBEC3B 1.036577e-127   6.685079 0.272 0.034 1.456702e-123
-RSAD2     0.000000e+00   6.661976 0.920 0.041  0.000000e+00</code></pre>
+monocytes for CCL8, CXCL11 and CXCL10, with HESX1 in fewer monocytes and
+CXCL10 also in the B and T cells.</div>
+</figure><div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>                p_val avg_log2FC pct.1 pct.2    p_val_adj
+CCL8     0.000000e+00   9.134191 0.918 0.017  0.00000e+00
+CXCL11   0.000000e+00   8.624208 0.932 0.012  0.00000e+00
+HESX1   2.729040e-227   8.265045 0.388 0.001 3.83512e-223
+CXCL10   0.000000e+00   8.036564 0.984 0.035  0.00000e+00
+IFIT1    0.000000e+00   7.319139 0.985 0.033  0.00000e+00
+IFIT2    0.000000e+00   7.179929 0.961 0.039  0.00000e+00
+TNFSF10  0.000000e+00   6.991279 0.989 0.047  0.00000e+00
+CD38    4.872419e-277   6.974732 0.464 0.005 6.84721e-273
+IFIT3    0.000000e+00   6.883785 0.992 0.056  0.00000e+00
+GMPR    4.371764e-244   6.765773 0.419 0.005 6.14364e-240</code></pre>
+</div>
 <p>The top 10 genes fall into two functional categories, both consistent
 with IFN-beta stimulation:</p>
 <table class="table"><colgroup><col width="15%"><col width="20%"><col width="38%"><col width="25%"></colgroup><thead><tr><th>Gene</th>
@@ -1094,75 +1183,205 @@ with IFN-beta stimulation:</p>
 <th align="left">pct.1 / pct.2</th>
 <th align="left">Function</th>
 </tr></thead><tbody><tr><td>CCL8</td>
-<td align="center">9.06</td>
-<td align="left">0.80 / 0.02</td>
+<td align="center">9.13</td>
+<td align="left">0.92 / 0.02</td>
 <td align="left">Chemokine; recruits monocytes and T cells to sites of
 inflammation</td>
 </tr><tr><td>CXCL11</td>
-<td align="center">8.58</td>
-<td align="left">0.80 / 0.01</td>
+<td align="center">8.62</td>
+<td align="left">0.93 / 0.01</td>
 <td align="left">IFN-inducible chemokine; attracts activated T cells via
 CXCR3</td>
 </tr><tr><td>HESX1</td>
-<td align="center">8.28</td>
-<td align="left">0.34 / 0.00</td>
+<td align="center">8.27</td>
+<td align="left">0.39 / 0.00</td>
 <td align="left">Transcription factor; emerging role in IFN
 signaling</td>
 </tr><tr><td>CXCL10</td>
-<td align="center">8.01</td>
-<td align="left">0.87 / 0.03</td>
+<td align="center">8.04</td>
+<td align="left">0.98 / 0.04</td>
 <td align="left">IFN-inducible chemokine (IP-10); major recruiter of
 immune cells</td>
 </tr><tr><td>IFIT1</td>
-<td align="center">7.17</td>
-<td align="left">0.97 / 0.03</td>
+<td align="center">7.32</td>
+<td align="left">0.99 / 0.03</td>
 <td align="left">Directly induced by type I IFN; inhibits viral
 translation</td>
 </tr><tr><td>IFIT2</td>
-<td align="center">6.91</td>
-<td align="left">0.91 / 0.04</td>
+<td align="center">7.18</td>
+<td align="left">0.96 / 0.04</td>
 <td align="left">Antiviral effector; regulates translation during
 infection</td>
+</tr><tr><td>TNFSF10</td>
+<td align="center">6.99</td>
+<td align="left">0.99 / 0.05</td>
+<td align="left">TRAIL; IFN-induced death ligand that kills infected
+cells</td>
+</tr><tr><td>CD38</td>
+<td align="center">6.97</td>
+<td align="left">0.46 / 0.01</td>
+<td align="left">NAD-consuming enzyme induced by type I IFN in
+monocytes</td>
 </tr><tr><td>IFIT3</td>
-<td align="center">6.80</td>
-<td align="left">0.97 / 0.06</td>
+<td align="center">6.88</td>
+<td align="left">0.99 / 0.06</td>
 <td align="left">Antiviral effector; forms complex with IFIT1 and
 IFIT2</td>
 </tr><tr><td>GMPR</td>
-<td align="center">6.75</td>
-<td align="left">0.37 / 0.00</td>
+<td align="center">6.77</td>
+<td align="left">0.42 / 0.01</td>
 <td align="left">Guanosine monophosphate reductase; modulates purine
 metabolism</td>
-</tr><tr><td>APOBEC3B</td>
-<td align="center">6.69</td>
-<td align="left">0.27 / 0.03</td>
-<td align="left">Cytidine deaminase; innate antiviral defense via RNA
-editing</td>
-</tr><tr><td>RSAD2</td>
-<td align="center">6.66</td>
-<td align="left">0.92 / 0.04</td>
-<td align="left">Viperin; broad-spectrum antiviral enzyme induced by
-IFN</td>
 </tr></tbody></table><p>Two patterns stand out:</p>
 <p><strong>Chemokines dominate the top.</strong> CCL8, CXCL11, and
 CXCL10 are three of the top four, with fold changes of 8.0-9.1,
 reflecting the monocyte’s primary role as a sentinel cell: upon IFN
 stimulation, monocytes broadcast chemokine signals to recruit other
-immune cells. Note the pct.2 values (0.01-0.03) – these chemokines are
+immune cells. Note the pct.2 values (0.01-0.04) – these chemokines are
 essentially absent in control cells and massively induced by
 stimulation.</p>
-<p><strong>Classical ISGs fill the rest.</strong> IFIT1/2/3, RSAD2, and
-APOBEC3B are canonical interferon-stimulated genes that directly inhibit
-viral replication. The IFIT family shows the highest pct.1 values
-(0.91-0.97), meaning nearly every stimulated monocyte expresses them – a
-hallmark of a robust, uniform interferon response.</p>
+<p><strong>Classical ISGs fill the rest.</strong> IFIT1/2/3 and TNFSF10
+are canonical interferon-stimulated genes; CD38 and GMPR are induced in
+a subset of cells (pct.1 0.42-0.46). The IFIT family shows the highest
+pct.1 values (0.96-0.99), meaning nearly every stimulated monocyte
+expresses them – a hallmark of a robust, uniform interferon
+response.</p>
 <p>The FeaturePlot confirms this visually: CCL8, CXCL11, HESX1, and
 CXCL10 are virtually absent in the CTRL panels (gray) and strongly
 expressed in the STIM panels (red), with the signal concentrated in the
-monocyte clusters (right side of the UMAP). CXCL10 and CXCL11 also show
-some expression in the stimulated CD4 T and NK clusters, consistent with
-these cell types also responding to IFN-beta, though less strongly than
-monocytes.</p>
+monocytes (right side of the UMAP); HESX1 is induced in only a subset of
+them. CXCL10 also reaches the stimulated B cells and is scattered
+through the T cells, consistent with these cell types also responding to
+IFN-beta, though less strongly than monocytes.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="challenge-3-label-the-integrated-clusters-yourself" class="callout challenge">
+<div class="callout-square">
+<i class="callout-icon" data-feather="zap"></i>
+</div>
+<span class="callout-header">Challenge</span>
+<div id="challenge-3-label-the-integrated-clusters-yourself" class="callout-inner">
+<h3 class="callout-title">Challenge 3: Label the integrated clusters
+yourself</h3>
+<div class="callout-content">
+<p>We used the labels that ship with the dataset. Label the 14
+integrated clusters from marker genes instead, as in episode 6, and
+compare your labels with <code>seurat_annotations</code>. Plot the
+canonical markers per cluster first, then write one label per
+cluster.</p>
+<div class="codewrapper sourceCode" id="cb33">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">Idents</span><span class="op">(</span><span class="va">ifnb</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"seurat_clusters"</span></span>
+<span><span class="fu">DotPlot</span><span class="op">(</span><span class="va">ifnb</span>, features <span class="op">=</span> <span class="fu">c</span><span class="op">(</span><span class="st">"CD3D"</span>, <span class="st">"IL7R"</span>, <span class="st">"CCR7"</span>, <span class="st">"CD8A"</span>, <span class="st">"GNLY"</span>, <span class="st">"NKG7"</span>,</span>
+<span>                           <span class="st">"MS4A1"</span>, <span class="st">"CD79A"</span>, <span class="st">"CD14"</span>, <span class="st">"LYZ"</span>, <span class="st">"FCGR3A"</span>, <span class="st">"MS4A7"</span>,</span>
+<span>                           <span class="st">"FCER1A"</span>, <span class="st">"LILRA4"</span>, <span class="st">"IL3RA"</span>, <span class="st">"PPBP"</span>, <span class="st">"HBB"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">coord_flip</span><span class="op">(</span><span class="op">)</span></span></code></pre>
+</div>
+<div id="a-label-vector-only-fits-the-clusters-it-was-written-for" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<span class="callout-header">Callout</span>
+<div id="a-label-vector-only-fits-the-clusters-it-was-written-for" class="callout-inner">
+<h3 class="callout-title">A label vector only fits the clusters it was
+written for</h3>
+<div class="callout-content">
+<p>The solution below fits the 14 clusters this lesson’s integration
+gives with the package versions in the setup instructions. With other
+versions the number or order of the clusters can change, and the names
+then land on the wrong cells without any error. The code stops if the
+number of clusters does not match the number of labels; it cannot detect
+a change in order, so check your dot plot against the comment beside
+each label.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="accordionSolution3" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
+  <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
+</button>
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div class="accordion-body">
+<div class="codewrapper sourceCode" id="cb34">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># One label per integrated cluster, in cluster order (0 to 13)</span></span>
+<span><span class="va">my.labels</span> <span class="op">&lt;-</span> <span class="fu">c</span><span class="op">(</span></span>
+<span>    <span class="st">"CD14 Mono"</span>,     <span class="co"># 0: CD14+, LYZ+, CST3+</span></span>
+<span>    <span class="st">"CD4 Naive T"</span>,   <span class="co"># 1: CD3D+, CCR7 high</span></span>
+<span>    <span class="st">"CD4 Memory T"</span>,  <span class="co"># 2: CD3D+, IL7R+, CCR7 lower</span></span>
+<span>    <span class="st">"B"</span>,             <span class="co"># 3: MS4A1+, CD79A+</span></span>
+<span>    <span class="st">"CD16 Mono"</span>,     <span class="co"># 4: FCGR3A+, MS4A7+</span></span>
+<span>    <span class="st">"CD8 T"</span>,         <span class="co"># 5: CD3D+, CD8A+, NKG7+</span></span>
+<span>    <span class="st">"T activated"</span>,   <span class="co"># 6: IL7R+, CCR7+, CD3D low</span></span>
+<span>    <span class="st">"NK"</span>,            <span class="co"># 7: GNLY+, NKG7+, CD3D-</span></span>
+<span>    <span class="st">"DC"</span>,            <span class="co"># 8: LYZ+, CST3+, FCER1A+</span></span>
+<span>    <span class="st">"Mk"</span>,            <span class="co"># 9: PPBP+</span></span>
+<span>    <span class="st">"pDC"</span>,           <span class="co"># 10: LILRA4+, IL3RA+</span></span>
+<span>    <span class="st">"Eryth"</span>,         <span class="co"># 11: HBB+</span></span>
+<span>    <span class="st">"Mk"</span>,            <span class="co"># 12: PPBP+, with monocyte genes</span></span>
+<span>    <span class="st">"pDC"</span>            <span class="co"># 13: no clear marker; the shipped labels say pDC</span></span>
+<span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu">nlevels</span><span class="op">(</span><span class="va">ifnb</span><span class="op">$</span><span class="va">seurat_clusters</span><span class="op">)</span> <span class="op">!=</span> <span class="fu">length</span><span class="op">(</span><span class="va">my.labels</span><span class="op">)</span><span class="op">)</span> <span class="kw">stop</span><span class="op">(</span><span class="st">"ifnb has "</span>, <span class="fu">nlevels</span><span class="op">(</span><span class="va">ifnb</span><span class="op">$</span><span class="va">seurat_clusters</span><span class="op">)</span>, <span class="st">" clusters but my.labels has "</span>, <span class="fu">length</span><span class="op">(</span><span class="va">my.labels</span><span class="op">)</span>, <span class="st">" labels; check the dot plot and edit my.labels"</span><span class="op">)</span></span>
+<span><span class="fu">names</span><span class="op">(</span><span class="va">my.labels</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">levels</span><span class="op">(</span><span class="va">ifnb</span><span class="op">$</span><span class="va">seurat_clusters</span><span class="op">)</span></span>
+<span><span class="va">ifnb</span><span class="op">$</span><span class="va">manual_celltype</span> <span class="op">&lt;-</span> <span class="fu">unname</span><span class="op">(</span><span class="va">my.labels</span><span class="op">[</span><span class="fu">as.character</span><span class="op">(</span><span class="va">ifnb</span><span class="op">$</span><span class="va">seurat_clusters</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu">table</span><span class="op">(</span>Manual <span class="op">=</span> <span class="va">ifnb</span><span class="op">$</span><span class="va">manual_celltype</span>, Shipped <span class="op">=</span> <span class="va">ifnb</span><span class="op">$</span><span class="va">celltype</span><span class="op">)</span></span>
+<span><span class="fu">Idents</span><span class="op">(</span><span class="va">ifnb</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"celltype"</span></span></code></pre>
+</div>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>              Shipped
+Manual         CD14 Mono CD4 Naive T CD4 Memory T CD16 Mono    B CD8 T
+  B                    0           0            0         0  975     1
+  CD14 Mono         4272           0            0        16    1     0
+  CD16 Mono           28           0            0      1027    0     0
+  CD4 Memory T         5         132         1643         0    0    30
+  CD4 Naive T          0        2332           47         1    1     9
+  CD8 T                1           2           51         0    0   765
+  DC                  48           0            0         0    0     0
+  Eryth                3           0            0         0    0     0
+  Mk                   5           0           13         0    1     0
+  NK                   0           0            0         0    0     8
+  pDC                  0           0            0         0    0     0
+  T activated          0          38            8         0    0     1
+              Shipped
+Manual         T activated   NK   DC B Activated   Mk  pDC Eryth
+  B                     15    0    0         387    0    0     1
+  CD14 Mono              0    0    4           1    2    0     0
+  CD16 Mono              0    0    0           0   13    0     0
+  CD4 Memory T          16    1    0           0    1    0     0
+  CD4 Naive T           20    0    0           0    6    0     0
+  CD8 T                  7    9    0           0    0    0     0
+  DC                     0    0  466           0    0    1     0
+  Eryth                  0    0    0           0    0    0    54
+  Mk                     0    1    0           0  214    0     0
+  NK                     0  608    0           0    0    0     0
+  pDC                    0    0    2           0    0  130     0
+  T activated          575    0    0           0    0    1     0</code></pre>
+</div>
+<p>Each cluster gets the shipped label that most of its cells carry, so
+most cells sit on the diagonal of the table. The off-diagonal cells are
+the ones a cluster-level label cannot get right: activated B cells
+inside the B cell cluster, the naive and memory CD4 T cells that the two
+CD4 clusters share, and a few cells of other types in each cluster.
+Cluster 13 has no clear marker in the dot plot; with only 24 cells, it
+is labelled pDC because the shipped annotation says so. Two lessons: a
+cluster label is a statement about most of its cells, not all of them,
+and a cluster without markers is a candidate for removal rather than a
+cell type.</p>
+<p>The last line sets the identities back to the shipped labels, so any
+code you run afterwards uses the same cell types as the rest of the
+lesson.</p>
 </div>
 </div>
 </div>

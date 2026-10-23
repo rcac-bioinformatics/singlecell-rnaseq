@@ -583,9 +583,10 @@ mostly noise.</p>
 <div id="how-many-pcs" class="callout-inner">
 <h3 class="callout-title">How many PCs?</h3>
 <div class="callout-content">
-<p>For the PBMC 10k dataset, the elbow typically falls around <strong>PC
-12–15</strong>. We will use <strong>15 PCs</strong> for the rest of this
-episode.</p>
+<p>For the PBMC 10k dataset, the elbow falls around <strong>PC
+8–10</strong>: the curve drops steeply through PC 7 and flattens after
+PC 10. We will use <strong>15 PCs</strong> for the rest of this episode,
+a few more than the elbow (see below for why).</p>
 <p>In practice, the exact number is not critical. Using 10 vs. 20 PCs
 usually produces very similar clustering results for well-separated cell
 types. The choice matters more for subtle distinctions between closely
@@ -827,8 +828,9 @@ Levels: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
 2112 1810 1187 1015 1006  716  639  634  517  429  357  234  176  175  122   78   64   39 </code></pre>
 </div>
 <p>Cluster 0 is the largest with 2,112 cells (T cells, which are the
-most abundant PBMC type). Cluster 17 is the smallest with only 39 cells
-(likely a rare population like platelets or dendritic cells).</p>
+most abundant PBMC type). Cluster 17 is the smallest with only 39 cells;
+the next episode shows that it is a rare population of haematopoietic
+stem and progenitor cells (HSPC).</p>
 </div>
 </div>
 </div>
@@ -1091,19 +1093,18 @@ your run):</p>
 <th align="left">Cluster(s)</th>
 </tr></thead><tbody><tr><td>CD3D</td>
 <td align="left">T cells</td>
-<td align="left">Clusters 0, 2, 3, 5, 6 (several groups across the
-upper-left and lower-left UMAP). CD3D is expressed in both CD4+ and CD8+
-T cells, so it marks multiple clusters.</td>
+<td align="left">Clusters 0, 3, 5, 6 and 10 (the large T cell group and
+its branches). CD3D is expressed in both CD4+ and CD8+ T cells, so it
+marks multiple clusters.</td>
 </tr><tr><td>MS4A1</td>
 <td align="left">B cells</td>
-<td align="left">Cluster 7 (a compact, clearly separated group in the
-upper-right). MS4A1 (also known as CD20) is highly specific to B
-cells.</td>
+<td align="left">Clusters 4, 8 and 14 (one separate group). MS4A1 (also
+known as CD20) is highly specific to B cells.</td>
 </tr><tr><td>LYZ</td>
 <td align="left">CD14+ Monocytes</td>
-<td align="left">Clusters 1 and 2 (large groups in the lower portion of
-the UMAP). You may also see weaker LYZ expression in a smaller monocyte
-cluster (FCGR3A+).</td>
+<td align="left">Clusters 1 and 2, with the smaller clusters 11 and 16
+(the large monocyte group). LYZ is also high in the dendritic cells
+(cluster 12) and weaker in the FCGR3A+ monocytes (cluster 9).</td>
 </tr></tbody></table><p>The fact that each marker cleanly maps to specific clusters confirms
 that our clustering at resolution 0.5 is capturing meaningful biological
 groupings. Notice that CD3D marks multiple clusters – this is expected

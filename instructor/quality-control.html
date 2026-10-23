@@ -476,7 +476,7 @@ creating the Seurat object:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -516,7 +516,7 @@ detected genes (these are likely empty droplets or debris)</li>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -587,7 +587,7 @@ during object creation:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -688,7 +688,7 @@ look at the summary statistics:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
   <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
+<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -866,7 +866,7 @@ fall outside the thresholds.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
   <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -979,13 +979,15 @@ exceed 5–8%</li>
 doublets</li>
 <li>Studies where rare intermediate populations could be confused with
 doublets</li>
-</ul><p><strong>For this dataset</strong>, the 10x Chromium platform at
-standard loading (~10,000 cells targeted) produces a doublet rate of
-approximately 3–5%. At this level, most doublets will be removed by our
-QC filters or will form small insignificant clusters that can be
-identified and removed during cell type annotation. We will not run a
-dedicated doublet detection tool in this workshop, but be aware of these
-tools for your own analyses.</p>
+</ul><p><strong>For this dataset</strong>, 10x Genomics expects about 0.8%
+doublets per 1,000 cells recovered with v3 chemistry, so about 8–9% for
+the roughly 11,800 cells here. Many of them combine two cells of the
+same type (two T cells, say), which barely changes clustering. Doublets
+of two different types tend to form small, mixed clusters that can be
+found during cell type annotation (cluster 16 in episode 6, with both
+monocyte and B cell markers, is one). We will not run a dedicated
+doublet detection tool in this workshop, but be aware of these tools for
+your own analyses.</p>
 </div>
 </div>
 </div>
@@ -1001,8 +1003,8 @@ tools for your own analyses.</p>
 on the distributions, propose your own filtering thresholds for
 <code>nFeature_RNA</code>, <code>nCount_RNA</code>, and
 <code>percent.mt</code>. Justify your choices. How many cells pass your
-filters compared to the default thresholds
-(<code>nFeature_RNA &gt; 200 &amp; nFeature_RNA &lt; 5000 &amp; percent.mt &lt; 15</code>)?</p>
+filters compared to the 11,310 cells that passed the thresholds used
+above?</p>
 <p>Run the following code with your chosen values:</p>
 <div class="codewrapper sourceCode" id="cb24">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1022,7 +1024,7 @@ filters compared to the default thresholds
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single correct answer – reasonable thresholds depend on
 how conservative you want to be. Here is one example of a slightly more
@@ -1037,14 +1039,14 @@ conservative approach:</p>
 <span>                               <span class="va">percent.mt</span> <span class="op">&lt;</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu">cat</span><span class="op">(</span><span class="st">"Cells with custom thresholds:"</span>, <span class="fu">ncol</span><span class="op">(</span><span class="va">pbmc_custom</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre>
 </div>
-<p>This retains 7,579 cells compared to 9,874 with the default
-thresholds – a loss of roughly 23% of the data. The trade-offs are:</p>
+<p>This retains 7,579 cells compared to 11,310 with the thresholds used
+above – a loss of about a third of the data. The trade-offs are:</p>
 <ul><li>
 <code>nFeature_RNA &gt; 300</code> (vs. 200): slightly more
 aggressive removal of low-complexity cells, but may also remove some
 small cell types like platelets that naturally express few genes.</li>
 <li>
-<code>nFeature_RNA &lt; 4000</code> (vs. 5000): this is the biggest
+<code>nFeature_RNA &lt; 4000</code> (vs. 7000): this is the biggest
 driver of cell loss here. The median nFeature_RNA in this dataset is
 ~3,378, so a 4,000 ceiling cuts into the upper quartile and removes a
 substantial number of valid cells, not just doublets.</li>
@@ -1054,11 +1056,11 @@ stressed cells, but some immune cell types (e.g., activated T cells)
 naturally have moderately elevated mitochondrial content.</li>
 </ul><p>The key point is that <strong>more aggressive filtering is not always
 better</strong>. Every cell you remove is data you lose. Dropping from
-9,874 to 7,579 cells means losing nearly a quarter of the dataset, which
-could reduce statistical power and under-represent cell types that
-naturally have higher gene counts or mitochondrial content. The goal is
-to remove cells that would distort the analysis, not to enforce an
-artificially narrow definition of “high quality.”</p>
+11,310 to 7,579 cells means losing a third of the dataset, which could
+reduce statistical power and under-represent cell types that naturally
+have higher gene counts or mitochondrial content. The goal is to remove
+cells that would distort the analysis, not to enforce an artificially
+narrow definition of “high quality.”</p>
 </div>
 </div>
 </div>
@@ -1080,18 +1082,10 @@ PBMCs?</p>
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Starting from the unfiltered object (re-load if needed)</span></span>
-<span><span class="va">pbmc_strict</span> <span class="op">&lt;-</span> <span class="fu">subset</span><span class="op">(</span><span class="va">pbmc</span>,</span>
-<span>                      subset <span class="op">=</span> <span class="va">nFeature_RNA</span> <span class="op">&gt;</span> <span class="fl">200</span> <span class="op">&amp;</span></span>
-<span>                               <span class="va">nFeature_RNA</span> <span class="op">&lt;</span> <span class="fl">5000</span> <span class="op">&amp;</span></span>
-<span>                               <span class="va">percent.mt</span> <span class="op">&lt;</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="fu">cat</span><span class="op">(</span><span class="st">"Cells with percent.mt &lt; 5:"</span>, <span class="fu">ncol</span><span class="op">(</span><span class="va">pbmc_strict</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">pbmc_default</span> <span class="op">&lt;-</span> <span class="fu">subset</span><span class="op">(</span><span class="va">pbmc</span>,</span>
-<span>                       subset <span class="op">=</span> <span class="va">nFeature_RNA</span> <span class="op">&gt;</span> <span class="fl">200</span> <span class="op">&amp;</span></span>
-<span>                                <span class="va">nFeature_RNA</span> <span class="op">&lt;</span> <span class="fl">5000</span> <span class="op">&amp;</span></span>
-<span>                                <span class="va">percent.mt</span> <span class="op">&lt;</span> <span class="fl">15</span><span class="op">)</span></span>
-<span><span class="fu">cat</span><span class="op">(</span><span class="st">"Cells with percent.mt &lt; 15:"</span>, <span class="fu">ncol</span><span class="op">(</span><span class="va">pbmc_default</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre>
+<code class="sourceCode R"><span><span class="co"># pbmc is the filtered object from above (the episode's thresholds, percent.mt &lt; 15)</span></span>
+<span><span class="va">pbmc_strict</span> <span class="op">&lt;-</span> <span class="fu">subset</span><span class="op">(</span><span class="va">pbmc</span>, subset <span class="op">=</span> <span class="va">percent.mt</span> <span class="op">&lt;</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="fu">cat</span><span class="op">(</span><span class="st">"Cells with percent.mt &lt; 15:"</span>, <span class="fu">ncol</span><span class="op">(</span><span class="va">pbmc</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="fu">cat</span><span class="op">(</span><span class="st">"Cells with percent.mt &lt; 5:"</span>, <span class="fu">ncol</span><span class="op">(</span><span class="va">pbmc_strict</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre>
 </div>
 </div>
 </div>
@@ -1101,11 +1095,12 @@ PBMCs?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
-<p>With <code>percent.mt &lt; 5</code>, only <strong>2,709 cells
-remain</strong>, compared to 9,874 with <code>percent.mt &lt; 15</code>.
-That is a loss of <strong>over 72% of the dataset</strong>.</p>
+<p>With <code>percent.mt &lt; 5</code>, only <strong>3,276 cells
+remain</strong>, compared to 11,310 with
+<code>percent.mt &lt; 15</code>. That is a loss of <strong>71% of the
+dataset</strong>.</p>
 <p>This is <strong>far too aggressive for PBMCs</strong>. Here is
 why:</p>
 <ul><li>The median mitochondrial percentage in this dataset is ~5.8%,
@@ -1113,11 +1108,11 @@ meaning a <code>&lt; 5</code> cutoff removes the majority of cells by
 definition – not just dying cells, but most of the healthy
 population.</li>
 <li>Different immune cell types have naturally different mitochondrial
-content. Activated T cells, monocytes, and NK cells tend to have higher
-mitochondrial content (6-12%) because they are metabolically active. A
-<code>&lt; 5</code> threshold disproportionately removes these
-populations, biasing your downstream analysis toward cell types with low
-metabolic activity.</li>
+content, so the loss is uneven. Using the labels from episode 6, a
+<code>&lt; 5</code> cutoff keeps about 45% of CD4 T and NK cells but
+only about 24% of CD14 monocytes and 12% of CD8 T cells and FCGR3A+
+monocytes. It biases the downstream analysis toward the cell types with
+low mitochondrial content.</li>
 <li>A threshold of <code>&lt; 5</code> might be appropriate for some
 cell lines or tissues where mitochondrial content is uniformly low, but
 for primary immune cells from blood, 10-15% is a more appropriate

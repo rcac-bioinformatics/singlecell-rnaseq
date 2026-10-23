@@ -185,7 +185,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 | **Caption** | Scatter plot after filtering |
 | **Description** | Scatter plot of total UMI counts versus number of genes after filtering, colored by mitochondrial percentage, showing a tighter cloud with outliers removed |
 | **Plot function** | `ggplot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 ---
 
@@ -265,30 +265,30 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 
 | Field | Value |
 |-------|-------|
-| **Chunk** | `umap-plot` (`dimensionality-reduction-clustering.Rmd` line 217) |
-| **Shown at** | line 221 |
+| **Chunk** | `umap-plot` (`dimensionality-reduction-clustering.Rmd` line 218) |
+| **Shown at** | line 222 |
 | **Caption** | UMAP plot of all cells shown in a single color before clustering. Cells naturally organize into several spatially distinct groups corresponding to different cell types. |
 | **Description** | UMAP scatter plot of 11310 cells in a single color before clustering, with cells forming several spatially distinct groups that correspond to different cell types. |
 | **Plot function** | `DimPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 5.5 umap-clusters (`ep5_umap-clusters.png`)
 
 | Field | Value |
 |-------|-------|
-| **Chunk** | `umap-clusters` (`dimensionality-reduction-clustering.Rmd` line 374) |
-| **Shown at** | line 379 |
+| **Chunk** | `umap-clusters` (`dimensionality-reduction-clustering.Rmd` line 376) |
+| **Shown at** | line 381 |
 | **Caption** | UMAP plot with 18 clusters labeled 0 through 17, each shown in a distinct color. Large clusters like 0 and 1 dominate the center and bottom, while smaller clusters appear at the periphery. |
 | **Description** | UMAP plot colored by Louvain cluster identity at resolution 0.5, showing 18 clusters numbered 0 through 17 with large clusters in the center and small clusters at the periphery. |
 | **Plot function** | `DimPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 5.6 clustree (`ep5_clustree.png`)
 
 | Field | Value |
 |-------|-------|
-| **Chunk** | `clustree` (`dimensionality-reduction-clustering.Rmd` line 399) |
-| **Shown at** | line 402 |
+| **Chunk** | `clustree` (`dimensionality-reduction-clustering.Rmd` line 401) |
+| **Shown at** | line 404 |
 | **Caption** | Clustree diagram showing how clusters split as resolution increases from 0.2 to 1.2. At low resolution a few large clusters exist, which progressively split into more subclusters at higher resolutions. Stable splits show clean branches while unstable splits show cells moving between multiple clusters. |
 | **Description** | Clustree diagram tracing cluster membership from resolution 0.2 to 1.2, with clean branches indicating stable splits and tangled arrows indicating unstable over-splitting. |
 | **Plot function** | `clustree()` |
@@ -298,19 +298,19 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 
 | Field | Value |
 |-------|-------|
-| **Chunk** | `feature-plot` (`dimensionality-reduction-clustering.Rmd` line 432) |
-| **Shown at** | line 438 |
+| **Chunk** | `feature-plot` (`dimensionality-reduction-clustering.Rmd` line 434) |
+| **Shown at** | line 440 |
 | **Caption** | Four UMAP plots showing expression of CD3D, MS4A1, LYZ, and GNLY. Each gene is highlighted in a different cluster region, indicating T cells, B cells, monocytes, and NK cells respectively. |
 | **Description** | Four UMAP panels showing expression of CD3D, MS4A1, LYZ, and GNLY on a grey-to-purple gradient, each marking distinct cell populations for T cells, B cells, monocytes, and NK cells. |
 | **Plot function** | `FeaturePlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 5.8 vln-markers (`ep5_vln-markers.png`)
 
 | Field | Value |
 |-------|-------|
-| **Chunk** | `vln-markers` (`dimensionality-reduction-clustering.Rmd` line 451) |
-| **Shown at** | line 457 |
+| **Chunk** | `vln-markers` (`dimensionality-reduction-clustering.Rmd` line 453) |
+| **Shown at** | line 459 |
 | **Caption** | Violin plots showing expression of CD3D, MS4A1, LYZ, and GNLY across all clusters. Each marker shows high expression in one or two specific clusters and low or zero expression in the others. |
 | **Description** | Violin plots of CD3D, MS4A1, LYZ, and GNLY expression across 18 clusters, showing each marker with high expression in specific clusters and near-zero expression elsewhere. |
 | **Plot function** | `VlnPlot()` |
@@ -320,34 +320,34 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 
 | Field | Value |
 |-------|-------|
-| **Chunk** | `challenge1` (`dimensionality-reduction-clustering.Rmd` line 480) |
-| **Shown at** | line 503 |
+| **Chunk** | `challenge1` (`dimensionality-reduction-clustering.Rmd` line 482) |
+| **Shown at** | line 505 |
 | **Caption** | Four UMAP plots comparing clustering at resolutions 0.2, 0.5, 0.8, and 1.2. Lower resolutions produce fewer large clusters while higher resolutions split cells into progressively more subclusters. |
 | **Description** | Side-by-side UMAP plots at resolutions 0.2, 0.5, 0.8, and 1.2 showing progressively more clusters as resolution increases. |
 | **Plot function** | `DimPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 5.10 challenge2 (`challenge2_plot1.png`)
 
 | Field | Value |
 |-------|-------|
-| **Chunk** | `challenge2` (`dimensionality-reduction-clustering.Rmd` line 553) |
-| **Shown at** | line 561 |
+| **Chunk** | `challenge2` (`dimensionality-reduction-clustering.Rmd` line 555) |
+| **Shown at** | line 563 |
 | **Caption** | FeaturePlot of CD3D, MS4A1, and LYZ on the UMAP, each highlighting distinct cell populations |
 | **Description** | Three UMAP panels showing expression of CD3D, MS4A1, and LYZ. CD3D expression is concentrated in the upper-left and lower-left regions. MS4A1 lights up a compact group in the upper-right. LYZ is strongest in the lower-left clusters. |
 | **Plot function** | `FeaturePlot()`, `DimPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 5.11 challenge2 (`ep5_challenge2.png`)
 
 | Field | Value |
 |-------|-------|
-| **Chunk** | `challenge2` (`dimensionality-reduction-clustering.Rmd` line 553) |
-| **Shown at** | line 563 |
+| **Chunk** | `challenge2` (`dimensionality-reduction-clustering.Rmd` line 555) |
+| **Shown at** | line 565 |
 | **Caption** | Cluster-labeled UMAP for reference |
 | **Description** | UMAP plot with 18 clusters labeled 0 through 17 for cross-referencing with the FeaturePlot above. |
 | **Plot function** | `FeaturePlot()`, `DimPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 ---
 
@@ -362,7 +362,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 | **Caption** | Clustered UMAP from previous episode |
 | **Description** | UMAP plot with 18 clusters labeled 0 through 17 at resolution 0.5, matching the clustering results from the previous episode. |
 | **Plot function** | `DimPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 6.2 heatmap (`ep6_heatmap.png`)
 
@@ -384,7 +384,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 | **Caption** | Dot plot of top marker genes |
 | **Description** | Dot plot showing expression of top 3 marker genes across all 18 clusters. Dot size indicates the percentage of cells expressing each gene; dot shading indicates average expression level. |
 | **Plot function** | `DotPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 6.4 feature-markers (`ep6_feature-markers.png`)
 
@@ -395,7 +395,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 | **Caption** | FeaturePlot of 8 canonical PBMC markers |
 | **Description** | Grid of 8 UMAP panels showing expression of CD3D, IL7R, CD8A, MS4A1, LYZ, FCGR3A, GNLY, and FCER1A. Each marker highlights a distinct UMAP region: CD3D and IL7R in the upper-left T cell area, CD8A in a small cluster on the right, MS4A1 in B cells on the right, LYZ in monocytes at the lower-left, FCGR3A in a small cluster at the lower-right, GNLY in NK cells at the upper-center, and FCER1A in a small dendritic cell group. |
 | **Plot function** | `FeaturePlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 6.5 vln-markers (`ep6_vln-markers.png`)
 
@@ -428,7 +428,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 | **Caption** | SingleR annotated UMAP |
 | **Description** | UMAP plot with cells colored by SingleR automated annotation labels from the Monaco Immune reference, showing CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils. |
 | **Plot function** | `DimPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 6.8 side-by-side (`ep6_side-by-side.png`)
 
@@ -493,20 +493,20 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 
 | Field | Value |
 |-------|-------|
-| **Chunk** | `annotated-umap` (`multi-sample-integration.Rmd` line 342) |
-| **Shown at** | line 345 |
-| **Caption** | UMAP plot with cells colored and labeled by annotated cell type. Nine cell types are visible: CD14 Mono (large cluster, right), CD4 T (large, upper left), CD8 T (upper right), B (center left), NK (left), FCGR3A Mono (lower right), DC (small, center), Mk (small, center right), and Eryth (small, bottom). |
-| **Description** | Annotated UMAP plot of the integrated IFNB dataset with nine labeled cell types including CD14 Mono, CD4 T, CD8 T, B, NK, FCGR3A Mono, DC, Mk, and Eryth. |
+| **Chunk** | `annotated-umap` (`multi-sample-integration.Rmd` line 401) |
+| **Shown at** | line 404 |
+| **Caption** | UMAP plot of the integrated IFNB dataset with cells labeled by cell type. CD4 Naive T, CD4 Memory T, T activated, CD8 T and NK cells form one large group, B and B Activated cells a second, and CD14 Mono, CD16 Mono and DC a third, with small Mk, pDC and Eryth groups. |
+| **Description** | Annotated UMAP plot of the integrated IFNB dataset with thirteen labeled cell types: CD14 Mono, CD4 Naive T, CD4 Memory T, CD16 Mono, B, CD8 T, T activated, NK, DC, B Activated, Mk, pDC and Eryth. |
 | **Plot function** | `DimPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 7.5 isg-feature (`ep7_isg-feature.png`)
 
 | Field | Value |
 |-------|-------|
-| **Chunk** | `isg-feature` (`multi-sample-integration.Rmd` line 480) |
-| **Shown at** | line 487 |
-| **Caption** | Four-row FeaturePlot split by CTRL and STIM for ISG15, IFIT1, TNFSF10, and RSAD2. CTRL panels show mostly grey cells with sparse expression. STIM panels show strong red expression across monocyte and other clusters for all four genes. |
+| **Chunk** | `isg-feature` (`multi-sample-integration.Rmd` line 541) |
+| **Shown at** | line 548 |
+| **Caption** | Two-row FeaturePlot split by CTRL and STIM for IFIT3 and IFIT1. CTRL panels show mostly grey cells with sparse expression. STIM panels show strong red expression across all cell types, strongest in the monocytes. |
 | **Description** | FeaturePlot of ISG genes split by condition showing near-absent expression in CTRL panels and strong red expression in STIM panels, especially in monocyte clusters. |
 | **Plot function** | `FeaturePlot()` |
 | **Redraw** | By hand from a live session or a kit run |
@@ -515,31 +515,31 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 
 | Field | Value |
 |-------|-------|
-| **Chunk** | `isg-violin` (`multi-sample-integration.Rmd` line 490) |
-| **Shown at** | line 499 |
+| **Chunk** | `isg-violin` (`multi-sample-integration.Rmd` line 551) |
+| **Shown at** | line 560 |
 | **Caption** | Four violin plots for IFIT1, IFIT3, TNFSF10, and RSAD2 in CD14 monocytes. Each panel shows two violins: a thin line at zero for control and a broad teal shape peaking around expression level 3 to 4 for stimulated, confirming strong IFN-beta induction. |
 | **Description** | Violin plots of IFIT1, IFIT3, TNFSF10, and RSAD2 in CD14 monocytes showing flat expression in control and broad high expression in stimulated cells. |
 | **Plot function** | `VlnPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 7.7 challenge1 (`ep7_challenge1.png`)
 
 | Field | Value |
 |-------|-------|
-| **Chunk** | `challenge1` (`multi-sample-integration.Rmd` line 516) |
-| **Shown at** | line 542 |
-| **Caption** | Split UMAP with CTRL and STIM panels, cells labeled by cell type. Both panels show identical cluster arrangement with CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, and Eryth labels, confirming balanced condition mixing within each cell type. |
-| **Description** | Split UMAP showing CTRL and STIM panels with cell type labels, demonstrating balanced mixing of conditions within each annotated cluster. |
+| **Chunk** | `challenge1` (`multi-sample-integration.Rmd` line 577) |
+| **Shown at** | line 607 |
+| **Caption** | Split UMAP with CTRL and STIM panels, cells labeled by cell type. Both panels show the same arrangement of the thirteen cell types, confirming balanced condition mixing within each cell type. |
+| **Description** | Split UMAP showing CTRL and STIM panels with cell type labels, demonstrating balanced mixing of conditions within each annotated cell type. |
 | **Plot function** | `DimPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 7.8 challenge2 (`ep7_challenge2.png`)
 
 | Field | Value |
 |-------|-------|
-| **Chunk** | `challenge2` (`multi-sample-integration.Rmd` line 582) |
-| **Shown at** | line 599 |
-| **Caption** | Four-row FeaturePlot split by CTRL and STIM showing CCL8, CXCL11, HESX1, and CXCL10. CTRL panels are almost entirely grey. STIM panels show strong red expression concentrated in the monocyte clusters for all four chemokine and ISG genes. |
+| **Chunk** | `challenge2` (`multi-sample-integration.Rmd` line 645) |
+| **Shown at** | line 662 |
+| **Caption** | Four-row FeaturePlot split by CTRL and STIM showing CCL8, CXCL11, HESX1, and CXCL10. CTRL panels are almost entirely grey. STIM panels show strong red expression concentrated in the monocytes for CCL8, CXCL11 and CXCL10, with HESX1 in fewer monocytes and CXCL10 also in the B and T cells. |
 | **Description** | FeaturePlot of CCL8, CXCL11, HESX1, and CXCL10 split by condition showing absent expression in control and strong monocyte-concentrated expression in stimulated cells. |
 | **Plot function** | `FeaturePlot()` |
 | **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
@@ -555,9 +555,9 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 | **Chunk** | `load-data` (`differential-expression.Rmd` line 78) |
 | **Shown at** | line 91 |
 | **Caption** | Split UMAP showing CTRL and STIM panels with cells colored and labeled by cell type. |
-| **Description** | UMAP split by CTRL and STIM conditions with nine cell types colored and labeled, showing identical spatial arrangement in both panels confirming successful integration. |
+| **Description** | UMAP split by CTRL and STIM conditions with thirteen cell types colored and labeled, showing identical spatial arrangement in both panels confirming successful integration. |
 | **Plot function** | `DimPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 8.2 volcano (`ep8_volcano.png`)
 
@@ -568,7 +568,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 | **Caption** | Volcano plot for CD14 monocytes STIM vs CTRL. |
 | **Description** | Volcano plot showing upregulated genes in red in the upper right, downregulated genes in blue in the upper left, and non-significant genes in grey near the bottom, with dashed cutoff lines for significance and fold change. |
 | **Plot function** | `ggplot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 8.3 de-viz (`ep8_featureplot_ifit1.png`)
 
@@ -588,9 +588,9 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 | **Chunk** | `de-violin` (`differential-expression.Rmd` line 383) |
 | **Shown at** | line 391 |
 | **Caption** | Violin plots for IFIT1, CXCL10, and MX1 across cell types, split by condition. |
-| **Description** | Three violin plot panels showing IFIT1, CXCL10, and MX1 dramatically upregulated in stimulated cells across all cell types, with control violins near zero and stimulated violins broad and tall. |
+| **Description** | Three violin plot panels showing IFIT1 and MX1 upregulated in stimulated cells of every cell type and CXCL10 mainly in stimulated monocytes, dendritic cells and B cells, with control violins near zero. |
 | **Plot function** | `VlnPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 8.5 de-dotplot (`ep8_dotplot_de.png`)
 
@@ -601,7 +601,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 | **Caption** | Dot plot of top 10 DE genes across cell types split by condition. |
 | **Description** | Dot plot showing top 10 DE genes across all cell types split by CTRL and STIM, with dot size indicating percent expressed and color indicating average expression, showing consistently larger and redder dots in stimulated cells. |
 | **Plot function** | `DotPlot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 8.6 go-dotplot (`ep8_go_dotplot.png`)
 
@@ -612,7 +612,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 | **Caption** | GO Biological Process dot plot for STIM vs CTRL CD14 monocytes. |
 | **Description** | GO enrichment dot plot showing 15 biological process terms with response to virus, defense response to virus, and viral process as the top three by gene ratio, with dot color from red to blue indicating adjusted p-value. |
 | **Plot function** | `dotplot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 8.7 challenge1 (`ep8_pval_comparison.png`)
 
@@ -623,7 +623,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 | **Caption** | Scatter plot comparing p-values from Wilcoxon and pseudobulk DE tests. |
 | **Description** | Scatter plot of negative log10 p-values from Wilcoxon versus pseudobulk for shared genes, with a red dashed diagonal showing equal significance and points broadly scattered indicating different significance rankings between methods. |
 | **Plot function** | `ggplot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 #### 8.8 challenge2 (`ep8_go_top200.png`)
 
@@ -634,7 +634,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
 | **Caption** | GO BP dot plot for the top 200 upregulated genes in STIM CD14 monocytes. |
 | **Description** | GO enrichment dot plot for top 200 upregulated genes showing 10 biological process terms with response to virus and defense response to virus having the largest gene ratios and deepest red color indicating lowest adjusted p-values. |
 | **Plot function** | `dotplot()` |
-| **Redraw** | By hand from a live session or a kit run |
+| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
 
 
 ## Summary

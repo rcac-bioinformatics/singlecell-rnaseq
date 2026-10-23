@@ -692,11 +692,12 @@ aggressive filtering removes more noise but may also remove real cells
 (especially small cell types like platelets). Ask: “Which cell types are
 most at risk from a low nFeature_RNA threshold?”</p>
 <p><strong>Challenge 2 – Aggressive Mitochondrial Filtering:</strong>
-With percent.mt &lt; 5, only 2,709 cells remain against 9,874 at &lt;
-15, a loss of over 72%, because the median mitochondrial percentage is
-about 5.8%. This disproportionately removes metabolically active immune
-cells (monocytes, activated T cells). Use this to reinforce that
-thresholds must be tuned to the specific tissue and dataset.</p>
+With percent.mt &lt; 5, only 3,276 of the 11,310 filtered cells remain,
+a loss of 71%, because the median mitochondrial percentage is about
+5.8%. The loss is uneven: about 45% of CD4 T and NK cells survive, but
+only 12% of CD8 T cells and FCGR3A+ monocytes and 24% of CD14 monocytes.
+Use this to reinforce that thresholds must be tuned to the specific
+tissue and dataset.</p>
 </div>
 <div class="section level3">
 <h3 id="episode-4-normalization-and-feature-selection">Episode 4: Normalization and Feature Selection<a class="anchor" aria-label="anchor" href="#episode-4-normalization-and-feature-selection"></a>
@@ -757,32 +758,47 @@ tissue type.</p>
 <div class="section level3">
 <h3 id="episode-7-multi-sample-integration">Episode 7: Multi-Sample Integration<a class="anchor" aria-label="anchor" href="#episode-7-multi-sample-integration"></a>
 </h3>
+<p>Since patch 24 the cell types come from the
+<code>seurat_annotations</code> column that ships with ifnb (13 labels),
+not from a hardcoded vector; the cluster-versus-label table is the
+integration check.</p>
 <p><strong>Challenge 1 – Quantifying Integration Quality:</strong> The
-proportion table shows 43–57% per condition within each cell type (CD14
-Mono 50.3/49.7). If a cell type is heavily skewed (e.g., 90% from one
-condition), it could be a condition-specific population or a sign of
-incomplete integration. Ask: “What would it mean if a cluster was 95%
-STIM cells?” It could represent a stimulation-induced cell state that
-does not exist in control.</p>
+proportion table shows 39–61% per condition within each cell type (CD14
+Mono 50.8/49.2), against a baseline of 47/53 because STIM has more
+cells. If a cell type is heavily skewed (e.g., 90% from one condition),
+it could be a condition-specific population or a sign of incomplete
+integration. Ask: “What would it mean if a cluster was 95% STIM cells?”
+It could represent a stimulation-induced cell state that does not exist
+in control.</p>
 <p><strong>Challenge 2 – Interferon Response Genes:</strong> The top 10
 are led by IFN-inducible chemokines (CCL8, CXCL11, CXCL10) and HESX1,
-followed by ISGs (IFIT1, IFIT2, IFIT3, RSAD2). Use this to validate the
-integration: if the biological signal was lost during integration, these
-genes would not be differentially expressed. This challenge connects
-back to the biology – IFN-beta activates the JAK-STAT pathway, which
-induces ISG transcription.</p>
+followed by ISGs (IFIT1, IFIT2, TNFSF10, IFIT3) and CD38. Use this to
+validate the integration: if the biological signal was lost during
+integration, these genes would not be differentially expressed. This
+challenge connects back to the biology – IFN-beta activates the JAK-STAT
+pathway, which induces ISG transcription.</p>
+<p><strong>Challenge 3 – Label the Integrated Clusters
+Yourself:</strong> The solution’s 14 labels give each cluster the
+shipped label most of its cells carry; the comparison table puts most
+cells on the diagonal. Discuss the off-diagonal cells (activated B cells
+inside the B cluster, CD4 naive and memory cells shared between clusters
+1 and 2) and cluster 13, which has no clear marker. Before patch 24 the
+episode hardcoded a vector like this one, and 11 of its 14 labels were
+wrong (for example NK cells labelled CD14 Mono); the guard and the kit’s
+marker anchors exist because of that.</p>
 </div>
 <div class="section level3">
 <h3 id="episode-8-differential-expression-analysis">Episode 8: Differential Expression Analysis<a class="anchor" aria-label="anchor" href="#episode-8-differential-expression-analysis"></a>
 </h3>
 <p><strong>Challenge 1 – Wilcoxon vs. Pseudobulk:</strong> Wilcoxon
-finds 759 significant genes and pseudobulk 1,464 (Negishi). Pseudobulk
-finds more here only because the episode builds artificial
-pseudo-replicates from one sample per condition; the episode explains
-this. The key teaching point is still pseudoreplication: per-cell tests
-treat each cell as an independent sample. Discuss when per-cell tests
-are acceptable (single-sample, exploratory) vs. when pseudobulk is
-required (multi-sample, publication).</p>
+finds 825 significant genes and pseudobulk 1,539 (patch 24 labels;
+Negishi, 2026-10-23). Pseudobulk finds more here only because the
+episode builds artificial pseudo-replicates from one sample per
+condition; the episode explains this. The key teaching point is still
+pseudoreplication: per-cell tests treat each cell as an independent
+sample. Discuss when per-cell tests are acceptable (single-sample,
+exploratory) vs. when pseudobulk is required (multi-sample,
+publication).</p>
 <p><strong>Challenge 2 – GO Enrichment:</strong> Top GO terms all relate
 to the antiviral response: “response to virus”, “defense response to
 virus”, “regulation of viral process”. No type I interferon term reaches
