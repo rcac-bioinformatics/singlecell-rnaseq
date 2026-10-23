@@ -1,0 +1,64 @@
+# Lesson anchors, from the episodes' own output blocks (authoritative; decision 2026-10-16, round 1).
+# The CLAUDE.md anchors drafted before any run (8-9k cells, 9-11 clusters, Wilcoxon thousands) were wrong and are not used.
+# tolerance: exact | rel:F (|measured-expected| <= F*expected) | abs:N | max:N | in:a|b (value is one of) |
+#   atleast:K:g1,g2,... (at least K of the genes in the measured list) | contains:t1|t2 (every term in the measured text) |
+#   contains_any:t1|t2 | info (reported, never fails)
+# measure: name written by the kit (records/anchors/<step>.tsv or records/metrics/02/); a+b = union of two gene lists.
+# severity: what a FAIL is logged as in round 3. Episode 2 numbers depend on Cell Ranger/STAR versions, so should-fix.
+anchor	episode	measure	expected	tolerance	severity	source
+cellranger cells	02	cellranger_cells	11809	rel:0.10	should-fix	episodes/raw-data-processing.Rmd:684
+cellranger genes	02	cellranger_genes	38606	exact	should-fix	episodes/raw-data-processing.Rmd:686
+starsolo cells	02	starsolo_cells	11682	rel:0.10	should-fix	episodes/raw-data-processing.Rmd:689
+starsolo genes	02	starsolo_genes	38606	exact	should-fix	episodes/raw-data-processing.Rmd:691
+cell count difference CR vs STARsolo (percent)	02	cr_starsolo_cell_diff_pct	1.1	max:3	should-fix	episodes/raw-data-processing.Rmd:694
+fresh vs staged barcodes (content)	02	fresh_vs_staged_barcodes_identical	yes	exact	check	staged filtered_feature_bc_matrix must be this script's output
+Estimated Number of Cells	02	cr:Estimated Number of Cells	11809	rel:0.10	should-fix	episodes/raw-data-processing.Rmd:409
+Median Genes per Cell	02	cr:Median Genes per Cell	3371	rel:0.10	should-fix	episodes/raw-data-processing.Rmd:410
+Reads Mapped Confidently to Transcriptome	02	cr:Reads Mapped Confidently to Transcriptome	79.1	abs:2	should-fix	episodes/raw-data-processing.Rmd:411
+Sequencing Saturation	02	cr:Sequencing Saturation	68.2	abs:5	should-fix	episodes/raw-data-processing.Rmd:412
+Fraction Reads in Cells	02	cr:Fraction Reads in Cells	95.7	abs:2	should-fix	episodes/raw-data-processing.Rmd:413
+Valid Barcodes	02	cr:Valid Barcodes	97.3	abs:1	should-fix	episodes/raw-data-processing.Rmd:414
+Mean Reads per Cell	02	cr:Mean Reads per Cell	-	info	check	not quoted in the episode (challenge 2 colleague: 45,000)
+challenge 2 context: Fraction Reads in Cells	02	cr:Fraction Reads in Cells	55.2	info	check	episodes/raw-data-processing.Rmd:782 (hypothetical colleague, context only)
+challenge 2 context: Sequencing Saturation	02	cr:Sequencing Saturation	28.3	info	check	episodes/raw-data-processing.Rmd:784 (hypothetical colleague, context only)
+STAR uniquely mapped percent	02	star:Uniquely mapped reads %	89.28	abs:2	should-fix	episodes/raw-data-processing.Rmd:640
+STAR multi-mapping percent	02	star:% of reads mapped to multiple loci	7.14	abs:2	should-fix	episodes/raw-data-processing.Rmd:641
+STAR mismatch rate	02	star:Mismatch rate per base, %	0.56	abs:0.2	should-fix	episodes/raw-data-processing.Rmd:643
+genes read	03	ep3_read_genes	38606	exact	blocker	episodes/quality-control.Rmd:88
+barcodes read	03	ep3_read_cells	11809	rel:0.10	blocker	episodes/quality-control.Rmd:88
+genes after CreateSeuratObject	03	ep3_seurat_genes	29155	rel:0.02	should-fix	episodes/quality-control.Rmd:121
+cells after CreateSeuratObject	03	ep3_seurat_cells	11721	rel:0.10	should-fix	episodes/quality-control.Rmd:121
+median percent.mt before filtering	03	ep3_median_percent_mt_prefilter	5.79	rel:0.10	blocker	episodes/quality-control.Rmd:254
+cells after QC	03	ep3_cells_after_qc	11310	rel:0.10	blocker	episodes/quality-control.Rmd:404
+variable features	04	ep4_n_variable	2000	exact	should-fix	episodes/normalization-and-features.Rmd:275
+PPBP among the top 10 variable genes	04	ep4_top10_variable	1:PPBP	atleast:1:PPBP	should-fix	episodes/normalization-and-features.Rmd:294
+clusters at resolution 0.5	05	ep5_clusters_res0.5	18	abs:2	blocker	episodes/dimensionality-reduction-clustering.Rmd:327
+clusters at resolution 0.5 (episode 6 hardcodes 18 labels)	05	ep5_clusters_res0.5	18	exact	should-fix	episodes/cell-type-annotation.Rmd:319-338
+clusters at resolution 0.2	05	ep5_clusters_res0.2	16	abs:2	should-fix	episodes/dimensionality-reduction-clustering.Rmd:511
+clusters at resolution 0.8	05	ep5_clusters_res0.8	21	abs:2	should-fix	episodes/dimensionality-reduction-clustering.Rmd:514
+CD3D highest in a T cell label	06	ep6_marker_CD3D	CD4 T|CD8 T	in:CD4 T|CD8 T	blocker	episodes/cell-type-annotation.Rmd:319-338
+MS4A1 highest in B	06	ep6_marker_MS4A1	B	in:B	blocker	episodes/cell-type-annotation.Rmd:319-338
+LYZ highest in CD14 Mono	06	ep6_marker_LYZ	CD14 Mono	in:CD14 Mono|FCGR3A+ Mono	blocker	episodes/cell-type-annotation.Rmd:319-338
+GNLY highest in NK	06	ep6_marker_GNLY	NK	in:NK	blocker	episodes/cell-type-annotation.Rmd:319-338
+PPBP highest in Platelet	06	ep6_marker_PPBP	Platelet	in:Platelet	blocker	episodes/cell-type-annotation.Rmd:319-338
+FCER1A highest in DC	06	ep6_marker_FCER1A	DC	in:DC	blocker	episodes/cell-type-annotation.Rmd:319-338
+CD8A highest in CD8 T	06	ep6_marker_CD8A	CD8 T	in:CD8 T	blocker	episodes/cell-type-annotation.Rmd:319-338
+LILRA4 highest in pDC	06	ep6_marker_LILRA4	pDC	in:pDC	blocker	episodes/cell-type-annotation.Rmd:319-338
+CD34 highest in HSPC	06	ep6_marker_CD34	HSPC	in:HSPC	should-fix	episodes/cell-type-annotation.Rmd:319-338
+annotated labels	06	ep6_n_labels	10	exact	should-fix	episodes/cell-type-annotation.Rmd:469-493
+ifnb cells	07	ep7_ifnb_cells	13999	exact	blocker	episodes/multi-sample-integration.Rmd:103
+ifnb genes	07	ep7_ifnb_genes	14053	exact	should-fix	episodes/multi-sample-integration.Rmd:103
+CTRL cells	07	ep7_ctrl_cells	6548	exact	should-fix	episodes/multi-sample-integration.Rmd:123
+STIM cells	07	ep7_stim_cells	7451	exact	should-fix	episodes/multi-sample-integration.Rmd:123
+clusters after integration (episode 7 hardcodes 14 labels)	07	ep7_clusters_integrated	14	exact	should-fix	episodes/multi-sample-integration.Rmd:243,319-334
+cell types after annotation	07	ep7_n_celltypes	9	exact	should-fix	episodes/multi-sample-integration.Rmd:319-334
+top STIM vs CTRL CD14 Mono genes are ISGs (episode 7)	07	ep7_mono_top20	IFIT1,IFIT3,TNFSF10,RSAD2,IFIT2,MX1,CXCL10,LY6E,CXCL11,CCL8	atleast:5:IFIT1,IFIT3,TNFSF10,RSAD2,IFIT2,MX1,CXCL10,LY6E,CXCL11,CCL8	blocker	episodes/multi-sample-integration.Rmd:433-444
+Wilcoxon significant genes	08	ep8_wilcox_sig	759	rel:0.30	blocker	episodes/differential-expression.Rmd:161
+pseudobulk DESeq2 significant genes	08	ep8_pseudobulk_sig	1464	rel:0.30	blocker	episodes/differential-expression.Rmd:315
+top Wilcoxon genes are ISGs	08	ep8_wilcox_top20	IFIT1,IFIT3,TNFSF10,RSAD2,IFIT2,MX1,CXCL10,LY6E,CXCL11,CCL8	atleast:5:IFIT1,IFIT3,TNFSF10,RSAD2,IFIT2,MX1,CXCL10,LY6E,CXCL11,CCL8	blocker	episodes/differential-expression.Rmd:137-150
+core ISGs in the top DE genes	08	ep8_wilcox_top20+ep8_pseudo_top20	ISG15,IFIT1,IFIT3,IFI6,MX1	atleast:3:ISG15,IFIT1,IFIT3,IFI6,MX1	blocker	episodes/differential-expression.Rmd:137-150,291-302
+AggregateExpression returns a Seurat object	08	ep8_aggregate_class	Seurat	exact	should-fix	episodes/differential-expression.Rmd:233
+GO top 15: virus terms	08	ep8_go_top15	response to virus|defense response to virus	contains:response to virus|defense response to virus	blocker	episodes/differential-expression.Rmd:492-493
+GO top 15: type I interferon or defense response to virus	08	ep8_go_top15	type I interferon	contains_any:type I interferon|defense response to virus	blocker	episodes/differential-expression.Rmd:485,499-507
+GO top 15: type II interferon (go-dotplot fig.alt)	08	ep8_go_top15	type II interferon	contains:type II interferon	should-fix	episodes/differential-expression.Rmd:485
+KEGG top terms	08	ep8_kegg_top5	-	info	check	episodes/differential-expression.Rmd:511

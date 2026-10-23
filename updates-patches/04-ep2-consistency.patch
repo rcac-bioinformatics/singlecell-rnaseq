@@ -1,0 +1,70 @@
+[should-fix] Episode 2 internal inconsistencies:
+- raw-data-processing.Rmd:139-140 says four FASTQ files; the listing at :100-105 shows six (I1 included).
+- :288 says 30 to 60 minutes on 16 cores; the script requests 64 cores and the callout at :624 says ~7 h.
+  Replace with a pointer to the callout (round 3 updates the number from the Negishi run).
+- :300 parameter table says --localmem 64; the script at :276 uses 100.
+- :312-337 array example has no --partition and placeholder sample names; label it a template.
+- :498 STAR index "about 30 minutes on 16 cores"; the script requests 64.
+Apply: git apply updates-patches/04-ep2-consistency.patch
+
+--- a/episodes/raw-data-processing.Rmd
++++ b/episodes/raw-data-processing.Rmd
+@@ -136,8 +136,9 @@
+ └─────────────────────────── Sample name
+ ```
+ 
+-This dataset was sequenced across two lanes (L001, L002), producing four files
+-total: two lanes times two reads per lane.
++This dataset was sequenced across two lanes (L001, L002), producing six files:
++two lanes times three reads per lane. The `I1` files hold the sample index
++read, which `cellranger count` and STARsolo do not need for this dataset.
+ 
+ ### What is in each read?
+ 
+@@ -285,7 +286,9 @@
+ squeue -u ${USER} # or squeue --me
+ ```
+ 
+-The job typically takes 30--60 minutes on 16 cores, depending on cluster load.
++The job takes several hours on 64 cores (see the runtime comparison at the end
++of this episode). Submit it and move on: the next episode starts from a
++pre-computed copy of the same matrix.
+ 
+ ### Cell Ranger count parameters
+ 
+@@ -297,7 +300,7 @@
+ | `--create-bam` | `true` | Generate a BAM file with aligned reads. Starting with Cell Ranger v8, BAM output is off by default; set to `true` if you need the BAM for downstream tools such as velocyto or variant calling. |
+ | `--sample` | `pbmc_10k_v3` | The sample name prefix in the FASTQ file names. Cell Ranger selects files matching this prefix. |
+ | `--localcores` | `${SLURM_CPUS_ON_NODE}` | Number of CPU cores to use. We set this to match the SLURM allocation so Cell Ranger does not try to use more cores than allocated. |
+-| `--localmem` | `64` | Maximum memory (in GB) that Cell Ranger is allowed to use. |
++| `--localmem` | `100` | Maximum memory (in GB) that Cell Ranger is allowed to use. Keep it below the memory SLURM gives the job, which on Negishi follows the number of cores requested. |
+ 
+ :::::::::::::::::::::::::::::::::::::::: callout
+ 
+@@ -307,7 +310,8 @@
+ all to one `cellranger count` command?
+ 
+ **A:** No. `cellranger count` processes **one sample** per invocation. Use a
+-SLURM array job to run them in parallel:
++SLURM array job to run them in parallel. The template below is illustrative:
++replace the sample names with the prefixes of your own FASTQ files.
+ 
+ ```bash
+ #!/bin/bash
+@@ -317,6 +321,7 @@
+ #SBATCH --time=1-00:00:00
+ #SBATCH --job-name=cellranger
+ #SBATCH --account=workshop
++#SBATCH --partition=cpu
+ 
+ ml --force purge
+ ml biocontainers cellranger
+@@ -495,7 +500,7 @@
+ sbatch ${RCAC_SCRATCH}/scrna_workshop/build_star_index.sh
+ ```
+ 
+-This step requires approximately 32 GB of RAM and takes about 30 minutes on 16
++This step requires approximately 32 GB of RAM and takes about 30 minutes on 64
+ cores. The resulting index will be written to
+ `${RCAC_SCRATCH}/scrna_workshop/reference/star_index/`.
+ 

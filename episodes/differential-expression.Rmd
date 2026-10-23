@@ -65,6 +65,16 @@ work_dir <- paste0(
 setwd(work_dir)
 ```
 
+:::::::::::::::::::::::::::::::::::::::: callout
+
+## Starting here without the previous episode?
+
+Copy the saved objects from the workshop data first (`pbmc_annotated.rds` is
+used by the export section at the end):
+`file.copy(paste0(work_dir, c("rds/ifnb_annotated.rds", "rds/pbmc_annotated.rds")), work_dir)`
+
+:::::::::::::::::::::::::::::::::::::::
+
 ```{r load-data, eval=FALSE}
 ifnb <- readRDS(paste0(work_dir, "ifnb_annotated.rds"))
 Idents(ifnb) <- "celltype"
@@ -136,24 +146,24 @@ cat("Significant genes (padj < 0.05):", sum(mono.wilcox$p_val_adj < 0.05), "\n")
 
 ```{output}
         p_val avg_log2FC pct.1 pct.2 p_val_adj
-IFIT1       0   7.118    0.965 0.034         0
-IFIT3       0   6.737    0.971 0.057         0
-TNFSF10     0   6.322    0.959 0.062         0
-RSAD2       0   6.620    0.920 0.042         0
-IFIT2       0   6.894    0.909 0.040         0
-MX1         0   4.824    0.953 0.099         0
-CXCL10      0   7.975    0.873 0.032         0
-LY6E        0   4.255    0.990 0.174         0
-CXCL11      0   8.522    0.800 0.011         0
-CCL8        0   9.063    0.800 0.015         0
+IFIT1       0   7.173024 0.965 0.033         0
+IFIT3       0   6.798858 0.972 0.057         0
+TNFSF10     0   6.370735 0.959 0.061         0
+RSAD2       0   6.661976 0.920 0.041         0
+IFIT2       0   6.905053 0.909 0.039         0
+MX1         0   4.839203 0.953 0.099         0
+CXCL10      0   8.007812 0.873 0.031         0
+LY6E        0   4.263751 0.990 0.174         0
+CXCL11      0   8.576537 0.801 0.011         0
+OAS1        0   4.045792 0.915 0.131         0
 
 
-Significant genes (padj < 0.05): 765 
+Significant genes (padj < 0.05): 759 
 ```
 
-You should see approximately **765 significant genes** at padj < 0.05. The
+You should see approximately **759 significant genes** at padj < 0.05. The
 top genes include interferon-stimulated genes (IFIT1/2/3, RSAD2, MX1) and
-IFN-inducible chemokines (CXCL10, CXCL11, CCL8). But notice that the
+IFN-inducible chemokines (CXCL10, CXCL11). But notice that the
 p-values are extremely small (effectively zero). This is a symptom of per-cell
 testing with thousands of cells -- even modest differences become
 "significant."
@@ -289,24 +299,24 @@ cat("Significant genes (padj < 0.05):", sum(mono.pseudo$p_val_adj < 0.05, na.rm 
 ## Expected output
 
 ```{output}
-       p_val avg_log2FC pct.1 pct.2 p_val_adj
-ISG15      0   6.441088     1     1         0
-IFI6       0   3.705585     1     1         0
-IFI44L     0   3.374846     1     1         0
-GBP1       0   2.535916     1     1         0
-S100A8     0  -2.276587     1     1         0
-MNDA       0   2.661545     1     1         0
-RSAD2      0   5.839812     1     1         0
-TMSB10     0   1.655318     1     1         0
-VAMP5      0   2.977336     1     1         0
-SSB        0   2.470712     1     1         0
+        p_val avg_log2FC pct.1 pct.2 p_val_adj
+ISG15       0   6.452648     1     1         0
+IFI6        0   3.711404     1     1         0
+GBP1        0   2.539654     1     1         0
+S100A8      0  -2.281767     1     1         0
+RSAD2       0   5.865844     1     1         0
+TMSB10      0   1.657216     1     1         0
+VAMP5       0   2.982033     1     1         0
+SSB         0   2.471605     1     1         0
+PLSCR1      0   2.468085     1     1         0
+TNFSF10     0   5.819272     1     1         0
 
 
-Significant genes (p_val_adj < 0.05): 1455 
+Significant genes (padj < 0.05): 1464 
 ```
 
-The pseudobulk analysis identifies **1455 significant genes** -- more than
-the Wilcoxon test (765). This may seem surprising: we said pseudobulk is more
+The pseudobulk analysis identifies **1464 significant genes** -- more than
+the Wilcoxon test (759). This may seem surprising: we said pseudobulk is more
 conservative, so why does it find more? Because we used **pseudo-replicates**,
 not true biological replicates. The 3 random splits within each condition have
 very low within-group variance, giving DESeq2 high statistical power.
@@ -472,7 +482,7 @@ go_results <- enrichGO(gene = gene_ids$ENTREZID,
 
 Visualize the top enriched GO terms with a dot plot:
 
-```{r go-dotplot, eval=FALSE, fig.alt="Dot plot showing the top 15 enriched GO biological process terms for upregulated genes in stimulated monocytes. The top terms are response to virus, defense response to virus, viral process, and viral life cycle, with response to type I interferon and interferon-mediated signaling pathway appearing lower in the list."}
+```{r go-dotplot, eval=FALSE, fig.alt="Dot plot showing the top 15 enriched GO biological process terms for upregulated genes in stimulated monocytes. The top terms are response to virus, defense response to virus, viral process, and negative regulation of viral genome replication, with response to type II interferon and regulation of innate immune response further down the list."}
 dotplot(go_results, showCategory = 15) +
     ggtitle("GO Biological Process: STIM vs CTRL CD14+ Monocytes")
 ```
@@ -521,35 +531,42 @@ head(kegg_results, 5)
 ## Expected output
 
 ```{output}
-                   category               subcategory       ID                         Description GeneRatio
-hsa04621 Organismal Systems             Immune system hsa04621 NOD-like receptor signaling pathway    22/166
-hsa05168     Human Diseases Infectious disease: viral hsa05168    Herpes simplex virus 1 infection    17/166
-hsa05169     Human Diseases Infectious disease: viral hsa05169        Epstein-Barr virus infection    18/166
-hsa05164     Human Diseases Infectious disease: viral hsa05164                         Influenza A    16/166
-hsa04612 Organismal Systems             Immune system hsa04612 Antigen processing and presentation    11/166
-          BgRatio RichFactor FoldEnrichment    zScore       pvalue     p.adjust       qvalue
-hsa04621 187/9382 0.11764706       6.649185 10.472204 1.358486e-12 3.124518e-10 2.702672e-10
-hsa05168 180/9382 0.09444444       5.337818  7.886310 1.677668e-08 1.503560e-06 1.300562e-06
-hsa05169 205/9382 0.08780488       4.962562  7.698570 1.961165e-08 1.503560e-06 1.300562e-06
-hsa05164 173/9382 0.09248555       5.227105  7.531253 6.092210e-08 3.503021e-06 3.030073e-06
-hsa04612  82/9382 0.13414634       7.581693  8.033604 1.806443e-07 8.309640e-06 7.187743e-06
+                   category               subcategory       ID
+hsa04621 Organismal Systems             Immune system hsa04621
+hsa05168     Human Diseases Infectious disease: viral hsa05168
+hsa05164     Human Diseases Infectious disease: viral hsa05164
+hsa05169     Human Diseases Infectious disease: viral hsa05169
+hsa04612 Organismal Systems             Immune system hsa04612
+                                 Description GeneRatio  BgRatio RichFactor
+hsa04621 NOD-like receptor signaling pathway    22/166 187/9451 0.11764706
+hsa05168    Herpes simplex virus 1 infection    17/166 180/9451 0.09444444
+hsa05164                         Influenza A    16/166 173/9451 0.09248555
+hsa05169        Epstein-Barr virus infection    17/166 205/9451 0.08292683
+hsa04612 Antigen processing and presentation    11/166  82/9451 0.13414634
+         FoldEnrichment    zScore       pvalue     p.adjust       qvalue
+hsa04621       6.698086 10.522757 1.177304e-12 2.707800e-10 2.707800e-10
+hsa05168       5.377075  7.927494 1.508406e-08 1.734667e-06 1.734667e-06
+hsa05164       5.265548  7.570938 5.514350e-08 4.227668e-06 4.227668e-06
+hsa05169       4.721334  7.202407 1.039155e-07 5.975139e-06 5.975139e-06
+hsa04612       7.637452  8.071248 1.679829e-07 7.727211e-06 7.727211e-06
                                                                                                                         geneID
-hsa04621 4938/3665/115361/2633/4939/4940/6347/3428/115362/10616/7295/3320/6772/837/2635/79792/114769/3326/2634/834/10010/10628
-hsa05168                                 4938/3665/5610/64135/684/4939/4940/6347/3133/6890/6772/3107/8717/6672/29992/6892/3134
-hsa05169                              3627/4938/9636/3665/5610/4939/4940/3133/6890/6772/3107/4067/958/8717/9541/4616/6892/3134
-hsa05164                                       8743/91543/4599/3627/4938/4600/3665/5610/64135/4939/4940/6347/6772/8717/103/834
-hsa04612                                                                3303/3133/5721/6890/3320/3107/1520/3326/1514/6892/3134
+hsa04621 837/834/79792/115361/2634/3320/3326/10010/4939/6772/10628/3665/3428/114769/2635/7295/6347/10616/2633/4940/115362/4938
+hsa05168                                 5610/6672/4939/6772/3665/3133/29992/6892/684/6347/3107/6890/3134/4940/64135/4938/8717
+hsa05164                                       834/91543/5610/103/4939/6772/4599/3665/4600/3627/8743/6347/4940/64135/4938/8717
+hsa05169                                   4616/5610/4067/4939/6772/3665/3133/9636/6892/958/3627/3107/6890/3134/4940/4938/8717
+hsa04612                                                                5721/3320/3326/3133/3303/1514/6892/3107/6890/3134/1520
          Count
 hsa04621    22
 hsa05168    17
-hsa05169    18
 hsa05164    16
+hsa05169    17
 hsa04612    11
 ```
 
-Top KEGG pathways should include entries like "Influenza A", "Hepatitis C",
-"RIG-I-like receptor signaling pathway", and "NOD-like receptor signaling
-pathway" -- all pathways involving the interferon/antiviral response.
+The top KEGG pathways are "NOD-like receptor signaling pathway", "Herpes
+simplex virus 1 infection", "Influenza A", "Epstein-Barr virus infection" and
+"Antigen processing and presentation" -- all involving the interferon and
+antiviral response.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -561,18 +578,21 @@ support reproducibility, sharing, and downstream use.
 ### Save the annotated Seurat object
 
 ```{r save-rds, eval=FALSE}
-saveRDS(ifnb, file = paste0(work_dir, "ifnb_annotated.rds"))
+saveRDS(ifnb, file = paste0(work_dir, "ifnb_de.rds"))
 ```
 
 ### Export the count matrix and metadata
 
 For the PBMC 10k dataset from earlier episodes, you can export the raw counts
-and metadata as CSV files:
+and metadata as CSV files. First load the annotated object saved in the cell
+type annotation episode:
 
 ```{r export-csv, eval=FALSE}
+pbmc <- readRDS(paste0(work_dir, "pbmc_annotated.rds"))
+
 # Export raw count matrix (warning: can be large for big datasets)
 counts_matrix <- GetAssayData(pbmc, layer = "counts")
-writeMM(counts_matrix, file = "counts.mtx")
+Matrix::writeMM(counts_matrix, file = "counts.mtx")
 
 # Export metadata
 write.csv(pbmc@meta.data, file = "metadata.csv", quote = FALSE)
@@ -582,26 +602,44 @@ write.csv(data.frame(gene = rownames(pbmc)), file = "features.csv",
           row.names = FALSE, quote = FALSE)
 ```
 
-For smaller datasets, you can export as a dense CSV:
+A dense CSV stores every zero, so keep it to small datasets or a subset of
+cells. Here, the first 500 cells:
 
 ```{r export-dense, eval=FALSE}
-write.csv(as.matrix(GetAssayData(pbmc, layer = "counts")),
-          file = "counts_dense.csv")
+write.csv(as.matrix(GetAssayData(pbmc, layer = "counts")[, 1:500]),
+          file = "counts_dense_500cells.csv")
 ```
 
 ### Format conversion for Python users
 
-If collaborators use the Python/Scanpy ecosystem, you can convert your Seurat
-object to AnnData format using the `sceasy` package:
+If collaborators use the Python/Scanpy ecosystem, you can write your Seurat
+object as an AnnData `.h5ad` file with the Bioconductor package `anndataR`.
+It writes the file directly from R, so no Python installation is needed:
 
 ```{r convert-anndata, eval=FALSE}
-# Install sceasy if needed: remotes::install_github("cellgeni/sceasy")
-library(sceasy)
-sceasy::convertFormat(pbmc,
-                      from = "seurat",
-                      to = "anndata",
-                      outFile = "pbmc_annotated.h5ad")
+# Install anndataR if needed: BiocManager::install("anndataR")
+library(anndataR)
+write_h5ad(pbmc, "pbmc_annotated.h5ad", mode = "w")  # "w" overwrites an earlier export
 ```
+
+The counts, normalized data, cell metadata and the PCA and UMAP embeddings
+are all carried over. Three warnings are expected. One says the `scale.data`
+layer is skipped "with unexpected dimensions": it holds only the 2,000
+variable genes, an AnnData layer must cover every gene, and scaled values are
+easy to recompute in Python. Two say that matrix column names "cannot be
+written": AnnData stores embeddings without column names. To read the file
+in Python, collaborators need a recent `anndata` (0.13 reads it; 0.10 does
+not).
+
+::::::::::::::::::::::::::::::::::::: callout
+
+## Why not sceasy?
+
+Older tutorials use `sceasy::convertFormat()`. Its latest version (0.0.7)
+calls `GetAssayData(slot = ...)`, which SeuratObject 5 no longer accepts, so
+it stops with an error on Seurat v5 objects.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
 
 ### GEO submission
 
@@ -685,8 +723,8 @@ Which method gives more conservative results? Why?
 
 You should find that:
 
-- **Wilcoxon** identifies 765 significant genes
-- **Pseudobulk** identifies 1455 (with pseudo-replicates)
+- **Wilcoxon** identifies 759 significant genes
+- **Pseudobulk** identifies 1464 (with pseudo-replicates)
 
 Pseudobulk finds **more** significant genes here, which may seem to contradict
 the usual advice that pseudobulk is more conservative. The reason: our

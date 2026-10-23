@@ -1,0 +1,52 @@
+[blocker] Episode 8 export blocks use `pbmc`, which Episode 8 never creates (it works on ifnb):
+differential-expression.Rmd:574-603 (export-csv, export-dense, convert-anndata). writeMM() is from Matrix,
+which is not attached (verified locally: exists("writeMM") is FALSE after the episode's setup chunk).
+[should-fix] save-rds (:564) overwrites ifnb_annotated.rds, the Episode 7 to 8 handoff file and the name of
+the staged rds/ copy; save under a new name.
+[should-fix] export-dense writes a dense 29,155 x 11,310 CSV (about 330 million values); limit it to a few
+hundred cells as the prose ("for smaller datasets") intends.
+Apply: git apply updates-patches/03-ep8-exports.patch
+
+--- a/episodes/differential-expression.Rmd
++++ b/episodes/differential-expression.Rmd
+@@ -561,18 +561,21 @@
+ ### Save the annotated Seurat object
+ 
+ ```{r save-rds, eval=FALSE}
+-saveRDS(ifnb, file = paste0(work_dir, "ifnb_annotated.rds"))
++saveRDS(ifnb, file = paste0(work_dir, "ifnb_de.rds"))
+ ```
+ 
+ ### Export the count matrix and metadata
+ 
+ For the PBMC 10k dataset from earlier episodes, you can export the raw counts
+-and metadata as CSV files:
++and metadata as CSV files. First load the annotated object saved in the cell
++type annotation episode:
+ 
+ ```{r export-csv, eval=FALSE}
++pbmc <- readRDS(paste0(work_dir, "pbmc_annotated.rds"))
++
+ # Export raw count matrix (warning: can be large for big datasets)
+ counts_matrix <- GetAssayData(pbmc, layer = "counts")
+-writeMM(counts_matrix, file = "counts.mtx")
++Matrix::writeMM(counts_matrix, file = "counts.mtx")
+ 
+ # Export metadata
+ write.csv(pbmc@meta.data, file = "metadata.csv", quote = FALSE)
+@@ -582,11 +585,12 @@
+           row.names = FALSE, quote = FALSE)
+ ```
+ 
+-For smaller datasets, you can export as a dense CSV:
++A dense CSV stores every zero, so keep it to small datasets or a subset of
++cells. Here, the first 500 cells:
+ 
+ ```{r export-dense, eval=FALSE}
+-write.csv(as.matrix(GetAssayData(pbmc, layer = "counts")),
+-          file = "counts_dense.csv")
++write.csv(as.matrix(GetAssayData(pbmc, layer = "counts")[, 1:500]),
++          file = "counts_dense_500cells.csv")
+ ```
+ 
+ ### Format conversion for Python users

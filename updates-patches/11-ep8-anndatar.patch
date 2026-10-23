@@ -1,0 +1,43 @@
+--- a/episodes/differential-expression.Rmd	2026-10-21 13:56:35.386729037 -0500
++++ b/episodes/differential-expression.Rmd	2026-10-21 13:56:35.390729060 -0500
+@@ -595,18 +595,32 @@
+ 
+ ### Format conversion for Python users
+ 
+-If collaborators use the Python/Scanpy ecosystem, you can convert your Seurat
+-object to AnnData format using the `sceasy` package:
++If collaborators use the Python/Scanpy ecosystem, you can write your Seurat
++object as an AnnData `.h5ad` file with the Bioconductor package `anndataR`.
++It writes the file directly from R, so no Python installation is needed:
+ 
+ ```{r convert-anndata, eval=FALSE}
+-# Install sceasy if needed: remotes::install_github("cellgeni/sceasy")
+-library(sceasy)
+-sceasy::convertFormat(pbmc,
+-                      from = "seurat",
+-                      to = "anndata",
+-                      outFile = "pbmc_annotated.h5ad")
++# Install anndataR if needed: BiocManager::install("anndataR")
++library(anndataR)
++write_h5ad(pbmc, "pbmc_annotated.h5ad")
+ ```
+ 
++The counts, normalized data, cell metadata and the PCA and UMAP embeddings
++are all carried over. Warnings that matrix column names "cannot be written"
++are expected: AnnData stores embeddings without column names. To read the file
++in Python, collaborators need a recent `anndata` (0.13 reads it; 0.10 does
++not).
++
++::::::::::::::::::::::::::::::::::::: callout
++
++## Why not sceasy?
++
++Older tutorials use `sceasy::convertFormat()`. Its latest version (0.0.7)
++calls `GetAssayData(slot = ...)`, which SeuratObject 5 no longer accepts, so
++it stops with an error on Seurat v5 objects.
++
++::::::::::::::::::::::::::::::::::::::::::::::::
++
+ ### GEO submission
+ 
+ For submitting data to NCBI GEO, you typically need:

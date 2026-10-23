@@ -60,6 +60,15 @@ work_dir <- paste0(
 setwd(work_dir)
 ```
 
+:::::::::::::::::::::::::::::::::::::::: callout
+
+## Starting here without the previous episode?
+
+Copy the saved object from the workshop data first:
+`file.copy(paste0(work_dir, "rds/pbmc_filtered.rds"), work_dir)`
+
+:::::::::::::::::::::::::::::::::::::::
+
 ```{r load-data, eval=FALSE}
 pbmc <- readRDS(paste0(work_dir, "pbmc_filtered.rds"))
 pbmc
@@ -469,6 +478,17 @@ However, SCTransform is the preferred method for most production analyses.
 
 Run both normalization approaches on the same filtered dataset and compare the
 top 20 variable features from each method. How many genes appear in both lists?
+
+This challenge is self-paced. SCTransform on the whole dataset needs about 15 GB
+of memory, so run it in an RStudio session with 12 or more cores (the workshop
+sessions have 8; start a new one for this). In the new session, reload the
+object you saved above:
+
+```r
+library(Seurat)
+work_dir <- paste0("/scratch/negishi/", Sys.getenv("USER"), "/scrna_workshop/")
+pbmc <- readRDS(paste0(work_dir, "pbmc_normalized.rds"))
+```
 
 ```{r challenge1, eval=FALSE}
 # LogNormalize pathway (already done above)

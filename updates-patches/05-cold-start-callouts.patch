@@ -1,0 +1,88 @@
+[should-fix] No episode tells a learner who fell behind how to use the staged rds/ copies. setup.md:144
+says rds/ is "for jumping into later episodes", but readRDS(paste0(work_dir, "<name>.rds")) reads
+scrna_workshop/<name>.rds while the rsync puts the copies in scrna_workshop/rds/<name>.rds, so a cold
+start fails with "cannot open compressed file". Add a short callout before each load-data chunk of
+Episodes 4, 5, 6 and 8 (Episode 7 starts from SeuratData). Episode 8 copies pbmc_annotated.rds too (its export chunks read it since patch 03; added 2026-10-22).
+Apply: git apply updates-patches/05-cold-start-callouts.patch
+
+diff --git a/episodes/cell-type-annotation.Rmd b/episodes/cell-type-annotation.Rmd
+index 28ba174..d1d082b 100644
+--- a/episodes/cell-type-annotation.Rmd
++++ b/episodes/cell-type-annotation.Rmd
+@@ -64,6 +64,15 @@ work_dir <- paste0(
+ setwd(work_dir)
+ ```
+ 
++:::::::::::::::::::::::::::::::::::::::: callout
++
++## Starting here without the previous episode?
++
++Copy the saved object from the workshop data first:
++`file.copy(paste0(work_dir, "rds/pbmc_clustered.rds"), work_dir)`
++
++:::::::::::::::::::::::::::::::::::::::
++
+ ```{r load-data, eval=FALSE}
+ pbmc <- readRDS(paste0(work_dir, "pbmc_clustered.rds"))
+ Idents(pbmc) <- "RNA_snn_res.0.5"
+diff --git a/episodes/differential-expression.Rmd b/episodes/differential-expression.Rmd
+index 7a34354..08d1b83 100644
+--- a/episodes/differential-expression.Rmd
++++ b/episodes/differential-expression.Rmd
+@@ -65,6 +65,16 @@ work_dir <- paste0(
+ setwd(work_dir)
+ ```
+ 
++:::::::::::::::::::::::::::::::::::::::: callout
++
++## Starting here without the previous episode?
++
++Copy the saved objects from the workshop data first (`pbmc_annotated.rds` is
++used by the export section at the end):
++`file.copy(paste0(work_dir, c("rds/ifnb_annotated.rds", "rds/pbmc_annotated.rds")), work_dir)`
++
++:::::::::::::::::::::::::::::::::::::::
++
+ ```{r load-data, eval=FALSE}
+ ifnb <- readRDS(paste0(work_dir, "ifnb_annotated.rds"))
+ Idents(ifnb) <- "celltype"
+diff --git a/episodes/dimensionality-reduction-clustering.Rmd b/episodes/dimensionality-reduction-clustering.Rmd
+index 5748f6c..576e619 100644
+--- a/episodes/dimensionality-reduction-clustering.Rmd
++++ b/episodes/dimensionality-reduction-clustering.Rmd
+@@ -63,6 +63,15 @@ work_dir <- paste0(
+ setwd(work_dir)
+ ```
+ 
++:::::::::::::::::::::::::::::::::::::::: callout
++
++## Starting here without the previous episode?
++
++Copy the saved object from the workshop data first:
++`file.copy(paste0(work_dir, "rds/pbmc_normalized.rds"), work_dir)`
++
++:::::::::::::::::::::::::::::::::::::::
++
+ ```{r load-data, eval=FALSE}
+ pbmc <- readRDS(paste0(work_dir, "pbmc_normalized.rds"))
+ pbmc
+diff --git a/episodes/normalization-and-features.Rmd b/episodes/normalization-and-features.Rmd
+index 0ba2a1c..cca0dd1 100644
+--- a/episodes/normalization-and-features.Rmd
++++ b/episodes/normalization-and-features.Rmd
+@@ -60,6 +60,15 @@ work_dir <- paste0(
+ setwd(work_dir)
+ ```
+ 
++:::::::::::::::::::::::::::::::::::::::: callout
++
++## Starting here without the previous episode?
++
++Copy the saved object from the workshop data first:
++`file.copy(paste0(work_dir, "rds/pbmc_filtered.rds"), work_dir)`
++
++:::::::::::::::::::::::::::::::::::::::
++
+ ```{r load-data, eval=FALSE}
+ pbmc <- readRDS(paste0(work_dir, "pbmc_filtered.rds"))
+ pbmc

@@ -1,0 +1,20 @@
+--- a/episodes/raw-data-processing.Rmd	2026-10-19 12:06:26.875658251 -0500
++++ b/episodes/raw-data-processing.Rmd	2026-10-19 12:06:26.879658240 -0500
+@@ -261,7 +261,7 @@
+ # Load modules
+ ml --force purge
+ ml biocontainers
+-ml cellranger
++ml cellranger/10.0.0
+ 
+ # Move to the output directory
+ cd ${RCAC_SCRATCH}/scrna_workshop/cellranger_output
+@@ -324,7 +324,7 @@
+ #SBATCH --partition=cpu
+ 
+ ml --force purge
+-ml biocontainers cellranger
++ml biocontainers cellranger/10.0.0
+ 
+ SAMPLES=(WT_rep1 WT_rep2 KO_rep1 KO_rep2)
+ SAMPLE=${SAMPLES[$SLURM_ARRAY_TASK_ID]}

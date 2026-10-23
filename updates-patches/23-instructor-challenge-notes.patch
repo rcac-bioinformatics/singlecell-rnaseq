@@ -1,0 +1,109 @@
+diff --git a/instructors/instructor-notes.md b/instructors/instructor-notes.md
+index ba6e8b7..dd0faaa 100644
+--- a/instructors/instructor-notes.md
++++ b/instructors/instructor-notes.md
+@@ -185,18 +185,18 @@ aggressive filtering removes more noise but may also remove real cells
+ most at risk from a low nFeature_RNA threshold?"
+ 
+ **Challenge 2 -- Aggressive Mitochondrial Filtering:**
+-With percent.mt < 5, roughly 35--40% of cells are removed because the median
+-mitochondrial percentage is ~5.5%. This disproportionately removes metabolically
++With percent.mt < 5, only 2,709 cells remain against 9,874 at < 15, a loss of
++over 72%, because the median mitochondrial percentage is about 5.8%. This disproportionately removes metabolically
+ active immune cells (monocytes, activated T cells). Use this to reinforce that
+ thresholds must be tuned to the specific tissue and dataset.
+ 
+ ### Episode 4: Normalization and Feature Selection
+ 
+ **Challenge 1 -- LogNormalize vs. SCTransform Variable Features:**
+-Expect ~60--70% overlap in the top 20 variable features. The shared genes
+-(S100A9, LYZ, GNLY, NKG7, IGKC) are strong cell-type markers that any
+-reasonable method will identify. The differences are in moderately variable
+-genes where the two variance estimation approaches disagree. Emphasize that
++Expect 7 of 20 shared (PPBP, PF4, GP1BB, IGKC, GNLY, LINGO2, CAVIN2). The
++LogNormalize list leans to sparse, low-expressed genes (LINC01478, PTGDS,
++SOX5), the SCTransform list to strongly expressed markers (S100A9, S100A8,
++LYZ, NKG7). This challenge is self-paced and needs 12 or more cores. Emphasize that
+ downstream clustering is typically robust to these differences.
+ 
+ **Challenge 2 -- Housekeeping vs. Variable Gene Behavior:**
+@@ -211,9 +211,9 @@ normalization (remove technical variation) and variable feature selection
+ **Challenge 1 -- Choosing a Resolution with Clustree:**
+ Guide learners through reading the clustree plot. Stable splits (clean
+ branching) suggest real biology; unstable splits (cells scattering across
+-multiple clusters) suggest over-splitting. Resolution 0.5 typically gives
+-9--11 clusters matching the ~8 major PBMC types. Resolution 0.2 under-clusters
+-(merges T cell subtypes), while 1.2 over-splits.
++multiple clusters) suggest over-splitting. Resolutions 0.2, 0.5, 0.8 and 1.2
++give 16, 18, 21 and 25 clusters. The workshop uses 0.5 (18 clusters, which
++episode 6 merges into 10 cell types); 1.2 over-splits.
+ 
+ **Challenge 2 -- Mapping Markers to Clusters:**
+ This is a preview of Episode 6. Learners should identify that CD3D marks
+@@ -225,28 +225,34 @@ in all T cell subtypes, which are resolved into separate clusters.
+ ### Episode 6: Cell Type Annotation
+ 
+ **Challenge 1 -- Identifying a T Cell Subtype:**
+-The pattern SELL-high, CCR7-high, CD69-low identifies naive T cells. Use this
+-to discuss the concept of marker combinations: no single gene is sufficient for
+-subtype identification. Ask learners what markers would distinguish effector
+-memory T cells (SELL-low, CCR7-low, possibly CD69-high).
++CD3D and IL7R are expressed in almost every CD4 T cell, but SELL (69%) and
++CCR7 (55%) only in part of the group: it mixes naive and central memory cells
++(SELL+ CCR7+) with effector memory cells (SELL- CCR7-). CD69 is expressed in
++about 90% of T, B and NK cells alike, so it does not mark activated cells here
++(it is also induced during sample processing). Use this to discuss marker
++combinations and checking that a marker is specific before trusting it.
+ 
+ **Challenge 2 -- Comparing Two SingleR References:**
+ Monaco Immune works better for PBMCs because it was built from sorted immune
+-populations. HPCA may assign non-immune labels (e.g., "Tissue_stem_cells")
+-because its reference includes non-immune cell types. Discuss the importance
++populations. The two agree on B cells, monocytes, NK and T cells, but HPCA
++cannot split T cells into CD4 and CD8, calls most Monaco dendritic cells
++"Monocyte", and labels Monaco's progenitors mostly "Platelets", with a few
++bone-marrow classes (CMP, GMP, MEP, HSC). Discuss the importance
+ of choosing a reference appropriate for your tissue type.
+ 
+ ### Episode 7: Multi-Sample Integration
+ 
+ **Challenge 1 -- Quantifying Integration Quality:**
+-The proportion table should show ~45--55% per condition within each cell type.
++The proportion table shows 43--57% per condition within each cell type
++(CD14 Mono 50.3/49.7).
+ If a cell type is heavily skewed (e.g., 90% from one condition), it could be a
+ condition-specific population or a sign of incomplete integration. Ask: "What
+ would it mean if a cluster was 95% STIM cells?" It could represent a
+ stimulation-induced cell state that does not exist in control.
+ 
+ **Challenge 2 -- Interferon Response Genes:**
+-All top 10 DE genes should be ISGs (IFIT1, ISG15, IFI6, MX1, etc.). Use this
++The top 10 are led by IFN-inducible chemokines (CCL8, CXCL11, CXCL10) and
++HESX1, followed by ISGs (IFIT1, IFIT2, IFIT3, RSAD2). Use this
+ to validate the integration: if the biological signal was lost during
+ integration, these genes would not be differentially expressed. This challenge
+ connects back to the biology -- IFN-beta activates the JAK-STAT pathway, which
+@@ -255,15 +261,18 @@ induces ISG transcription.
+ ### Episode 8: Differential Expression Analysis
+ 
+ **Challenge 1 -- Wilcoxon vs. Pseudobulk:**
+-Wilcoxon identifies thousands of significant genes; pseudobulk identifies
+-hundreds. The key teaching point is pseudoreplication: per-cell tests treat
+-each cell as independent (n = 4,000) when the true sample size is n = 2.
++Wilcoxon finds 759 significant genes and pseudobulk 1,464 (Negishi). Pseudobulk
++finds more here only because the episode builds artificial pseudo-replicates
++from one sample per condition; the episode explains this. The key teaching
++point is still pseudoreplication: per-cell tests treat each cell as an
++independent sample.
+ Discuss when per-cell tests are acceptable (single-sample, exploratory) vs.
+ when pseudobulk is required (multi-sample, publication).
+ 
+ **Challenge 2 -- GO Enrichment:**
+-Top GO terms should all relate to interferon/antiviral response: "defense
+-response to virus", "type I interferon signaling pathway", "response to virus".
++Top GO terms all relate to the antiviral response: "response to virus",
++"defense response to virus", "regulation of viral process". No type I
++interferon term reaches the top (patch 18).
+ Use this as the capstone: the full pipeline (from raw data through integration
+ and DE) correctly identifies the expected biology. Ask learners to think about
+ what GO terms they would expect for their own research questions.
