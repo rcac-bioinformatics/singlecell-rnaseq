@@ -94,6 +94,8 @@ Start with `SUMMARY.md`. It covers:
 
 `submit_all.sh --run ID [--only all|shell|r|cold] [--from STEP] [--force] [--dry-run]`
 
+`submit_all.sh --run ID --step STEP [--dry-run]` reruns that one step, even if it is done, and nothing else (for example `--step 02-prep` after an episode 2 text change).
+
 - **Reruns are safe.** A step that already finished in this run is skipped: its marker says PASS or WARN, or, for a learner script, its outputs exist. `--force` reruns it. `submit_all.sh` refuses while jobs from an earlier submission of the same run are still queued.
 - **A failed step cancels its dependents** (`--kill-on-invalid-dep=yes`). The logs are:
   - `runs/ID/logs/<step>.<jobid>.out`;

@@ -11,7 +11,7 @@ Front matter totals 445 min; the day in `learners/setup.md` allows about 325 min
 | 1 Introduction | 30 | 20 min | Technology comparison detail |
 | 2 Raw data processing | 60 | 35 min, write and `sbatch --test-only`; instructor shows a pre-run (patch 20) | Running the jobs for real (submitted at 16:05 as follow-up); both challenges |
 | 3 Quality control | 60 | 55 min (10 min from episode 2, patch 20) | Challenge 2 (aggressive mt filtering) |
-| 4 Normalization and features | 55 | 50 min | SCTransform comparison (challenge 1; needs 8 or more cores, patch 20) |
+| 4 Normalization and features | 55 | 50 min | SCTransform comparison (challenge 1; needs 12 or more cores, patch 20) |
 | 5 Dim reduction and clustering | 60 | 45 min | Clustree walkthrough shortened; challenge 2 |
 | 6 Cell type annotation | 60 | 45 min | HPCA vs Monaco comparison (challenge 2) |
 | 7 Multi-sample integration | 60 | 40 min | Alternative integration methods; challenge 1 |
@@ -151,17 +151,6 @@ Run `/scratch/negishi/aseethar/scrna-kit/runs/2026-10-21`, episodes as of commit
 - `[should-fix]` kit (fixed 2026-10-23): `c08` FAILED (job 44580367). Its anchors all pass (759, 1,464, GO and KEGG terms), but `export-csv` stopped with `cannot open compressed file '.../cold/08/scratch/scrna_workshop/pbmc_annotated.rds'`, and `export-dense` and `convert-anndata` failed after it with `object 'pbmc' not found`. The cause is the kit, not the episode. `kit_cold_seed` (`negishi-run/lib.sh`) hardcoded one RDS per episode and gave `c08` only `ifnb_annotated.rds`, while episode 8 (since patch 03) and its patch 05 callout also read `pbmc_annotated.rds`. Fix: `build_kit.py` derives the cold seed from each episode's `readRDS()` minus `saveRDS()` names, writes `generated/cold_seed.tsv`, and stops if a seed file is not a staged `rds/` file. `kit_cold_seed` copies that list. A mutation test was added. Confirmed 2026-10-23 (`c08` 44601306 PASS, collected 08:53): the seed held `ifnb_annotated.rds` and `pbmc_annotated.rds` (plus `ifnb_de.rds` left over from the failed job, which the episode rewrites), with no chunk errors, and all 56 anchors pass. The kit's cold pass is now fully green.
 - `redraw_figures.sh --run 2026-10-21` on Negishi: the three `ep6_*` figures are byte-identical to the committed files. `ep7_challenge2.png` is not, because its UMAP layout differs: the local pre-screen's `ifnb_annotated.rds` embeds the same clusters in a rotated layout. The genes, the row order and the CTRL versus STIM pattern are the same, and the alt text and FIGURE_DESCRIPTIONS describe no layout. The committed file is replaced with the Negishi redraw (`r07` 44579914), which is what learners will see.
 - Staged manifest frozen: `make_staged_manifest.py` on the verified copy (`check_staged.sh` full, 0 problems) is committed as `negishi-run/staged_manifest.tsv`, with sizes and md5 for all 21 files. `README.txt` md5 matches `negishi-run/staged-top/README.txt` (2,782 bytes), so the republished README is the kit copy.
-- `[should-fix]` `instructors/instructor-notes.md` challenge discussion points contradict the episodes' solutions and the Negishi run:
-  - ep3 C2 says 35 to 40 percent removed; the solution and Negishi say over 72 percent (2,709 vs 9,874).
-  - ep4 C1 says 60 to 70 percent overlap with S100A9, LYZ and NKG7 shared; the actual overlap is 7 of 20, and those three are not among them.
-  - ep5 C1 says 9 to 11 clusters at 0.5; the actual count is 18.
-  - ep6 C1 says "CD69-low naive"; CD69 is about 90 percent everywhere (patch 15).
-  - ep6 C2 mentions "Tissue_stem_cells"; HPCA gives no such label here.
-  - ep7 C2 says "all top 10 are ISGs"; chemokines and HESX1 lead.
-  - ep8 C1 says "Wilcoxon thousands, pseudobulk hundreds"; it is 759 vs 1,464.
-  - ep8 C2 names a type I interferon term, which is absent.
-  
-  Proposed fix: `updates-patches/23-instructor-challenge-notes.patch` (checked with `git apply --check`, not applied).
 
 ## Runtime record
 
@@ -203,19 +192,31 @@ Non-blocking improvements worth doing before the next delivery cycle (the tentat
 
 ## Done
 
-### 2026-10-23: patches 20 to 22 applied (branch prep-2026-10-29); applied
+### 2026-10-23: patches 20 to 23 applied (branch prep-2026-10-29); applied
 
+- `[should-fix]` `instructors/instructor-notes.md` challenge discussion points contradict the episodes' solutions and the Negishi run:
+  - ep3 C2 says 35 to 40 percent removed; the solution and Negishi say over 72 percent (2,709 vs 9,874).
+  - ep4 C1 says 60 to 70 percent overlap with S100A9, LYZ and NKG7 shared; the actual overlap is 7 of 20, and those three are not among them.
+  - ep5 C1 says 9 to 11 clusters at 0.5; the actual count is 18.
+  - ep6 C1 says "CD69-low naive"; CD69 is about 90 percent everywhere (patch 15).
+  - ep6 C2 mentions "Tissue_stem_cells"; HPCA gives no such label here.
+  - ep7 C2 says "all top 10 are ISGs"; chemokines and HESX1 lead.
+  - ep8 C1 says "Wilcoxon thousands, pseudobulk hundreds"; it is 759 vs 1,464.
+  - ep8 C2 names a type I interferon term, which is absent.
+  
+  Fix: `updates-patches/23-instructor-challenge-notes.patch`. Applied 2026-10-23 (Arun approved), with the episode 4 note at 12 cores.
 - `[blocker]` delivery capacity (decided by Arun 2026-10-23): the learner account `rcac-rnaseq` has 192 priority cores for about 20 learners. Standby is limited to 4 cores (8 GB, too little for episodes 6 and 8) and 4 hours. Each learner's episode 2 scripts ask for 64 cores (Cell Ranger 5.5 h, 75 GB), so 20 live submissions would sit pending behind the RStudio sessions, then run three at a time for about 37 h. Fix: `updates-patches/20-ep2-test-only-ood-settings.patch`.
   - **Episode 2:** learners write the three scripts and check each with `sbatch --test-only` (expected output from the Negishi preflight). The instructor shows a pre-run. The real `sbatch` blocks stay unchanged, under "After the workshop: run it for real" (close RStudio first; the job may pend a day or more). "Comparing Outputs" says the instructor shows the numbers in class. The objectives are updated, and the keypoint gains `--test-only`.
   - **Live schedule:** episode 2 drops to 35 min (9:20 to 9:55), the break moves to 9:55 to 10:10, and episode 3 gets 55 min (10:10 to 11:05). Q&A at 16:05 includes the follow-up submission. The front matter `teaching`/`exercises` are unchanged, because they describe the full lesson, not the live day.
   - **Kit:** the three `--test-only` blocks run in `02-prep`; the kit's real submissions are unchanged.
+  - **Kit:** `submit_all.sh --step STEP` reruns exactly one step, even if it is done (test added), so `--step 02-prep` checks the new login-node commands without resubmitting the 64-core jobs.
 - `[should-fix]` `learners/setup.md` OOD table (patch 20; supersedes the open entry above):
   - Values: account `rcac-rnaseq`, 8 cores, 8 h, `R 4.6.1 / Bioconductor 3.23 (recommended)`, and a new row "Load extra RCAC site library (advanced): checked".
   - A paragraph on memory (2 GB per core) and why the box must stay checked.
   - New alt texts for both screenshots (Arun retakes the images).
   - New "Step 5: Restart R at the start of each episode", with a matching note in `instructors/instructor-notes.md` (new "Delivery on Negishi" section: OOD settings, restart, measured peaks, the episode 2 flow).
 - `[should-fix]` `learners/setup.md` local install list (patch 20): it named `tidyverse` and omitted packages the episodes need (clustree, metap, multtest, glmGamPoi, DESeq2, presto, anndataR). It now follows `negishi-run/generated/r_packages.tsv`.
-- `[should-fix]` episode 4 challenge 1 (patch 20): SCTransform v2 on the whole object peaks at 14.1 GiB (Negishi 2026-10-23), against about 14.9 GiB at 8 cores. The challenge now says it is self-paced, needs about 15 GB and 8 or more cores, and shows how to restart R and reload `pbmc_normalized.rds` (saved just above).
+- `[should-fix]` episode 4 challenge 1 (patch 20): SCTransform v2 on the whole object peaks at 14.1 GiB (Negishi 2026-10-23), against about 14.9 GiB at 8 cores. 2026-10-23 (Arun): raised to 12 or more cores in a new session, which gives about 22 GiB. The challenge now says it is self-paced, needs about 15 GB and 8 or more cores, and shows how to restart R and reload `pbmc_normalized.rds` (saved just above).
 - `[nice]` episode 2 keypoint said STARsolo is "approximately 9x faster", against "roughly 7x" in the runtime callout since patch 16. Fixed in patch 20.
 - `[nice]` `instructors/instructor-notes.md` pre-workshop checklist (patch 21, `updates-patches/21-instructor-checklist-anndatar-warnings.patch`):
   - It listed sceasy. It now lists anndataR and the other packages the episodes need (presto, metap, multtest, glmGamPoi, DESeq2), saying they come from the image or the extra site library.

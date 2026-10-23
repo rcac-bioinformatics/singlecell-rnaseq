@@ -480,9 +480,9 @@ Run both normalization approaches on the same filtered dataset and compare the
 top 20 variable features from each method. How many genes appear in both lists?
 
 This challenge is self-paced. SCTransform on the whole dataset needs about 15 GB
-of memory, so run it in a session with 8 or more cores. If your session already
-holds other large objects, restart R first (**Session > Restart R**) and reload
-the object you saved above:
+of memory, so run it in an RStudio session with 12 or more cores (the workshop
+sessions have 8; start a new one for this). In the new session, reload the
+object you saved above:
 
 ```r
 library(Seurat)

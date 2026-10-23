@@ -23,7 +23,7 @@ index ba6e8b7..dd0faaa 100644
 +Expect 7 of 20 shared (PPBP, PF4, GP1BB, IGKC, GNLY, LINGO2, CAVIN2). The
 +LogNormalize list leans to sparse, low-expressed genes (LINC01478, PTGDS,
 +SOX5), the SCTransform list to strongly expressed markers (S100A9, S100A8,
-+LYZ, NKG7). This challenge is self-paced and needs 8 or more cores. Emphasize that
++LYZ, NKG7). This challenge is self-paced and needs 12 or more cores. Emphasize that
  downstream clustering is typically robust to these differences.
  
  **Challenge 2 -- Housekeeping vs. Variable Gene Behavior:**

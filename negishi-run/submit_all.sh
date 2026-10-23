@@ -3,10 +3,12 @@
 # step 02-prep runs the episode 2 login-node commands first, as learners do).
 # Usage:
 #   bash submit_all.sh --run RUN_ID [--only all|shell|r|cold] [--from STEP] [--force] [--dry-run]
+#   bash submit_all.sh --run RUN_ID --step STEP [--dry-run]
 # Steps and dependencies come from generated/steps.tsv (built from the episodes). A step that is
 # already done in this run (marker, or outputs for the learner's own scripts) is skipped unless
 # --force; --from STEP skips everything before STEP in the table. Job IDs go to $RUN/jobs.tsv.
 # --only shell: episode 2; r: env-egress and the continuous R chain; cold: the cold pass.
+# --step STEP runs or submits that one step again (even if done); its dependencies must have passed.
 # --dry-run submits nothing: it prints each sbatch command, checks every script with bash -n, and
 # asks SLURM to validate the job headers with sbatch --test-only.
 # Kit jobs use KIT_ACCOUNT; R jobs use OOD_ACCOUNT, OOD_CORES and OOD_TIME (config.sh), as the
@@ -17,13 +19,14 @@ export KIT_DIR
 # shellcheck source=negishi-run/lib.sh
 source "$KIT_DIR/lib.sh"
 
-RUN_ID=""; ONLY=all; FROM=""; FORCE=0; DRY=0
-usage() { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
+RUN_ID=""; ONLY=all; FROM=""; STEP=""; FORCE=0; DRY=0
+usage() { sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
 while [ $# -gt 0 ]; do
   case $1 in
     --run) RUN_ID=$2; shift 2;;
     --only) ONLY=$2; shift 2;;
     --from) FROM=$2; shift 2;;
+    --step) STEP=$2; shift 2;;
     --force) FORCE=1; shift;;
     --dry-run) DRY=1; shift;;
     -h|--help) usage 0;;
@@ -37,6 +40,10 @@ done
 case $ONLY in all|shell|r|cold) ;; *) kit_die "--only must be all, shell, r or cold";; esac
 [ -n "$RUN_ID" ] || kit_die "--run RUN_ID is required (the ID given to 01_learner_setup.sh)"
 python3 "$KIT_DIR/build_kit.py" --check >&2 || kit_die "generated/ is stale or was edited; rebuild with python3 $KIT_DIR/build_kit.py and re-send"
+if [ -n "$STEP" ]; then
+  if [ -n "$FROM" ] || [ "$ONLY" != all ]; then kit_die "--step cannot be combined with --from or --only"; fi
+  FROM=$STEP; FORCE=1
+fi
 if [ -n "$FROM" ] && ! awk -F'\t' -v s="$FROM" '$1 == s { f = 1 } END { exit !f }' "$KIT_GEN/steps.tsv"; then
   kit_die "--from $FROM: no such step; steps are: $(awk -F'\t' 'NR > 1 { printf "%s ", $1 }' "$KIT_GEN/steps.tsv")"
 fi
@@ -111,6 +118,7 @@ while IFS=$'\t' read -r step kind deps dep_type _ _ script desc; do
     if [ "$step" = "$FROM" ]; then started=1; else continue; fi
   fi
   in_scope "$step" || continue
+  [ -n "$STEP" ] && [ "$step" != "$STEP" ] && continue
   if [ "$step" != 02-prep ] && step_done "$step"; then kit_log "skip $step (already done)"; continue; fi
 
   # dependencies: only on steps submitted in this invocation; others must be done already
