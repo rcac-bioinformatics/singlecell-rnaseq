@@ -340,7 +340,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Normalization and Feature Selection</h1>
-        <p>Last updated on 2026-10-20 |
+        <p>Last updated on 2026-10-23 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/normalization-and-features.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -426,6 +426,20 @@ thresholds.</p>
 <span>    <span class="st">"/scrna_workshop/"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu">setwd</span><span class="op">(</span><span class="va">work_dir</span><span class="op">)</span></span></code></pre>
+</div>
+<div id="starting-here-without-the-previous-episode" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<span class="callout-header">Callout</span>
+<div id="starting-here-without-the-previous-episode" class="callout-inner">
+<h3 class="callout-title">Starting here without the previous
+episode?</h3>
+<div class="callout-content">
+<p>Copy the saved object from the workshop data first:
+<code>file.copy(paste0(work_dir, "rds/pbmc_filtered.rds"), work_dir)</code></p>
+</div>
+</div>
 </div>
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -916,7 +930,19 @@ variable features</h3>
 <p>Run both normalization approaches on the same filtered dataset and
 compare the top 20 variable features from each method. How many genes
 appear in both lists?</p>
+<p>This challenge is self-paced. SCTransform on the whole dataset needs
+about 15 GB of memory, so run it in an RStudio session with 12 or more
+cores (the workshop sessions have 8; start a new one for this). In the
+new session, reload the object you saved above:</p>
 <div class="codewrapper sourceCode" id="cb23">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">library</span><span class="op">(</span><span class="va">Seurat</span><span class="op">)</span></span>
+<span><span class="va">work_dir</span> <span class="op">&lt;-</span> <span class="fu">paste0</span><span class="op">(</span><span class="st">"/scratch/negishi/"</span>, <span class="fu">Sys.getenv</span><span class="op">(</span><span class="st">"USER"</span><span class="op">)</span>, <span class="st">"/scrna_workshop/"</span><span class="op">)</span></span>
+<span><span class="va">pbmc</span> <span class="op">&lt;-</span> <span class="fu">readRDS</span><span class="op">(</span><span class="fu">paste0</span><span class="op">(</span><span class="va">work_dir</span>, <span class="st">"pbmc_normalized.rds"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+</div>
+<div class="codewrapper sourceCode" id="cb24">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -995,7 +1021,7 @@ the top.</p>
 <p>If you see the warning about glmGamPoi not being installed,
 SCTransform still runs but falls back to a slower implementation.
 Install it for faster runs:</p>
-<div class="codewrapper sourceCode" id="cb25">
+<div class="codewrapper sourceCode" id="cb26">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -1020,7 +1046,7 @@ Behavior</h3>
 <p>Plot the expression of <strong>ACTB</strong> (a housekeeping gene)
 and <strong>LYZ</strong> (a variable monocyte marker) before and after
 normalization. What changes for each gene, and why?</p>
-<div class="codewrapper sourceCode" id="cb26">
+<div class="codewrapper sourceCode" id="cb27">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
@@ -1183,8 +1209,8 @@ any links that you are not going to use.
   "url": "https://singlecell-rnaseq.github.io/NA/normalization-and-features.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/normalization-and-features.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-10-20",
-  "datePublished": "2026-10-20"
+  "dateModified": "2026-10-23",
+  "datePublished": "2026-10-23"
 }
 
   </script><script>

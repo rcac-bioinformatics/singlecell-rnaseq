@@ -340,7 +340,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Multi-Sample Integration</h1>
-        <p>Last updated on 2026-10-20 |
+        <p>Last updated on 2026-10-23 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/multi-sample-integration.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -468,7 +468,7 @@ PBMCs from two conditions:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
 <div class="accordion-body">
 <pre><code>An object of class Seurat
 14053 features across 13999 samples within 1 assay
@@ -492,7 +492,7 @@ cell came from.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
 <div class="accordion-body">
 <pre><code>CTRL STIM
 6548 7451</code></pre>
@@ -518,7 +518,7 @@ sample separately.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
 <div class="accordion-body">
 <pre><code>An object of class Seurat
 14053 features across 13999 samples within 1 assay
@@ -817,30 +817,41 @@ should appear as strong conserved markers for monocytes.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
   <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
+<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
 <div class="accordion-body">
-<pre><code>         CTRL_p_val CTRL_avg_log2FC CTRL_pct.1 CTRL_pct.2 CTRL_p_val_adj    STIM_p_val STIM_avg_log2FC
-TYROBP            0        2.356269      0.940      0.227              0  0.000000e+00        2.337569
-FCER1G            0        2.197678      0.930      0.233              0  0.000000e+00        2.549589
-S100A8            0        4.739502      0.743      0.071              0  0.000000e+00        5.318497
-C15orf48          0        2.720354      0.869      0.201              0  0.000000e+00        2.751572
-IL8               0        3.651882      0.799      0.144              0 9.967253e-252        3.819957
-CD63              0        2.740801      0.958      0.333              0  0.000000e+00        2.889984
-S100A9            0        4.606045      0.691      0.069              0  0.000000e+00        5.236085
-CTSB              0        3.116819      0.772      0.183              0  0.000000e+00        3.400786
-LGALS1            0        2.400262      0.905      0.321              0  0.000000e+00        2.848345
-TYMP              0        2.084914      0.860      0.282              0  0.000000e+00        2.267578
-         STIM_pct.1 STIM_pct.2 STIM_p_val_adj      max_pval minimump_p_val
-TYROBP        0.952      0.199   0.000000e+00  0.000000e+00              0
-FCER1G        0.910      0.197   0.000000e+00  0.000000e+00              0
-S100A8        0.445      0.020   0.000000e+00  0.000000e+00              0
-C15orf48      0.860      0.201   0.000000e+00  0.000000e+00              0
-IL8           0.295      0.028  1.400698e-247 9.967253e-252              0
-CD63          0.931      0.276   0.000000e+00  0.000000e+00              0
-S100A9        0.584      0.036   0.000000e+00  0.000000e+00              0
-CTSB          0.822      0.183   0.000000e+00  0.000000e+00              0
-LGALS1        0.867      0.217   0.000000e+00  0.000000e+00              0
-TYMP          0.926      0.438   0.000000e+00  0.000000e+00              0</code></pre>
+<pre><code>         CTRL_p_val CTRL_avg_log2FC CTRL_pct.1 CTRL_pct.2 CTRL_p_val_adj
+TYROBP            0        2.357371      0.940      0.227              0
+FCER1G            0        2.197611      0.930      0.233              0
+S100A8            0        4.737642      0.742      0.071              0
+C15orf48          0        2.719921      0.868      0.201              0
+IL8               0        3.648031      0.798      0.144              0
+CD63              0        2.739659      0.957      0.333              0
+S100A9            0        4.597336      0.690      0.070              0
+CTSB              0        3.108400      0.771      0.183              0
+LGALS1            0        2.396676      0.904      0.322              0
+TYMP              0        2.075884      0.859      0.283              0
+            STIM_p_val STIM_avg_log2FC STIM_pct.1 STIM_pct.2 STIM_p_val_adj
+TYROBP    0.000000e+00        2.344174      0.951      0.197   0.000000e+00
+FCER1G    0.000000e+00        2.552006      0.910      0.196   0.000000e+00
+S100A8    0.000000e+00        5.328514      0.444      0.020   0.000000e+00
+C15orf48  0.000000e+00        2.758492      0.860      0.199   0.000000e+00
+IL8      3.434056e-251        3.687341      0.294      0.028  4.825879e-247
+CD63      0.000000e+00        2.896965      0.931      0.275   0.000000e+00
+S100A9    0.000000e+00        5.195483      0.581      0.036   0.000000e+00
+CTSB      0.000000e+00        3.421778      0.822      0.182   0.000000e+00
+LGALS1    0.000000e+00        2.860965      0.866      0.216   0.000000e+00
+TYMP      0.000000e+00        2.278326      0.927      0.437   0.000000e+00
+              max_pval minimump_p_val
+TYROBP    0.000000e+00              0
+FCER1G    0.000000e+00              0
+S100A8    0.000000e+00              0
+C15orf48  0.000000e+00              0
+IL8      3.434056e-251              0
+CD63      0.000000e+00              0
+S100A9    0.000000e+00              0
+CTSB      0.000000e+00              0
+LGALS1    0.000000e+00              0
+TYMP      0.000000e+00              0</code></pre>
 </div>
 </div>
 </div>
@@ -875,24 +886,26 @@ compare conditions:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
   <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Expected output </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
 <div class="accordion-body">
 <pre><code>        p_val avg_log2FC pct.1 pct.2 p_val_adj
-IFIT1       0   7.117626 0.965 0.034         0
-IFIT3       0   6.737338 0.971 0.057         0
-TNFSF10     0   6.322227 0.959 0.062         0
-RSAD2       0   6.619577 0.920 0.042         0
-IFIT2       0   6.893956 0.909 0.040         0
-MX1         0   4.824046 0.953 0.099         0
-CXCL10      0   7.975000 0.873 0.032         0
-LY6E        0   4.255152 0.990 0.174         0
-CXCL11      0   8.521702 0.800 0.011         0
-CCL8        0   9.063100 0.800 0.015         0</code></pre>
+IFIT1       0   7.173024 0.965 0.033         0
+IFIT3       0   6.798858 0.972 0.057         0
+TNFSF10     0   6.370735 0.959 0.061         0
+RSAD2       0   6.661976 0.920 0.041         0
+IFIT2       0   6.905053 0.909 0.039         0
+MX1         0   4.839203 0.953 0.099         0
+CXCL10      0   8.007812 0.873 0.031         0
+LY6E        0   4.263751 0.990 0.174         0
+CXCL11      0   8.576537 0.801 0.011         0
+OAS1        0   4.045792 0.915 0.131         0</code></pre>
 <p>The top DE genes are all <strong>interferon-stimulated genes
 (ISGs)</strong>: IFIT1, IFIT3, TNFSF10, RSAD2, IFIT2. These are exactly
 the genes you would expect to be upregulated by IFN-beta stimulation,
 confirming that our integration preserved the biological signal while
-correcting the batch effect.</p>
+correcting the batch effect. The exact fold changes, and the number of
+genes that pass a significance cutoff, vary slightly between Seurat
+versions; the leading ISGs do not.</p>
 </div>
 </div>
 </div>
@@ -976,12 +989,16 @@ cell type?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <pre><code>         CellType
-Condition CD14 Mono  CD4 T  CD8 T     NK      B FCGR3A Mono     DC     Mk  Eryth
-     CTRL     0.504  0.432  0.477  0.435  0.482       0.530  0.447  0.446  0.458
-     STIM     0.496  0.568  0.523  0.565  0.518       0.470  0.553  0.554  0.542</code></pre>
+Condition CD14 Mono     CD4 T     CD8 T        NK         B FCGR3A Mono
+     CTRL 0.5033865 0.4326872 0.4775281 0.4287425 0.4812594   0.5378641
+     STIM 0.4966135 0.5673128 0.5224719 0.5712575 0.5187406   0.4621359
+         CellType
+Condition        DC        Mk     Eryth
+     CTRL 0.4473684 0.4561404 0.4583333
+     STIM 0.5526316 0.5438596 0.5416667</code></pre>
 <figure><img src="fig/ep7_challenge1.png" alt="Split UMAP showing CTRL and STIM panels with cell type labels, demonstrating balanced mixing of conditions within each annotated cluster." class="figure mx-auto d-block"><div class="figcaption">Split UMAP with CTRL and STIM panels, cells
 labeled by cell type. Both panels show identical cluster arrangement
 with CD4 T, CD8 T, B, NK, CD14 Mono, FCGR3A Mono, DC, Mk, and Eryth
@@ -994,7 +1011,7 @@ panels with similar spatial arrangement – each cluster appears in both
 CTRL and STIM with comparable density.</p>
 <p>Some observations worth discussing:</p>
 <ul><li>
-<strong>CD14 Mono</strong> is the best-mixed cell type (50.4/49.6),
+<strong>CD14 Mono</strong> is the best-mixed cell type (50.3/49.7),
 essentially a perfect split. This is expected for the most abundant
 population.</li>
 <li>
@@ -1053,23 +1070,23 @@ stimulation response?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
-<figure><img src="fig/ep7_challenge2.png" alt="FeaturePlot of CCL8, CXCL11, CXCL10, and HESX1 split by condition showing absent expression in control and strong monocyte-concentrated expression in stimulated cells." class="figure mx-auto d-block"><div class="figcaption">Four-row FeaturePlot split by CTRL and STIM
-showing CCL8, CXCL11, CXCL10, and HESX1. CTRL panels are almost entirely
+<figure><img src="fig/ep7_challenge2.png" alt="FeaturePlot of CCL8, CXCL11, HESX1, and CXCL10 split by condition showing absent expression in control and strong monocyte-concentrated expression in stimulated cells." class="figure mx-auto d-block"><div class="figcaption">Four-row FeaturePlot split by CTRL and STIM
+showing CCL8, CXCL11, HESX1, and CXCL10. CTRL panels are almost entirely
 grey. STIM panels show strong red expression concentrated in the
 monocyte clusters for all four chemokine and ISG genes.</div>
 </figure><pre><code>                 p_val avg_log2FC pct.1 pct.2     p_val_adj
-CCL8      0.000000e+00   9.063    0.800 0.015  0.000000e+00
-CXCL11    0.000000e+00   8.522    0.800 0.011  0.000000e+00
-CXCL10    0.000000e+00   7.975    0.873 0.032  0.000000e+00
-HESX1    1.756212e-217   7.935    0.335 0.002 2.468004e-213
-IFIT1     0.000000e+00   7.118    0.965 0.034  0.000000e+00
-IFIT2     0.000000e+00   6.894    0.909 0.040  0.000000e+00
-IFIT3     0.000000e+00   6.737    0.971 0.057  0.000000e+00
-GMPR     1.772282e-239   6.634    0.371 0.005 2.490588e-235
-RSAD2     0.000000e+00   6.620    0.920 0.042  0.000000e+00
-APOBEC3B 1.261976e-127   6.600    0.273 0.034 1.773454e-123</code></pre>
+CCL8      0.000000e+00   9.059454 0.798 0.015  0.000000e+00
+CXCL11    0.000000e+00   8.576537 0.801 0.011  0.000000e+00
+HESX1    3.530769e-218   8.283957 0.335 0.001 4.961789e-214
+CXCL10    0.000000e+00   8.007812 0.873 0.031  0.000000e+00
+IFIT1     0.000000e+00   7.173024 0.965 0.033  0.000000e+00
+IFIT2     0.000000e+00   6.905053 0.909 0.039  0.000000e+00
+IFIT3     0.000000e+00   6.798858 0.972 0.057  0.000000e+00
+GMPR     2.606001e-242   6.750793 0.373 0.004 3.662213e-238
+APOBEC3B 1.036577e-127   6.685079 0.272 0.034 1.456702e-123
+RSAD2     0.000000e+00   6.661976 0.920 0.041  0.000000e+00</code></pre>
 <p>The top 10 genes fall into two functional categories, both consistent
 with IFN-beta stimulation:</p>
 <table class="table"><colgroup><col width="15%"><col width="20%"><col width="38%"><col width="25%"></colgroup><thead><tr><th>Gene</th>
@@ -1082,64 +1099,65 @@ with IFN-beta stimulation:</p>
 <td align="left">Chemokine; recruits monocytes and T cells to sites of
 inflammation</td>
 </tr><tr><td>CXCL11</td>
-<td align="center">8.52</td>
+<td align="center">8.58</td>
 <td align="left">0.80 / 0.01</td>
 <td align="left">IFN-inducible chemokine; attracts activated T cells via
 CXCR3</td>
-</tr><tr><td>CXCL10</td>
-<td align="center">7.98</td>
-<td align="left">0.87 / 0.03</td>
-<td align="left">IFN-inducible chemokine (IP-10); major recruiter of
-immune cells</td>
 </tr><tr><td>HESX1</td>
-<td align="center">7.93</td>
+<td align="center">8.28</td>
 <td align="left">0.34 / 0.00</td>
 <td align="left">Transcription factor; emerging role in IFN
 signaling</td>
+</tr><tr><td>CXCL10</td>
+<td align="center">8.01</td>
+<td align="left">0.87 / 0.03</td>
+<td align="left">IFN-inducible chemokine (IP-10); major recruiter of
+immune cells</td>
 </tr><tr><td>IFIT1</td>
-<td align="center">7.12</td>
+<td align="center">7.17</td>
 <td align="left">0.97 / 0.03</td>
 <td align="left">Directly induced by type I IFN; inhibits viral
 translation</td>
 </tr><tr><td>IFIT2</td>
-<td align="center">6.89</td>
+<td align="center">6.91</td>
 <td align="left">0.91 / 0.04</td>
 <td align="left">Antiviral effector; regulates translation during
 infection</td>
 </tr><tr><td>IFIT3</td>
-<td align="center">6.74</td>
+<td align="center">6.80</td>
 <td align="left">0.97 / 0.06</td>
 <td align="left">Antiviral effector; forms complex with IFIT1 and
 IFIT2</td>
 </tr><tr><td>GMPR</td>
-<td align="center">6.63</td>
-<td align="left">0.37 / 0.01</td>
+<td align="center">6.75</td>
+<td align="left">0.37 / 0.00</td>
 <td align="left">Guanosine monophosphate reductase; modulates purine
 metabolism</td>
-</tr><tr><td>RSAD2</td>
-<td align="center">6.62</td>
-<td align="left">0.92 / 0.04</td>
-<td align="left">Viperin; broad-spectrum antiviral enzyme induced by
-IFN</td>
 </tr><tr><td>APOBEC3B</td>
-<td align="center">6.60</td>
+<td align="center">6.69</td>
 <td align="left">0.27 / 0.03</td>
 <td align="left">Cytidine deaminase; innate antiviral defense via RNA
 editing</td>
+</tr><tr><td>RSAD2</td>
+<td align="center">6.66</td>
+<td align="left">0.92 / 0.04</td>
+<td align="left">Viperin; broad-spectrum antiviral enzyme induced by
+IFN</td>
 </tr></tbody></table><p>Two patterns stand out:</p>
-<p><strong>Chemokines dominate the top 3.</strong> CCL8, CXCL11, and
-CXCL10 have the highest fold changes (7.9-9.1), reflecting the
-monocyte’s primary role as a sentinel cell: upon IFN stimulation,
-monocytes broadcast chemokine signals to recruit other immune cells.
-Note the pct.2 values (0.01-0.03) – these chemokines are essentially
-absent in control cells and massively induced by stimulation.</p>
+<p><strong>Chemokines dominate the top.</strong> CCL8, CXCL11, and
+CXCL10 are three of the top four, with fold changes of 8.0-9.1,
+reflecting the monocyte’s primary role as a sentinel cell: upon IFN
+stimulation, monocytes broadcast chemokine signals to recruit other
+immune cells. Note the pct.2 values (0.01-0.03) – these chemokines are
+essentially absent in control cells and massively induced by
+stimulation.</p>
 <p><strong>Classical ISGs fill the rest.</strong> IFIT1/2/3, RSAD2, and
 APOBEC3B are canonical interferon-stimulated genes that directly inhibit
 viral replication. The IFIT family shows the highest pct.1 values
 (0.91-0.97), meaning nearly every stimulated monocyte expresses them – a
 hallmark of a robust, uniform interferon response.</p>
-<p>The FeaturePlot confirms this visually: CCL8, CXCL11, CXCL10, and
-HESX1 are virtually absent in the CTRL panels (gray) and strongly
+<p>The FeaturePlot confirms this visually: CCL8, CXCL11, HESX1, and
+CXCL10 are virtually absent in the CTRL panels (gray) and strongly
 expressed in the STIM panels (red), with the signal concentrated in the
 monocyte clusters (right side of the UMAP). CXCL10 and CXCL11 also show
 some expression in the stimulated CD4 T and NK clusters, consistent with
@@ -1236,8 +1254,8 @@ any links that you are not going to use.
   "url": "https://singlecell-rnaseq.github.io/NA/multi-sample-integration.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/multi-sample-integration.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-10-20",
-  "datePublished": "2026-10-20"
+  "dateModified": "2026-10-23",
+  "datePublished": "2026-10-23"
 }
 
   </script><script>

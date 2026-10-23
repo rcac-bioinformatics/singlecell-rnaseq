@@ -341,7 +341,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Differential Expression Analysis</h1>
-        <p>Last updated on 2026-10-20 |
+        <p>Last updated on 2026-10-23 |
 
         <a href="https://rcac-bioinformatics.github.io/singlecell-rnaseq/edit/main/episodes/differential-expression.Rmd" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -437,6 +437,22 @@ the active identity.</p>
 <span>    <span class="st">"/scrna_workshop/"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu">setwd</span><span class="op">(</span><span class="va">work_dir</span><span class="op">)</span></span></code></pre>
+</div>
+<div id="starting-here-without-the-previous-episode" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<span class="callout-header">Callout</span>
+<div id="starting-here-without-the-previous-episode" class="callout-inner">
+<h3 class="callout-title">Starting here without the previous
+episode?</h3>
+<div class="callout-content">
+<p>Copy the saved objects from the workshop data first
+(<code>pbmc_annotated.rds</code> is used by the export section at the
+end):
+<code>file.copy(paste0(work_dir, c("rds/ifnb_annotated.rds", "rds/pbmc_annotated.rds")), work_dir)</code></p>
+</div>
+</div>
 </div>
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -545,26 +561,26 @@ group.</td>
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code>        p_val avg_log2FC pct.1 pct.2 p_val_adj
-IFIT1       0   7.118    0.965 0.034         0
-IFIT3       0   6.737    0.971 0.057         0
-TNFSF10     0   6.322    0.959 0.062         0
-RSAD2       0   6.620    0.920 0.042         0
-IFIT2       0   6.894    0.909 0.040         0
-MX1         0   4.824    0.953 0.099         0
-CXCL10      0   7.975    0.873 0.032         0
-LY6E        0   4.255    0.990 0.174         0
-CXCL11      0   8.522    0.800 0.011         0
-CCL8        0   9.063    0.800 0.015         0
+IFIT1       0   7.173024 0.965 0.033         0
+IFIT3       0   6.798858 0.972 0.057         0
+TNFSF10     0   6.370735 0.959 0.061         0
+RSAD2       0   6.661976 0.920 0.041         0
+IFIT2       0   6.905053 0.909 0.039         0
+MX1         0   4.839203 0.953 0.099         0
+CXCL10      0   8.007812 0.873 0.031         0
+LY6E        0   4.263751 0.990 0.174         0
+CXCL11      0   8.576537 0.801 0.011         0
+OAS1        0   4.045792 0.915 0.131         0
 
 
-Significant genes (padj &lt; 0.05): 765 </code></pre>
+Significant genes (padj &lt; 0.05): 759 </code></pre>
 </div>
-<p>You should see approximately <strong>765 significant genes</strong>
+<p>You should see approximately <strong>759 significant genes</strong>
 at padj &lt; 0.05. The top genes include interferon-stimulated genes
-(IFIT1/2/3, RSAD2, MX1) and IFN-inducible chemokines (CXCL10, CXCL11,
-CCL8). But notice that the p-values are extremely small (effectively
-zero). This is a symptom of per-cell testing with thousands of cells –
-even modest differences become “significant.”</p>
+(IFIT1/2/3, RSAD2, MX1) and IFN-inducible chemokines (CXCL10, CXCL11).
+But notice that the p-values are extremely small (effectively zero).
+This is a symptom of per-cell testing with thousands of cells – even
+modest differences become “significant.”</p>
 </div>
 </div>
 </div>
@@ -730,23 +746,23 @@ subset to CD14+ monocytes and compare conditions:</p>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>       p_val avg_log2FC pct.1 pct.2 p_val_adj
-ISG15      0   6.441088     1     1         0
-IFI6       0   3.705585     1     1         0
-IFI44L     0   3.374846     1     1         0
-GBP1       0   2.535916     1     1         0
-S100A8     0  -2.276587     1     1         0
-MNDA       0   2.661545     1     1         0
-RSAD2      0   5.839812     1     1         0
-TMSB10     0   1.655318     1     1         0
-VAMP5      0   2.977336     1     1         0
-SSB        0   2.470712     1     1         0
+<pre class="output" tabindex="0"><code>        p_val avg_log2FC pct.1 pct.2 p_val_adj
+ISG15       0   6.452648     1     1         0
+IFI6        0   3.711404     1     1         0
+GBP1        0   2.539654     1     1         0
+S100A8      0  -2.281767     1     1         0
+RSAD2       0   5.865844     1     1         0
+TMSB10      0   1.657216     1     1         0
+VAMP5       0   2.982033     1     1         0
+SSB         0   2.471605     1     1         0
+PLSCR1      0   2.468085     1     1         0
+TNFSF10     0   5.819272     1     1         0
 
 
-Significant genes (p_val_adj &lt; 0.05): 1455 </code></pre>
+Significant genes (padj &lt; 0.05): 1464 </code></pre>
 </div>
-<p>The pseudobulk analysis identifies <strong>1455 significant
-genes</strong> – more than the Wilcoxon test (765). This may seem
+<p>The pseudobulk analysis identifies <strong>1464 significant
+genes</strong> – more than the Wilcoxon test (759). This may seem
 surprising: we said pseudobulk is more conservative, so why does it find
 more? Because we used <strong>pseudo-replicates</strong>, not true
 biological replicates. The 3 random splits within each condition have
@@ -1011,35 +1027,41 @@ concentrated in exactly these pathways.</p>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>                   category               subcategory       ID                         Description GeneRatio
-hsa04621 Organismal Systems             Immune system hsa04621 NOD-like receptor signaling pathway    22/166
-hsa05168     Human Diseases Infectious disease: viral hsa05168    Herpes simplex virus 1 infection    17/166
-hsa05169     Human Diseases Infectious disease: viral hsa05169        Epstein-Barr virus infection    18/166
-hsa05164     Human Diseases Infectious disease: viral hsa05164                         Influenza A    16/166
-hsa04612 Organismal Systems             Immune system hsa04612 Antigen processing and presentation    11/166
-          BgRatio RichFactor FoldEnrichment    zScore       pvalue     p.adjust       qvalue
-hsa04621 187/9382 0.11764706       6.649185 10.472204 1.358486e-12 3.124518e-10 2.702672e-10
-hsa05168 180/9382 0.09444444       5.337818  7.886310 1.677668e-08 1.503560e-06 1.300562e-06
-hsa05169 205/9382 0.08780488       4.962562  7.698570 1.961165e-08 1.503560e-06 1.300562e-06
-hsa05164 173/9382 0.09248555       5.227105  7.531253 6.092210e-08 3.503021e-06 3.030073e-06
-hsa04612  82/9382 0.13414634       7.581693  8.033604 1.806443e-07 8.309640e-06 7.187743e-06
+<pre class="output" tabindex="0"><code>                   category               subcategory       ID
+hsa04621 Organismal Systems             Immune system hsa04621
+hsa05168     Human Diseases Infectious disease: viral hsa05168
+hsa05164     Human Diseases Infectious disease: viral hsa05164
+hsa05169     Human Diseases Infectious disease: viral hsa05169
+hsa04612 Organismal Systems             Immune system hsa04612
+                                 Description GeneRatio  BgRatio RichFactor
+hsa04621 NOD-like receptor signaling pathway    22/166 187/9451 0.11764706
+hsa05168    Herpes simplex virus 1 infection    17/166 180/9451 0.09444444
+hsa05164                         Influenza A    16/166 173/9451 0.09248555
+hsa05169        Epstein-Barr virus infection    17/166 205/9451 0.08292683
+hsa04612 Antigen processing and presentation    11/166  82/9451 0.13414634
+         FoldEnrichment    zScore       pvalue     p.adjust       qvalue
+hsa04621       6.698086 10.522757 1.177304e-12 2.707800e-10 2.707800e-10
+hsa05168       5.377075  7.927494 1.508406e-08 1.734667e-06 1.734667e-06
+hsa05164       5.265548  7.570938 5.514350e-08 4.227668e-06 4.227668e-06
+hsa05169       4.721334  7.202407 1.039155e-07 5.975139e-06 5.975139e-06
+hsa04612       7.637452  8.071248 1.679829e-07 7.727211e-06 7.727211e-06
                                                                                                                         geneID
-hsa04621 4938/3665/115361/2633/4939/4940/6347/3428/115362/10616/7295/3320/6772/837/2635/79792/114769/3326/2634/834/10010/10628
-hsa05168                                 4938/3665/5610/64135/684/4939/4940/6347/3133/6890/6772/3107/8717/6672/29992/6892/3134
-hsa05169                              3627/4938/9636/3665/5610/4939/4940/3133/6890/6772/3107/4067/958/8717/9541/4616/6892/3134
-hsa05164                                       8743/91543/4599/3627/4938/4600/3665/5610/64135/4939/4940/6347/6772/8717/103/834
-hsa04612                                                                3303/3133/5721/6890/3320/3107/1520/3326/1514/6892/3134
+hsa04621 837/834/79792/115361/2634/3320/3326/10010/4939/6772/10628/3665/3428/114769/2635/7295/6347/10616/2633/4940/115362/4938
+hsa05168                                 5610/6672/4939/6772/3665/3133/29992/6892/684/6347/3107/6890/3134/4940/64135/4938/8717
+hsa05164                                       834/91543/5610/103/4939/6772/4599/3665/4600/3627/8743/6347/4940/64135/4938/8717
+hsa05169                                   4616/5610/4067/4939/6772/3665/3133/9636/6892/958/3627/3107/6890/3134/4940/4938/8717
+hsa04612                                                                5721/3320/3326/3133/3303/1514/6892/3107/6890/3134/1520
          Count
 hsa04621    22
 hsa05168    17
-hsa05169    18
 hsa05164    16
+hsa05169    17
 hsa04612    11</code></pre>
 </div>
-<p>Top KEGG pathways should include entries like “Influenza A”,
-“Hepatitis C”, “RIG-I-like receptor signaling pathway”, and “NOD-like
-receptor signaling pathway” – all pathways involving the
-interferon/antiviral response.</p>
+<p>The top KEGG pathways are “NOD-like receptor signaling pathway”,
+“Herpes simplex virus 1 infection”, “Influenza A”, “Epstein-Barr virus
+infection” and “Antigen processing and presentation” – all involving the
+interferon and antiviral response.</p>
 </div>
 </div>
 </div>
@@ -1054,20 +1076,23 @@ that support reproducibility, sharing, and downstream use.</p>
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">saveRDS</span><span class="op">(</span><span class="va">ifnb</span>, file <span class="op">=</span> <span class="fu">paste0</span><span class="op">(</span><span class="va">work_dir</span>, <span class="st">"ifnb_annotated.rds"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<code class="sourceCode R"><span><span class="fu">saveRDS</span><span class="op">(</span><span class="va">ifnb</span>, file <span class="op">=</span> <span class="fu">paste0</span><span class="op">(</span><span class="va">work_dir</span>, <span class="st">"ifnb_de.rds"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 </div>
 </div>
 <div class="section level3">
 <h3 id="export-the-count-matrix-and-metadata">Export the count matrix and metadata<a class="anchor" aria-label="anchor" href="#export-the-count-matrix-and-metadata"></a></h3>
 <p>For the PBMC 10k dataset from earlier episodes, you can export the
-raw counts and metadata as CSV files:</p>
+raw counts and metadata as CSV files. First load the annotated object
+saved in the cell type annotation episode:</p>
 <div class="codewrapper sourceCode" id="cb25">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Export raw count matrix (warning: can be large for big datasets)</span></span>
+<code class="sourceCode R"><span><span class="va">pbmc</span> <span class="op">&lt;-</span> <span class="fu">readRDS</span><span class="op">(</span><span class="fu">paste0</span><span class="op">(</span><span class="va">work_dir</span>, <span class="st">"pbmc_annotated.rds"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Export raw count matrix (warning: can be large for big datasets)</span></span>
 <span><span class="va">counts_matrix</span> <span class="op">&lt;-</span> <span class="fu">GetAssayData</span><span class="op">(</span><span class="va">pbmc</span>, layer <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span>
-<span><span class="fu">writeMM</span><span class="op">(</span><span class="va">counts_matrix</span>, file <span class="op">=</span> <span class="st">"counts.mtx"</span><span class="op">)</span></span>
+<span><span class="fu">Matrix</span><span class="fu">::</span><span class="fu">writeMM</span><span class="op">(</span><span class="va">counts_matrix</span>, file <span class="op">=</span> <span class="st">"counts.mtx"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Export metadata</span></span>
 <span><span class="fu">write.csv</span><span class="op">(</span><span class="va">pbmc</span><span class="op">@</span><span class="va">meta.data</span>, file <span class="op">=</span> <span class="st">"metadata.csv"</span>, quote <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -1076,30 +1101,53 @@ raw counts and metadata as CSV files:</p>
 <span><span class="fu">write.csv</span><span class="op">(</span><span class="fu">data.frame</span><span class="op">(</span>gene <span class="op">=</span> <span class="fu">rownames</span><span class="op">(</span><span class="va">pbmc</span><span class="op">)</span><span class="op">)</span>, file <span class="op">=</span> <span class="st">"features.csv"</span>,</span>
 <span>          row.names <span class="op">=</span> <span class="cn">FALSE</span>, quote <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre>
 </div>
-<p>For smaller datasets, you can export as a dense CSV:</p>
+<p>A dense CSV stores every zero, so keep it to small datasets or a
+subset of cells. Here, the first 500 cells:</p>
 <div class="codewrapper sourceCode" id="cb26">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">write.csv</span><span class="op">(</span><span class="fu">as.matrix</span><span class="op">(</span><span class="fu">GetAssayData</span><span class="op">(</span><span class="va">pbmc</span>, layer <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>          file <span class="op">=</span> <span class="st">"counts_dense.csv"</span><span class="op">)</span></span></code></pre>
+<code class="sourceCode R"><span><span class="fu">write.csv</span><span class="op">(</span><span class="fu">as.matrix</span><span class="op">(</span><span class="fu">GetAssayData</span><span class="op">(</span><span class="va">pbmc</span>, layer <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">500</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>          file <span class="op">=</span> <span class="st">"counts_dense_500cells.csv"</span><span class="op">)</span></span></code></pre>
 </div>
 </div>
 <div class="section level3">
 <h3 id="format-conversion-for-python-users">Format conversion for Python users<a class="anchor" aria-label="anchor" href="#format-conversion-for-python-users"></a></h3>
-<p>If collaborators use the Python/Scanpy ecosystem, you can convert
-your Seurat object to AnnData format using the <code>sceasy</code>
-package:</p>
+<p>If collaborators use the Python/Scanpy ecosystem, you can write your
+Seurat object as an AnnData <code>.h5ad</code> file with the
+Bioconductor package <code>anndataR</code>. It writes the file directly
+from R, so no Python installation is needed:</p>
 <div class="codewrapper sourceCode" id="cb27">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Install sceasy if needed: remotes::install_github("cellgeni/sceasy")</span></span>
-<span><span class="kw">library</span><span class="op">(</span><span class="va">sceasy</span><span class="op">)</span></span>
-<span><span class="fu">sceasy</span><span class="fu">::</span><span class="fu">convertFormat</span><span class="op">(</span><span class="va">pbmc</span>,</span>
-<span>                      from <span class="op">=</span> <span class="st">"seurat"</span>,</span>
-<span>                      to <span class="op">=</span> <span class="st">"anndata"</span>,</span>
-<span>                      outFile <span class="op">=</span> <span class="st">"pbmc_annotated.h5ad"</span><span class="op">)</span></span></code></pre>
+<code class="sourceCode R"><span><span class="co"># Install anndataR if needed: BiocManager::install("anndataR")</span></span>
+<span><span class="kw">library</span><span class="op">(</span><span class="va">anndataR</span><span class="op">)</span></span>
+<span><span class="fu">write_h5ad</span><span class="op">(</span><span class="va">pbmc</span>, <span class="st">"pbmc_annotated.h5ad"</span>, mode <span class="op">=</span> <span class="st">"w"</span><span class="op">)</span>  <span class="co"># "w" overwrites an earlier export</span></span></code></pre>
+</div>
+<p>The counts, normalized data, cell metadata and the PCA and UMAP
+embeddings are all carried over. Three warnings are expected. One says
+the <code>scale.data</code> layer is skipped “with unexpected
+dimensions”: it holds only the 2,000 variable genes, an AnnData layer
+must cover every gene, and scaled values are easy to recompute in
+Python. Two say that matrix column names “cannot be written”: AnnData
+stores embeddings without column names. To read the file in Python,
+collaborators need a recent <code>anndata</code> (0.13 reads it; 0.10
+does not).</p>
+<div id="why-not-sceasy" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<span class="callout-header">Callout</span>
+<div id="why-not-sceasy" class="callout-inner">
+<h3 class="callout-title">Why not sceasy?</h3>
+<div class="callout-content">
+<p>Older tutorials use <code>sceasy::convertFormat()</code>. Its latest
+version (0.0.7) calls <code>GetAssayData(slot = ...)</code>, which
+SeuratObject 5 no longer accepts, so it stops with an error on Seurat v5
+objects.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="section level3">
@@ -1202,9 +1250,9 @@ significant genes and the p-value distributions.</p>
 and pseudobulk DE tests.</div>
 </figure><p>You should find that:</p>
 <ul><li>
-<strong>Wilcoxon</strong> identifies 765 significant genes</li>
+<strong>Wilcoxon</strong> identifies 759 significant genes</li>
 <li>
-<strong>Pseudobulk</strong> identifies 1455 (with
+<strong>Pseudobulk</strong> identifies 1464 (with
 pseudo-replicates)</li>
 </ul><p>Pseudobulk finds <strong>more</strong> significant genes here, which
 may seem to contradict the usual advice that pseudobulk is more
@@ -1417,8 +1465,8 @@ any links that you are not going to use.
   "url": "https://singlecell-rnaseq.github.io/NA/instructor/differential-expression.html",
   "identifier": "https://singlecell-rnaseq.github.io/NA/instructor/differential-expression.html",
   "dateCreated": "2026-02-24",
-  "dateModified": "2026-10-20",
-  "datePublished": "2026-10-20"
+  "dateModified": "2026-10-23",
+  "datePublished": "2026-10-23"
 }
 
   </script><script>
