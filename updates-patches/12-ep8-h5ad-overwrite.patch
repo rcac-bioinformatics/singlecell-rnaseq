@@ -1,0 +1,11 @@
+--- a/episodes/differential-expression.Rmd	2026-10-22 20:37:14.441719738 -0500
++++ b/episodes/differential-expression.Rmd	2026-10-22 20:37:14.441719738 -0500
+@@ -602,7 +602,7 @@
+ ```{r convert-anndata, eval=FALSE}
+ # Install anndataR if needed: BiocManager::install("anndataR")
+ library(anndataR)
+-write_h5ad(pbmc, "pbmc_annotated.h5ad")
++write_h5ad(pbmc, "pbmc_annotated.h5ad", mode = "w")  # "w" overwrites an earlier export
+ ```
+ 
+ The counts, normalized data, cell metadata and the PCA and UMAP embeddings
