@@ -1,6 +1,7 @@
 # redraw_figures.R <figures_redraw.tsv> <handoff dir> <generated dir> <out dir>
 # Redraws committed figures from handoff RDS files with the episode's own chunk code: the episode's
-# setup block, any `before` blocks, then the figure's block, printed to a PNG of the committed size. Prints one line per
+# setup block, any `before` blocks, then the figure's block, printed to a PNG of the committed size;
+# `part` picks which top-level expression of that block is the figure (- for the last). Prints one line per
 # figure (file, pixel size, identities of the object it was drawn from).
 args <- commandArgs(trailingOnly = TRUE)
 tab <- utils::read.delim(args[1], comment.char = "#", stringsAsFactors = FALSE)
@@ -22,7 +23,9 @@ for (i in seq_len(nrow(tab))) {
   assign(sub("_.*", "", basename(r$handoff)), objects[[rds]], envir = env)  # pbmc_annotated.rds -> pbmc
   if (r$before != "-") for (b in strsplit(r$before, ",")[[1]]) sys.source(block(ep, b), envir = env)
   set.seed(42)  # ggrepel label placement is random; a fixed seed makes the redraw byte-reproducible
-  p <- eval(parse(block(ep, r$label)), envir = env)
+  vals <- lapply(parse(block(ep, r$label)), eval, envir = env)  # in order, like the episode
+  part <- if (is.null(r$part) || r$part %in% c("-", "")) length(vals) else as.integer(r$part)
+  p <- vals[[part]]
   f <- file.path(out, r$fig)
   grDevices::png(f, width = r$width, height = r$height, res = r$res, type = "cairo")
   print(p)

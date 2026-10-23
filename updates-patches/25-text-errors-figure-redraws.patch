@@ -1,0 +1,351 @@
+diff --git a/episodes/dimensionality-reduction-clustering.Rmd b/episodes/dimensionality-reduction-clustering.Rmd
+index 576e619..a34d914 100644
+--- a/episodes/dimensionality-reduction-clustering.Rmd
++++ b/episodes/dimensionality-reduction-clustering.Rmd
+@@ -175,8 +175,9 @@ biological signal; PCs after the elbow are mostly noise.
+ 
+ ## How many PCs?
+ 
+-For the PBMC 10k dataset, the elbow typically falls around **PC 12--15**. We
+-will use **15 PCs** for the rest of this episode.
++For the PBMC 10k dataset, the elbow falls around **PC 8--10**: the curve drops
++steeply through PC 7 and flattens after PC 10. We will use **15 PCs** for the
++rest of this episode, a few more than the elbow (see below for why).
+ 
+ In practice, the exact number is not critical. Using 10 vs. 20 PCs usually
+ produces very similar clustering results for well-separated cell types.
+@@ -364,8 +365,9 @@ Levels: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
+ ```
+ 
+ Cluster 0 is the largest with 2,112 cells (T cells, which are the most
+-abundant PBMC type). Cluster 17 is the smallest with only 39 cells (likely
+-a rare population like platelets or dendritic cells).
++abundant PBMC type). Cluster 17 is the smallest with only 39 cells; the next
++episode shows that it is a rare population of haematopoietic stem and
++progenitor cells (HSPC).
+ 
+ ::::::::::::::::::::::::::::::::::::::::::::::::::
+ 
+@@ -568,9 +570,9 @@ following pattern (exact cluster numbers may differ depending on your run):
+ 
+ | Marker | Cell type | Cluster(s) |
+ |--------|:----------|:-----------|
+-| CD3D | T cells | Clusters 0, 2, 3, 5, 6 (several groups across the upper-left and lower-left UMAP). CD3D is expressed in both CD4+ and CD8+ T cells, so it marks multiple clusters. |
+-| MS4A1 | B cells | Cluster 7 (a compact, clearly separated group in the upper-right). MS4A1 (also known as CD20) is highly specific to B cells. |
+-| LYZ | CD14+ Monocytes | Clusters 1 and 2 (large groups in the lower portion of the UMAP). You may also see weaker LYZ expression in a smaller monocyte cluster (FCGR3A+). |
++| CD3D | T cells | Clusters 0, 3, 5, 6 and 10 (the large T cell group and its branches). CD3D is expressed in both CD4+ and CD8+ T cells, so it marks multiple clusters. |
++| MS4A1 | B cells | Clusters 4, 8 and 14 (one separate group). MS4A1 (also known as CD20) is highly specific to B cells. |
++| LYZ | CD14+ Monocytes | Clusters 1 and 2, with the smaller clusters 11 and 16 (the large monocyte group). LYZ is also high in the dendritic cells (cluster 12) and weaker in the FCGR3A+ monocytes (cluster 9). |
+ 
+ The fact that each marker cleanly maps to specific clusters confirms that
+ our clustering at resolution 0.5 is capturing meaningful biological groupings.
+diff --git a/episodes/fig/FIGURE_DESCRIPTIONS.md b/episodes/fig/FIGURE_DESCRIPTIONS.md
+index e83c18e..808ad11 100644
+--- a/episodes/fig/FIGURE_DESCRIPTIONS.md
++++ b/episodes/fig/FIGURE_DESCRIPTIONS.md
+@@ -185,7 +185,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ | **Caption** | Scatter plot after filtering |
+ | **Description** | Scatter plot of total UMI counts versus number of genes after filtering, colored by mitochondrial percentage, showing a tighter cloud with outliers removed |
+ | **Plot function** | `ggplot()` |
+-| **Redraw** | By hand from a live session or a kit run |
++| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
+ 
+ ---
+ 
+@@ -270,7 +270,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ | **Caption** | UMAP plot of all cells shown in a single color before clustering. Cells naturally organize into several spatially distinct groups corresponding to different cell types. |
+ | **Description** | UMAP scatter plot of 11310 cells in a single color before clustering, with cells forming several spatially distinct groups that correspond to different cell types. |
+ | **Plot function** | `DimPlot()` |
+-| **Redraw** | By hand from a live session or a kit run |
++| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
+ 
+ #### 5.5 umap-clusters (`ep5_umap-clusters.png`)
+ 
+@@ -281,7 +281,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ | **Caption** | UMAP plot with 18 clusters labeled 0 through 17, each shown in a distinct color. Large clusters like 0 and 1 dominate the center and bottom, while smaller clusters appear at the periphery. |
+ | **Description** | UMAP plot colored by Louvain cluster identity at resolution 0.5, showing 18 clusters numbered 0 through 17 with large clusters in the center and small clusters at the periphery. |
+ | **Plot function** | `DimPlot()` |
+-| **Redraw** | By hand from a live session or a kit run |
++| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
+ 
+ #### 5.6 clustree (`ep5_clustree.png`)
+ 
+@@ -303,7 +303,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ | **Caption** | Four UMAP plots showing expression of CD3D, MS4A1, LYZ, and GNLY. Each gene is highlighted in a different cluster region, indicating T cells, B cells, monocytes, and NK cells respectively. |
+ | **Description** | Four UMAP panels showing expression of CD3D, MS4A1, LYZ, and GNLY on a grey-to-purple gradient, each marking distinct cell populations for T cells, B cells, monocytes, and NK cells. |
+ | **Plot function** | `FeaturePlot()` |
+-| **Redraw** | By hand from a live session or a kit run |
++| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
+ 
+ #### 5.8 vln-markers (`ep5_vln-markers.png`)
+ 
+@@ -325,7 +325,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ | **Caption** | Four UMAP plots comparing clustering at resolutions 0.2, 0.5, 0.8, and 1.2. Lower resolutions produce fewer large clusters while higher resolutions split cells into progressively more subclusters. |
+ | **Description** | Side-by-side UMAP plots at resolutions 0.2, 0.5, 0.8, and 1.2 showing progressively more clusters as resolution increases. |
+ | **Plot function** | `DimPlot()` |
+-| **Redraw** | By hand from a live session or a kit run |
++| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
+ 
+ #### 5.10 challenge2 (`challenge2_plot1.png`)
+ 
+@@ -336,7 +336,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ | **Caption** | FeaturePlot of CD3D, MS4A1, and LYZ on the UMAP, each highlighting distinct cell populations |
+ | **Description** | Three UMAP panels showing expression of CD3D, MS4A1, and LYZ. CD3D expression is concentrated in the upper-left and lower-left regions. MS4A1 lights up a compact group in the upper-right. LYZ is strongest in the lower-left clusters. |
+ | **Plot function** | `FeaturePlot()`, `DimPlot()` |
+-| **Redraw** | By hand from a live session or a kit run |
++| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
+ 
+ #### 5.11 challenge2 (`ep5_challenge2.png`)
+ 
+@@ -347,7 +347,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ | **Caption** | Cluster-labeled UMAP for reference |
+ | **Description** | UMAP plot with 18 clusters labeled 0 through 17 for cross-referencing with the FeaturePlot above. |
+ | **Plot function** | `FeaturePlot()`, `DimPlot()` |
+-| **Redraw** | By hand from a live session or a kit run |
++| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
+ 
+ ---
+ 
+@@ -362,7 +362,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ | **Caption** | Clustered UMAP from previous episode |
+ | **Description** | UMAP plot with 18 clusters labeled 0 through 17 at resolution 0.5, matching the clustering results from the previous episode. |
+ | **Plot function** | `DimPlot()` |
+-| **Redraw** | By hand from a live session or a kit run |
++| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
+ 
+ #### 6.2 heatmap (`ep6_heatmap.png`)
+ 
+@@ -384,7 +384,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ | **Caption** | Dot plot of top marker genes |
+ | **Description** | Dot plot showing expression of top 3 marker genes across all 18 clusters. Dot size indicates the percentage of cells expressing each gene; dot shading indicates average expression level. |
+ | **Plot function** | `DotPlot()` |
+-| **Redraw** | By hand from a live session or a kit run |
++| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
+ 
+ #### 6.4 feature-markers (`ep6_feature-markers.png`)
+ 
+@@ -395,7 +395,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ | **Caption** | FeaturePlot of 8 canonical PBMC markers |
+ | **Description** | Grid of 8 UMAP panels showing expression of CD3D, IL7R, CD8A, MS4A1, LYZ, FCGR3A, GNLY, and FCER1A. Each marker highlights a distinct UMAP region: CD3D and IL7R in the upper-left T cell area, CD8A in a small cluster on the right, MS4A1 in B cells on the right, LYZ in monocytes at the lower-left, FCGR3A in a small cluster at the lower-right, GNLY in NK cells at the upper-center, and FCER1A in a small dendritic cell group. |
+ | **Plot function** | `FeaturePlot()` |
+-| **Redraw** | By hand from a live session or a kit run |
++| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
+ 
+ #### 6.5 vln-markers (`ep6_vln-markers.png`)
+ 
+@@ -428,7 +428,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ | **Caption** | SingleR annotated UMAP |
+ | **Description** | UMAP plot with cells colored by SingleR automated annotation labels from the Monaco Immune reference, showing CD4+ T cells, CD8+ T cells, T cells, Monocytes, B cells, NK cells, Dendritic cells, Progenitors, and Basophils. |
+ | **Plot function** | `DimPlot()` |
+-| **Redraw** | By hand from a live session or a kit run |
++| **Redraw** | Yes -- `negishi-run/redraw_figures.sh` |
+ 
+ #### 6.8 side-by-side (`ep6_side-by-side.png`)
+ 
+@@ -506,7 +506,7 @@ Figures listed in `negishi-run/figures_redraw.tsv` are redrawn at their committe
+ |-------|-------|
+ | **Chunk** | `isg-feature` (`multi-sample-integration.Rmd` line 541) |
+ | **Shown at** | line 548 |
+-| **Caption** | Four-row FeaturePlot split by CTRL and STIM for ISG15, IFIT1, TNFSF10, and RSAD2. CTRL panels show mostly grey cells with sparse expression. STIM panels show strong red expression across monocyte and other clusters for all four genes. |
++| **Caption** | Two-row FeaturePlot split by CTRL and STIM for IFIT3 and IFIT1. CTRL panels show mostly grey cells with sparse expression. STIM panels show strong red expression across all cell types, strongest in the monocytes. |
+ | **Description** | FeaturePlot of ISG genes split by condition showing near-absent expression in CTRL panels and strong red expression in STIM panels, especially in monocyte clusters. |
+ | **Plot function** | `FeaturePlot()` |
+ | **Redraw** | By hand from a live session or a kit run |
+diff --git a/episodes/introduction.Rmd b/episodes/introduction.Rmd
+index 1b95770..0a8276a 100644
+--- a/episodes/introduction.Rmd
++++ b/episodes/introduction.Rmd
+@@ -202,9 +202,9 @@ proportional to the actual number of mRNA molecules in the cell, not to PCR
+ amplification efficiency.
+ 
+ For the PBMC 10k v3 dataset we will use in this workshop, the count matrix
+-contains approximately 11,800 cells and 36,600 genes, but after filtering out
+-lowly-expressed genes and low-quality cells, we will work with roughly 8,000 --
+-10,000 cells and 15,000 -- 20,000 genes.
++contains 11,809 cell barcodes and 38,606 genes. After removing genes detected
++in fewer than 3 cells and low-quality cells, we will work with 11,310 cells
++and 29,155 genes.
+ 
+ ## Analysis Workflow Overview
+ 
+@@ -240,7 +240,8 @@ across cells and carry the strongest biological signal.
+ With 20,000+ genes per cell, we need to reduce the data to a manageable number
+ of dimensions. **PCA** (Principal Component Analysis) compresses the data into
+ the top principal components. We then use **UMAP** to create a 2D visualization
+-and apply the **Leiden algorithm** to group similar cells into clusters.
++and apply the **Louvain algorithm** (Seurat's default) to group similar cells
++into clusters.
+ 
+ **5. Cell Type Annotation (Episode 6).**
+ Clusters are just numbers until we assign biological meaning. We identify cell
+diff --git a/episodes/multi-sample-integration.Rmd b/episodes/multi-sample-integration.Rmd
+index 086cd2e..15914c1 100644
+--- a/episodes/multi-sample-integration.Rmd
++++ b/episodes/multi-sample-integration.Rmd
+@@ -545,7 +545,7 @@ FeaturePlot(ifnb,
+             cols = c("grey85", "firebrick"))
+ ```
+ 
+-![Four-row FeaturePlot split by CTRL and STIM for ISG15, IFIT1, TNFSF10, and RSAD2. CTRL panels show mostly grey cells with sparse expression. STIM panels show strong red expression across monocyte and other clusters for all four genes.](fig/ep7_isg-feature.png){alt="FeaturePlot of ISG genes split by condition showing near-absent expression in CTRL panels and strong red expression in STIM panels, especially in monocyte clusters."}
++![Two-row FeaturePlot split by CTRL and STIM for IFIT3 and IFIT1. CTRL panels show mostly grey cells with sparse expression. STIM panels show strong red expression across all cell types, strongest in the monocytes.](fig/ep7_isg-feature.png){alt="FeaturePlot of ISG genes split by condition showing near-absent expression in CTRL panels and strong red expression in STIM panels, especially in monocyte clusters."}
+ 
+ 
+ ```{r isg-violin, eval=FALSE, fig.alt="Four violin plots showing IFIT1, IFIT3, TNFSF10, and RSAD2 expression in CD14 monocytes, split by control and stimulated condition. All four genes show dramatically higher expression in the stimulated condition with broad violin shapes peaking around 3 to 4, while control violins are flat near zero."}
+diff --git a/episodes/quality-control.Rmd b/episodes/quality-control.Rmd
+index 0e8fef4..7f1b74c 100644
+--- a/episodes/quality-control.Rmd
++++ b/episodes/quality-control.Rmd
+@@ -522,11 +522,12 @@ that resemble these artificial doublets.
+ - Multiplexed experiments (e.g., cell hashing) with cross-sample doublets
+ - Studies where rare intermediate populations could be confused with doublets
+ 
+-**For this dataset**, the 10x Chromium platform at standard loading (~10,000
+-cells targeted) produces a doublet rate of approximately 3--5%. At this level,
+-most doublets will be removed by our QC filters or will form small
+-insignificant clusters that can be identified and removed during cell type
+-annotation. We will not run a dedicated doublet detection tool in this workshop,
++**For this dataset**, 10x Genomics expects about 0.8% doublets per 1,000
++cells recovered with v3 chemistry, so about 8--9% for the roughly 11,800 cells
++here. Many of them combine two cells of the same type (two T cells, say), which
++barely changes clustering. Doublets of two different types tend to form small,
++mixed clusters that can be found during cell type annotation (cluster 16 in
++episode 6, with both monocyte and B cell markers, is one). We will not run a dedicated doublet detection tool in this workshop,
+ but be aware of these tools for your own analyses.
+ 
+ :::::::::::::::::::::::::::::::::::::::
+@@ -539,8 +540,7 @@ but be aware of these tools for your own analyses.
+ Look at the violin plots and scatter plots you generated above. Based on the
+ distributions, propose your own filtering thresholds for `nFeature_RNA`,
+ `nCount_RNA`, and `percent.mt`. Justify your choices. How many cells pass your
+-filters compared to the default thresholds
+-(`nFeature_RNA > 200 & nFeature_RNA < 5000 & percent.mt < 15`)?
++filters compared to the 11,310 cells that passed the thresholds used above?
+ 
+ Run the following code with your chosen values:
+ 
+@@ -567,13 +567,13 @@ pbmc_custom <- subset(pbmc,
+ cat("Cells with custom thresholds:", ncol(pbmc_custom), "\n")
+ ```
+ 
+-This retains 7,579 cells compared to 9,874 with the default thresholds --
+-a loss of roughly 23% of the data. The trade-offs are:
++This retains 7,579 cells compared to 11,310 with the thresholds used above --
++a loss of about a third of the data. The trade-offs are:
+ 
+ - `nFeature_RNA > 300` (vs. 200): slightly more aggressive removal of
+   low-complexity cells, but may also remove some small cell types like
+   platelets that naturally express few genes.
+-- `nFeature_RNA < 4000` (vs. 5000): this is the biggest driver of cell loss
++- `nFeature_RNA < 4000` (vs. 7000): this is the biggest driver of cell loss
+   here. The median nFeature_RNA in this dataset is ~3,378, so a 4,000 ceiling
+   cuts into the upper quartile and removes a substantial number of valid cells,
+   not just doublets.
+@@ -582,8 +582,8 @@ a loss of roughly 23% of the data. The trade-offs are:
+   elevated mitochondrial content.
+ 
+ The key point is that **more aggressive filtering is not always better**. Every
+-cell you remove is data you lose. Dropping from 9,874 to 7,579 cells means
+-losing nearly a quarter of the dataset, which could reduce statistical power
++cell you remove is data you lose. Dropping from 11,310 to 7,579 cells means
++losing a third of the dataset, which could reduce statistical power
+ and under-represent cell types that naturally have higher gene counts or
+ mitochondrial content. The goal is to remove cells that would distort the
+ analysis, not to enforce an artificially narrow definition of "high quality."
+@@ -601,37 +601,29 @@ following code and compare the number of remaining cells. Would this threshold
+ be too aggressive for PBMCs?
+ 
+ ```{r challenge2, eval=FALSE}
+-# Starting from the unfiltered object (re-load if needed)
+-pbmc_strict <- subset(pbmc,
+-                      subset = nFeature_RNA > 200 &
+-                               nFeature_RNA < 5000 &
+-                               percent.mt < 5)
++# pbmc is the filtered object from above (the episode's thresholds, percent.mt < 15)
++pbmc_strict <- subset(pbmc, subset = percent.mt < 5)
++cat("Cells with percent.mt < 15:", ncol(pbmc), "\n")
+ cat("Cells with percent.mt < 5:", ncol(pbmc_strict), "\n")
+-
+-pbmc_default <- subset(pbmc,
+-                       subset = nFeature_RNA > 200 &
+-                                nFeature_RNA < 5000 &
+-                                percent.mt < 15)
+-cat("Cells with percent.mt < 15:", ncol(pbmc_default), "\n")
+ ```
+ 
+ :::::::::::::::::::::::: solution
+ 
+ ## Solution
+ 
+-With `percent.mt < 5`, only **2,709 cells remain**, compared to 9,874 with
+-`percent.mt < 15`. That is a loss of **over 72% of the dataset**.
++With `percent.mt < 5`, only **3,276 cells remain**, compared to 11,310 with
++`percent.mt < 15`. That is a loss of **71% of the dataset**.
+ 
+ This is **far too aggressive for PBMCs**. Here is why:
+ 
+ - The median mitochondrial percentage in this dataset is ~5.8%, meaning a `< 5`
+   cutoff removes the majority of cells by definition -- not just dying cells,
+   but most of the healthy population.
+-- Different immune cell types have naturally different mitochondrial content.
+-  Activated T cells, monocytes, and NK cells tend to have higher mitochondrial
+-  content (6-12%) because they are metabolically active. A `< 5` threshold
+-  disproportionately removes these populations, biasing your downstream
+-  analysis toward cell types with low metabolic activity.
++- Different immune cell types have naturally different mitochondrial content,
++  so the loss is uneven. Using the labels from episode 6, a `< 5` cutoff keeps
++  about 45% of CD4 T and NK cells but only about 24% of CD14 monocytes and 12%
++  of CD8 T cells and FCGR3A+ monocytes. It biases the downstream analysis
++  toward the cell types with low mitochondrial content.
+ - A threshold of `< 5` might be appropriate for some cell lines or tissues
+   where mitochondrial content is uniformly low, but for primary immune cells
+   from blood, 10-15% is a more appropriate cutoff.
+diff --git a/instructors/instructor-notes.md b/instructors/instructor-notes.md
+index e56ee3e..832b6d9 100644
+--- a/instructors/instructor-notes.md
++++ b/instructors/instructor-notes.md
+@@ -184,9 +184,10 @@ aggressive filtering removes more noise but may also remove real cells
+ most at risk from a low nFeature_RNA threshold?"
+ 
+ **Challenge 2 -- Aggressive Mitochondrial Filtering:**
+-With percent.mt < 5, only 2,709 cells remain against 9,874 at < 15, a loss of
+-over 72%, because the median mitochondrial percentage is about 5.8%. This disproportionately removes metabolically
+-active immune cells (monocytes, activated T cells). Use this to reinforce that
++With percent.mt < 5, only 3,276 of the 11,310 filtered cells remain, a loss of
++71%, because the median mitochondrial percentage is about 5.8%. The loss is
++uneven: about 45% of CD4 T and NK cells survive, but only 12% of CD8 T cells
++and FCGR3A+ monocytes and 24% of CD14 monocytes. Use this to reinforce that
+ thresholds must be tuned to the specific tissue and dataset.
+ 
+ ### Episode 4: Normalization and Feature Selection
+diff --git a/negishi-run/figures_redraw.tsv b/negishi-run/figures_redraw.tsv
+index d0853be..b8ee19e 100644
+--- a/negishi-run/figures_redraw.tsv
++++ b/negishi-run/figures_redraw.tsv
+@@ -6,6 +6,12 @@
+ # (- for the last, as before; 1 for the first). Episode 7 and 8 rows added 2026-10-23 (patch 24, labels from
+ # seurat_annotations). ep8_umap_split.png is drawn from episode 7's challenge1 chunk: the same DimPlot call as
+ # episode 8's load-data, which reads the RDS from work_dir and so cannot be redrawn directly.
++# Episode 3, 5 and 6 rows added 2026-10-23 (patch 25): the episode 5 and early episode 6 UMAPs were drawn from an
++# older run with a different layout, and ep3_scatter-after and ep6_dotplot had transparent backgrounds (png() draws
++# on white). ep5_umap-plot is drawn before clustering, so it reruns PCA and UMAP on the r04 object (RunUMAP's fixed
++# seed gives the run's layout). ep6_load-data uses episode 5's umap-clusters chunk, the same DimPlot call, because
++# episode 6's load-data reads the RDS from work_dir. ep6_dotplot is drawn per cluster, before annotation, so it uses
++# the r05 object and reruns episode 6's find-markers and heatmap chunks (about a minute with presto).
+ fig	episode	label	handoff	width	height	res	before	part
+ ep6_annotated-umap.png	06	annotated-umap	r06/pbmc_annotated.rds	2400	1800	300	-	-
+ ep6_side-by-side.png	06	side-by-side	r06/pbmc_annotated.rds	2400	1800	300	-	-
+@@ -21,3 +27,14 @@ ep8_dotplot_de.png	08	de-dotplot	r07/ifnb_annotated.rds	3000	1800	300	wilcox-de
+ ep8_go_dotplot.png	08	go-dotplot	r07/ifnb_annotated.rds	3000	1800	300	wilcox-de,convert-ids,enrichgo	-
+ ep8_pval_comparison.png	08	challenge1	r07/ifnb_annotated.rds	2400	1200	300	wilcox-de,create-pseudo-reps,aggregate,pseudobulk-de	-
+ ep8_go_top200.png	08	challenge2	r07/ifnb_annotated.rds	2400	1200	300	wilcox-de	-
++ep3_scatter-after.png	03	scatter-after	r03/pbmc_filtered.rds	2400	1800	300	-	-
++ep5_umap-plot.png	05	umap-plot	r04/pbmc_normalized.rds	2400	1800	300	run-pca,run-umap	-
++ep5_umap-clusters.png	05	umap-clusters	r05/pbmc_clustered.rds	2400	1800	300	-	-
++ep5_feature-plot.png	05	feature-plot	r05/pbmc_clustered.rds	2400	1800	300	-	-
++ep5_challenge1.png	05	challenge1	r05/pbmc_clustered.rds	2400	1800	300	-	-
++challenge2_plot1.png	05	challenge2	r05/pbmc_clustered.rds	3000	900	300	-	1
++ep5_challenge2.png	05	challenge2	r05/pbmc_clustered.rds	2400	1800	300	-	2
++ep6_load-data.png	05	umap-clusters	r05/pbmc_clustered.rds	2400	1800	300	-	-
++ep6_dotplot.png	06	dotplot	r05/pbmc_clustered.rds	3000	2400	300	find-markers,heatmap	-
++ep6_feature-markers.png	06	feature-markers	r06/pbmc_annotated.rds	3600	1800	300	-	-
++ep6_singler-umap.png	06	singler-umap	r06/pbmc_annotated.rds	2400	1800	300	-	-

@@ -2,8 +2,39 @@
 # with the episode's own chunk code (generated/blocks/<episode>/<label>.R after the episode's setup block).
 # Pixel sizes are those of the files in episodes/fig/ (res 300). before: chunks of the same episode run first,
 # for figures that need objects the handoff RDS does not hold (- for none). Added 2026-10-22.
-fig	episode	label	handoff	width	height	res	before
-ep6_annotated-umap.png	06	annotated-umap	r06/pbmc_annotated.rds	2400	1800	300	-
-ep6_side-by-side.png	06	side-by-side	r06/pbmc_annotated.rds	2400	1800	300	-
-ep6_challenge1.png	06	challenge1	r06/pbmc_annotated.rds	3600	1200	300	-
-ep7_challenge2.png	07	challenge2	r07/ifnb_annotated.rds	2400	3600	300	de-condition
+# part: which top-level expression of the chunk is the figure, for chunks that draw more than one plot
+# (- for the last, as before; 1 for the first). Episode 7 and 8 rows added 2026-10-23 (patch 24, labels from
+# seurat_annotations). ep8_umap_split.png is drawn from episode 7's challenge1 chunk: the same DimPlot call as
+# episode 8's load-data, which reads the RDS from work_dir and so cannot be redrawn directly.
+# Episode 3, 5 and 6 rows added 2026-10-23 (patch 25): the episode 5 and early episode 6 UMAPs were drawn from an
+# older run with a different layout, and ep3_scatter-after and ep6_dotplot had transparent backgrounds (png() draws
+# on white). ep5_umap-plot is drawn before clustering, so it reruns PCA and UMAP on the r04 object (RunUMAP's fixed
+# seed gives the run's layout). ep6_load-data uses episode 5's umap-clusters chunk, the same DimPlot call, because
+# episode 6's load-data reads the RDS from work_dir. ep6_dotplot is drawn per cluster, before annotation, so it uses
+# the r05 object and reruns episode 6's find-markers and heatmap chunks (about a minute with presto).
+fig	episode	label	handoff	width	height	res	before	part
+ep6_annotated-umap.png	06	annotated-umap	r06/pbmc_annotated.rds	2400	1800	300	-	-
+ep6_side-by-side.png	06	side-by-side	r06/pbmc_annotated.rds	2400	1800	300	-	-
+ep6_challenge1.png	06	challenge1	r06/pbmc_annotated.rds	3600	1200	300	-	-
+ep7_challenge2.png	07	challenge2	r07/ifnb_annotated.rds	2400	3600	300	de-condition	-
+ep7_annotated-umap.png	07	annotated-umap	r07/ifnb_annotated.rds	1800	1500	300	-	-
+ep7_challenge1.png	07	challenge1	r07/ifnb_annotated.rds	2400	1500	300	-	1
+ep7_isg-violin.png	07	isg-violin	r07/ifnb_annotated.rds	2400	1200	300	-	-
+ep8_umap_split.png	07	challenge1	r07/ifnb_annotated.rds	2400	1200	300	-	1
+ep8_volcano.png	08	volcano	r07/ifnb_annotated.rds	2400	1200	300	wilcox-de	-
+ep8_violin_de.png	08	de-violin	r07/ifnb_annotated.rds	3000	1200	300	-	-
+ep8_dotplot_de.png	08	de-dotplot	r07/ifnb_annotated.rds	3000	1800	300	wilcox-de	-
+ep8_go_dotplot.png	08	go-dotplot	r07/ifnb_annotated.rds	3000	1800	300	wilcox-de,convert-ids,enrichgo	-
+ep8_pval_comparison.png	08	challenge1	r07/ifnb_annotated.rds	2400	1200	300	wilcox-de,create-pseudo-reps,aggregate,pseudobulk-de	-
+ep8_go_top200.png	08	challenge2	r07/ifnb_annotated.rds	2400	1200	300	wilcox-de	-
+ep3_scatter-after.png	03	scatter-after	r03/pbmc_filtered.rds	2400	1800	300	-	-
+ep5_umap-plot.png	05	umap-plot	r04/pbmc_normalized.rds	2400	1800	300	run-pca,run-umap	-
+ep5_umap-clusters.png	05	umap-clusters	r05/pbmc_clustered.rds	2400	1800	300	-	-
+ep5_feature-plot.png	05	feature-plot	r05/pbmc_clustered.rds	2400	1800	300	-	-
+ep5_challenge1.png	05	challenge1	r05/pbmc_clustered.rds	2400	1800	300	-	-
+challenge2_plot1.png	05	challenge2	r05/pbmc_clustered.rds	3000	900	300	-	1
+ep5_challenge2.png	05	challenge2	r05/pbmc_clustered.rds	2400	1800	300	-	2
+ep6_load-data.png	05	umap-clusters	r05/pbmc_clustered.rds	2400	1800	300	-	-
+ep6_dotplot.png	06	dotplot	r05/pbmc_clustered.rds	3000	2400	300	find-markers,heatmap	-
+ep6_feature-markers.png	06	feature-markers	r06/pbmc_annotated.rds	3600	1800	300	-	-
+ep6_singler-umap.png	06	singler-umap	r06/pbmc_annotated.rds	2400	1800	300	-	-
