@@ -4,7 +4,7 @@ title: Setup
 
 ## Instructors
 
-1. **Arun Seetharam**: Arun is a Bioinformatics Scientist at Purdue's Rosen Center for Advanced Computing (RCAC). He develops and delivers bioinformatics training workshops and provides research computing support for the Purdue community.
+1. **Arun Seetharam**,  Ph.D.: Arun is a Bioinformatics Scientist at Purdue's Rosen Center for Advanced Computing (RCAC). He develops and delivers bioinformatics training workshops and provides research computing support for the Purdue community.
 
 2. **Michael Carlson**, Ph.D.: Michael is a Senior Computational Scientist at Purdue University's Rosen Center for Advanced Computing (RCAC). Michael has a background in computational physics, specifically hypersonic materials. He also leads many introductory workshops in the High-Performance Computing domain.
 
